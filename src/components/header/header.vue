@@ -10,7 +10,7 @@
           <span class="name">{{seller.name}}</span>
         </div>
         <div class="description">
-          {{seller.description}} / {{seller.deliveryTime}}小时送达
+          {{seller.description}} / {{seller.deliveryTime}}小时内发货
         </div>
         <div v-if="seller.supports" class="support">
           <icons :size="1" :type="seller.supports[0].type"></icons>
@@ -44,7 +44,7 @@
                 <span class="text">{{item.description}}</span>
               </li>
             </ul>
-            <modal-title title="商家公告"></modal-title>
+            <modal-title title="系统公告"></modal-title>
             <div class="bulletin">
               <p class="content">{{seller.bulletin}}</p>
             </div>

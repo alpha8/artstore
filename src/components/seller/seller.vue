@@ -10,21 +10,21 @@
           </div>
           <ul class="remark">
             <li class="block">
-              <h2>起送价</h2>
+              <h2>用户数</h2>
               <div class="content">
-                <span class="stress">{{seller.minPrice}}</span>元
+                <span class="stress">8000</span>
               </div>
             </li>
             <li class="block">
-              <h2>商家配送</h2>
+              <h2>累计销售额</h2>
               <div class="content">
-                <span class="stress">{{seller.deliveryPrice}}</span>元
+                <span class="stress">100</span>万
               </div>
             </li>
             <li class="block">
-              <h2>平均配送时间</h2>
+              <h2>客服支持</h2>
               <div class="content">
-                <span class="stress">{{seller.deliveryTime}}</span>分钟
+                <span class="stress">24小时</span>
               </div>
             </li>
           </ul>

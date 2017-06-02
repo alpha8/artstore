@@ -203,6 +203,7 @@
         .now
           margin-right: 8px
           font-size: 14px
+          font-weight: 700
           color: rgb(240, 20, 20)
         .old
           text-decoration: line-through
@@ -291,5 +292,4 @@
           padding: 16px 0
           font-size: 12px
           color: rgb(147, 153, 159)
-
 </style>

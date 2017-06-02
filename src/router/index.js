@@ -1,3 +1,4 @@
+/* jshint esnext: true */
 import Vue from 'vue';
 import Router from 'vue-router';
 import VueResource from 'vue-resource';
