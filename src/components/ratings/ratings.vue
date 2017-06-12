@@ -19,7 +19,7 @@
               <span class="score">{{seller.foodScore}}</span>
             </div>
             <div class="delivery-wrapper">
-              <span class="title">送达时间</span>
+              <span class="title">发货时间</span>
               <span class="delivery">{{seller.deliveryTime}}小时</span>
             </div>
           </div>
@@ -82,8 +82,8 @@
       };
     },
     created() {
-      this.$http.get('/api/ratings').then((response) => {
-        response = response.body;
+      this.axios.get('/api/ratings').then((response) => {
+        response = response.data;
         if (response.errno === ERR_OK) {
           this.ratings = response.data;
           this.$nextTick(() => {

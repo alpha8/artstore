@@ -35,12 +35,14 @@ router.get('/seller', function(req, res){
   })
 })
 
+/* 
 router.get('/goods', function(req, res){
   res.json({
     errno: 0,
     data: goods
   })
 })
+*/
 
 router.get('/ratings', function(req, res){
   res.json({
@@ -48,7 +50,15 @@ router.get('/ratings', function(req, res){
     data: ratings
   })
 })
-app.use('/api', router)
+
+var goodsData = require('../src/data/goods.json');
+router.get('/goods', function(req, res){
+  res.json({
+    errno: 0,
+    data: goodsData.goods
+  });
+});
+app.use('/api', router);
 
 var compiler = webpack(webpackConfig)
 

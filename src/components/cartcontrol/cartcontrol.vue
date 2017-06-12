@@ -22,24 +22,19 @@
       }
     },
     methods: {
-      addCart(event) {
-        if (!event._constructed) {
-          return;
-        }
-
+      addCart() {
         if (!this.good.count) {
           Vue.set(this.good, 'count', 1);
         } else {
           this.good.count++;
         }
         this.$emit('add', event.target);
+        this.$store.commit('ADD_QUANTITY', this.good.id);
       },
-      decreaseCart(event) {
-        if (!event._constructed) {
-          return;
-        }
+      decreaseCart() {
         if (this.good.count) {
           this.good.count--;
+          this.$store.commit('REDUCE_QUANTITY', this.good.id);
         }
       }
     }

@@ -2,35 +2,80 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import * as types from './mutation-types';
+import cart from './modules/cart';
 
 Vue.use(Vuex);
 
 // actions
-const actions = {
+export const actions = {
   addToCart({ commit }, product) {
-    if (product.inventory > 0) {
-      commit(types.ADD_TO_CART, {
-        id: product.id
-      });
-    }
-  }
-};
-
-// getters
-const getters = {
-  cartProducts: state => {
-    return state.cart.added.map(({ id, quantity }) => {
-      const product = state.products.all.find(p => p.id === id);
-      return {
-        title: product.title,
-        price: product.price,
-        quantity
-      };
+    commit(types.ADD_TO_CART, {
+      product: product
     });
   }
 };
 
+// getters
+export const getters = {
+  cartProducts: state => state.cart.added,
+  addedProducts: state => state.products
+};
+
+// states
+export const state = {
+  loading: false,
+  showFooter: true,
+  cartAmount: 0,
+  products: {}
+};
+
+// mutations
+export const mutations = {
+  [types.SHOW_LOADING](state) {
+    state.loading = true;
+  },
+  [types.HIDE_LOADING](state) {
+    state.loading = false;
+  },
+  [types.SHOW_FOOTER](state) {
+    state.showFooter = true;
+  },
+  [types.HIDE_FOOTER](state) {
+    state.showFooter = false;
+  },
+  [types.ADD_QUANTITY](state, id) {
+    state.cartAmount++;
+
+    let sid = '"' + id + '"';
+    let product = state.products[sid];
+    if (!product) {
+      state.products[sid] = 1;
+    } else {
+      state.products[sid]++;
+    }
+  },
+  [types.REDUCE_QUANTITY](state, id) {
+    if (state.cartAmount > 0) {
+      state.cartAmount--;
+    }
+
+    let sid = '"' + id + '"';
+    let product = state.products[sid];
+    if (product) {
+      state.products[sid]--;
+    }
+  },
+  [types.CLEAR_CART](state) {
+    state.cartAmount = 0;
+  }
+};
+
 export default new Vuex.Store({
+  state,
+  mutations,
   actions,
-  getters
+  getters,
+  modules: {
+    cart
+  }
 });

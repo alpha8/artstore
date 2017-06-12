@@ -27,7 +27,7 @@
       },
       selectType: {
         type: Number,
-        defalt: ALL
+        default: ALL
       },
       onlyContent: {
         type: Boolean,

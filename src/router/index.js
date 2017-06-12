@@ -1,23 +1,27 @@
 /* jshint esnext: true */
 import Vue from 'vue';
 import Router from 'vue-router';
-import VueResource from 'vue-resource';
-import goods from '@/components/goods/goods';
-import ratings from '@/components/ratings/ratings';
-import seller from '@/components/seller/seller';
-// import Header from '@/components/Hello'
+import goods from '@/components/goods/goodsv2';
+import goodDetail from '@/components/good-detail/good-detailv2';
+// import ratings from '@/components/ratings/ratings';
+// import seller from '@/components/seller/seller';
+import home from '@/components/home/home';
+import shopcart from '@/components/cart/shopcart';
 
 import '@/common/stylus/index.styl';
 
 Vue.use(Router);
-Vue.use(VueResource);
 
 export default new Router({
+  mode: 'history',
   linkActiveClass: 'active',
   routes: [
-    {path: '/', redirect: '/goods'},
-    {path: '/goods', name: 'goods', component: goods},
-    {path: '/ratings', name: 'ratings', component: ratings},
-    {path: '/seller', name: 'seller', component: seller}
+    {path: '/', redirect: '/home'},
+    {path: '/home', component: home},
+    {path: '/category', component: goods},
+    {path: '/good/:id', component: goodDetail, name: 'good'},
+    {path: '/cart', component: shopcart}
+    // {path: '/ratings', component: ratings},
+    // {path: '/seller', component: seller}
   ]
 });

@@ -20,12 +20,12 @@
   .title
     display: flex
     width: 80%
-    margin: 28px auto 24px auto
+    margin: 22px auto 20px auto
     .line
       flex: 1
       position: relative
       top: -6px
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2)
+      border-bottom: 1px solid #fafafa
     .text
       padding: 0 12px
       font-size: 14px
