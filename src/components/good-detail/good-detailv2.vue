@@ -1,52 +1,55 @@
 <template>
-  <div class="good" v-show="showFlag" ref="good">
-    <div class="good-content">
-      <div class="image-header">
-        <img :src="good.image" alt="">
-        <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
-      </div>
-      <div class="content">
-        <h1 class="title">{{good.name}}</h1>
-        <div class="detail">
-          <span class="sell-count">月售{{good.sellCount}}份</span>
+  <div>
+    <fixedheader title="商品详情" right-icon="icon-more"></fixedheader>
+    <div class="good" ref="good">
+      <div class="good-content">
+        <div class="image-header">
+          <img :src="good.image" alt="">
+          <!-- <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div> -->
         </div>
-        <div class="price">
-          <span class="now">￥{{good.price}}</span><span class="old" v-show="good.oldPrice">￥{{good.oldPrice}}</span>
-        </div>          
-        <div class="cartcontrol-wrapper">
-          <cartcontrol @add="addGood" :good="good"></cartcontrol>
+        <div class="content">
+          <h1 class="title">{{good.name}}</h1>
+          <div class="detail">
+            <span class="sell-count">月售{{good.sellCount}}份</span>
+          </div>
+          <div class="price">
+            <span class="now">￥{{good.price}}</span><span class="old" v-show="good.oldPrice">￥{{good.oldPrice}}</span>
+          </div>          
+          <div class="cartcontrol-wrapper">
+            <cartcontrol @add="addGood" :good="good"></cartcontrol>
+          </div>
+          <transition name="fade">
+            <div @click.stop.prevent="addFirst" class="buy" v-show="!good.count || good.count === 0">加入购物车</div>
+          </transition>
         </div>
-        <transition name="fade">
-          <div @click.stop.prevent="addFirst" class="buy" v-show="!good.count || good.count === 0">加入购物车</div>
-        </transition>
-      </div>
-      <split v-show="good.info"></split>
-      <div class="info" v-show="good.info">
-        <h1 class="title">商品信息</h1>
-        <div class="text">{{good.info}}</div>
-      </div>
-      <split></split>  
-      <div class="rating">
-        <h1 class="title">商品评价</h1>
-        <ratingselect @select="selectRating" @toggle="toggleContent" :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="good.ratings"></ratingselect>
-        <div class="rating-wrapper">
-          <ul v-show="good.ratings && good.ratings.length">
-            <li class="rating-item border-1px" v-for="rating in good.ratings" v-show="needShow(rating.rateType, rating.text)">
-              <div class="user">
-                <span class="name">{{rating.username}}</span>
-                <img :src="rating.avatar" width="12" height="12" alt="" class="avatar">
-              </div>
-              <div class="time">{{rating.rateTime | formatDate}}</div>
-              <p class="text">
-                <span :class="{'icon-thumb_up': rating.rateType===0, 'icon-thumb_down': rating.rateType===1}"></span>{{rating.text}}
-              </p>
-            </li>
-          </ul>
-          <div class="no-rating" v-show="!good.ratings || !good.ratings.length">暂无评论</div>
+        <split v-show="good.info"></split>
+        <div class="info" v-show="good.info">
+          <h1 class="title">商品信息</h1>
+          <div class="text">{{good.info}}</div>
         </div>
-      </div>      
+        <split></split>  
+        <div class="rating">
+          <h1 class="title">商品评价</h1>
+          <ratingselect @select="selectRating" @toggle="toggleContent" :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="good.ratings"></ratingselect>
+          <div class="rating-wrapper">
+            <ul v-show="good.ratings && good.ratings.length">
+              <li class="rating-item border-1px" v-for="rating in good.ratings" v-show="needShow(rating.rateType, rating.text)">
+                <div class="user">
+                  <span class="name">{{rating.username}}</span>
+                  <img :src="rating.avatar" width="12" height="12" alt="" class="avatar">
+                </div>
+                <div class="time">{{rating.rateTime | formatDate}}</div>
+                <p class="text">
+                  <span :class="{'icon-thumb_up': rating.rateType===0, 'icon-thumb_down': rating.rateType===1}"></span>{{rating.text}}
+                </p>
+              </li>
+            </ul>
+            <div class="no-rating" v-show="!good.ratings || !good.ratings.length">暂无评论</div>
+          </div>
+        </div>      
+      </div>
+      <fixedcart ref="shopcart" @add="addToCart"></fixedcart>
     </div>
-    <fixedcart ref="shopcart" @add="addToCart"></fixedcart>
   </div>
 </template>
 
@@ -58,6 +61,8 @@
   import split from '@/components/split/split';
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedcart from '@/components/fixedtoolbar/fixedcart';
+  import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import api from '@/api/api';
 
   // const POSITIVE = 0;
   // const NEGATIVE = 1;
@@ -74,7 +79,6 @@
     data() {
       return {
         good: {},
-        showFlag: false,
         selectType: ALL,
         onlyContent: true,
         desc: {
@@ -87,27 +91,21 @@
     },
     methods: {
       fetchData() {
-        this.axios.get('/api/goods').then((response) => {
-          response = response.data;
+        let id = this.$route.params.id;
+        api.GetGood(id).then(response => {
           if (response.errno === ERR_OK) {
-            let goods = response.data;
-            goods.filter((good) => {
-              good.items.forEach((item) => {
-                if (item.id === this.$route.params.id) {
-                  var qty = this.addedProducts && this.addedProducts['"' + item.id + '"'];
-                  item.count = qty || 0;
-                  this.good = item;
-                  this.show();
-                  return;
-                }
-              });
-            });
+            let good = response.data;
+            let sid = 'p' + good.id;
+            var qty = this.addedProducts && this.addedProducts[sid];
+            good.count = qty || 0;
+            this.good = good;
+            this.show();
+            return;
           }
         });
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
-        this.showFlag = true;
         this.$nextTick(() => {
           if (!this.scroll) {
             this.scroll = new BScroll(this.$refs.good, {
@@ -119,7 +117,6 @@
         });
       },
       hide() {
-        this.showFlag = false;
         this.$store.commit('SHOW_FOOTER');
       },
       back() {
@@ -180,7 +177,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart
+      cartcontrol, split, ratingselect, fixedcart, fixedheader
     }
   };
 </script>
@@ -189,13 +186,12 @@
   @import '../../common/stylus/mixin'
 
   .good
-    position: fixed
-    left: 0
-    top: 0
+    position: absolute
+    top: 44px
     bottom: 50px
     width: 100%
-    z-index: 30
     background: #fff
+    overflow: hidden
     &.move-enter-active, &.move-leave-active
       transition: all 0.2s linear
       transform: translate3d(0, 0, 0)

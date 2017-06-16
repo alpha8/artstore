@@ -34,6 +34,7 @@
   import modalTitle from '@/components/modal-title/modal-title';
   import channel from '@/components/channel/channel';
   import gotop from '@/components/fixedtoolbar/gotop';
+  import api from '@/api/api';
 
   const ERR_OK = 0;
 
@@ -77,8 +78,7 @@
       };
     },
     created() {
-      this.axios.get('/api/goods').then((response) => {
-        response = response.data;
+      api.GetGoods().then(response => {
         if (response.errno === ERR_OK) {
           let goods = response.data;
           let tmp = goods.filter((good) => {
@@ -114,7 +114,7 @@
         }
       });
     },
-    mounted() {
+    activated() {
       this._initScroll();
     },
     methods: {

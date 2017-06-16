@@ -35,6 +35,28 @@ apiRoutes.get('/goods', function (req, res) {
 	});
 });
 
+router.get('/good/:id', function(req, res){
+  var id = req.params.id;
+  if (id) {
+    var goods = goodsData.goods;
+    goods.filter((good) => {
+      good.items.forEach((item) => {
+        if (item.id === id) {
+          res.json({
+            errno: 0,
+            data: item
+          });
+          return;
+        }
+      });
+    });
+  }
+  res.json({
+    errno: 0,
+    data: {}
+  });
+});
+
 apiRoutes.get('/ratings', function (req, res) {
 	res.json({
 		errno: 0,

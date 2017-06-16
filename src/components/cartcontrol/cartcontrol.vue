@@ -1,7 +1,7 @@
 <template>
   <div class="cartcontrol">
     <transition name="move">
-      <div class="cart-decrease" v-show="good.count > 0" @click.stop.prevent="decreaseCart">
+      <div class="cart-decrease" :class="{'disable': good.count <= 1}" @click.stop.prevent="decreaseCart">
         <span class="inner icon-remove_circle_outline"></span>
       </div>
     </transition>
@@ -32,7 +32,7 @@
         this.$store.commit('ADD_QUANTITY', this.good.id);
       },
       decreaseCart() {
-        if (this.good.count) {
+        if (this.good.count > 1) {
           this.good.count--;
           this.$store.commit('REDUCE_QUANTITY', this.good.id);
         }
@@ -48,6 +48,8 @@
       display: inline-block
       padding: 6px
       transition: all 0.4s linear
+      &.disable span
+        color: #dedede
       &.move-transition
         opacity: 1
         transform: translate3d(0, 0, 0)

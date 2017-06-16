@@ -4,11 +4,13 @@
       <router-view></router-view>
     </keep-alive>
     <fixedfoot :items="items"></fixedfoot>
+    <loading></loading>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
 import fixedfoot from '@/components/fixedtoolbar/fixedfoot';
+import loading from '@/components/common/loading';
 
 export default {
   data () {
@@ -32,12 +34,12 @@ export default {
         icon: 'icon-user2',
         text: '个人中心',
         active: false,
-        link: '/user'
+        link: '/my'
       }]
     };
   },
   components: {
-    fixedfoot
+    fixedfoot, loading
   }
 };
 </script>

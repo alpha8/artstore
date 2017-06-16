@@ -137,6 +137,8 @@
         .button-lg
           display: block
           line-height: 50px
+          font-family: "黑体"
+          font-size: 14px
           i
             font-size: 22px
           &.orange

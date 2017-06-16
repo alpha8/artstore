@@ -4,11 +4,20 @@
       <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
     </div>
     <h2 class="title">{{title}}</h2>
-    <div class="right" v-show="rightIcon">
-      <router-link :to="rightLink" class="search">
-        <i :class="rightIcon"></i>
-      </router-link>
+    <div class="right" v-show="rightIcon" @click.stop.prevent="toggle">
+      <i :class="rightIcon" v-show="!toggleFlag"></i>
+      <i class="icon-close" v-show="toggleFlag"></i>
     </div>
+    <nav class="nav" v-show="toggleFlag" :class="{'active': toggleFlag}">
+      <ul>
+        <li v-for="item in items">
+          <router-link :to="item.link">
+            <i class="icon" :class="item.icon"></i>
+            <span class="text">{{item.text}}</span>
+          </router-link>
+        </li>
+      </ul>
+    </nav>
   </div>
 </template>
 
@@ -28,16 +37,32 @@
         default: ''
       }
     },
+    data() {
+      return {
+        toggleFlag: false,
+        items: [{
+          link: '/home', icon: 'icon-home', text: '首页'
+        }, {
+          link: '/search', icon: 'icon-search', text: '搜索'
+        }, {
+          link: '/category', icon: 'icon-classify', text: '分类'
+        }, {
+          link: '/cart', icon: 'icon-cart', text: '购物车'
+        }, {
+          link: '/my', icon: 'icon-user2', text: '我的'
+        }]
+      };
+    },
     methods: {
+      toggle() {
+        this.toggleFlag = !this.toggleFlag;
+      },
+      hide() {
+        this.toggleFlag = false;
+      },
       back() {
         this.$router.back();
       }
-    },
-    activated() {
-      this.$store.commit('HIDE_FOOTER');
-    },
-    deactivated() {
-      this.$store.commit('SHOW_FOOTER');
     }
   };
 </script>
@@ -48,15 +73,13 @@
   .header
     position: relative
     display: flex
-    padding:0 8px
     background: #f2f2f2
-    border-bottom-1px(#eee)
-    height: 40px
-    line-height: 40px
+    line-height: 44px
     text-align: center
     color: #9B9B9B
     .left
       flex: 30px 0 0
+      padding-left: 8px
       i
         font-size: 18px
     .title
@@ -64,8 +87,37 @@
       color: #666
     .right
       flex: 0 0 30px
+      padding-right: 8px
       i
         font-size: 18px
+        color: #666
+      .icon-close
+        color: #fb4741
+        font-size: 20px
+        font-weight: 700
+    .nav
+      position: absolute
+      left: 0
+      right: 0
+      top: 44px
+      z-index: 99
+      background: #fff
+      &.active
+        border-bottom: 1px solid #d8d8d8
+      ul
+        display: flex
+        padding: 4px 0
+        li
+          flex: 1
+          .icon
+            display: block
+            line-height: 1
+            padding-bottom: 3px
+            font-size: 20px
+          .text
+            display: block
+            line-height: 1
+            font-size: 12px
 
 </style>
 

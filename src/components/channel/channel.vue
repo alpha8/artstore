@@ -64,14 +64,14 @@
       .item-info
         h3
           line-height: 1.5
-          min-height: 20px
-          max-height: 40px
+          height: 20px
           font-size: 14px
           overflow: hidden
           text-overflow: ellipsis
         .price
+          color: #ff463c
           font-size: 14px
-          color: #e4393c
+          font-weight: 700
           line-height: 1.2
           white-space: nowrap
           overflow: hidden

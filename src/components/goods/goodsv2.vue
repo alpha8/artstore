@@ -1,39 +1,42 @@
 <template>
-  <div class="goods">
-    <div class="menu-wrapper" ref="menuWrapper">
-      <ul>
-        <li v-for="(item, index) in goods" class="menu-item" :class="{'current': currentIndex===index}" @click.prevent="selectMenu(index)">
-          <span class="text border-1px">
-            <icons v-show="item.type>0" :size="3" :type="item.type"></icons>{{item.name}}
-          </span>
-        </li>
-      </ul>
-    </div>
-    <div class="goods-wrapper" ref="goodsWrapper">
-      <ul>
-        <li class="good-list good-list-hook" v-for="item in goods">
-          <h1 class="title">{{item.name}}</h1>
-          <ul>
-            <li v-for="good in item.items">
-              <router-link :to="{name:'good', params: { id: good.id }}" class="good-item">
-                <div class="icon">
-                  <img :src="good.icon" width="57" height="57" alt="">
-                </div>
-                <div class="content">
-                  <h2 class="name">{{good.name}}</h2>
-                  <p class="desc">{{good.description}}</p>
-                  <div class="extra">
-                    <span class="count">月售{{good.sellCount}}份</span>
+  <div>
+    <fixedheader title="商品分类"></fixedheader>
+    <div class="goods">
+      <div class="menu-wrapper" ref="menuWrapper">
+        <ul>
+          <li v-for="(item, index) in goods" class="menu-item" :class="{'current': currentIndex===index}" @click.prevent="selectMenu(index)">
+            <span class="text border-1px">
+              <icons v-show="item.type>0" :size="3" :type="item.type"></icons>{{item.name}}
+            </span>
+          </li>
+        </ul>
+      </div>
+      <div class="goods-wrapper" ref="goodsWrapper">
+        <ul>
+          <li class="good-list good-list-hook" v-for="item in goods">
+            <h1 class="title">{{item.name}}</h1>
+            <ul>
+              <li v-for="good in item.items">
+                <router-link :to="{name:'good', params: { id: good.id }}" class="good-item">
+                  <div class="icon">
+                    <img :src="good.icon" width="57" height="57" alt="">
                   </div>
-                  <div class="price">
-                    <span class="now">￥{{good.price}}</span><span class="old" v-show="good.oldPrice">￥{{good.oldPrice}}</span>
+                  <div class="content">
+                    <h2 class="name">{{good.name}}</h2>
+                    <p class="desc">{{good.description}}</p>
+                    <div class="extra">
+                      <span class="count">月售{{good.sellCount}}份</span>
+                    </div>
+                    <div class="price">
+                      <span class="now">￥{{good.price}}</span><span class="old" v-show="good.oldPrice">￥{{good.oldPrice}}</span>
+                    </div>
                   </div>
-                </div>
-              </router-link>
-            </li>
-          </ul>
-        </li>
-      </ul>
+                </router-link>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -43,6 +46,8 @@
   import icons from '@/components/icons/icons';
   import cart from '@/components/cart/cart';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
+  import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import api from '@/api/api';
 
   const ERR_OK = 0;
 
@@ -82,8 +87,7 @@
     created() {
       this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
 
-      this.axios.get('/api/goods').then((response) => {
-        response = response.data;
+      api.GetGoods().then(response => {
         if (response.errno === ERR_OK) {
           this.goods = response.data;
           this.$nextTick(() => {
@@ -138,7 +142,7 @@
       }
     },
     components: {
-      icons, cart, cartcontrol
+      icons, cart, cartcontrol, fixedheader
     }
   };
 </script>
@@ -149,7 +153,7 @@
   .goods
     display: flex
     position: absolute
-    top: 0
+    top: 44px
     bottom: 50px
     width: 100%
     overflow: hidden
@@ -163,12 +167,14 @@
         width: 56px
         line-height: 14px
         padding: 0 12px
+        border-left: 4px solid transparent
         &.current
           position: relative
           z-index: 10
           margin-top: -1px
           background: #fff
           font-weight: 700
+          border-left: 4px solid #00bb9c
           .text
             border-none()
         .text

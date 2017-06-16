@@ -7,6 +7,7 @@ import goodDetail from '@/components/good-detail/good-detailv2';
 // import seller from '@/components/seller/seller';
 import home from '@/components/home/home';
 import shopcart from '@/components/cart/shopcart';
+import my from '@/components/my/my';
 
 import '@/common/stylus/index.styl';
 
@@ -16,11 +17,12 @@ export default new Router({
   mode: 'history',
   linkActiveClass: 'active',
   routes: [
-    {path: '/', redirect: '/home'},
+    {path: '*', redirect: '/home'},
     {path: '/home', component: home},
     {path: '/category', component: goods},
     {path: '/good/:id', component: goodDetail, name: 'good'},
-    {path: '/cart', component: shopcart}
+    {path: '/cart', component: shopcart},
+    {path: '/my', component: my}
     // {path: '/ratings', component: ratings},
     // {path: '/seller', component: seller}
   ]

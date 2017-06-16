@@ -1,23 +1,17 @@
 /* jshint esnext: true */
-import * as types from '../mutation-types';
+import * as types from '../types';
 
 // initial state
 const state = {
-  added: [],
-  checkoutStatus: null
+  added: JSON.parse(localStorage.getItem('cartAdded')) || []
 };
 
 // getters
 const getters = {
-  checkoutStatus: state => state.checkoutStatus
 };
 
 // actions
 const actions = {
-  checkout ({ commit, state }, products) {
-    // const savedCartItems = [...state.added];
-    commit(types.CHECKOUT_REQUEST);
-  }
 };
 
 // mutations
@@ -35,27 +29,13 @@ const mutations = {
         description: product.description,
         price: product.price,
         oldPrice: product.oldPrice,
-        count: product.count
+        count: product.count,
+        checked: false
       });
     } else {
       record.count++;
     }
-  },
-
-  [types.CHECKOUT_REQUEST] (state) {
-    // clear cart
-    state.added = [];
-    state.checkoutStatus = null;
-  },
-
-  [types.CHECKOUT_SUCCESS] (state) {
-    state.checkoutStatus = 'successful';
-  },
-
-  [types.CHECKOUT_FAILURE] (state, { savedCartItems }) {
-    // rollback to the cart saved before sending the request
-    state.added = savedCartItems;
-    state.checkoutStatus = 'failed';
+    localStorage.setItem('cartAdded', JSON.stringify(state.added));
   }
 };
 

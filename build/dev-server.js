@@ -58,6 +58,28 @@ router.get('/goods', function(req, res){
     data: goodsData.goods
   });
 });
+
+router.get('/good/:id', function(req, res){
+  let id = req.params.id;
+  if (id) {
+    let goods = goodsData.goods;
+    goods.filter((good) => {
+      good.items.forEach((item) => {
+        if (item.id === id) {
+          res.json({
+            errno: 0,
+            data: item
+          });
+          return;
+        }
+      });
+    });
+  }
+  res.json({
+    errno: 0,
+    data: {}
+  });
+});
 app.use('/api', router);
 
 var compiler = webpack(webpackConfig)

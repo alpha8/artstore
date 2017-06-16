@@ -1,7 +1,7 @@
 /* jshint esnext: true */
 import Vue from 'vue';
 import Vuex from 'vuex';
-import * as types from './mutation-types';
+import * as types from './types';
 import cart from './modules/cart';
 
 Vue.use(Vuex);
@@ -29,6 +29,7 @@ export const state = {
   products: {}
 };
 
+const prefix = 'p';
 // mutations
 export const mutations = {
   [types.SHOW_LOADING](state) {
@@ -46,7 +47,7 @@ export const mutations = {
   [types.ADD_QUANTITY](state, id) {
     state.cartAmount++;
 
-    let sid = '"' + id + '"';
+    let sid = prefix + id;
     let product = state.products[sid];
     if (!product) {
       state.products[sid] = 1;
@@ -59,7 +60,7 @@ export const mutations = {
       state.cartAmount--;
     }
 
-    let sid = '"' + id + '"';
+    let sid = prefix + id;
     let product = state.products[sid];
     if (product) {
       state.products[sid]--;
