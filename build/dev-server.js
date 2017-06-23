@@ -74,10 +74,19 @@ router.get('/good/:id', function(req, res){
         }
       });
     });
+  }else {
+    res.json({
+      errno: 0,
+      data: {}
+    });
   }
+});
+
+var categoryData = require('../src/data/category.json');
+router.get('/category', function(req, res){
   res.json({
     errno: 0,
-    data: {}
+    data: categoryData.categories
   });
 });
 app.use('/api', router);

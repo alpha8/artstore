@@ -83,19 +83,24 @@ export function doPut(url, params) {
 }
 
 export default {
+  /** 获取所有商品列表 */
   GetGoods() {
     return doGet('/api/goods');
   },
-
+  /** 查询单个商品详情 */
   GetGood(id) {
     return doGet('/api/good/' + id);
+  },
+  /** 获取所有商品分类 */
+  GetCategories() {
+    return doGet('/api/category');
   },
 
   /**
    * 用户登录
    */
-  Login(params) {
-    return doPost('/users/api/userLogin', params);
+  Login() {
+    return doGet('/wxservice/baseInfo');
   },
   /**
    * 用户注册

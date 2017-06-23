@@ -23,14 +23,16 @@ export function urlParse() {
 /**
  * currency货币价格
  */
-const digitsRE = /(\d{3})(?=\d)/g;
+// const digitsRE = /(\d{3})(?=\d)/g;
 export function currency (value, cur, decimals) {
   value = parseFloat(value);
   if (!isFinite(value) || (!value && value !== 0)) {
     return '';
   }
-  cur = cur != null ? cur : '￥';
+  cur = cur != null ? cur : '¥';
   decimals = decimals != null ? decimals : 2;
+  return cur + Math.abs(value).toFixed(decimals);
+  /*
   var stringified = Math.abs(value).toFixed(decimals);
   var _int = decimals ? stringified.slice(0, -1 - decimals) : stringified;
   var i = _int.length % 3;
@@ -40,6 +42,7 @@ export function currency (value, cur, decimals) {
   return sign + cur + head +
     _int.slice(i).replace(digitsRE, '$1,') +
     _float;
+  */
 }
 
 /**

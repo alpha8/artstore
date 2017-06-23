@@ -1,9 +1,10 @@
 /* jshint esnext: true */
 import * as types from '../types';
+import { save, load } from '../../common/js/store';
 
 // initial state
 const state = {
-  added: JSON.parse(localStorage.getItem('cartAdded')) || []
+  added: load('cartAdded', [])
 };
 
 // getters
@@ -12,12 +13,14 @@ const getters = {
 
 // actions
 const actions = {
+  removeCartItems({ commit }, products) {
+    commit(types.REMOVE_CART_ITEM, products);
+  }
 };
 
 // mutations
 const mutations = {
   [types.ADD_TO_CART] (state, { product }) {
-    state.lastCheckout = null;
     let record = state.added.find(p => p.id === product.id);
     if (!record) {
       state.added.push({
@@ -35,7 +38,22 @@ const mutations = {
     } else {
       record.count++;
     }
-    localStorage.setItem('cartAdded', JSON.stringify(state.added));
+    save('cartAdded', state.added);
+  },
+  [types.REMOVE_CART_ITEM] (state, products) {
+    if (!products || products.length === 0) {
+      return;
+    }
+
+    products.forEach((p) => {
+      for (let i = 0; i < state.added.length; i++) {
+        let item = state.added[i];
+        if (item.id === p.id) {
+          state.added.splice(i, 1);
+        }
+      }
+    });
+    save('cartAdded', state.added);
   }
 };
 

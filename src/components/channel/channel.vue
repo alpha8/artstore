@@ -7,7 +7,7 @@
         </div>
         <div class="item-info">
           <h3>{{item.name}}</h3>
-          <div class="price">￥{{item.price}}</div>
+          <div class="price">¥<span class="num">{{item.price}}</span></div>
         </div>
       </router-link>
     </div>
@@ -46,7 +46,7 @@
       width: 33.3%
       height: auto
       vertical-align: top
-      border-sizing: border-box
+      box-sizing: border-box
       padding-bottom: 10px
       .item-img img
         width: 31.5vw
@@ -68,11 +68,14 @@
           font-size: 14px
           overflow: hidden
           text-overflow: ellipsis
+          display: -webkit-box
+          -webkit-line-clamp: 1
+          -webkit-box-orient: vertical
         .price
+          margin-top: 3px
           color: #ff463c
           font-size: 14px
           font-weight: 700
-          line-height: 1.2
           white-space: nowrap
           overflow: hidden
           text-overflow: ellipsis

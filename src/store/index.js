@@ -3,8 +3,27 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import * as types from './types';
 import cart from './modules/cart';
+import loading from './modules/loading';
+import { save, load } from '../common/js/store';
 
 Vue.use(Vuex);
+
+// states
+export const state = {
+  showFooter: true,
+  cartAmount: load('cartAmount', 0),
+  products: load('products', {}),
+  searchDialog: false,
+  showSidebar: false,
+  showSidebarMask: false
+};
+
+// getters
+export const getters = {
+  cartProducts: state => state.cart.added,
+  addedProducts: state => state.products,
+  showSearchBox: state => state.searchDialog
+};
 
 // actions
 export const actions = {
@@ -15,34 +34,30 @@ export const actions = {
   }
 };
 
-// getters
-export const getters = {
-  cartProducts: state => state.cart.added,
-  addedProducts: state => state.products
-};
-
-// states
-export const state = {
-  loading: false,
-  showFooter: true,
-  cartAmount: 0,
-  products: {}
-};
-
 const prefix = 'p';
 // mutations
 export const mutations = {
-  [types.SHOW_LOADING](state) {
-    state.loading = true;
+  [types.SHOW_SIDEBAR](state) {
+    state.showSidebar = true;
+    state.showSidebarMask = true;
   },
-  [types.HIDE_LOADING](state) {
-    state.loading = false;
+  [types.HIDE_SIDEBAR](state) {
+    state.showSidebar = false;
+    setTimeout(() => {
+      state.showSidebarMask = false;
+    }, 500);
   },
   [types.SHOW_FOOTER](state) {
     state.showFooter = true;
   },
   [types.HIDE_FOOTER](state) {
     state.showFooter = false;
+  },
+  [types.SHOW_SEARCH](state) {
+    state.searchDialog = true;
+  },
+  [types.HIDE_SEARCH](state) {
+    state.searchDialog = false;
   },
   [types.ADD_QUANTITY](state, id) {
     state.cartAmount++;
@@ -54,6 +69,8 @@ export const mutations = {
     } else {
       state.products[sid]++;
     }
+    save('products', state.products);
+    save('cartAmount', state.cartAmount);
   },
   [types.REDUCE_QUANTITY](state, id) {
     if (state.cartAmount > 0) {
@@ -65,9 +82,12 @@ export const mutations = {
     if (product) {
       state.products[sid]--;
     }
+    save('products', state.products);
+    save('cartAmount', state.cartAmount);
   },
   [types.CLEAR_CART](state) {
     state.cartAmount = 0;
+    save('cartAmount', state.cartAmount);
   }
 };
 
@@ -77,6 +97,7 @@ export default new Vuex.Store({
   actions,
   getters,
   modules: {
-    cart
+    cart,
+    loading
   }
 });

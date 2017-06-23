@@ -1,6 +1,7 @@
 <template>
   <div class="home">
-    <fixedsearch ref="search"></fixedsearch>
+    <fixedsearch ref="search" :showFixed="showFixed"></fixedsearch>
+    <search ref="advancedSearch"></search>
     <div class="main" ref="mainWrapper">
       <div class="mainContent">
         <div class="swipe-wrapper swipe-hook">
@@ -34,6 +35,7 @@
   import modalTitle from '@/components/modal-title/modal-title';
   import channel from '@/components/channel/channel';
   import gotop from '@/components/fixedtoolbar/gotop';
+  import search from '@/components/fixedtoolbar/search';
   import api from '@/api/api';
 
   const ERR_OK = 0;
@@ -74,6 +76,7 @@
         ],
         selectedGood: {},
         showTop: false,
+        showFixed: false,
         winHeight: document.documentElement.clientHeight
       };
     },
@@ -132,8 +135,10 @@
               this.scrollY = Math.abs(Math.round(pos.y));
               if (this.scrollY > h) {
                 search.className = 'toolbar fixed';
+                this.showFixed = true;
               } else {
                 search.className = 'toolbar';
+                this.showFixed = false;
               }
             });
           } else {
@@ -159,7 +164,8 @@
       modalTitle,
       channel,
       fixedsearch,
-      gotop
+      gotop,
+      search
     }
   };
 </script>

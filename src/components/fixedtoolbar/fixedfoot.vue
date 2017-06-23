@@ -32,7 +32,7 @@
     right: 0
     bottom: 0
     height: 50px
-    z-index: 99
+    z-index: 8
     background: #fafafa
     .foot-wrapper
       display: flex

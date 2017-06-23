@@ -4,7 +4,7 @@
       <router-view></router-view>
     </keep-alive>
     <fixedfoot :items="items"></fixedfoot>
-    <loading></loading>
+    <loading :show="loading.show" :text="loading.text"></loading>
   </div>
 </template>
 
@@ -37,6 +37,14 @@ export default {
         link: '/my'
       }]
     };
+  },
+  computed: {
+    loading() {
+      return {
+        show: this.$store.getters.isLoading,
+        text: this.$store.getters.loadingText
+      };
+    }
   },
   components: {
     fixedfoot, loading

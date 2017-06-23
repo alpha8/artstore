@@ -41,8 +41,8 @@
         </div>
         <div class="content-center" v-show="editMode">
           <div class="button-wrapper">
-            <div class="button remove"><span>删除</span></div>
-            <div class="button favorite"><span>移入收藏</span></div>
+            <div class="button remove" @click.stop.prevent="removeCartItem"><span>删除</span></div>
+            <!-- <div class="button favorite"><span>移入收藏</span></div> -->
             <div class="button share"><span>分享</span></div>
           </div>
         </div>
@@ -61,7 +61,7 @@
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
-  import {mapGetters} from 'vuex';
+  import {mapGetters, mapActions} from 'vuex';
 
   export default {
     data() {
@@ -92,6 +92,7 @@
       this.$refs.header.hide();
     },
     methods: {
+      ...mapActions(['removeCartItems']),
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -102,6 +103,15 @@
             this.scroll.refresh();
           }
         });
+      },
+      removeCartItem() {
+        let deleteItems = [];
+        this.cartProducts.forEach((item) => {
+          if (item.checked) {
+            deleteItems.push(item);
+          }
+        });
+        this.$store.dispatch('removeCartItems', deleteItems);
       },
       toggleCheckAll() {
         this.checkedAll = !this.checkedAll;
@@ -229,11 +239,15 @@
               overflow: hidden
               font-size: 14px
               a
-                display: inline-block
+                display: block
                 height: 100%
                 overflow: hidden
                 text-overflow: ellipsis
                 word-wrap: break-word
+                display: -webkit-box
+                -webkit-line-clamp: 2
+                -webkit-box-orient: vertical
+                line-height: 1.45
             .amountWrapper
               position: absolute
               display: inline-block

@@ -28,7 +28,7 @@
       <div class="other-wrapper">
         <div class="title">其他</div>
         <div class="otherList">
-          <router-link :to="item.link" class="item" v-for="(item, index) in others" key="index">
+          <router-link :to="item.link" class="item" v-for="(item, index) in others" key="index" :class="{'highlight': item.highlight}">
             <i :class="item.icon"></i>
             <span class="text">{{item.text}}</span>
             <span class="more" v-show="!item.noPage"><i class="icon-keyboard_arrow_right"></i></span>
@@ -63,7 +63,7 @@
           { icon: 'icon-footprint', text: '浏览足迹', link: '' },
           { icon: 'icon-kefu', text: '我的客服', link: '' },
           { icon: 'icon-auction', text: '我的拍卖', link: '' },
-          { icon: 'icon-quit', text: '退出登录', link: '', noPage: true }
+          { icon: 'icon-quit', text: '退出登录', link: '', noPage: true, highlight: true }
         ]
       };
     },
@@ -177,12 +177,15 @@
         border-1px(rgba(7, 17, 27, 0.1))
         &:last-child
           border-none()
+        &.highlight
+          >i, .text
+            color: #ff463c
         >i
           font-size: 18px
           padding-right: 3px
           vertical-align: middle
         .text
-          vertical-align: middle
+          vertical-align: middle          
         .more
           float: right
           font-size: 18px

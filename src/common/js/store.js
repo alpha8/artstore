@@ -26,3 +26,35 @@ export function loadFromLocal(id, key, def) {
   let ret = seller[key];
   return ret || def;
 }
+
+export function save(key, val) {
+  if (!key || !val) {
+    return;
+  }
+
+  if (window.localStorage) {
+    window.localStorage.setItem(key, JSON.stringify(val));
+  }
+}
+
+export function load(key, def) {
+  if (!key) {
+    return def;
+  }
+  if (window.localStorage) {
+    let val = window.localStorage.getItem(key);
+    if (val) {
+      return JSON.parse(val);
+    }
+  }
+  return def;
+}
+
+export function clear(key) {
+  if (!key) {
+    return;
+  }
+  if (window.localStorage) {
+    window.localStorage.removeItem(key);
+  }
+}

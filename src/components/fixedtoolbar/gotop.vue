@@ -30,7 +30,7 @@
     position: fixed
     right: 10px
     bottom: 52px
-    z-index: 10
+    z-index: 9
     img
       background: transparent
       height: 44px
