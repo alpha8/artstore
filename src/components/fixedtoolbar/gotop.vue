@@ -1,6 +1,6 @@
 <template>
   <div class="back-top" v-show="showTop" @click.stop.prevent="goTop">
-    <img class="back-img" src="/static/images/gotop.png">
+    <img class="back-img" src="../../common/images/gotop.png">
   </div>
 </template>
 

@@ -4,8 +4,6 @@
 import Vue from 'vue';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
-import { Indicator } from 'mint-ui';
-import 'mint-ui/lib/style.css';
 import VueAwesomeSwiper from 'vue-awesome-swiper';
 
 import App from './App';
@@ -20,7 +18,6 @@ Vue.use(VueAxios, axios);
 // Vue.component(Swipe.name, Swipe);
 // Vue.component(SwipeItem.name, SwipeItem);
 Vue.use(VueAwesomeSwiper);
-Vue.use(Indicator);
 
 /* eslint-disable no-new */
 new Vue({

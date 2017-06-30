@@ -1,6 +1,6 @@
 <template>
   <div class="header border-bottom-1px">
-    <div class="left">
+    <div class="left" v-show="showBack">
       <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
     </div>
     <h2 class="title">{{title}}</h2>
@@ -35,6 +35,10 @@
       rightLink: {
         type: String,
         default: ''
+      },
+      showBack: {
+        type: Boolean,
+        default: true
       }
     },
     data() {

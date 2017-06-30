@@ -34,7 +34,7 @@
       vertical-align: middle
       -webkit-animation: e 1s steps(12) infinite
       animation: e 1s steps(12) infinite
-      background: transparent url(/static/images/loading.svg) no-repeat
+      background: transparent url(../../common/images/loading.svg) no-repeat
       background-size: 100%
       @keyframes e{
         0% {

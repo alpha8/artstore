@@ -13,9 +13,6 @@ const getters = {
 
 // actions
 const actions = {
-  removeCartItems({ commit }, products) {
-    commit(types.REMOVE_CART_ITEM, products);
-  }
 };
 
 // mutations
@@ -38,21 +35,6 @@ const mutations = {
     } else {
       record.count++;
     }
-    save('cartAdded', state.added);
-  },
-  [types.REMOVE_CART_ITEM] (state, products) {
-    if (!products || products.length === 0) {
-      return;
-    }
-
-    products.forEach((p) => {
-      for (let i = 0; i < state.added.length; i++) {
-        let item = state.added[i];
-        if (item.id === p.id) {
-          state.added.splice(i, 1);
-        }
-      }
-    });
     save('cartAdded', state.added);
   }
 };

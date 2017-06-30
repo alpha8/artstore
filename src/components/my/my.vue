@@ -3,9 +3,10 @@
     <div class="my-wrapper">
       <div class="header-wrapper">
         <div class="avatar">
-          <img :src="user.icon" alt="" class="pic">
+          <a v-show="!hasLogin" href="/wxservice/baseInfo"><img src="http://www.yihuyixi.com/ps/download/5951bed1e4b0e29e1a4086ca?w=80&h=80" alt="" class="pic"></a>
+          <img :src="user.icon" alt="" class="pic" v-show="hasLogin">
         </div>
-        <div class="line"><span class="text">{{user.name}}</span></div>
+        <div class="line"><span class="text" v-show="!hasLogin">未登录</span><span class="text" v-show="hasLogin">{{user.nickName}}</span></div>
       </div>
       <split></split>
       <div class="order-wrapper">
@@ -47,10 +48,8 @@
   export default {
     data() {
       return {
-        user: {
-          icon: '/static/images/usericon.png',
-          name: 'Alpha'
-        },
+        user: this.$store.getters.getUserInfo,
+        hasLogin: this.$store.getters.checkLogined,
         orders: [
           { icon: 'icon-pending_payment', text: '待付款', link: '' },
           { icon: 'icon-delivery_package_box', text: '待发货', link: '' },
@@ -59,9 +58,8 @@
         ],
         others: [
           { icon: 'icon-heart', text: '我的收藏', link: '' },
-          { icon: 'icon-address', text: '收货地址', link: '' },
+          { icon: 'icon-address', text: '收货地址', link: '/address' },
           { icon: 'icon-footprint', text: '浏览足迹', link: '' },
-          { icon: 'icon-kefu', text: '我的客服', link: '' },
           { icon: 'icon-auction', text: '我的拍卖', link: '' },
           { icon: 'icon-quit', text: '退出登录', link: '', noPage: true, highlight: true }
         ]

@@ -28,8 +28,12 @@ export function loadFromLocal(id, key, def) {
 }
 
 export function save(key, val) {
-  if (!key || !val) {
+  if (!key) {
     return;
+  }
+
+  if (!val) {
+    val = '';
   }
 
   if (window.localStorage) {
@@ -57,4 +61,44 @@ export function clear(key) {
   if (window.localStorage) {
     window.localStorage.removeItem(key);
   }
+}
+
+export function loadCookie(key, def) {
+  if (!key) {
+    return def;
+  }
+  var arr = document.cookie.match(new RegExp('(^| )' + key + '=([^;]*)(;|$)'));
+  if (arr) {
+    return unescape(arr[2]);
+  }
+  return def;
+}
+
+export function saveCookie(name, value, path, expires) {
+  var opts = {
+    name: name || '',
+    value: value || '',
+    expires: isNaN(expires) ? 0 : expires,
+    path: path || '/'
+  };
+
+  var exp = new Date();
+  exp.setTime(exp.getTime() + opts.expires);
+  document.cookie = opts.name +
+    '=' + escape(opts.value) +
+    ';expires=' + exp.toGMTString() +
+    ';path=' + opts.path;
+}
+
+export function removeCookie(name, path) {
+  var opts = {
+    name: name || '',
+    path: path || '/'
+  };
+
+  var exp = new Date();
+  exp.setTime(exp.getTime() - 1000);
+  document.cookie = opts.name +
+    '=;expires=' + exp.toGMTString() +
+    ';path=' + opts.path;
 }

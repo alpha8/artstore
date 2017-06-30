@@ -14,15 +14,6 @@
           "sellCount": 1,
           "rating": 100,
           "info": "80年代绿茶（茉莉花茶）（珍品）",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "很喜欢",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c948e4b0b0797c093323?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c948e4b0b0797c093323?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c948e4b0b0797c093323?w=750&h=750"
@@ -35,29 +26,6 @@
           "description": "1990年铁观音（特级珍品）   10万/斤",
           "sellCount": 0,
           "rating": 100,
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "已收藏",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "3******b",
-              "rateTime": 1469261964000,
-              "rateType": 1,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "info": "",
           "src": "http://www.yihuyixi.com/ps/download/5930c8a6e4b0b0797c0932ea?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8a6e4b0b0797c0932ea?w=114&h=114",
@@ -72,22 +40,6 @@
           "sellCount": 2,
           "rating": 85,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "10086个赞",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "厉害了我的哥",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c89ee4b0b0797c0932e5?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c89ee4b0b0797c0932e5?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c89ee4b0b0797c0932e5?w=750&h=750"
@@ -101,29 +53,6 @@
           "sellCount": 10,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "推荐",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "3******b",
-              "rateTime": 1469261964000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c8b3e4b0b0797c0932f0?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8b3e4b0b0797c0932f0?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8b3e4b0b0797c0932f0?w=750&h=750"
@@ -144,15 +73,6 @@
           "sellCount": 170,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c8bbe4b0b0797c0932f4?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8bbe4b0b0797c0932f4?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8bbe4b0b0797c0932f4?w=750&h=750"
@@ -166,15 +86,6 @@
           "sellCount": 1800,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c897e4b0b0797c0932e1?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c897e4b0b0797c0932e1?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c897e4b0b0797c0932e1?w=750&h=750"
@@ -188,15 +99,6 @@
           "sellCount": 1000,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932de?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932de?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932de?w=750&h=750"
@@ -210,15 +112,6 @@
           "sellCount": 2000,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c8b5e4b0b0797c0932f2?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8b5e4b0b0797c0932f2?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8b5e4b0b0797c0932f2?w=750&h=750"
@@ -239,22 +132,6 @@
           "sellCount": 15,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "非常精美，值得入手",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c8b1e4b0b0797c0932ef?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8b1e4b0b0797c0932ef?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8b1e4b0b0797c0932ef?w=750&h=750"
@@ -268,22 +145,6 @@
           "sellCount": 15,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "非常精美，值得入手",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c94ce4b0b0797c093325?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c94ce4b0b0797c093325?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c94ce4b0b0797c093325?w=750&h=750"
@@ -297,22 +158,6 @@
           "sellCount": 15,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "非常精美，值得入手",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c8d0e4b0b0797c0932fd?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8d0e4b0b0797c0932fd?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8d0e4b0b0797c0932fd?w=750&h=750"
@@ -326,22 +171,6 @@
           "sellCount": 150,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "非常精美，值得入手",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932df?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932df?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932df?w=750&h=750"
@@ -355,22 +184,6 @@
           "sellCount": 105,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "非常精美，值得入手",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c8d7e4b0b0797c093300?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8d7e4b0b0797c093300?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8d7e4b0b0797c093300?w=750&h=750"
@@ -384,22 +197,6 @@
           "sellCount": 1200,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "非常精美，值得入手",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c8a1e4b0b0797c0932e7?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8a1e4b0b0797c0932e7?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8a1e4b0b0797c0932e7?w=750&h=750"
@@ -413,22 +210,6 @@
           "sellCount": 5005,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "非常精美，值得入手",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c8c7e4b0b0797c0932f9?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8c7e4b0b0797c0932f9?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8c7e4b0b0797c0932f9?w=750&h=750"
@@ -442,22 +223,6 @@
           "sellCount": 1000,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "非常精美，值得入手",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c8c8e4b0b0797c0932fb?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8c8e4b0b0797c0932fb?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8c8e4b0b0797c0932fb?w=750&h=750"
@@ -478,7 +243,6 @@
           "sellCount": 1,
           "rating": "",
           "info": "",
-          "ratings": [],
           "src": "http://www.yihuyixi.com/ps/download/5930c8cbe4b0b0797c0932fc?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8cbe4b0b0797c0932fc?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8cbe4b0b0797c0932fc?w=750&h=750"
@@ -492,29 +256,6 @@
           "sellCount": 7,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "3******b",
-              "rateTime": 1469261964000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c8e1e4b0b0797c093306?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c8e1e4b0b0797c093306?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c8e1e4b0b0797c093306?w=750&h=750"
@@ -528,22 +269,6 @@
           "sellCount": 15,
           "rating": 100,
           "info": "",
-          "ratings": [
-            {
-              "username": "3******c",
-              "rateTime": 1469281964000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            },
-            {
-              "username": "2******3",
-              "rateTime": 1469271264000,
-              "rateType": 0,
-              "text": "",
-              "avatar": "/static/images/usericon.png"
-            }
-          ],
           "src": "http://www.yihuyixi.com/ps/download/5930c94ae4b0b0797c093324?w=228&h=128",
           "icon": "http://www.yihuyixi.com/ps/download/5930c94ae4b0b0797c093324?w=114&h=114",
           "image": "http://www.yihuyixi.com/ps/download/5930c94ae4b0b0797c093324?w=750&h=750"

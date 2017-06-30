@@ -11,18 +11,16 @@
         </div>
       </div>
       <div class="ext-tools">
-        <span v-show="showLogin" @click.stop.prevent="login"><span>登录</span></span>
+        <span v-show="showLogin"><a href="/wxservice/baseInfo">登录</a></span>
         <span v-show="showDiscard" @click.stop.prevent="hideDialog"><span class="button">取消</span></span>
         <span v-show="showSearchBtn"><span class="button" :class="{'blue': !showFixed}">搜索</span></span>
-        <span v-show="hasLogin"><router-link to="/my"><i class="icon-user2"></i></router-link></span>
+        <span v-show="hasLogin && !typing"><router-link to="/my"><i class="icon-user2"></i></router-link></span>
       </div>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import api from '@/api/api';
-  import { save, load } from '@/common/js/store';
   export default {
     props: {
       showFixed: {
@@ -35,7 +33,8 @@
         showDiscard: false,
         showSearch: false,
         keyword: '',
-        isLogin: false
+        isLogin: this.$store.getters.checkLogined,
+        typing: false
       };
     },
     computed: {
@@ -52,43 +51,30 @@
         return this.showSearch;
       },
       hasLogin() {
-        if (this.checkLogin()) {
-          this.isLogin = true;
-        }
         this.showLogin = !this.isLogin;
         return this.isLogin;
       }
     },
     methods: {
-      checkLogin() {
-        return typeof load('loginUser') !== 'undefined';
-      },
       showLoginForm() {
-        if (this.checkLogin()) {
-          this.isLogin = true;
-        } else {
-          this.isLogin = false;
-        }
         this.showLogin = !this.isLogin;
       },
       openSmartSearch() {
         this.$store.commit('SHOW_SEARCH');
         this.showDiscard = true;
-        this.showLogin = this.showSearch = this.isLogin = false;
+        this.showLogin = this.showSearch = false;
+        this.typing = true;
       },
       hideDialog() {
+        this.typing = false;
         this.$store.commit('HIDE_SEARCH');
         this.showLoginForm();
         this.showDiscard = this.showSearch = false;
       },
       clearText() {
+        this.typing = true;
+        this.showDiscard = true;
         this.keyword = '';
-      },
-      login() {
-        api.Login().then((response) => {
-          response = response.data;
-          save('loginUser', response);
-        });
       }
     }
   };
@@ -147,7 +133,7 @@
             width: 20px
             height: 20px
             margin-top: -10px
-            background: url(/static/images/close.png) no-repeat
+            background: url(../../common/images/close.png) no-repeat
             background-size: 20px auto
           .search-form-input
             display: inline-block
@@ -182,7 +168,9 @@
           height: 33px
           line-height: 33px
           .button
-            background: rgba(7, 17, 27, 0.1)
+            background: rgba(7, 17, 27, 0.3)
             &.blue
               background: rgba(0, 187, 156, 0.87)
+          .icon-user2
+            font-size: 16px
 </style>

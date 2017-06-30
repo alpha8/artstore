@@ -30,6 +30,7 @@
         }
         this.$emit('add', event.target);
         this.$store.commit('ADD_QUANTITY', this.good.id);
+        this.$store.dispatch('addToCart', this.good);
       },
       decreaseCart() {
         if (this.good.count > 1) {

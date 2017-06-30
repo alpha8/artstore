@@ -11,6 +11,7 @@
 <script type="text/ecmascript-6">
 import fixedfoot from '@/components/fixedtoolbar/fixedfoot';
 import loading from '@/components/common/loading';
+import toast from '@/components/common/toast';
 
 export default {
   data () {
@@ -47,7 +48,7 @@ export default {
     }
   },
   components: {
-    fixedfoot, loading
+    fixedfoot, loading, toast
   }
 };
 </script>

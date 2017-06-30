@@ -50,7 +50,7 @@
           <span class="totalPrice">总计：<span class="price">{{totalPrice | currency}}</span></span>
         </div>
         <div class="content-right" @click.stop.prevent="pay" v-show="!editMode">
-          <div class="pay activated">结算<span>(<em class="count">{{selectedCount}}</em>件)</span></div>
+          <div class="pay activated">结算<span>(<em class="count">{{totalCount}}</em>件)</span></div>
         </div>
       </div>
     </div>
@@ -61,38 +61,60 @@
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
-  import {mapGetters, mapActions} from 'vuex';
 
   export default {
     data() {
       return {
         checkedAll: false,
-        totalPrice: 0,
-        selectedCount: 0,
         defaultAddress: '深圳市',
-        editMode: false
+        editMode: false,
+        cartProducts: [],
+        total: 0
       };
     },
     computed: {
-      ...mapGetters(['cartProducts']),
       editDesc() {
         if (this.editMode) {
           return '完成';
         } else {
           return '修改商品';
         }
+      },
+      totalPrice() {
+        let total = 0;
+        this.cartProducts.forEach((item) => {
+          if (item.checked) {
+            total += item.count * item.price;
+          }
+        });
+        this.total = total;
+        return total;
+      },
+      totalCount() {
+        let count = 0;
+        this.cartProducts.forEach((item) => {
+          if (item.checked) {
+            count += item.count;
+          }
+        });
+        return count;
       }
     },
     activated() {
+      this.reloadItems();
       this._initScroll();
       this.$store.commit('HIDE_FOOTER');
     },
+    updated() {
+      this._initScroll();
+    },
     deactivated() {
+      this.checkAll(false);
+      this.checkedAll = false;
       this.$store.commit('SHOW_FOOTER');
       this.$refs.header.hide();
     },
     methods: {
-      ...mapActions(['removeCartItems']),
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -104,6 +126,24 @@
           }
         });
       },
+      reloadItems() {
+        let goods = this.$store.getters.cartProducts;
+        this.cartProducts = [];
+        goods.forEach((product) => {
+          this.cartProducts.push({
+            id: product.id,
+            name: product.name,
+            icon: product.icon,
+            src: product.src,
+            info: product.info,
+            description: product.description,
+            price: product.price,
+            oldPrice: product.oldPrice,
+            count: product.count,
+            checked: product.checked || false
+          });
+        });
+      },
       removeCartItem() {
         let deleteItems = [];
         this.cartProducts.forEach((item) => {
@@ -112,6 +152,8 @@
           }
         });
         this.$store.dispatch('removeCartItems', deleteItems);
+        this.reloadItems();
+        this.editMode = false;
       },
       toggleCheckAll() {
         this.checkedAll = !this.checkedAll;
@@ -127,31 +169,15 @@
         this.checkedAll = false;
       },
       checkAll(state) {
-        let count = 0;
-        let total = 0;
         this.cartProducts.forEach((item) => {
           item.checked = state;
-
-          if (item.checked) {
-            count += item.count;
-            total += item.count * item.price;
-          }
         });
-        this.selectedCount = count;
-        this.totalPrice = total;
       },
       check(state) {
         let notSame = false;
-        let count = 0;
-        let total = 0;
         this.cartProducts.forEach((item) => {
           if (item.checked !== state) {
             notSame = true;
-          }
-
-          if (item.checked) {
-            count += item.count;
-            total += item.count * item.price;
           }
         });
         if (!notSame && state) {
@@ -159,12 +185,10 @@
         } else {
           this.checkedAll = false;
         }
-        this.selectedCount = count;
-        this.totalPrice = total;
       },
       pay() {
-        if (this.totalPrice) {
-          alert(`支付${this.totalPrice}元`);
+        if (this.total) {
+          this.$router.push('pay');
         }
       }
     },

@@ -5,16 +5,18 @@ import Router from 'vue-router';
 import goodDetail from '@/components/good-detail/good-detailv2';
 import home from '@/components/home/home';
 import shopcart from '@/components/cart/shopcart';
+import pay from '@/components/cart/pay';
 import category from '@/components/category/category';
 import search from '@/components/search/search';
 import my from '@/components/my/my';
+import addressList from '@/components/my/addressList';
+import addAddress from '@/components/my/addAddress';
 
 import '@/common/stylus/index.styl';
 
 Vue.use(Router);
-
 export default new Router({
-  mode: 'history',
+  // mode: 'history',
   linkActiveClass: 'active',
   routes: [
     {path: '*', redirect: '/home'},
@@ -23,6 +25,9 @@ export default new Router({
     {path: '/search', component: search},
     {path: '/good/:id', component: goodDetail, name: 'good'},
     {path: '/cart', component: shopcart},
+    {path: '/pay', component: pay},
+    {path: '/address', component: addressList},
+    {path: '/addAddress', component: addAddress},
     {path: '/my', component: my}
   ]
 });

@@ -28,7 +28,7 @@
                       <span class="count">月售{{good.sellCount}}份</span>
                     </div>
                     <div class="price">
-                      <span class="now">￥{{good.price}}</span><span class="old" v-show="good.oldPrice">￥{{good.oldPrice}}</span>
+                      <span class="now">¥{{good.price}}</span><span class="old" v-show="good.oldPrice">￥{{good.oldPrice}}</span>
                     </div>
                   </div>
                 </router-link>

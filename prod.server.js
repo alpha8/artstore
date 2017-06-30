@@ -66,7 +66,7 @@ apiRoutes.get('/ratings', function (req, res) {
 
 app.use('/api', apiRoutes);
 
-app.use(express.static('./dist'));
+app.use('/webapp', express.static('./dist'));
 
 module.exports = app.listen(port, function (err) {
 	if (err) {

@@ -292,7 +292,7 @@
               border-sizing: border-box
             &.on span
               border: 1px solid #ff463c
-              background: url(/static/images/box-checked.png) transparent right bottom no-repeat
+              background: url(../../common/images/box-checked.png) transparent right bottom no-repeat
               background-size: 15px
               color: #ff463c
         .min-price, .max-price

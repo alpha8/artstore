@@ -20,3 +20,9 @@ export const SHOW_SEARCH = 'SHOW_SEARCH';
 // SIDEBAR
 export const HIDE_SIDEBAR = 'HIDE_SIDEBAR';
 export const SHOW_SIDEBAR = 'SHOW_SIDEBAR';
+
+// ADDRESS
+export const SET_ADDRESS = 'SET_ADDRESS';
+export const ADD_ADDRESS = 'ADD_ADDRESS';
+export const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
+export const REMOVE_ADDRESS = 'REMOVE_ADDRESS';

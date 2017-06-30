@@ -22,7 +22,7 @@ axios.interceptors.request.use((config) => {
 axios.interceptors.response.use((res) => {
   return res;
 }, (error) => {
-  console.log('网络异常');
+  alert('网络异常, err=' + error);
   return Promise.reject(error);
 });
 
@@ -42,8 +42,9 @@ export function doPost(url, params) {
 
 export function doGet(url, params) {
   return new Promise((resolve, reject) => {
-    axios.get(url, params)
-      .then(response => {
+    axios.get(url, {
+      params: params
+    }).then(response => {
         resolve(response.data);
       }, err => {
         reject(err);
@@ -56,8 +57,9 @@ export function doGet(url, params) {
 
 export function doDelete(url, params) {
   return new Promise((resolve, reject) => {
-    axios.delete(url, params)
-      .then(response => {
+    axios.delete(url, {
+      params: params
+    }).then(response => {
         resolve(response.data);
       }, err => {
         reject(err);
@@ -128,5 +130,10 @@ export default {
    */
    getAddressJson() {
      return doPost('/api/address');
+   },
+
+   /** 获取微信支付接口参数 */
+   wxpay(params) {
+    return doGet('/wxservice/wx/pay', params);
    }
 };

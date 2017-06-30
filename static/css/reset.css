@@ -105,3 +105,31 @@ a,button,input,textarea,select,li{-webkit-appearance: none;border-radius: 0;outl
 
 a{text-decoration: none;}
 i, em{font-style: normal;}
+
+.btns{
+  display: flex;
+  margin: 10px 0;
+  height: 40px;
+  line-height: 40px;
+  font-size: 16px;
+  text-align: center;
+  border-radius: 2px;
+  color: #fff;
+}
+.btns.btn-red {
+  background: #d05148;
+}
+.btns.btn-blue{
+  background: #3a77e7;
+}
+.btns.btn-lightblue{
+  background: #bbebe9;
+  color: #0f8783;
+}
+.btns.btn-green{
+  background: #44b549;
+}
+.btns.btn-blue{
+  background: #3a77e7;
+}
+.btns span{flex: 1;}

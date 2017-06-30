@@ -25,10 +25,10 @@
       <div class="productlist">
         <div class="product-item" v-for="(product, index) in products" key="index">
           <div class="product-thumbnail">
-            <img :src="product.img" />
+            <router-link :to="{name: 'good', params: {id: product.id}}"><img :src="product.image" /></router-link>
           </div>
           <div class="product-info">
-            <div class="product-title">{{product.name}}</div>
+            <div class="product-title"><router-link :to="{name: 'good', params: {id: product.id}}">{{product.name}}</router-link></div>
             <div class="product-price">¥<span class="num">{{product.price}}</span></div>
           </div>
         </div>
@@ -46,13 +46,253 @@
       return {
         keyword: '',
         products: [
-          { id: '10001', name: '大宋官窑-梅花盖碗钧瓷梅花  手抓壶盖碗茶杯三才碗功夫茶', price: 390.00, img: 'http://img3x6.ddimg.cn/14/23/1384884086-1_h_3.jpg' },
-          { id: '10002', name: '大宋官窑-小斗笠碗钧瓷斗笠  茶杯小茶盏窑变主人杯功夫茶', price: 360.00, img: 'http://img3x6.ddimg.cn/30/32/1384885686-1_h_3.jpg' },
-          { id: '10003', name: '手绘龙泉青瓷家用带盖主人喝茶杯子办公室会议水杯陶瓷个人泡茶杯', price: 79.00, img: 'http://img3x0.ddimg.cn/67/30/1019563150-1_h_2.jpg' },
-          { id: '10004', name: '手绘龙泉青瓷家用带盖主人喝茶杯子办公室会议水杯陶瓷个人泡茶杯', price: 79.00, img: 'http://img3x0.ddimg.cn/67/30/1019563150-1_h_2.jpg' },
-          { id: '10005', name: '手绘龙泉青瓷家用带盖主人喝茶杯子办公室会议水杯陶瓷个人泡茶杯', price: 79.00, img: 'http://img3x0.ddimg.cn/67/30/1019563150-1_h_2.jpg' },
-          { id: '10006', name: '手绘龙泉青瓷家用带盖主人喝茶杯子办公室会议水杯陶瓷个人泡茶杯', price: 79.00, img: 'http://img3x0.ddimg.cn/67/30/1019563150-1_h_2.jpg' },
-          { id: '10007', name: '手绘龙泉青瓷家用带盖主人喝茶杯子办公室会议水杯陶瓷个人泡茶杯', price: 79.00, img: 'http://img3x0.ddimg.cn/67/30/1019563150-1_h_2.jpg' }
+          {
+            'id': '1000',
+            'name': '80年代绿茶',
+            'price': 100000,
+            'oldPrice': '',
+            'description': '80年代绿茶（茉莉花茶）（珍品） 10万/斤',
+            'sellCount': 1,
+            'rating': 100,
+            'info': '80年代绿茶（茉莉花茶）（珍品）',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c948e4b0b0797c093323?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c948e4b0b0797c093323?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c948e4b0b0797c093323?w=750&h=750'
+          },
+          {
+            'id': '1001',
+            'name': '1990年铁观音',
+            'price': 100000,
+            'oldPrice': '',
+            'description': '1990年铁观音（特级珍品）   10万/斤',
+            'sellCount': 0,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8a6e4b0b0797c0932ea?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8a6e4b0b0797c0932ea?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8a6e4b0b0797c0932ea?w=750&h=750'
+          },
+          {
+            'id': '1002',
+            'name': '1992年铁观音',
+            'price': 95000,
+            'oldPrice': '',
+            'description': '1992年铁观音（特级珍品）   9.5万/斤',
+            'sellCount': 2,
+            'rating': 85,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c89ee4b0b0797c0932e5?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c89ee4b0b0797c0932e5?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c89ee4b0b0797c0932e5?w=750&h=750'
+          },
+          {
+            'id': '1003',
+            'name': '2006象明山乔木生普',
+            'price': 800,
+            'oldPrice': '',
+            'description': '2006象明山乔木生普（鉴藏级）800/斤',
+            'sellCount': 10,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8b3e4b0b0797c0932f0?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8b3e4b0b0797c0932f0?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8b3e4b0b0797c0932f0?w=750&h=750'
+          },
+          {
+            'id': '2000',
+            'name': '唐蹴鞠瓷雕',
+            'price': 2800,
+            'oldPrice': 3000,
+            'description': '唐蹴鞠瓷雕（特级）',
+            'sellCount': 170,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8bbe4b0b0797c0932f4?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8bbe4b0b0797c0932f4?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8bbe4b0b0797c0932f4?w=750&h=750'
+          },
+          {
+            'id': '2001',
+            'name': '遨云皮丘铜雕',
+            'price': 1200,
+            'oldPrice': '',
+            'description': '遨云皮丘铜雕（特级）',
+            'sellCount': 1800,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c897e4b0b0797c0932e1?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c897e4b0b0797c0932e1?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c897e4b0b0797c0932e1?w=750&h=750'
+          },
+          {
+            'id': '2003',
+            'name': '将军螃蟹铜雕',
+            'price': 350,
+            'oldPrice': '',
+            'description': '将军螃蟹铜雕（特级）',
+            'sellCount': 1000,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932de?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932de?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932de?w=750&h=750'
+          },
+          {
+            'id': '2004',
+            'name': '熙园双鹊瓷雕',
+            'price': 320,
+            'oldPrice': '',
+            'description': '熙园双鹊瓷雕（特级）',
+            'sellCount': 2000,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8b5e4b0b0797c0932f2?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8b5e4b0b0797c0932f2?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8b5e4b0b0797c0932f2?w=750&h=750'
+          },
+          {
+            'id': '3000',
+            'name': '荷塘鸣雀杯',
+            'price': 850,
+            'oldPrice': 1000,
+            'description': '荷塘鸣雀杯（特级）',
+            'sellCount': 15,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8b1e4b0b0797c0932ef?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8b1e4b0b0797c0932ef?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8b1e4b0b0797c0932ef?w=750&h=750'
+          },
+          {
+            'id': '3001',
+            'name': '鹅黄釉相思鸟品茗杯',
+            'price': 850,
+            'oldPrice': '',
+            'description': '鹅黄釉相思鸟品茗杯（特级）',
+            'sellCount': 15,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c94ce4b0b0797c093325?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c94ce4b0b0797c093325?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c94ce4b0b0797c093325?w=750&h=750'
+          },
+          {
+            'id': '3002',
+            'name': '闲云野鹤杯',
+            'price': 520,
+            'oldPrice': '',
+            'description': '闲云野鹤杯（特级）',
+            'sellCount': 15,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8d0e4b0b0797c0932fd?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8d0e4b0b0797c0932fd?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8d0e4b0b0797c0932fd?w=750&h=750'
+          },
+          {
+            'id': '3003',
+            'name': '千叶马蹄杯',
+            'price': 450,
+            'oldPrice': '',
+            'description': '千叶马蹄杯（特级）',
+            'sellCount': 150,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932df?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932df?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c890e4b0b0797c0932df?w=750&h=750'
+          },
+          {
+            'id': '3004',
+            'name': '小云朵影青玉兰杯',
+            'price': 260,
+            'oldPrice': 300,
+            'description': '小云朵影青玉兰杯',
+            'sellCount': 105,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8d7e4b0b0797c093300?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8d7e4b0b0797c093300?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8d7e4b0b0797c093300?w=750&h=750'
+          },
+          {
+            'id': '3005',
+            'name': '葵口方鼎杯',
+            'price': 120,
+            'oldPrice': '',
+            'description': '葵口方鼎杯',
+            'sellCount': 1200,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8a1e4b0b0797c0932e7?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8a1e4b0b0797c0932e7?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8a1e4b0b0797c0932e7?w=750&h=750'
+          },
+          {
+            'id': '3006',
+            'name': '千仞悟杯',
+            'price': 90,
+            'oldPrice': '',
+            'description': '千仞悟杯',
+            'sellCount': 5005,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8c7e4b0b0797c0932f9?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8c7e4b0b0797c0932f9?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8c7e4b0b0797c0932f9?w=750&h=750'
+          },
+          {
+            'id': '3007',
+            'name': '五福天青壶承',
+            'price': 450,
+            'oldPrice': '',
+            'description': '五福天青壶承',
+            'sellCount': 1000,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8c8e4b0b0797c0932fb?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8c8e4b0b0797c0932fb?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8c8e4b0b0797c0932fb?w=750&h=750'
+          },
+          {
+            'id': '4000',
+            'name': '云中鹰茶仓',
+            'price': 1200,
+            'oldPrice': '',
+            'description': '云中鹰茶仓（存货紧缺）',
+            'sellCount': 1,
+            'rating': '',
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8cbe4b0b0797c0932fc?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8cbe4b0b0797c0932fc?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8cbe4b0b0797c0932fc?w=750&h=750'
+          },
+          {
+            'id': '4001',
+            'name': '隐樵山柴烧茶仓',
+            'price': 1100,
+            'oldPrice': '',
+            'description': '隐樵山柴烧茶仓（存货紧缺）',
+            'sellCount': 7,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c8e1e4b0b0797c093306?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c8e1e4b0b0797c093306?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c8e1e4b0b0797c093306?w=750&h=750'
+          },
+          {
+            'id': '4002',
+            'name': '80年代老厂红泥小火炉',
+            'price': 1600,
+            'oldPrice': '',
+            'description': '80年代老厂红泥小火炉（特级，存货紧缺）',
+            'sellCount': 15,
+            'rating': 100,
+            'info': '',
+            'src': 'http://www.yihuyixi.com/ps/download/5930c94ae4b0b0797c093324?w=228&h=128',
+            'icon': 'http://www.yihuyixi.com/ps/download/5930c94ae4b0b0797c093324?w=114&h=114',
+            'image': 'http://www.yihuyixi.com/ps/download/5930c94ae4b0b0797c093324?w=750&h=750'
+          }
         ]
       };
     },
@@ -153,7 +393,7 @@
           width: 20px
           height: 20px
           margin-top: -10px
-          background: url(/static/images/close.png) no-repeat
+          background: url(../../common/images/close.png) no-repeat
           background-size: 20px auto
     .right
       flex: 0 0 50px
