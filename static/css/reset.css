@@ -116,20 +116,19 @@ i, em{font-style: normal;}
   border-radius: 2px;
   color: #fff;
 }
-.btns.btn-red {
+.btn-red {
   background: #d05148;
 }
-.btns.btn-blue{
+.btn-blue{
   background: #3a77e7;
 }
-.btns.btn-lightblue{
+.btn-lightblue{
   background: #bbebe9;
   color: #0f8783;
 }
-.btns.btn-green{
+.btn-green{
   background: #44b549;
 }
-.btns.btn-blue{
-  background: #3a77e7;
-}
 .btns span{flex: 1;}
+.text-blue{color: #3a77e7;}
+.text-red{color: #e4393c;}

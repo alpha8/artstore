@@ -9,6 +9,7 @@ import { save, load, loadCookie } from '../common/js/store';
 Vue.use(Vuex);
 
 const ADDRESS_LIST = 'addresses';
+const DEFAULT_ADDRESS = 'defaultAddress';
 
 // states
 export const state = {
@@ -19,7 +20,7 @@ export const state = {
   showSidebar: false,
   showSidebarMask: false,
   userInfo: JSON.parse(loadCookie('wxuser', '{}')),
-  defaultAddress: JSON.parse(load('defaultAddress', '{}')),
+  defaultAddress: load(DEFAULT_ADDRESS, '{}'),
   addressList: load(ADDRESS_LIST, [])
 };
 
@@ -46,9 +47,9 @@ export const actions = {
       address: address
     });
   },
-  updateAddress({ commit }, id, address) {
+  updateAddress({ commit }, address) {
+    console.log(address);
     commit(types.UPDATE_ADDRESS, {
-      id: id,
       address: address
     });
   },
@@ -144,25 +145,22 @@ export const mutations = {
   },
   [types.SET_ADDRESS](state, { address }) {
     state.defaultAddress = address;
-    save('defaultAddress', address);
+    save(DEFAULT_ADDRESS, address);
   },
   [types.ADD_ADDRESS](state, { address }) {
     if (!address.id) {
       address.id = +new Date();
     }
     state.addressList.push(address);
-    save(ADDRESS_LIST, address);
+    save(ADDRESS_LIST, state.addressList);
   },
-  [types.UPDATE_ADDRESS](state, { id, address }) {
-    if (!id) {
-      return;
-    }
+  [types.UPDATE_ADDRESS](state, { address }) {
+    console.log(address);
     let addressList = state.addressList;
     for (let i = 0; i < addressList.length; i++) {
       let oldAddress = addressList[i];
-      if (oldAddress.id === id) {
-        addressList.splice(i, 1);
-        addressList.push(address);
+      if (oldAddress.id === address.id) {
+        oldAddress = address;
       }
     }
     save(ADDRESS_LIST, addressList);

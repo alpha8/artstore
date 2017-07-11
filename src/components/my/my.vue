@@ -3,7 +3,7 @@
     <div class="my-wrapper">
       <div class="header-wrapper">
         <div class="avatar">
-          <a v-show="!hasLogin" href="/wxservice/baseInfo"><img src="http://www.yihuyixi.com/ps/download/5951bed1e4b0e29e1a4086ca?w=80&h=80" alt="" class="pic"></a>
+          <a v-show="!hasLogin" href="/wxservice/baseInfo"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
           <img :src="user.icon" alt="" class="pic" v-show="hasLogin">
         </div>
         <div class="line"><span class="text" v-show="!hasLogin">未登录</span><span class="text" v-show="hasLogin">{{user.nickName}}</span></div>
@@ -11,7 +11,7 @@
       <split></split>
       <div class="order-wrapper">
         <div class="title">
-          <router-link to="">
+          <router-link to="/order">
             <i class="icon-order"></i>我的订单
             <span class="more"><span>查看全部订单</span><i class="icon-keyboard_arrow_right"></i></span>
           </router-link>
@@ -31,7 +31,8 @@
         <div class="otherList">
           <router-link :to="item.link" class="item" v-for="(item, index) in others" key="index" :class="{'highlight': item.highlight}">
             <i :class="item.icon"></i>
-            <span class="text">{{item.text}}</span>
+            <span class="text" v-show="!item.callable">{{item.text}}</span>
+            <span class="text" v-show="item.callable" @click.stop.prevent="item.callable">{{item.text}}</span>
             <span class="more" v-show="!item.noPage"><i class="icon-keyboard_arrow_right"></i></span>
           </router-link>
         </div>
@@ -51,16 +52,25 @@
         user: this.$store.getters.getUserInfo,
         hasLogin: this.$store.getters.checkLogined,
         orders: [
-          { icon: 'icon-pending_payment', text: '待付款', link: '' },
-          { icon: 'icon-delivery_package_box', text: '待发货', link: '' },
-          { icon: 'icon-truck', text: '待收货', link: '' },
-          { icon: 'icon-refund_and_return', text: '退换货', link: '' }
+          { icon: 'icon-pending_payment', text: '待付款', link: '/order?type=0' },
+          { icon: 'icon-delivery_package_box', text: '待发货', link: '/order?type=1' },
+          { icon: 'icon-truck', text: '待收货', link: '/order?type=2' },
+          { icon: 'icon-refund_and_return', text: '退换货', link: '/order?type=6' }
         ],
         others: [
           { icon: 'icon-heart', text: '我的收藏', link: '' },
           { icon: 'icon-address', text: '收货地址', link: '/address' },
           { icon: 'icon-footprint', text: '浏览足迹', link: '' },
           { icon: 'icon-auction', text: '我的拍卖', link: '' },
+          { icon: 'icon-command',
+            text: '清理缓存',
+            link: '',
+            noPage: true,
+            callable: () => {
+              window.localStorage.clear();
+              alert('缓存清理成功！');
+            }
+          },
           { icon: 'icon-quit', text: '退出登录', link: '', noPage: true, highlight: true }
         ]
       };

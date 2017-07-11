@@ -13,7 +13,7 @@
                 <span class="mobile">{{item.mobile}}</span>
               </div>
             </div>
-            <span class="ops"><i class="icon-edit"></i></span>
+            <span class="ops"><i class="icon-edit" @click.stop.prevent="editAddress(item)"></i></span>
           </li>
         </ul>
         <div class="addAddress">
@@ -31,28 +31,24 @@
   export default {
     data() {
       return {
-        addressList: [
-          { address: '深圳市福田区梅林一村49栋304', nickName: '小虎', mobile: '188****8888', defaultAddr: false },
-          { address: '深圳市福田区鸿浩阁D栋202', nickName: '小虎', mobile: '158****4896', defaultAddr: false },
-          { address: '深圳市福田区会展中心', nickName: '小虎', mobile: '188****8888', defaultAddr: false },
-          { address: '深圳市福田区京基百纳', nickName: '小虎', mobile: '188****8888', defaultAddr: false },
-          { address: '广州市会展中心', nickName: '小虎', mobile: '188****8888', defaultAddr: false },
-          { address: '北京市三里屯', nickName: '小虎', mobile: '188****8888', defaultAddr: false },
-          { address: '香港中环商业广场', nickName: '小虎', mobile: '188****8888', defaultAddr: false }
-        ],
+        addressList: [],
         showBack: true
       };
     },
     mounted() {
+      this.getAddressList();
       this._initScroll();
       this.defaultAddr();
     },
     activated() {
+      this.getAddressList();
       this._initScroll();
       this.$store.commit('HIDE_FOOTER');
     },
     deactivated() {
       this.$store.commit('SHOW_FOOTER');
+    },
+    computed: {
     },
     methods: {
       _initScroll() {
@@ -65,6 +61,9 @@
             this.scroll.refresh();
           }
         });
+      },
+      getAddressList() {
+        this.addressList = this.$store.getters.getAddressList;
       },
       show() {
         this._initScroll();
@@ -90,6 +89,9 @@
       },
       addAddress() {
         this.$router.push('/addAddress');
+      },
+      editAddress(item) {
+        this.$router.push({name: 'address', params: {id: item.id}});
       }
     },
     components: {

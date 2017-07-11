@@ -48,7 +48,11 @@ export function load(key, def) {
   if (window.localStorage) {
     let val = window.localStorage.getItem(key);
     if (val) {
-      return JSON.parse(val);
+      try {
+        return JSON.parse(val);
+      } catch (e) {
+        return def;
+      }
     }
   }
   return def;

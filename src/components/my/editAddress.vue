@@ -23,9 +23,10 @@
               <i class="icon-close" v-show="clearAddress" @click.stop.prevent="doClearAddr"></i>
             </p>
           </li>
-          <input type="hidden" v-model="user.defaultAddr" value="false">
+          <input type="hidden" v-model="user.defaultAddr">
+          <input type="hidden" v-model="user.id">
         </ul>
-        <div class="btns btn-blue" @click.stop.prevent="addAddress"><span>确认</span></div>
+        <div class="btns btn-blue" @click.stop.prevent="updateAddress"><span>保存</span></div>
       </div>
     </div>
   </div>
@@ -45,26 +46,27 @@
         }
       };
     },
+    activated() {
+      let id = this.$route.params.id;
+      if (!id) {
+        return;
+      }
+      this.user = this.$store.getters.getAddressList.find((addr) => addr.id === id);
+    },
     computed: {
       clearAddress() {
-        if (this.user.address.length) {
+        if (this.user.address && this.user.address.length) {
           return true;
         }
         return false;
       }
     },
     methods: {
-      addAddress() {
+      updateAddress() {
         if (!this.user.mobile || !this.user.address) {
           return;
         }
-        this.$store.dispatch('addAddress', this.user);
-        this.user = {
-          nickName: '',
-          mobile: '',
-          address: '',
-          defaultAddr: false
-        };
+        this.$store.dispatch('updateAddress', this.user);
         this.$router.back();
       },
       doClearAddr() {
