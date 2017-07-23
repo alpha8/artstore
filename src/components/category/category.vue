@@ -5,7 +5,7 @@
       <div class="menu-wrapper" ref="menuWrapper">
         <ul>
           <li v-for="(item, index) in goods" class="menu-item" :class="{'current': item.id===good.id}" @click.stop.prevent="selectMenu(index)">
-            <span class="text border-1px">{{item.name}}</span>
+            <span class="text border-1px">{{item.value}}</span>
           </li>
         </ul>
       </div>
@@ -13,14 +13,14 @@
         <ul>
           <li class="good-list good-list-hook">
             <ul class="itemList">
-              <li v-for="good in good.items">
-                <router-link :to="{path: '/search', query: {key: good.name, cid: good.id}}" class="good-item">
-                  <div class="icon" v-show="good.icon">
+              <li v-for="good in good.childrens">
+                <router-link :to="{path: '/search', query: {cat: good.propertyName, key: good.value}}" class="good-item">
+                  <div class="icon" v-show="good.desc">
                     <!-- <img :src="good.icon" width="57" height="57" alt=""> -->
-                    <i :class="good.icon"></i>
+                    <i :class="good.desc"></i>
                   </div>
                   <div class="content">
-                    <h2 class="name">{{good.name}}<em>({{good.count}})</em></h2>
+                    <h2 class="name">{{good.value}}<em>({{good.count || 0}})</em></h2>
                   </div>
                 </router-link>
               </li>
@@ -35,50 +35,13 @@
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
-  // import api from '@/api/api';
-  // const ERR_OK = 0;
+  import api from '@/api/api';
 
   export default {
     data() {
       return {
-        goods: [
-          {
-            'id': '2000',
-            'name': '茶席艺术',
-            'items': [
-              { 'id': '2001', 'name': '茶杯', 'icon': 'icon-hot_tea', 'count': 200 },
-              { 'id': '2002', 'name': '茶壶', 'icon': 'icon-teapot', 'count': 990 },
-              { 'id': '2003', 'name': '雕塑', 'icon': 'icon-teapot2', 'count': 80 },
-              { 'id': '2004', 'name': '配画', 'icon': 'icon-heart', 'count': 80 },
-              { 'id': '2005', 'name': '茶仓', 'icon': 'icon-kettle', 'count': 20 },
-              { 'id': '2005', 'name': '火炉', 'icon': 'icon-teapot_and_cup', 'count': 10 }
-            ]
-          },
-          {
-            'id': '1000',
-            'name': '精选茶',
-            'items': [
-              { 'id': '1001', 'name': '红茶', 'icon': 'icon-hot_tea', 'count': 20 },
-              { 'id': '1002', 'name': '绿茶', 'icon': 'icon-hot_tea', 'count': 80 },
-              { 'id': '1003', 'name': '乌龙茶', 'icon': 'icon-hot_tea', 'count': 1300 },
-              { 'id': '1004', 'name': '普洱茶', 'icon': 'icon-hot_tea', 'count': 120 },
-              { 'id': '1005', 'name': '白茶', 'icon': 'icon-hot_tea', 'count': 500 },
-              { 'id': '1005', 'name': '黄茶', 'icon': 'icon-hot_tea', 'count': 800 }
-            ]
-          }
-        ],
-        good: {
-            'id': '2000',
-            'name': '茶席艺术',
-            'items': [
-              { 'id': '2001', 'name': '茶杯', 'icon': 'icon-hot_tea', 'count': 200 },
-              { 'id': '2002', 'name': '茶壶', 'icon': 'icon-teapot', 'count': 990 },
-              { 'id': '2003', 'name': '雕塑', 'icon': 'icon-teapot2', 'count': 80 },
-              { 'id': '2004', 'name': '配画', 'icon': 'icon-heart', 'count': 80 },
-              { 'id': '2005', 'name': '茶仓', 'icon': 'icon-kettle', 'count': 20 },
-              { 'id': '2005', 'name': '火炉', 'icon': 'icon-teapot_and_cup', 'count': 10 }
-            ]
-          },
+        goods: [],
+        good: {},
         heightArr: [],
         scrollY: 0
       };
@@ -95,6 +58,18 @@
         }
         return 0;
       }
+    },
+    created() {
+      this.$store.dispatch('openLoading');
+      api.GetCategories().then((response) => {
+        this.goods = response.childrens;
+        if (this.goods.length) {
+          this.good = this.goods[0];
+        }
+        this.$store.dispatch('closeLoading');
+      }).catch(response => {
+        this.$store.dispatch('closeLoading');
+      });
     },
     activated() {
       this._initScroll();

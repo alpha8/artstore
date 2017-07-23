@@ -5,7 +5,7 @@
         <div class="search-form-box">
           <i class="icon-search"></i>
           <div class="search-form-input">
-            <input type="text" name="txtSearch" class="txtSearch" placeholder="优雅茶道，由你传承！" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword">
+            <input type="text" name="txtSearch" class="txtSearch" placeholder="优雅茶道，由你传承！" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" @change="search">
           </div>
           <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i>
         </div>
@@ -13,7 +13,7 @@
       <div class="ext-tools">
         <span v-show="showLogin"><a href="/wxservice/baseInfo">登录</a></span>
         <span v-show="showDiscard" @click.stop.prevent="hideDialog"><span class="button">取消</span></span>
-        <span v-show="showSearchBtn"><span class="button" :class="{'blue': !showFixed}">搜索</span></span>
+        <span v-show="showSearchBtn"><span class="button" :class="{'blue': !showFixed}" @click.stop.prevent="search">搜索</span></span>
         <span v-show="hasLogin && !typing"><router-link to="/my"><i class="icon-user2"></i></router-link></span>
       </div>
     </div>
@@ -56,6 +56,9 @@
       }
     },
     methods: {
+      search() {
+        this.$router.push({path: '/search', query: {key: this.keyword || ''}});
+      },
       showLoginForm() {
         this.showLogin = !this.isLogin;
       },

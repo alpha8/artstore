@@ -6,9 +6,10 @@
         <div class="tab border-1px">
           <div class="tab-item" :class="{'active': item.val === activeItem}" v-for="item in tabItems" @click.stop.prevent="changeTab(item)">{{item.text}}</div>
         </div>
+
         <div class="order-container" ref="orderlist" v-show="showRecords > 0">
-          <ul class="order-list">
-            <li class="order-item" v-for="order in orders" v-show="showOrder(order)">
+          <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
+            <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(order, index) in orders" v-show="showOrder(order)" :key="index">
               <div class="item-title" @click.stop.prevent="showOrderDetail(order)">
                 <span class="productNo">订单号：{{order.orderNo}}</span>
                 <span class="op-btns"></span>
@@ -19,17 +20,17 @@
                   <p class="price"><label>总&nbsp;&nbsp;&nbsp;&nbsp;价：</label><span class="text">{{order.totalPrice | currency}}</span></p>
                 </div>
                 <div class="ops">
-                  <span class="button btn-red" v-show="order.status === 0">去支付</span>
+                  <span class="button btn-red" v-show="order.status === 0" @click.stop.prevent="weixinPay(order)">去支付</span>
                   <span class="button btn-green" v-show="order.status === 1">催单</span>
                   <span class="button btn-blue" v-show="order.status === 5">去评价</span>
                   <span class="button btn-orange" v-show="order.status === 5">再次购买</span>
                   <span class="button btn-white" v-show="order.status === 10">看相似</span>
                 </div>
               </div>
-              <div class="item-content" v-for="product in order.items">
-                <div class="item-img" @click.stop.prevent="showProductDetail(product)"><img :src="product.icon" alt=""></div>
+              <div class="item-content" v-for="product in order.products">
+                <div class="item-img" @click.stop.prevent="showProductDetail(product)"><img :src="getThumbnail(product)" alt=""></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="showOrderDetail(order)">{{product.productName}}</h3>
+                  <h3 class="title" @click.stop.prevent="showOrderDetail(order)">{{product.name}}</h3>
                   <div class="specs" v-show="product.specs">规格：{{product.specs}}</div>
                 </div>
                 <div class="item-pay">
@@ -37,20 +38,23 @@
                   <p class="nums">x{{product.count}}</p>
                 </div>
               </div>
-              <split v-show="showRecords > 0"></split>
-            </li>
-          </ul>
+            </mu-flexbox-item>
+          </mu-flexbox>
+          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
+          <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-show="showRecords === 0">您暂时还没有订单。</div>
+        <div class="no-order" v-show="showRecords === 0">啊哦，还没有相关记录哦</div>
+        <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
       </div>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
-  import split from '@/components/split/split';
+  import gotop from '@/components/fixedtoolbar/gotop';
+  import api from '@/api/api';
+  import {onBridgeReady, pay} from '@/common/js/pay';
 
   export default {
     data() {
@@ -62,230 +66,23 @@
           { text: '待收货', val: 2 },
           { text: '退换货', val: 6 }
         ],
-        orders: [{
-          orderNo: 'A000001',
-          totalPrice: 3400,
-          status: 1,
-          items: [{
-            productId: '4000',
-            productName: '云中鹰茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959acffe4b00faa50475a3d?w=70&h=70',
-            price: 1200,
-            count: 1
-          }, {
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000002',
-          totalPrice: 2200,
-          status: 0,
-          items: [{
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100.00,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000001',
-          totalPrice: 3400,
-          status: 1,
-          items: [{
-            productId: '4000',
-            productName: '云中鹰茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959acffe4b00faa50475a3d?w=70&h=70',
-            price: 1200,
-            count: 1
-          }, {
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000002',
-          totalPrice: 2200,
-          status: 0,
-          items: [{
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100.00,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000001',
-          totalPrice: 3400,
-          status: 1,
-          items: [{
-            productId: '4000',
-            productName: '云中鹰茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959acffe4b00faa50475a3d?w=70&h=70',
-            price: 1200,
-            count: 1
-          }, {
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000002',
-          totalPrice: 2200,
-          status: 0,
-          items: [{
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100.00,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000001',
-          totalPrice: 3400,
-          status: 1,
-          items: [{
-            productId: '4000',
-            productName: '云中鹰茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959acffe4b00faa50475a3d?w=70&h=70',
-            price: 1200,
-            count: 1
-          }, {
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000002',
-          totalPrice: 2200,
-          status: 0,
-          items: [{
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100.00,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000001',
-          totalPrice: 3400,
-          status: 1,
-          items: [{
-            productId: '4000',
-            productName: '云中鹰茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959acffe4b00faa50475a3d?w=70&h=70',
-            price: 1200,
-            count: 1
-          }, {
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000002',
-          totalPrice: 2200,
-          status: 0,
-          items: [{
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100.00,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000001',
-          totalPrice: 3400,
-          status: 1,
-          items: [{
-            productId: '4000',
-            productName: '云中鹰茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959acffe4b00faa50475a3d?w=70&h=70',
-            price: 1200,
-            count: 1
-          }, {
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000002',
-          totalPrice: 2200,
-          status: 0,
-          items: [{
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100.00,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000001',
-          totalPrice: 3400,
-          status: 1,
-          items: [{
-            productId: '4000',
-            productName: '云中鹰茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959acffe4b00faa50475a3d?w=70&h=70',
-            price: 1200,
-            count: 1
-          }, {
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100,
-            count: 2
-          }]
-        }, {
-          orderNo: 'A000002',
-          totalPrice: 2200,
-          status: 0,
-          items: [{
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=70&h=70',
-            price: 1100.00,
-            count: 2
-          }]
-        }],
+        orders: [],
         activeItem: -1,
-        mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消']
+        mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消'],
+        pageNumber: 1,
+        pageSize: 5,
+        totalPages: 0,
+        loadEnd: false,
+        scroller: null,
+        loading: false,
+        lastExec: +new Date(),
+        scrollY: 0,
+        winHeight: document.documentElement.clientHeight,
+        paying: false
       };
     },
     activated() {
-      this._initScroll();
+      this.fetchData(true);
       let type = this.$route.query.type;
       if (typeof type === 'undefined') {
         this.activeItem = -1;
@@ -295,41 +92,82 @@
       this.show();
     },
     deactivated() {
+      this._reset();
+      this.paying = false;
       this.hide();
     },
     computed: {
       showRecords() {
         if (this.activeItem === -1) {
-          return 1;
+          return true;
         } else {
           return this.orders.filter((order) => order.status === this.activeItem).length;
         }
       }
     },
+    mounted() {
+      this.scroller = this.$refs.orderlist;
+      window.onscroll = () => {
+        this.scrollY = window.pageYOffset;
+      };
+    },
     methods: {
-      _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.orderlist, {
-              click: true
-            });
-          } else {
-            this.scroll.refresh();
+      fetchData(force) {
+        if (this.totalPages && this.pageNumber > this.totalPages) {
+          return;
+        }
+        let now = +new Date();
+        if (!force && now - this.lastExec <= 50) {
+          return;
+        }
+        this.loading = true;
+        api.getOrders({
+          currentPage: this.pageNumber,
+          pageSize: this.pageSize,
+          userId: this.$store.getters.getUserInfo.userId || -1
+        }).then(response => {
+          if (response.code === 0) {
+            if (response.orders && response.orders.length) {
+              response.orders.forEach(item => {
+                this.orders.push(item);
+              });
+            }
+            this.totalPages = response.totalPages;
+            this.pageNumber++;
+            this.lastExec = +new Date();
+            this.loading = false;
+            this.loadEnd = this.pageNumber > this.totalPages;
           }
+        }).catch(response => {
+          this.loadEnd = false;
+          this.loading = false;
         });
+      },
+      _reset() {
+        this.orders = [];
+        this.pageNumber = 1;
+        this.totalPages = 0;
+        this.loadEnd = false;
+      },
+      getThumbnail(item) {
+        let icon = item.icon;
+        if (icon) {
+          return api.CONFIG.psCtx + icon + '?w=228&h=128';
+        } else {
+          return api.CONFIG.defaultImg;
+        }
       },
       statusDesc(status) {
         return this.mapStatus[status];
       },
       changeTab(item) {
         this.activeItem = item.val;
-        this._initScroll();
       },
       showOrder(order) {
         return this.activeItem === -1 || order.status === this.activeItem;
       },
       showOrderDetail(order) {
-        this.$router.push({name: 'orderdetail', query: {deal_id: order.orderNo}});
+        this.$router.push({name: 'orderdetail', query: {deal_id: order.id}});
       },
       showProductDetail(product) {
         this.$router.push({name: 'good', params: {id: product.productId}});
@@ -342,25 +180,64 @@
       },
       back() {
         this.$router.back();
+      },
+      loadMore() {
+        this.fetchData();
+      },
+      goTop() {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+      },
+      weixinPay(order) {
+        let userInfo = this.$store.getters.getUserInfo;
+        if (!userInfo.openid) {
+          alert('请先登录！');
+          return;
+        }
+        if (this.paying) {
+          alert('正在支付中...');
+          return;
+        }
+        this.paying = true;
+        let payParams = {
+          totalFee: order.totalPrice || 0,
+          openid: userInfo.openid,
+          orderNo: order.orderNo
+        };
+        api.wxpay(payParams).then((response) => {
+          this.paying = false;
+          onBridgeReady(response);
+          pay();
+          this.$router.push('order');
+        }).catch(response => {
+          this.paying = false;
+          this.$router.push('order');
+        });
       }
     },
     components: {
-      fixedheader, split
+      fixedheader, gotop
     }
   };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin';
+  .header
+    position: fixed
+    top: 0
+    width: 100%
+    height: 44px
+    overflow: hidden
+    z-index: 2
   .order
     position: absolute
     top: 44px
     bottom: 0
     width: 100%
-    overflow: hidden
     .order-wrap
+      position: relative
       width: 100%
-      height: 100%
       .btn-red
         background: #d05148
         color: #fff
@@ -390,17 +267,27 @@
           &.active
             color: #f15353
             border-bottom: 2px solid #f15353
+      .no-more
+        width: 100%
+        padding: 10px 0
+        color: #ccc
+        text-align: center
+        font-size: 12px
       .order-container
         position: relative
         width: 100%
-        height: 100%
-        overflow: hidden
+        display: flex
+        flex-wrap: wrap
+        overflow: auto
+        box-sizing: border-box
+        -webkit-overflow-scrolling: touch
         .order-list
           position: relative
           width: 100%
-          padding-bottom: 50px
           .order-item
-            padding: 0 8px 15px 8px
+            margin-bottom: 15px
+            padding: 0 8px
+            border-1px(rgba(7, 17, 27, 0.1))
             .item-title
               position: relative
               width: 100%
@@ -461,9 +348,13 @@
               font-size: 12px
               .item-img
                 flex: 15vw 0 0
+                img
+                  width: 70px
+                  height: 70px
+                  overflow: hidden
               .item-info
                 flex: 1
-                padding: 0 8px
+                padding: 20px 8px 0
                 >.title
                   overflow: hidden
                   text-overflow: ellipsis
@@ -477,6 +368,7 @@
               .item-pay
                 flex: 0 0 15vw
                 text-align: right
+                padding-top: 20px
                 .price
                   padding-bottom: 8px
                 .nums

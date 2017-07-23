@@ -78,7 +78,7 @@ export function loadCookie(key, def) {
   return def;
 }
 
-export function saveCookie(name, value, path, expires) {
+export function saveCookie(name, value, path, domain, expires) {
   var opts = {
     name: name || '',
     value: value || '',
@@ -91,18 +91,19 @@ export function saveCookie(name, value, path, expires) {
   document.cookie = opts.name +
     '=' + escape(opts.value) +
     ';expires=' + exp.toGMTString() +
-    ';path=' + opts.path;
+    ';path=' + opts.path +
+    (domain ? ';domain=' + domain : '');
 }
 
-export function removeCookie(name, path) {
+export function removeCookie(name, path, domain) {
   var opts = {
     name: name || '',
     path: path || '/'
   };
-
   var exp = new Date();
   exp.setTime(exp.getTime() - 1000);
   document.cookie = opts.name +
     '=;expires=' + exp.toGMTString() +
-    ';path=' + opts.path;
+    ';path=' + opts.path +
+    (domain ? ';domain=' + domain : '');
 }

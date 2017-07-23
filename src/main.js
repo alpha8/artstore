@@ -11,13 +11,15 @@ import router from './router';
 import store from './store';
 import { currency } from '@/common/js/util';
 
+import MuseUI from 'muse-ui';
+import 'muse-ui/dist/muse-ui.css';
+
 Vue.filter('currency', currency);
 Vue.config.productionTip = false;
 
 Vue.use(VueAxios, axios);
-// Vue.component(Swipe.name, Swipe);
-// Vue.component(SwipeItem.name, SwipeItem);
 Vue.use(VueAwesomeSwiper);
+Vue.use(MuseUI);
 
 /* eslint-disable no-new */
 new Vue({

@@ -26,8 +26,8 @@
                   <li class="half" v-for="item in filter.children" :class="{'on': item.checked}"><span @click.stop.prevent="checkOnly(item, filter)">{{item.name}}</span></li>
                   <li class="half" v-show="filter.val === 'price'">
                     <span>
-                      <input type="number" autocomplete=no class="min-price" v-model="form.minPrice" placeholder="最低价" /><em>-</em>
-                      <input type="number" autocomplete=no class="max-price" v-model="form.maxPrice" placeholder="最高价" />
+                      <input type="number" autocomplete=no class="min-price" v-model="form.minPrice" placeholder="最低价" @change.stop.prevent="inputPrice(filter)" /><em>-</em>
+                      <input type="number" autocomplete=no class="max-price" v-model="form.maxPrice" placeholder="最高价" @change.stop.prevent="inputPrice(filter)" />
                     </span>
                   </li>
                 </ul>
@@ -54,38 +54,25 @@
         filters: [
           {
             name: '分类',
-            val: 'category',
+            val: 'categoryName',
             checked: false,
             selectText: '全部展开',
             multiple: true,
             children: [
               {name: '全部', val: '', checked: false},
-              {name: '茶具配件', val: '', checked: false},
-              {name: '整套茶具', val: '', checked: false},
-              {name: '茶盘茶托', val: '', checked: false},
-              {name: '茶宠摆件', val: '', checked: false},
-              {name: '茶杯', val: '', checked: false},
-              {name: '茶叶罐', val: '', checked: false},
-              {name: '茶壶', val: '', checked: false},
-              {name: '其他', val: '', checked: false}
-            ]
-          },
-          {
-            name: '品牌',
-            val: 'brand',
-            checked: false,
-            selectText: '全部展开',
-            multiple: true,
-            children: [
-              {name: '金灶 (KAMJOVE)', val: '', checked: false},
-              {name: '容山堂', val: '', checked: false},
-              {name: '唐丰 (TANGFENG)', val: '', checked: false},
-              {name: '品茶忆友', val: '', checked: false},
-              {name: '汉唐', val: '', checked: false},
-              {name: '三界', val: '', checked: false},
-              {name: '梅兰竹菊', val: '', checked: false},
-              {name: '友茗堂', val: '', checked: false},
-              {name: '龍阡堂 (longqiantang)', val: '', checked: false}
+              {name: '茶杯', val: 'teacup', checked: false},
+              {name: '茶壶', val: 'teapot', checked: false},
+              {name: '雕塑', val: 'sculpture', checked: false},
+              {name: '配画', val: 'withpaint', checked: false},
+              {name: '茶仓', val: 'teahouse', checked: false},
+              {name: '火炉', val: 'stove', checked: false},
+              {name: '红茶', val: 'reatea', checked: false},
+              {name: '绿茶', val: 'greentea', checked: false},
+              {name: '乌龙', val: 'oolong', checked: false},
+              {name: '普洱', val: 'puertea', checked: false},
+              {name: '黑茶', val: 'blacktea', checked: false},
+              {name: '白茶', val: 'whitetea', checked: false},
+              {name: '黄茶', val: 'yellowtea', checked: false}
             ]
           },
           {
@@ -95,11 +82,27 @@
             selectText: '全部展开',
             multiple: false,
             children: [
-              {name: '¥1000以下', val: '', checked: false},
-              {name: '¥1000 - ¥2000', val: '', checked: false},
-              {name: '¥2000 - ¥5000', val: '', checked: false},
-              {name: '¥5000 - ¥10000', val: '', checked: false},
-              {name: '¥10000以上', val: '', checked: false}
+              {name: '全部', val: '0', checked: false},
+              {name: '¥1000以下', val: '0-1000', checked: false},
+              {name: '¥1000 - ¥2000', val: '1001-2000', checked: false},
+              {name: '¥2000 - ¥5000', val: '2001-5000', checked: false},
+              {name: '¥5000 - ¥10000', val: '5000-10000', checked: false},
+              {name: '¥10000以上', val: '10000-', checked: false}
+            ]
+          },
+          {
+            name: '上架时间',
+            val: 'shelfTime',
+            checked: false,
+            selectText: '全部展开',
+            multiple: false,
+            children: [
+              {name: '全部', val: '', checked: false},
+              {name: '两周', val: '0.5', checked: false},
+              {name: '一月', val: '1', checked: false},
+              {name: '二月', val: '2', checked: false},
+              {name: '三月', val: '3', checked: false},
+              {name: '半年', val: '6', checked: false}
             ]
           }
         ],
@@ -149,12 +152,18 @@
       checkItem(item, parent) {
         item.checked = !item.checked;
         let checkedList = [];
+        let categoryList = [];
         parent.children.forEach((child) => {
           if (child.checked) {
             checkedList.push(child.name);
+            categoryList.push(child.val);
           }
         });
         parent.selectText = checkedList.join(',');
+        this.form[parent.val] = categoryList.join(',');
+        if (parent.val === 'categoryName') {
+          this.form.keyword = parent.selectText === '全部' ? '' : parent.selectText;
+        }
         if (!parent.selectText) {
           parent.selectText = parent.checked ? '全部收起' : '全部展开';
         }
@@ -168,6 +177,18 @@
         item.checked = !item.checked;
         if (item.checked) {
           parent.selectText = item.name;
+          this.form[parent.val] = item.val;
+        } else {
+          parent.selectText = parent.checked ? '全部收起' : '全部展开';
+        }
+        this.form.minPrice = this.form.maxPrice = '';
+      },
+      inputPrice(parent) {
+        parent.children.forEach((child) => {
+          child.checked = false;
+        });
+        if (this.form.minPrice || this.form.maxPrice) {
+          parent.selectText = this.form.minPrice + '-' + this.form.maxPrice;
         } else {
           parent.selectText = parent.checked ? '全部收起' : '全部展开';
         }
@@ -176,10 +197,29 @@
         this.$store.commit('HIDE_SIDEBAR');
       },
       reset() {
-        this.$store.commit('HIDE_SIDEBAR');
+        this.form.minPrice = this.form.maxPrice = '';
+        this.filters.forEach(item => {
+          item.checked = false;
+          item.selectText = '全部展开';
+          item.children.forEach(child => {
+            child.checked = false;
+          });
+        });
+        this.form = {
+          minPrice: '',
+          maxPrice: ''
+        };
+        this.$emit('fireAction');
       },
       ok() {
+        if (this.form.minPrice || this.form.maxPrice) {
+          this.price = (this.form.minPrice || 0) + '-' + this.maxPrice;
+        }
+        this.$emit('fireAction');
         this.$store.commit('HIDE_SIDEBAR');
+      },
+      getFormValue() {
+        return this.form;
       }
     }
   };
@@ -299,6 +339,7 @@
           height: 100%
           width: 45%
           background-color: transparent
+          text-align: center
       .title
         height: 44px
         line-height: 44px

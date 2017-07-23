@@ -3,7 +3,7 @@
     <swiper-slide v-for="(slide, index) in swiperSlides" key="index">
       <div class="slide" :style="getSlideUrl(slide)"></div>
     </swiper-slide>
-    <div class="swiper-pagination" slot="pagination"></div>
+    <div class="swiper-pagination pager" slot="pagination"></div>
   </swiper>
 </template>
 
@@ -17,15 +17,11 @@
     data() {
       return {
         swiperOption: {
-          autoplay: 3500,
           setWrapperSize: true,
           pagination: '.swiper-pagination',
           paginationClickable: true,
           mousewheelControl: false,
-          observeParents: true,
-          loop: true,
-          speed: 1500,
-          autoplayDisableOnInteraction: false
+          observeParents: true
         }
       };
     },
@@ -48,11 +44,13 @@
       background-repeat: no-repeat
       background-position: center
       background-size: cover
-    .swiper-pagination-bullet
-      background: #fff
-      opacity: .6
-      &.swiper-pagination-bullet-active
-        background: #267fd4
-        width: 15px
-        border-radius: 10px
+    .pager
+      width: 100%
+      .swiper-pagination-bullet
+        background: #ccc
+        opacity: .9
+        &.swiper-pagination-bullet-active
+          background: #267fd4
+          width: 15px
+          border-radius: 10px
 </style>

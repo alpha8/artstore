@@ -3,7 +3,7 @@
     <div class="chanel-item" v-for="(item, index) in items" key="index" :class="{'p50': cols===2, 'p100': cols===1}">
       <router-link :to="{name:'good', params: { id: item.id }}" class="good-item">
         <div class="item-img">
-          <img :src="item.src" alt="">
+          <img :src="getThumbnail(item)" alt="">
         </div>
         <div class="item-info">
           <h3>{{item.name}}</h3>
@@ -15,6 +15,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import api from '@/api/api';
   export default {
     props: {
       items: {
@@ -31,6 +32,14 @@
     methods: {
       selectGood(target) {
         this.$emit('select', target);
+      },
+      getThumbnail(item) {
+        let pic = item.pictures;
+        if (pic && pic.length) {
+          return api.CONFIG.psCtx + pic[0].id + '?w=228&h=128';
+        } else {
+          return api.CONFIG.defaultImg;
+        }
       }
     }
   };

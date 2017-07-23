@@ -7,24 +7,25 @@
           <div class="order-state">
             <p><label>订单状态：</label><span class="text-blue">{{statusDesc}}</span></p>
             <p><label>订单编号：</label><span>{{order.orderNo}}</span></p>
-            <p><label>下单时间：</label><span>{{order.createTime | formatDate}}</span></p>
+            <p><label>下单时间：</label><span>{{order.createAt | formatDate}}</span></p>
           </div>
         </div>
         <split></split>
         <div class="title">配送信息</div>
         <div class="delivery-info">
-          <p><label>收货地址：</label><span>深圳市福田区市民中心</span></p>
-          <p><label>收货人：</label><span>王生</span></p>
+          <p><label>收货地址：</label><span>{{order.express.expressAddress}}</span></p>
+          <p><label>收货人：</label><span>{{order.express.receiver}}</span></p>
+          <p><label>联系方式：</label><span>{{order.express.mobile}}</span></p>
           <p><label>支付方式：</label><span>在线支付</span></p>
           <p><label>发票信息：</label><span>普通发票</span></p>
         </div>
         <split></split>
         <div class="title">商品列表</div>
         <ul class="goods-info">
-          <li class="good-item" v-for="product in order.items">
-            <div class="item-img"><img :src="product.icon" alt=""></div>
+          <li class="good-item" v-for="product in order.products">
+            <div class="item-img"><img :src="getThumbnail(product)" alt=""></div>
             <div class="item-info">
-              <h3 class="title">{{product.productName}}</h3>
+              <h3 class="title">{{product.name}}</h3>
             </div>
             <div class="item-pay">
               <p class="price">{{product.price | currency}}</p>
@@ -36,10 +37,10 @@
         <div class="price-summary">
           <ul>
             <li>商品总额<span class="text-red">{{order.totalPrice | currency}}</span></li>
-            <li>运费<span class="text-red">+ {{order.shipFee | currency}}</span></li>
+            <li>运费<span class="text-red">+ {{order.shipFee || 0 | currency}}</span></li>
           </ul>
           <p class="total">
-            实付金额：<strong class="text-red">{{order.totalPrice + order.shipFee | currency}}</strong>
+            实付金额：<strong class="text-red">{{order.totalPrice + (order.shipFee || 0) | currency}}</strong>
           </p>
         </div>
       </div>
@@ -60,44 +61,21 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import split from '@/components/split/split';
   import {formatDate} from '@/common/js/date';
+  import api from '@/api/api';
 
   export default {
     data() {
       return {
-        order: {
-          orderNo: 'A000002',
-          totalPrice: 2200,
-          shipFee: 5,
-          status: 0,
-          createTime: 1499774719847,
-          items: [{
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=50&h=50',
-            price: 1100,
-            count: 2
-          }, {
-            productId: '4001',
-            productName: '隐樵山柴烧茶仓',
-            productSpec: '1000g',
-            icon: 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=50&h=50',
-            price: 1100,
-            count: 2
-          }]
-        },
+        order: {},
         mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消']
       };
     },
     activated() {
-      this._initScroll();
+      this.fetchData();
       this.show();
     },
     deactivated() {
       this.hide();
-    },
-    mounted() {
-      this._initScroll();
     },
     computed: {
       statusDesc() {
@@ -111,6 +89,13 @@
       }
     },
     methods: {
+      fetchData() {
+        let id = this.$route.query.deal_id || '';
+        api.getOrderDetail(id).then(response => {
+          this.order = response;
+          this._initScroll();
+        });
+      },
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -130,6 +115,14 @@
       },
       back() {
         this.$router.back();
+      },
+      getThumbnail(item) {
+        let icon = item.icon;
+        if (icon) {
+          return api.CONFIG.psCtx + icon + '?w=70&h=70';
+        } else {
+          return api.CONFIG.defaultImg;
+        }
       }
     },
     components: {
@@ -177,7 +170,7 @@
       .order-info, .delivery-info, .goods-info, .price-summary
         padding: 10px 8px
         p
-          line-height: 1.5
+          line-height: 1.8
           font-size: 12px
           label
             display: inline-block
@@ -206,9 +199,13 @@
         font-size: 12px
         .item-img
           flex: 15vw 0 0
+          img
+            width: 60px
+            height: 60px
+            overflow: hidden
         .item-info
           flex: 1
-          padding: 0 8px
+          padding: 20px 8px 0
           >.title
             overflow: hidden
             text-overflow: ellipsis
@@ -222,6 +219,7 @@
         .item-pay
           flex: 0 0 15vw
           text-align: right
+          padding-top: 20px
           .price
             padding-bottom: 8px
           .nums

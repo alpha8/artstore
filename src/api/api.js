@@ -1,16 +1,15 @@
 /* jshint esnext: true */
 import axios from 'axios';
-import qs from 'qs';
 
 // axios 配置
-axios.defaults.timeout = 5000;
-axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+axios.defaults.timeout = 3000;
+axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 // axios.defaults.baseURL = '';
 
 // POST传参序列化
 axios.interceptors.request.use((config) => {
   if (config.method === 'post') {
-    config.data = qs.stringify(config.data);
+    config.data = JSON.stringify(config.data);
   }
   return config;
 }, (error) => {
@@ -22,7 +21,7 @@ axios.interceptors.request.use((config) => {
 axios.interceptors.response.use((res) => {
   return res;
 }, (error) => {
-  alert('网络异常, err=' + error);
+  console.log('网络异常, err=' + error);
   return Promise.reject(error);
 });
 
@@ -85,17 +84,28 @@ export function doPut(url, params) {
 }
 
 export default {
+  CONFIG: {
+   cmsCtx: 'http://www.yihuyixi.com/cms',
+   webCtx: 'http://www.yihuyixi.com/yihu',
+   psCtx: 'http://www.yihuyixi.com/ps/download/',
+   defaultImg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAAMFBMVEX///+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpufk+pAAAAD3RSTlMAESIzRFVmd4iZqrvM3e5GKvWZAAABv0lEQVRoge2YP1ICMRSH2R0UYZiRwlI5glfAylZP4G5twxGwt0BPgKVDs44XAFsbqW32CFTCiEAkhF3235DJyxud0d9XZRLyTXjJe9ndUgkAAAAAAAAAAADgx3DfhI5nI2Fd6xNfRsJDvVAYCt/7uwlNhQ+aXwQQ/hmhc/14xiq8EmLWYBTuyYx4yoydN+jCphRO0kNl8UIXelI4Tw+dqLJAE3alcJkOYqCCwCasrHpmZGE7/5dbsuvOalOmyQEnlF2fVOG+nD1MDlRVcb2hHuzOqtSnQugp4ZQqdG9fL5P97nhT/32m4hBfXh89HmE3Ei557pSyxa1XKGwmfEsO4YBFeBSfm4rNRR8LnXAYNVsswnpcEFXaWQsDsdi0aikfNYYyeX3VbAuOFa6yWYzWrTjtrITra0oFMfvMSBOuN1YFscchdNXG+tFarYXHaq4M4imLMFBzZRAHHMKDzdxFNu2owvjk+aULDuG2/I0yaUcUbvdhUsv5CEJn+zo173AIC1ZlJyxYlZWwvNtnLsylhq1Q94ZrKqxqfMZCj1l4P2YW9nU+U6F2gaZCPb8rZP8qwv7dBgAAAAAAAAAAAP+Lb4Qtq0R4e5WOAAAAAElFTkSuQmCC'
+  },
+
   /** 获取所有商品列表 */
-  GetGoods() {
-    return doGet('/api/goods');
+  GetGoods(params) {
+    return doGet(this.CONFIG.cmsCtx + '/artwork/list', params);
   },
   /** 查询单个商品详情 */
   GetGood(id) {
-    return doGet('/api/good/' + id);
+    return doGet(this.CONFIG.webCtx + '/artwork/' + id);
   },
   /** 获取所有商品分类 */
   GetCategories() {
-    return doGet('/api/category');
+    return doGet(this.CONFIG.cmsCtx + '/datadic/childrens?parentPath=cms/basedata/tea/type');
+  },
+  /** 查询数据字典配置值 */
+  GetConfigList(parent) {
+    return doGet(this.CONFIG.cmsCtx + '/datadic/childrens?parentPath=' + (parent || ''));
   },
 
   /**
@@ -104,36 +114,58 @@ export default {
   Login() {
     return doGet('/wxservice/baseInfo');
   },
+
   /**
-   * 用户注册
+   * 加入收藏
    */
-  Regist(params) {
-    return doPost('/users/api/userRegist', params);
+  mark(params) {
+    return doPost(this.CONFIG.cmsCtx + '/user/collect', params);
   },
 
   /**
-   * 发送注册验证码
+   * 创建订单
    */
-   RegistVerifiCode(tellphone) {
-     return doPost('/users/api/registVerifiCode', {tellphone: tellphone});
-   },
-
-  /**
-   * 获取用户信息
-   */
-  UserInfo(id) {
-    return doPost('/users/api/userInfo', {userId: id});
+  createOrder(params) {
+    return doPost(this.CONFIG.cmsCtx + '/order', params);
   },
 
   /**
-   * 获取全国JSON数据
+   * 查询订单列表
    */
-   getAddressJson() {
-     return doPost('/api/address');
-   },
+  getOrders(params) {
+    return doGet(this.CONFIG.cmsCtx + '/order/list', params);
+  },
 
-   /** 获取微信支付接口参数 */
-   wxpay(params) {
+  /**
+   * 查询订单列表
+   */
+  getOrderDetail(id) {
+    return doGet(this.CONFIG.cmsCtx + '/order/' + id);
+  },
+
+  /** 获取微信支付接口参数 */
+  wxpay(params) {
     return doGet('/wxservice/wx/pay', params);
-   }
+  },
+
+   /**
+    * 获取用户收货地址列表
+    */
+  getAddressList(userId) {
+    return doGet(this.CONFIG.cmsCtx + '/user/addressList?userId=' + userId);
+  },
+
+   /**
+    * 新增收货地址
+    */
+  addAddress(address) {
+    return doPost(this.CONFIG.cmsCtx + '/user/address', address);
+  },
+
+   /**
+    * 更新收货地址
+    */
+  updateAddress(address) {
+    return doPut(this.CONFIG.cmsCtx + '/user/address', address);
+  }
 };

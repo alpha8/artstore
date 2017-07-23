@@ -9,7 +9,7 @@
         <h3>收货地址</h3>
         <ul>
           <li>{{defaultAddress.address}}</li>
-          <li><strong>{{defaultAddress.nickName}}</strong><span class="mobile">{{defaultAddress.mobile}}</span></li>
+          <li><strong>{{defaultAddress.name}}</strong><span class="mobile">{{defaultAddress.mobile}}</span></li>
         </ul>
       </div>
     </div>
@@ -24,8 +24,7 @@
             </div>
             <div class="sku-info">
               <p class="sku-name">{{product.name}}</p>
-              <p class="sku-item">编号：A00001</p>
-              <p class="sku-item">规格：15 x 15</p>
+              <p class="sku-item">规格：标准</p>
             </div>
             <div class="sku-ext">
               <p class="sku-price">{{product.price | currency}}</p>
@@ -51,8 +50,8 @@
           </p>
           <div class="payBtnList">
             <div class="btns btn-green" @click.stop.prevent="weixinPay"><span>微信支付</span></div>
-            <div class="btns btn-red"><span>京东支付</span></div>
-            <div class="btns btn-lightblue"><span>货到付款</span></div>
+            <!-- <div class="btns btn-red"><span>京东支付</span></div>
+            <div class="btns btn-lightblue"><span>货到付款</span></div> -->
           </div>
         </div>
       </div>
@@ -81,7 +80,9 @@
       return {
         products: this.$store.getters.cartProducts,
         defaultAddress: this.$store.getters.getDefaultAddress,
-        showBox: false
+        showBox: false,
+        totalFee: 0,
+        paying: false
       };
     },
     computed: {
@@ -90,16 +91,19 @@
         this.products.forEach((item) => {
           total += item.count * item.price;
         });
+        this.totalFee = total;
         return total;
       }
     },
     activated() {
       this.show();
+      this._initScroll();
     },
     deactivated() {
       this.hide();
+      this.paying = false;
     },
-    created() {
+    mounted() {
       this._initScroll();
     },
     methods: {
@@ -135,19 +139,61 @@
         this.$router.back();
       },
       weixinPay() {
-        let openid = this.$store.getters.getUserInfo.openid;
-        if (!openid) {
+        let userInfo = this.$store.getters.getUserInfo;
+        if (!userInfo.openid) {
           alert('请先登录！');
           return;
         }
+        if (!this.defaultAddress.address) {
+          alert('请选择收货人信息');
+          return;
+        }
+        if (this.paying) {
+          alert('正在支付中...');
+          return;
+        }
         let params = {
-          totalFee: 0.01,
-          openid: openid,
-          orderNo: +new Date()
+          openid: userInfo.openid,
+          userId: userInfo.userId,
+          totalPrice: this.totalFee,
+          express: {
+            expressAddress: this.defaultAddress.address,
+            mobile: this.defaultAddress.mobile,
+            receiver: this.defaultAddress.name
+          },
+          remarks: '只工作日发货'
         };
-        api.wxpay(params).then((response) => {
-          onBridgeReady(response);
-          pay();
+        let items = [];
+        this.products.forEach(product => {
+          items.push({'id': product.id, 'count': product.count});
+        });
+        params.products = items;
+        this.paying = true;
+        api.createOrder(params).then(response => {
+          if (response.result !== 0) {
+            alert('生成订单失败！');
+            this.paying = false;
+            return;
+          }
+          this.$store.dispatch('clearCart');
+          let order = response.order;
+          let payParams = {
+            totalFee: order.totalFee,
+            openid: userInfo.openid,
+            orderNo: order.orderNo,
+            body: order.body
+          };
+          api.wxpay(payParams).then((response) => {
+            this.paying = false;
+            onBridgeReady(response);
+            pay();
+            this.$router.push('order');
+          }).catch(response => {
+            this.paying = false;
+            this.$router.push('order');
+          });
+        }).catch(response => {
+          this.paying = false;
         });
       }
     },
@@ -246,13 +292,15 @@
     >.pay
       position: absolute
       top: 114px
+      left: 0
       bottom: 0
       width: 100%
-      background: transparent
+      background: #fff
       overflow: hidden
       .order-wrap
         position: relative
-        padding-bottom: 45px
+        padding-bottom: 60px
+        box-sizing: border-box
         .order-shop
           display: block
           height: 40px
@@ -327,6 +375,7 @@
               top: 50%
               margin-top: -5px
         >.payArea
+          position: relative
           text-align: center
           background: #fff
           padding: 0 10px

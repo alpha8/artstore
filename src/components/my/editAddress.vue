@@ -7,7 +7,7 @@
           <li class="border-1px">
             <p>
               <span class="title">收货人</span>
-              <input type="text" v-model="user.nickName" placeholder="姓名" autofocus required>
+              <input type="text" v-model="user.name" placeholder="姓名" autofocus required>
             </p>
           </li>
           <li class="border-1px">
@@ -23,7 +23,7 @@
               <i class="icon-close" v-show="clearAddress" @click.stop.prevent="doClearAddr"></i>
             </p>
           </li>
-          <input type="hidden" v-model="user.defaultAddr">
+          <input type="hidden" v-model="user.default">
           <input type="hidden" v-model="user.id">
         </ul>
         <div class="btns btn-blue" @click.stop.prevent="updateAddress"><span>保存</span></div>
@@ -34,15 +34,17 @@
 
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import api from '@/api/api';
+  const RESPONSE_OK = 0;
 
   export default {
     data() {
       return {
         user: {
-          nickName: '',
+          name: '',
           mobile: '',
           address: '',
-          defaultAddr: false
+          default: false
         }
       };
     },
@@ -66,8 +68,13 @@
         if (!this.user.mobile || !this.user.address) {
           return;
         }
-        this.$store.dispatch('updateAddress', this.user);
-        this.$router.back();
+        this.user.userId = this.$store.getters.getUserInfo.userId;
+        api.updateAddress(this.user).then(response => {
+          if (response.code === RESPONSE_OK) {
+            this.$store.dispatch('updateAddress', this.user);
+            this.$router.back();
+          }
+        });
       },
       doClearAddr() {
         this.user.address = '';

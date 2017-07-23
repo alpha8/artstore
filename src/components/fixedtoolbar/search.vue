@@ -8,7 +8,7 @@
         </div>
         <ul class="tags">
           <li class="tag" v-for="item in historySearch">
-            <a href="">{{item.text}}</a>
+            <router-link :to="{path: '/search', query: {key: item.text}}">{{item.text}}</router-link>
           </li>
         </ul>
       </div>
@@ -19,7 +19,7 @@
         </div>
         <ul class="tags">
           <li class="tag" v-for="item in hotSearch">
-            <a href="">{{item.text}}</a>
+            <router-link :to="{path: '/search', query: {key: item.text}}">{{item.text}}</router-link>
           </li>
         </ul>
       </div>

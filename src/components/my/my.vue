@@ -2,11 +2,20 @@
   <div class="my" ref="my">
     <div class="my-wrapper">
       <div class="header-wrapper">
-        <div class="avatar">
-          <a v-show="!hasLogin" href="/wxservice/baseInfo"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
-          <img :src="user.icon" alt="" class="pic" v-show="hasLogin">
+        <div class="box">
+          <div class="box-container">
+            <div class="avatar">
+              <a v-show="!hasLogin" href="/wxservice/baseInfo"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
+              <img :src="user.icon" alt="" class="pic" v-show="hasLogin">
+            </div>
+            <div class="line">
+              <div class="userName" v-show="!hasLogin">未登录</div>
+              <div class="userName" v-show="hasLogin">{{user.nickName}}</div>
+              <div class="info" v-show="hasLogin"><span class="vip" :class="getVipIcon">{{getVipTitle}}</span></div>
+            </div>
+            <span class="setting" v-show="hasLogin"><img src="../../common/images/settings.png"/><span>账号管理</span></span>
+          </div>
         </div>
-        <div class="line"><span class="text" v-show="!hasLogin">未登录</span><span class="text" v-show="hasLogin">{{user.nickName}}</span></div>
       </div>
       <split></split>
       <div class="order-wrapper">
@@ -20,6 +29,23 @@
           <li class="item border-1px" v-for="item in orders">
             <router-link :to="item.link">
               <div class="icon"><i :class="item.icon"></i></div>
+              <div class="text">{{item.text}}</div>
+            </router-link>
+          </li>
+        </ul>
+      </div>
+      <split></split>
+      <div class="wallet-wrapper">
+        <div class="title">
+          <router-link to="">
+            <i class="icon-wallet"></i>我的钱包
+            <!-- <span class="more"><i class="icon-keyboard_arrow_right"></i></span> -->
+          </router-link>
+        </div>
+        <ul class="itemList">
+          <li class="item border-1px" v-for="item in wallet">
+            <router-link :to="item.link">
+              <div class="amount">{{item.count}}</div>
               <div class="text">{{item.text}}</div>
             </router-link>
           </li>
@@ -45,6 +71,7 @@
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import split from '@/components/split/split';
+  // import {removeCookie} from '@/common/js/store';
 
   export default {
     data() {
@@ -57,12 +84,17 @@
           { icon: 'icon-truck', text: '待收货', link: '/order?type=2' },
           { icon: 'icon-refund_and_return', text: '退换货', link: '/order?type=6' }
         ],
+        wallet: [
+          { count: '0.00', text: '账户余额', link: '/balance' },
+          { count: 5, text: '优惠券', link: '/coupon' }
+        ],
         others: [
-          { icon: 'icon-heart', text: '我的收藏', link: '' },
+          { icon: 'icon-heart', text: '我的收藏', link: '/follow' },
+          { icon: 'icon-footprint', text: '浏览足迹', link: '/footprint' },
           { icon: 'icon-address', text: '收货地址', link: '/address' },
-          { icon: 'icon-footprint', text: '浏览足迹', link: '' },
           { icon: 'icon-auction', text: '我的拍卖', link: '' },
-          { icon: 'icon-command',
+          {
+            icon: 'icon-command',
             text: '清理缓存',
             link: '',
             noPage: true,
@@ -70,15 +102,33 @@
               window.localStorage.clear();
               alert('缓存清理成功！');
             }
-          },
-          { icon: 'icon-quit', text: '退出登录', link: '', noPage: true, highlight: true }
+          }
+          /*
+          ,{
+            icon: 'icon-quit',
+            text: '退出登录',
+            link: '',
+            noPage: true,
+            highlight: true,
+            callable: () => {
+              removeCookie('wxuser', '', '.yihuyixi.com');
+              this.$router.push('/home');
+            }
+          }
+           */
         ]
       };
     },
     activated() {
       this._initScroll();
     },
-    deactivated() {
+    computed: {
+      getVipTitle() {
+        return this.user.userId === 33 ? '金牌会员' : '普通会员';
+      },
+      getVipIcon() {
+        return this.user.userId === 33 ? 'v4' : 'v1';
+      }
     },
     methods: {
       _initScroll() {
@@ -112,27 +162,98 @@
   .header-wrapper
     position: relative
     width: 100%
-    height: 155px
-    background: #e45050
-    color: #fff
-    overflow: hidden
+    padding: 10px
+    background-color: #fff
     box-sizing: border-box
-    .avatar
-      width: 80px
-      height: 80px
-      margin: 0 auto
-      padding-top: 30px
-      padding-bottom: 5px
-      img
-        width: 100%
-        height: auto
-        border-radius: 50%
-    .line
-      width: 100%
-      padding: 5px 0
-      text-align: center
-      font-size: 14px  
-  .order-wrapper
+    overflow: hidden
+    .box
+      padding: 30px 0
+      border-radius: 6px
+      font-size: 12px
+      color: #fff
+      background: -webkit-linear-gradient(left,#eb3c3c,#ff7459)
+      background: linear-gradient(90deg,#eb3c3c,#ff7459)
+      box-shadow: 0 2px 4px rgba(228,57,60,.4)
+      .box-container
+        display: flex
+        -webkit-box-align: center
+        align-items: center
+        padding: 0 15px
+        .avatar
+          position: relative
+          margin-right: 10px
+          width: 60px
+          height: 60px
+          border: 1px solid hsla(0,0%,100%,.4)
+          border-radius: 60px
+          box-shadow: 0 2px 10px rgba(0,0,0,.15)
+          overflow: hidden
+          img
+            position: absolute
+            top: 0
+            left: 0
+            width: 100%
+            border-radius: 60px
+        .line
+          position: relative
+          flex: 1
+          width: 1px
+          .userName
+            position: relative
+            display: inline-block
+            max-width: 100%
+            font-size: 14px
+            text-overflow: ellipsis
+            white-space: nowrap
+            overflow: hidden
+            -webkit-box-orient: vertical
+            -webkit-line-clamp: 1
+            box-sizing: border-box
+          .info
+            margin-top: 10px
+            .vip
+              position: relative
+              padding: 0 6px 0 10px
+              height: 16px
+              line-height: 16px
+              margin: 0 3px 0 8px
+              font-size: 10px
+              color: #fff
+              background: #9f3838
+              border-radius: 12px
+              &:before
+                content: ""
+                display: block
+                width: 20px
+                height: 20px
+                position: absolute
+                left: -10px
+                top: 50%
+                margin-top: -10px
+                background: url(../../common/images/icon_vip.png) no-repeat 0 0
+                background-size: 100px 20px
+              &.v5:before
+                background-position: -80px 0
+              &.v4:before
+                background-position: -60px 0
+              &.v3:before
+                background-position: -40px 0
+              &.v2:before
+                background-position: -20px 0
+              &.v1:before
+                background-position: 0 0
+
+        .setting
+          margin-left: 10px
+          color: rgba(76,0,0,.7)
+          img
+            width: 12px
+            height: 12px
+            margin-right: 3px
+            vertical-align: middle
+          span
+            vertical-align: middle
+  .order-wrapper, .wallet-wrapper
     position: relative
     width: 100%
     .title
@@ -162,6 +283,10 @@
         .icon
           font-size: 22px
           line-height: 1
+        .amount
+          font-size: 18px
+          line-height: 1 
+          margin-bottom: 2px       
         .text
           line-height: 1
   .other-wrapper
@@ -176,8 +301,9 @@
       i
         padding-right: 3px
     .otherList
+      position: relative
       width: 100%
-      height: 100%
+      padding-bottom: 30px
       .item
         display: block
         font-size: 14px

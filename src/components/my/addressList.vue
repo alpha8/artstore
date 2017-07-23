@@ -5,11 +5,11 @@
       <div class="address-wrap">
         <ul class="addressList">
           <li class="address-item border-1px" v-for="item in addressList">
-            <span class="icon-check_circle" :class="{'on': item.defaultAddr}" @click.stop.prevent="toggle(item)"></span>
+            <span class="icon-check_circle" :class="{'on': item.default}" @click.stop.prevent="toggle(item)"></span>
             <div class="addr" @click.stop.prevent="toggle(item)">
               <div class="addr-item">{{item.address}}</div>
               <div class="addr-item">
-                <strong>{{item.nickName}}</strong>
+                <strong>{{item.name}}</strong>
                 <span class="mobile">{{item.mobile}}</span>
               </div>
             </div>
@@ -27,6 +27,7 @@
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import api from '@/api/api';
 
   export default {
     data() {
@@ -38,10 +39,9 @@
     mounted() {
       this.getAddressList();
       this._initScroll();
-      this.defaultAddr();
     },
     activated() {
-      this.getAddressList();
+      // this.getAddressList();
       this._initScroll();
       this.$store.commit('HIDE_FOOTER');
     },
@@ -64,27 +64,25 @@
       },
       getAddressList() {
         this.addressList = this.$store.getters.getAddressList;
+        if (this.addressList.length === 0 && this.$store.getters.checkLogined) {
+          api.getAddressList(this.$store.getters.getUserInfo.userId).then(response => {
+            this.addressList = response;
+            this.$store.dispatch('setDefaultAddress', this.addressList);
+          });
+        }
       },
       show() {
         this._initScroll();
         this.showBack = false;
       },
-      defaultAddr() {
-        let defaultAddress = this.$store.getters.getDefaultAddress;
-        this.addressList.forEach((addr) => {
-          if (addr.address === defaultAddress.address && addr.mobile === defaultAddress.mobile) {
-            addr.defaultAddr = true;
-          }
-        });
-      },
       toggle(item) {
         this.addressList.forEach((addr) => {
-          if (addr.defaultAddr) {
-            addr.defaultAddr = false;
+          if (item.id !== addr.id && addr.default) {
+            addr.default = false;
           }
         });
-        item.defaultAddr = !item.defaultAddr;
-        this.$store.dispatch('setDefaultAddress', item);
+        item.default = !item.default;
+        this.$store.dispatch('setDefaultAddress', this.addressList);
         this.$emit('update');
       },
       addAddress() {

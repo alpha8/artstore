@@ -5,10 +5,13 @@
         <span class="badge" v-show="getCartAmount">{{getCartAmount}}</span>
         <span class="button-lg"><i class="icon-cart"></i></span>
       </router-link>
+      <span class="mini-favorite-item" @click.stop.prevent="mark">
+        <span class="button-lg"><i :class="favorited"></i></span>
+      </span>
       <div class="foot-item" @click.stop.prevent="addGood">
         <span class="button-lg orange">加入购物车</span>
       </div>
-      <div class="foot-item">
+      <div class="foot-item" @click.stop.prevent="pay">
         <span class="button-lg red">立即购买</span>
       </div>
     </div>
@@ -25,29 +28,67 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import api from '@/api/api';
   export default {
     props: {
-      items: {
-        type: Array,
-        default() {
-          return [];
-        }
+      good: {
+        type: Object
       }
     },
     data() {
       return {
         balls: [{show: false}, {show: false}, {show: false}, {show: false}, {show: false}],
-        dropBalls: []
+        dropBalls: [],
+        marked: false
       };
     },
     computed: {
       getCartAmount() {
         return this.$store.state.cartAmount;
+      },
+      favorited() {
+        let uid = this.$store.getters.getUserInfo.userId;
+        let ids = this.good.collected || [];
+        for (let i = 0; i < ids.length; i++) {
+          if (uid === ids[i]) {
+            this.marked = true;
+            return 'icon-favorite';
+          }
+        }
+        this.marked = false;
+        return 'icon-heart';
       }
+    },
+    deactivated() {
+      this.marked = false;
     },
     methods: {
       addGood() {
         this.$emit('add');
+      },
+      pay() {
+        this.$emit('add');
+        this.$router.push('/pay');
+      },
+      mark() {
+        if (this.marked) {
+          return;
+        }
+        let uid = this.$store.getters.getUserInfo.userId;
+        api.mark({
+          userId: uid,
+          type: 1,
+          artworkId: this.good.id,
+          fromCart: false
+        }).then(response => {
+          if (response.code === 0) {
+            if (this.good.collected) {
+              this.good.collected.push(uid);
+            } else {
+              this.good.collected = [uid];
+            }
+          }
+        });
       },
       drop(el) {
         for (let i = 0; i < this.balls.length; i++) {
@@ -147,6 +188,8 @@
           &.red
             background: #ff463c
             color: #fff
+          .icon-favorite
+            color: #ff463c  
       .mini-favorite-item
         flex: 70px 0 0
         .button-lg

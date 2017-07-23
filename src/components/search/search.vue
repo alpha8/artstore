@@ -6,9 +6,9 @@
       </div>
       <div class="title">
         <div class="search-form-box">
-          <i class="icon-search"></i>
+          <i class="icon-search" @click.stop.prevent="search"></i>
           <div class="search-form-input">
-            <input type="text" name="txtSearch" class="txtSearch" placeholder="搜索所有商品" autocomplete="off" v-model="keyword" @keyup.enter="search" @change="search">
+            <input type="text" name="txtSearch" class="txtSearch" placeholder="搜索所有商品" autocomplete="off" v-model="keyword" @change.stop.prevent="search">
           </div>
           <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i>
         </div>
@@ -16,340 +16,177 @@
       <div class="right" @click.stop.prevent="showSidebar">筛选</div>
     </div>
     <div class="sortbar-wrapper">
-      <div class="sortbar-item active">专业评分</div>
-      <div class="sortbar-item">销量</div>
-      <div class="sortbar-item"><span class="sort">价格<i class="arrow_up"></i><i class="arrow_down"></i></span></div>
-      <div class="sortbar-item">评论数</div>
+      <div class="sortbar-item" :class="{'active': sort === 'scoreSort'}" @click.stop.prevent="fireSort('scoreSort')">专业评分</div>
+      <div class="sortbar-item" :class="{'active': sort === 'saleSort'}" @click.stop.prevent="fireSort('saleSort')">销量</div>
+      <div class="sortbar-item" :class="{'active': sort === 'priceSort'}" @click.stop.prevent="fireSort('priceSort')"><span class="sort">价格<i class="arrow_up" :class="{'on': priceSort === '2'}"></i><i class="arrow_down" :class="{'on': priceSort === '1'}"></i></span></div>
+      <div class="sortbar-item" :class="{'active': sort === 'commentSort'}" @click.stop.prevent="fireSort('commentSort')">评论数</div>
     </div>
-    <div class="product-wrapper" ref="productWrapper">
-      <div class="productlist">
-        <div class="product-item" v-for="(product, index) in products" key="index">
-          <div class="product-thumbnail">
-            <router-link :to="{name: 'good', params: {id: product.id}}"><img :src="product.image" /></router-link>
-          </div>
-          <div class="product-info">
-            <div class="product-title"><router-link :to="{name: 'good', params: {id: product.id}}">{{product.name}}</router-link></div>
-            <div class="product-price">¥<span class="num">{{product.price}}</span></div>
-          </div>
-        </div>
+    <div class="product-wrapper">
+      <div class="productlist" ref="productWrapper">
+        <mu-flexbox wrap="wrap" justify="space-around" :gutter="0">
+          <mu-flexbox-item basis="50%" class="product-item" :key="index" v-for="(product, index) in products">
+            <div class="product-thumbnail">
+              <router-link :to="{name: 'good', params: {id: product.id}}"><img :src="getThumbnail(product)" /></router-link>
+            </div>
+            <div class="product-info">
+              <div class="product-title"><router-link :to="{name: 'good', params: {id: product.id}}">{{product.name}}</router-link></div>
+              <div class="product-price">¥<span class="num">{{product.price}}</span></div>
+            </div>
+          </mu-flexbox-item>
+        </mu-flexbox>
+        <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
+        <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
       </div>
     </div>
-    <sidebar></sidebar>
+    <sidebar ref="sidebar" @fireAction="search"></sidebar>
+    <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import BScroll from 'better-scroll';
   import sidebar from '@/components/search/sidebar';
+  import gotop from '@/components/fixedtoolbar/gotop';
+  import api from '@/api/api';
+
   export default {
     data() {
       return {
         keyword: '',
-        products: [
-          {
-            'id': '1000',
-            'name': '80年代绿茶',
-            'price': 100000,
-            'oldPrice': '',
-            'description': '80年代绿茶（茉莉花茶）（珍品） 10万/斤',
-            'sellCount': 1,
-            'rating': 100,
-            'count': 0,
-            'info': '80年代绿茶（茉莉花茶）（珍品）',
-            'src': 'http://www.yihuyixi.com/ps/download/5959ad20e4b00faa50475a62?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959ad20e4b00faa50475a62?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959ad20e4b00faa50475a62?w=750&h=750'
-          },
-          {
-            'id': '1001',
-            'name': '1990年铁观音',
-            'price': 100000,
-            'oldPrice': '',
-            'description': '1990年铁观音（特级珍品）   10万/斤',
-            'sellCount': 0,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acefe4b00faa50475a20?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acefe4b00faa50475a20?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acefe4b00faa50475a20?w=750&h=750'
-          },
-          {
-            'id': '1002',
-            'name': '1992年铁观音',
-            'price': 95000,
-            'oldPrice': '',
-            'description': '1992年铁观音（特级珍品）   9.5万/斤',
-            'sellCount': 2,
-            'rating': 85,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acf2e4b00faa50475a24?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acf2e4b00faa50475a24?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acf2e4b00faa50475a24?w=750&h=750'
-          },
-          {
-            'id': '1003',
-            'name': '2006象明山乔木生普',
-            'price': 800,
-            'oldPrice': '',
-            'description': '2006象明山乔木生普（鉴藏级）800/斤',
-            'sellCount': 10,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acf8e4b00faa50475a32?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acf8e4b00faa50475a32?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acf8e4b00faa50475a32?w=750&h=750'
-          },
-          {
-            'id': '2000',
-            'name': '唐蹴鞠瓷雕',
-            'price': 2800,
-            'oldPrice': 3000,
-            'description': '唐蹴鞠瓷雕（特级）',
-            'sellCount': 170,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acf8e4b00faa50475a32?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acf8e4b00faa50475a32?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acf8e4b00faa50475a32?w=750&h=750'
-          },
-          {
-            'id': '2001',
-            'name': '遨云皮丘铜雕',
-            'price': 1200,
-            'oldPrice': '',
-            'description': '遨云皮丘铜雕（特级）',
-            'sellCount': 1800,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959ad0be4b00faa50475a58?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959ad0be4b00faa50475a58?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959ad0be4b00faa50475a58?w=750&h=750'
-          },
-          {
-            'id': '2003',
-            'name': '将军螃蟹铜雕',
-            'price': 350,
-            'oldPrice': '',
-            'description': '将军螃蟹铜雕（特级）',
-            'sellCount': 1000,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acf1e4b00faa50475a22?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acf1e4b00faa50475a22?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acf1e4b00faa50475a22?w=750&h=750'
-          },
-          {
-            'id': '2004',
-            'name': '熙园双鹊瓷雕',
-            'price': 320,
-            'oldPrice': '',
-            'description': '熙园双鹊瓷雕（特级）',
-            'sellCount': 2000,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acfbe4b00faa50475a35?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acfbe4b00faa50475a35?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acfbe4b00faa50475a35?w=750&h=750'
-          },
-          {
-            'id': '3000',
-            'name': '荷塘鸣雀杯',
-            'price': 850,
-            'oldPrice': 1000,
-            'description': '荷塘鸣雀杯（特级）',
-            'sellCount': 15,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acfae4b00faa50475a33?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acfae4b00faa50475a33?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acfae4b00faa50475a33?w=750&h=750'
-          },
-          {
-            'id': '3001',
-            'name': '鹅黄釉相思鸟品茗杯',
-            'price': 850,
-            'oldPrice': '',
-            'description': '鹅黄釉相思鸟品茗杯（特级）',
-            'sellCount': 15,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acf0e4b00faa50475a21?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acf0e4b00faa50475a21?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acf0e4b00faa50475a21?w=750&h=750'
-          },
-          {
-            'id': '3002',
-            'name': '闲云野鹤杯',
-            'price': 520,
-            'oldPrice': '',
-            'description': '闲云野鹤杯（特级）',
-            'sellCount': 15,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acfbe4b00faa50475a36?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acfbe4b00faa50475a36?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acfbe4b00faa50475a36?w=750&h=750'
-          },
-          {
-            'id': '3003',
-            'name': '千叶马蹄杯',
-            'price': 450,
-            'oldPrice': '',
-            'description': '千叶马蹄杯（特级）',
-            'sellCount': 150,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acfee4b00faa50475a3a?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acfee4b00faa50475a3a?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acfee4b00faa50475a3a?w=750&h=750'
-          },
-          {
-            'id': '3004',
-            'name': '小云朵影青玉兰杯',
-            'price': 260,
-            'oldPrice': 300,
-            'description': '小云朵影青玉兰杯',
-            'sellCount': 105,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959ad05e4b00faa50475a4a?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959ad05e4b00faa50475a4a?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959ad05e4b00faa50475a4a?w=750&h=750'
-          },
-          {
-            'id': '3005',
-            'name': '葵口方鼎杯',
-            'price': 120,
-            'oldPrice': '',
-            'description': '葵口方鼎杯',
-            'sellCount': 1200,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959ad03e4b00faa50475a45?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959ad03e4b00faa50475a45?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959ad03e4b00faa50475a45?w=750&h=750'
-          },
-          {
-            'id': '3006',
-            'name': '千仞悟杯',
-            'price': 90,
-            'oldPrice': '',
-            'description': '千仞悟杯',
-            'sellCount': 5005,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acf6e4b00faa50475a2c?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acf6e4b00faa50475a2c?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acf6e4b00faa50475a2c?w=750&h=750'
-          },
-          {
-            'id': '3007',
-            'name': '五福天青壶承',
-            'price': 450,
-            'oldPrice': '',
-            'description': '五福天青壶承',
-            'sellCount': 1000,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acfee4b00faa50475a3b?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acfee4b00faa50475a3b?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acfee4b00faa50475a3b?w=750&h=750'
-          },
-          {
-            'id': '4000',
-            'name': '云中鹰茶仓',
-            'price': 1200,
-            'oldPrice': '',
-            'description': '云中鹰茶仓（存货紧缺）',
-            'sellCount': 1,
-            'rating': '',
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959acffe4b00faa50475a3d?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959acffe4b00faa50475a3d?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959acffe4b00faa50475a3d?w=750&h=750'
-          },
-          {
-            'id': '4001',
-            'name': '隐樵山柴烧茶仓',
-            'price': 1100,
-            'oldPrice': '',
-            'description': '隐樵山柴烧茶仓（存货紧缺）',
-            'sellCount': 7,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959ad01e4b00faa50475a41?w=750&h=750'
-          },
-          {
-            'id': '4002',
-            'name': '80年代老厂红泥小火炉',
-            'price': 1600,
-            'oldPrice': '',
-            'description': '80年代老厂红泥小火炉（特级，存货紧缺）',
-            'sellCount': 15,
-            'rating': 100,
-            'count': 0,
-            'info': '',
-            'src': 'http://www.yihuyixi.com/ps/download/5959b83de4b00faa50475a8d?w=228&h=128',
-            'icon': 'http://www.yihuyixi.com/ps/download/5959b83de4b00faa50475a8d?w=114&h=114',
-            'image': 'http://www.yihuyixi.com/ps/download/5959b83de4b00faa50475a8d?w=750&h=750'
-          }
-        ]
+        products: [],
+        pageNumber: 1,
+        pageSize: 10,
+        totalPages: 0,
+        loadEnd: false,
+        scroller: null,
+        loading: false,
+        scrollY: 0,
+        lastExec: +new Date(),
+        params: {
+          artworkTypeName: 'tea',
+          categoryName: ''
+        },
+        sort: 'saleSort',
+        priceSort: '',
+        winHeight: document.documentElement.clientHeight
       };
     },
     activated() {
-      this._initScroll();
+      this.show();
       this.keyword = this.$route.query.key || '';
+      this.params.categoryName = this.$route.query.cat || '';
+      this._reset();
+      this.fetchData(true);
+    },
+    deactivated() {
+      this.$refs.sidebar.reset();
+      this.hide();
+    },
+    mounted() {
+      this.scroller = this.$refs.productWrapper;
+      window.onscroll = () => {
+        this.scrollY = window.pageYOffset;
+      };
     },
     methods: {
-      _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.productWrapper, {
-              click: true
+      fetchData(force) {
+        if (this.totalPages && this.pageNumber > this.totalPages) {
+          return;
+        }
+        let now = +new Date();
+        if (!force && now - this.lastExec <= 50) {
+          return;
+        }
+        this.loading = true;
+        this.params.currentPage = this.pageNumber;
+        this.params.pageSize = this.pageSize;
+        api.GetGoods(this.params).then((response) => {
+          let goods = response.artworks;
+          if (goods && goods.length) {
+            goods.forEach(item => {
+              this.products.push(item);
             });
-          } else {
-            this.scroll.refresh();
           }
+          this.totalPages = response.totalPages;
+          this.pageNumber++;
+          this.lastExec = +new Date();
+          this.loading = false;
+          this.loadEnd = this.pageNumber > this.totalPages;
+        }).catch(response => {
+          this.loadEnd = false;
+          this.loading = false;
         });
+      },
+      _reset() {
+        this.products = [];
+        this.pageNumber = 1;
+        this.totalPages = 0;
+        this.loadEnd = false;
       },
       showSidebar() {
         this.$store.commit('SHOW_SIDEBAR');
+      },
+      getThumbnail(item) {
+        let pic = item.pictures;
+        if (pic && pic.length) {
+          return api.CONFIG.psCtx + pic[0].id + '?w=228&h=128';
+        } else {
+          return api.CONFIG.defaultImg;
+        }
+      },
+      show() {
+        this.$store.commit('HIDE_FOOTER');
+      },
+      hide() {
+        this.$store.commit('SHOW_FOOTER');
+        this.$store.commit('HIDE_SIDEBAR');
       },
       back() {
         this.$router.back();
       },
       search() {
-        this.$store.dispatch('openLoading');
-        setTimeout(() => {
-          this.$store.dispatch('closeLoading');
-          console.log(`搜索关键字：${this.keyword}`);
-        }, 1500);
+        this._reset();
+        let form = this.$refs.sidebar.getFormValue();
+        this.params.categoryName = form.categoryName || '';
+        this.params.price = form.price || '';
+        this.params.shelfTime = form.shelfTime || '0';
+        this.keyword = form.keyword || '';
+        this.fetchData(true);
+      },
+      fireSort(sortKey) {
+        this.sort = sortKey;
+        let sortKeys = ['saleSort', 'scoreSort', 'commentSort', 'priceSort'];
+        if (sortKey === 'priceSort') {
+          if (!this.priceSort || this.priceSort === '1') {
+            this.priceSort = '2';
+          } else {
+            this.priceSort = '1';
+          }
+        } else {
+          this.priceSort = '';
+        }
+        for (let i = 0; i < sortKeys.length; i++) {
+          if (sortKeys[i] !== sortKey) {
+            delete this.params[sortKeys[i]];
+          }
+        }
+        this.params[sortKey] = this.priceSort || true;
+        this._reset();
+        this.fetchData(true);
       },
       clearText() {
         this.keyword = '';
+        this.search();
+      },
+      loadMore() {
+        this.fetchData();
+      },
+      goTop() {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
       }
     },
     components: {
-      sidebar
+      sidebar, gotop
     }
   };
 </script>
@@ -357,14 +194,19 @@
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin'
   .header
-    position: relative
+    position: fixed
     display: flex
-    background: #f2f2f2
+    padding: 0 8px
+    top: 0
+    width: 100%
+    height: 44px
     line-height: 44px
     text-align: center
     color: #9B9B9B
-    padding: 0 8px
+    background: #f2f2f2
     box-sizing: border-box
+    overflow: hidden
+    z-index: 20
     .left
       flex: 30px 0 0
       i
@@ -421,12 +263,17 @@
         font-size: 18px
         color: #666
   .sortbar-wrapper
-    position: relative
+    border-1px(rgba(7, 17, 27, 0.1))
+    position: fixed
     display: flex
     width: 100%
     height: 44px
     line-height: 44px
-    border-1px(rgba(7, 17, 27, 0.1))
+    top: 44px
+    box-sizing: border-box
+    background: #fff
+    overflow: hidden
+    z-index: 20
     .sortbar-item
       flex: 1
       position: relative
@@ -462,17 +309,27 @@
           &.on
             border-color: #ff463c transparent transparent transparent
   .product-wrapper
-    position: fixed
+    position: absolute
     top: 88px
-    bottom: 50px
-    left: 0
-    right: 0
-    z-index: 8
-    overflow: hidden
+    bottom: 0
+    width: 100%
     .productlist
       position: relative
       display: flex
       flex-wrap: wrap
+      width: 100%
+      padding: 10px 0
+      overflow: auto
+      box-sizing: border-box
+      -webkit-overflow-scrolling: touch
+      .mu-flexbox
+        display: block
+      .no-more
+        width: 100%
+        padding: 10px 0
+        color: #ccc
+        text-align: center
+        font-size: 12px
       .product-item
         width: 50%
         float: left
@@ -480,23 +337,16 @@
         box-sizing: border-box
         .product-thumbnail
           position: relative
-          height: 0
-          padding-top: 100%
-          overflow: hidden
           background: #f2f2f7
           img
-            position: absolute
             width: 100%
             height: auto
-            left: 0
-            top: 0
             vertical-align: top
         .product-title
           overflow: hidden
           display: -webkit-box
           color: #666
           font-size: 14px
-          height: 38px
           line-height: 1.3
           white-space: normal
           word-break: break-all
@@ -505,9 +355,9 @@
           -webkit-box-orient: vertical
         .product-price
           margin-top: 8px
-          font-size: 14px
+          font-size: 12px
           color: #e4393c
           .num
-            font-size: 18px
+            font-size: 14px
             font-weight: 400
 </style>
