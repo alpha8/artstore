@@ -20,7 +20,10 @@
                   </div>
                 </li>
                 <ul class="list" v-show="filter.multiple && filter.children" :class="{'mini': !filter.checked}">
-                  <li v-for="item in filter.children" :class="{'on': item.checked}"><span @click.stop.prevent="checkItem(item, filter)">{{item.name}}</span></li>
+                  <li v-for="item in filter.children" :class="{'on': item.checked}">
+                    <span v-show="!item.val" @click.stop.prevent="checkAll(item, filter)">{{item.name}}</span>
+                    <span v-show="item.val" @click.stop.prevent="checkItem(item, filter)">{{item.name}}</span>
+                  </li>
                 </ul>
                 <ul class="list" v-show="!filter.multiple && filter.children">
                   <li class="half" v-for="item in filter.children" :class="{'on': item.checked}"><span @click.stop.prevent="checkOnly(item, filter)">{{item.name}}</span></li>
@@ -112,12 +115,6 @@
         }
       };
     },
-    created() {
-      this._initScroll();
-    },
-    mounted() {
-      this._initScroll();
-    },
     computed: {
       showSidebar() {
         return this.$store.state.showSidebar;
@@ -147,13 +144,33 @@
             item.selectText = '全部展开';
           }
         }
-        this.scroll.refresh();
+      },
+      checkAll(item, parent) {
+        item.checked = true;
+        let checkedList = [];
+        let categoryList = [];
+        parent.children.forEach((child) => {
+          if (child.val !== item.val && child.checked) {
+            child.checked = false;
+          }
+        });
+        parent.selectText = checkedList.join(',');
+        this.form[parent.val] = categoryList.join(',');
+        if (parent.val === 'categoryName') {
+          this.form.keyword = parent.selectText === '全部' ? '' : parent.selectText;
+        }
+        if (!parent.selectText) {
+          parent.selectText = parent.checked ? '全部收起' : '全部展开';
+        }
       },
       checkItem(item, parent) {
         item.checked = !item.checked;
         let checkedList = [];
         let categoryList = [];
         parent.children.forEach((child) => {
+          if (child.val === '') {
+            child.checked = false;
+          }
           if (child.checked) {
             checkedList.push(child.name);
             categoryList.push(child.val);
@@ -257,15 +274,15 @@
       .filter-wrapper
        position: absolute
        top: 44px
-       bottom: 50px
-       left: 0
-       right: 0
+       bottom: 44px
+       width: 100%
        z-index: 18
-       overflow: hidden
+       overflow-y: auto
+       overflow-x: hidden
        .filter
+        position: relative
         display: block
         width: 100%
-        overflow: hidden
         .filter-item
           padding: 10px 10px 10px 15px
           border-1px(rgba(7, 17, 27, 0.1))
@@ -362,12 +379,12 @@
         bottom: 0
         left: 0
         right: 0
-        height: 50px
+        height: 44px
+        line-height: 44px
         .ops-button
           display: flex
           width: 100%
           height: 100%
-          line-height: 50px
           .button
             flex: 1
             text-align: center

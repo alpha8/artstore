@@ -9,6 +9,8 @@ import { save, load, loadCookie } from '../common/js/store';
 Vue.use(Vuex);
 
 const ADDRESS_LIST = 'addresses';
+const USER_AMOUNT = 'userAmount';
+const COUPON_AMOUNT = 'couponAmount';
 
 // states
 export const state = {
@@ -18,8 +20,11 @@ export const state = {
   searchDialog: false,
   showSidebar: false,
   showSidebarMask: false,
-  userInfo: JSON.parse(loadCookie('wxuser', '{"activateTime":0,"createAt":1498579200000,"icon":"http://wx.qlogo.cn/mmopen/6AW5PBxOTT3iaoibqlhxNAQDGe6wiaMianYNkmib5wjxB2ib9JHEzibgq8aFX0oynhAESFw2y5qeK2YHQyhEa6ZeKIb4MzdVpBeKTrD/0","nickName":" Alpha","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":33}')),
-  addressList: load(ADDRESS_LIST, [])
+  userInfo: JSON.parse(loadCookie('wxuser', '{}')),
+  addressList: load(ADDRESS_LIST, []),
+  toastList: [],
+  couponAmount: load(COUPON_AMOUNT, 0),  // 优惠券账户余额
+  userAmount: load(USER_AMOUNT, 0)     // 用户账户余额
 };
 
 // getters
@@ -33,7 +38,17 @@ export const getters = {
   getDefaultAddress: state => {
     let address = state.addressList.find(addr => addr.default);
     return address || {};
-  }
+  },
+  getPayGoods: state => state.cart.payGoods,
+  showMsg (state) {
+    return state.toastList.length > 0;
+  },
+  messageText (state) {
+    return state.toastList.length > 0 ? state.toastList[0].text : null;
+  },
+  getFooterState: state => state.showFooter,
+  getUserAmount: state => state.userAmount,
+  getCouponAmount: state => state.couponAmount
 };
 
 // actions
@@ -88,6 +103,29 @@ export const actions = {
     save('cartAdded', state.cart.added);
     save('cartAmount', state.cartAmount);
     save('products', state.products);
+  },
+  addPayGoods({commit}, products) {
+    if (!products || products.length === 0) {
+      return;
+    }
+    commit(types.ADD_PAYGOODS, {
+      goods: products
+    });
+  },
+  clearPayGoods({commit}) {
+    commit(types.CLEAR_PAYGOODS);
+  },
+  openToast (context, payload) {
+    context.commit(types.SHOW_TOAST, payload);
+    setTimeout(() => {
+      context.commit(types.HIDE_TOAST);
+    }, 3000);
+  },
+  closeToast (context) {
+    context.commit(types.HIDE_TOAST);
+  },
+  updateCouponAmount(context, amount) {
+    context.commit(types.UPDATE_COUPON_AMOUNT, amount);
   }
 };
 
@@ -136,7 +174,6 @@ export const mutations = {
 
     let sid = prefix + id;
     let product = state.products[sid];
-    console.log(product);
     if (product) {
       product--;
       state.cart.added.forEach(p => {
@@ -191,6 +228,41 @@ export const mutations = {
       }
     }
     save(ADDRESS_LIST, addressList);
+  },
+  [types.ADD_PAYGOODS](state, {goods}) {
+    state.cart.payGoods = goods;
+    save('payGoods', state.cart.payGoods);
+  },
+  [types.CLEAR_PAYGOODS](state) {
+    let goods = state.cart.payGoods;
+    let cartGoods = state.cart.added;
+    let goodCount = state.products;
+    goods.forEach(good => {
+      for (let i = 0; i < cartGoods.length; i++) {
+        if (cartGoods[i].id === good.id) {
+          cartGoods.splice(i, 1);
+          delete goodCount['p' + good.id];
+          state.cartAmount -= good.count;
+        }
+      }
+    });
+    state.cart.added = cartGoods;
+    state.cart.payGoods = [];
+    save('cartAdded', state.cart.added);
+    save('payGoods', state.cart.payGoods);
+    state.products = goodCount;
+    save('products', state.products);
+    save('cartAmount', state.cartAmount);
+  },
+  [types.SHOW_TOAST] (state, payload) {
+    state.toastList.push({text: payload || '加载中...'});
+  },
+  [types.HIDE_TOAST] (state) {
+    state.toastList.shift();
+  },
+  [types.UPDATE_COUPON_AMOUNT] (state, amount) {
+    state.couponAmount = amount;
+    save(COUPON_AMOUNT, state.couponAmount);
   }
 };
 

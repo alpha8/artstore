@@ -9,6 +9,10 @@ export const ADD_QUANTITY = 'ADD_QUANTITY';
 export const HIDE_LOADING = 'HIDE_LOADING';
 export const SHOW_LOADING = 'SHOW_LOADING';
 
+// toast
+export const HIDE_TOAST = 'HIDE_TOAST';
+export const SHOW_TOAST = 'SHOW_TOAST';
+
 // footer show or hide
 export const HIDE_FOOTER = 'HIDE_FOOTER';
 export const SHOW_FOOTER = 'SHOW_FOOTER';
@@ -26,3 +30,10 @@ export const SET_ADDRESS = 'SET_ADDRESS';
 export const ADD_ADDRESS = 'ADD_ADDRESS';
 export const UPDATE_ADDRESS = 'UPDATE_ADDRESS';
 export const REMOVE_ADDRESS = 'REMOVE_ADDRESS';
+
+// PAY GOODS
+export const ADD_PAYGOODS = 'ADD_PAYGOODS';
+export const CLEAR_PAYGOODS = 'CLEAR_PAYGOODS';
+
+// COUPON
+export const UPDATE_COUPON_AMOUNT = 'UPDATE_COUPON_AMOUNT';

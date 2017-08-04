@@ -188,6 +188,7 @@
       },
       pay() {
         if (this.total) {
+          this.$store.dispatch('addPayGoods', this.cartProducts.filter(item => item.checked));
           this.$router.push('pay');
         }
       }

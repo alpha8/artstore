@@ -5,21 +5,21 @@
         <div class="box">
           <div class="box-container">
             <div class="avatar">
-              <a v-show="!hasLogin" href="/wxservice/baseInfo"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
-              <img :src="user.icon" alt="" class="pic" v-show="hasLogin">
+              <a v-show="!hasLogin()" href="/wxservice/baseInfo"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
+              <img :src="user().icon" alt="" class="pic" v-show="hasLogin()">
             </div>
             <div class="line">
-              <div class="userName" v-show="!hasLogin">未登录</div>
-              <div class="userName" v-show="hasLogin">{{user.nickName}}</div>
-              <div class="info" v-show="hasLogin"><span class="vip" :class="getVipIcon">{{getVipTitle}}</span></div>
+              <div class="userName" v-show="!hasLogin()"><a href="/wxservice/baseInfo">未登录</a></div>
+              <div class="userName" v-show="hasLogin()">{{user().nickName}}</div>
+              <div class="info" v-show="hasLogin()"><span class="vip" :class="getVipIcon">{{getVipTitle}}</span></div>
             </div>
-            <span class="setting" v-show="hasLogin"><img src="../../common/images/settings.png"/><span>账号管理</span></span>
+            <span class="setting" v-show="hasLogin()"><router-link to="/personInfo"><img src="../../common/images/settings.png"/><span>账号管理</span></router-link></span>
           </div>
         </div>
       </div>
       <split></split>
       <div class="order-wrapper">
-        <div class="title">
+        <div class="title border-1px">
           <router-link to="/order">
             <i class="icon-order"></i>我的订单
             <span class="more"><span>查看全部订单</span><i class="icon-keyboard_arrow_right"></i></span>
@@ -36,7 +36,7 @@
       </div>
       <split></split>
       <div class="wallet-wrapper">
-        <div class="title">
+        <div class="title border-1px">
           <router-link to="">
             <i class="icon-wallet"></i>我的钱包
             <!-- <span class="more"><i class="icon-keyboard_arrow_right"></i></span> -->
@@ -45,7 +45,7 @@
         <ul class="itemList">
           <li class="item border-1px" v-for="item in wallet">
             <router-link :to="item.link">
-              <div class="amount">{{item.count}}</div>
+              <div class="amount">{{item.amount | currency}}</div>
               <div class="text">{{item.text}}</div>
             </router-link>
           </li>
@@ -55,7 +55,7 @@
       <div class="other-wrapper">
         <div class="title">其他</div>
         <div class="otherList">
-          <router-link :to="item.link" class="item" v-for="(item, index) in others" key="index" :class="{'highlight': item.highlight}">
+          <router-link :to="item.link" class="item border-1px" v-for="(item, index) in others" key="index" :class="{'highlight': item.highlight}">
             <i :class="item.icon"></i>
             <span class="text" v-show="!item.callable">{{item.text}}</span>
             <span class="text" v-show="item.callable" @click.stop.prevent="item.callable">{{item.text}}</span>
@@ -71,13 +71,12 @@
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import split from '@/components/split/split';
+  import {mapGetters} from 'vuex';
   // import {removeCookie} from '@/common/js/store';
 
   export default {
     data() {
       return {
-        user: this.$store.getters.getUserInfo,
-        hasLogin: this.$store.getters.checkLogined,
         orders: [
           { icon: 'icon-pending_payment', text: '待付款', link: '/order?type=0' },
           { icon: 'icon-delivery_package_box', text: '待发货', link: '/order?type=1' },
@@ -85,8 +84,8 @@
           { icon: 'icon-refund_and_return', text: '退换货', link: '/order?type=6' }
         ],
         wallet: [
-          { count: '0.00', text: '账户余额', link: '/balance' },
-          { count: 5, text: '优惠券', link: '/coupon' }
+          { amount: 0, text: '账户余额', link: '/wallet' },
+          { amount: 0, text: '优惠券余额', link: '/coupon' }
         ],
         others: [
           { icon: 'icon-heart', text: '我的收藏', link: '/follow' },
@@ -121,16 +120,24 @@
     },
     activated() {
       this._initScroll();
+      if (this.wallet.length >= 2) {
+        this.wallet[0].amount = this.$store.getters.getUserAmount;
+        this.wallet[1].amount = this.$store.getters.getCouponAmount;
+      }
     },
     computed: {
       getVipTitle() {
-        return this.user.userId === 33 ? '金牌会员' : '普通会员';
+        return this.user().userId === 38 ? '金牌会员' : '普通会员';
       },
       getVipIcon() {
-        return this.user.userId === 33 ? 'v4' : 'v1';
+        return this.user().userId === 38 ? 'v4' : 'v1';
       }
     },
     methods: {
+      ...mapGetters({
+        hasLogin: 'checkLogined',
+        user: 'getUserInfo'
+      }),
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -209,6 +216,8 @@
             -webkit-box-orient: vertical
             -webkit-line-clamp: 1
             box-sizing: border-box
+            a
+              color: #fff
           .info
             margin-top: 10px
             .vip
@@ -242,10 +251,11 @@
                 background-position: -20px 0
               &.v1:before
                 background-position: 0 0
-
         .setting
           margin-left: 10px
           color: rgba(76,0,0,.7)
+          a
+            color: rgba(76,0,0,.7)
           img
             width: 12px
             height: 12px
@@ -258,9 +268,11 @@
     width: 100%
     .title
       padding: 0 10px
-      height: 50px
-      line-height: 50px
+      height: 40px
+      line-height: 40px
       font-size: 14px
+      border-1px(rgba(7, 17, 27, 0.1))
+      box-sizing: border-box
       >a i
         padding-right: 3px
       .more
@@ -280,6 +292,9 @@
         flex: 1
         font-size: 14px
         text-align: center
+        border-right: 1px solid rgba(7, 17, 27, 0.1)
+        &:last-child
+          border-right: none
         .icon
           font-size: 22px
           line-height: 1
@@ -288,7 +303,9 @@
           line-height: 1 
           margin-bottom: 2px       
         .text
+          padding-top: 5px
           line-height: 1
+          font-size: 12px
   .other-wrapper
     position: relative
     width: 100%
@@ -309,8 +326,6 @@
         font-size: 14px
         padding: 10px
         border-1px(rgba(7, 17, 27, 0.1))
-        &:last-child
-          border-none()
         &.highlight
           >i, .text
             color: #ff463c
@@ -319,7 +334,7 @@
           padding-right: 3px
           vertical-align: middle
         .text
-          vertical-align: middle          
+          vertical-align: middle
         .more
           float: right
           font-size: 18px

@@ -5,6 +5,9 @@
     </keep-alive>
     <fixedfoot :items="items"></fixedfoot>
     <loading :show="loading.show" :text="loading.text"></loading>
+    <toast v-show="toast.show" :text="toast.text"></toast>
+    <gohome></gohome>
+    <lg-preview></lg-preview>
   </div>
 </template>
 
@@ -12,6 +15,7 @@
 import fixedfoot from '@/components/fixedtoolbar/fixedfoot';
 import loading from '@/components/common/loading';
 import toast from '@/components/common/toast';
+import gohome from '@/components/fixedtoolbar/gohome';
 
 export default {
   data () {
@@ -40,6 +44,12 @@ export default {
     };
   },
   computed: {
+    toast() {
+      return {
+        show: this.$store.getters.showMsg,
+        text: this.$store.getters.messageText
+      };
+    },
     loading() {
       return {
         show: this.$store.getters.isLoading,
@@ -48,7 +58,7 @@ export default {
     }
   },
   components: {
-    fixedfoot, loading, toast
+    fixedfoot, loading, toast, gohome
   }
 };
 </script>

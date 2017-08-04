@@ -103,7 +103,7 @@
         let sliders = [];
         pics.forEach(pic => {
           if (pic) {
-            sliders.push(api.CONFIG.psCtx + pic.id + '?w=750&h=750');
+            sliders.push(api.CONFIG.psCtx + pic.id + '?w=' + (window.innerWidth));
           } else {
             sliders.push(api.CONFIG.defaultImg);
           }
@@ -124,7 +124,6 @@
           this.show();
           this.lazyload();
           this.$store.dispatch('closeLoading');
-          return;
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });
@@ -219,6 +218,9 @@
             this._initScroll();
           }, 500);
         }, 1000);
+      },
+      test(src) {
+        console.log('test.... src=' + src);
       }
     },
     filters: {

@@ -43,7 +43,8 @@
         goods: [],
         good: {},
         heightArr: [],
-        scrollY: 0
+        scrollY: 0,
+        teaTotal: {}
       };
     },
     computed: {
@@ -61,12 +62,44 @@
     },
     created() {
       this.$store.dispatch('openLoading');
-      api.GetCategories().then((response) => {
-        this.goods = response.childrens;
-        if (this.goods.length) {
-          this.good = this.goods[0];
-        }
-        this.$store.dispatch('closeLoading');
+      api.getTeaTotal().then(res => {
+        let typeTotal = res.teatype;
+        let totalPivot = {};
+        typeTotal.forEach(type => {
+          for (let key in type) {
+            totalPivot[key] = {};
+            let item = type[key];
+            if (item.length) {
+              item.forEach(o => {
+                totalPivot[key][o.name] = o.count || 0;
+              });
+            }
+          }
+        });
+        this.teaTotal = totalPivot;
+
+        api.GetCategories().then((response) => {
+          this.goods = response.childrens;
+          this.goods.forEach(good => {
+            let lv2Category = good.childrens;
+            if (lv2Category.length) {
+              lv2Category.forEach(inner => {
+                try {
+                  let count = this.teaTotal[good.propertyName] && this.teaTotal[good.propertyName][inner.propertyName];
+                  inner.count = count || 0;
+                } catch (e) {
+                  console.log(e);
+                }
+              });
+            }
+          });
+          if (this.goods.length) {
+            this.good = this.goods[0];
+          }
+          this.$store.dispatch('closeLoading');
+        }).catch(response => {
+          this.$store.dispatch('closeLoading');
+        });
       }).catch(response => {
         this.$store.dispatch('closeLoading');
       });

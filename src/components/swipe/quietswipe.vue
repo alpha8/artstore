@@ -1,7 +1,7 @@
 <template>
   <swiper :options="swiperOption">
     <swiper-slide v-for="(slide, index) in swiperSlides" key="index">
-      <div class="slide" :style="getSlideUrl(slide)"></div>
+      <div class="slide" :style="getSlideUrl(slide)" v-preview="slide"></div>
     </swiper-slide>
     <div class="swiper-pagination pager" slot="pagination"></div>
   </swiper>

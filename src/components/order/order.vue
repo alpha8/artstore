@@ -71,7 +71,7 @@
         mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消'],
         pageNumber: 1,
         pageSize: 5,
-        totalPages: 0,
+        totalPages: -1,
         loadEnd: false,
         scroller: null,
         loading: false,
@@ -82,13 +82,13 @@
       };
     },
     activated() {
-      this.fetchData(true);
       let type = this.$route.query.type;
       if (typeof type === 'undefined') {
         this.activeItem = -1;
       } else {
         this.activeItem = Number(type);
       }
+      this.fetchData(true);
       this.show();
     },
     deactivated() {
@@ -113,7 +113,7 @@
     },
     methods: {
       fetchData(force) {
-        if (this.totalPages && this.pageNumber > this.totalPages) {
+        if (this.totalPages > -1 && this.pageNumber > this.totalPages) {
           return;
         }
         let now = +new Date();
@@ -141,18 +141,19 @@
         }).catch(response => {
           this.loadEnd = false;
           this.loading = false;
+          this.totalPages = 0;
         });
       },
       _reset() {
         this.orders = [];
         this.pageNumber = 1;
-        this.totalPages = 0;
+        this.totalPages = -1;
         this.loadEnd = false;
       },
       getThumbnail(item) {
         let icon = item.icon;
         if (icon) {
-          return api.CONFIG.psCtx + icon + '?w=228&h=128';
+          return api.CONFIG.psCtx + icon + '?w=228&h=228';
         } else {
           return api.CONFIG.defaultImg;
         }

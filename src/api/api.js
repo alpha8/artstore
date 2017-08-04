@@ -85,9 +85,9 @@ export function doPut(url, params) {
 
 export default {
   CONFIG: {
-   cmsCtx: 'http://www.yihuyixi.com/cms',
-   webCtx: 'http://www.yihuyixi.com/yihu',
-   psCtx: 'http://www.yihuyixi.com/ps/download/',
+   cmsCtx: '/cms',
+   webCtx: '/yihu',
+   psCtx: '/ps/download/',
    defaultImg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAAMFBMVEX///+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpufk+pAAAAD3RSTlMAESIzRFVmd4iZqrvM3e5GKvWZAAABv0lEQVRoge2YP1ICMRSH2R0UYZiRwlI5glfAylZP4G5twxGwt0BPgKVDs44XAFsbqW32CFTCiEAkhF3235DJyxud0d9XZRLyTXjJe9ndUgkAAAAAAAAAAADgx3DfhI5nI2Fd6xNfRsJDvVAYCt/7uwlNhQ+aXwQQ/hmhc/14xiq8EmLWYBTuyYx4yoydN+jCphRO0kNl8UIXelI4Tw+dqLJAE3alcJkOYqCCwCasrHpmZGE7/5dbsuvOalOmyQEnlF2fVOG+nD1MDlRVcb2hHuzOqtSnQugp4ZQqdG9fL5P97nhT/32m4hBfXh89HmE3Ei557pSyxa1XKGwmfEsO4YBFeBSfm4rNRR8LnXAYNVsswnpcEFXaWQsDsdi0aikfNYYyeX3VbAuOFa6yWYzWrTjtrITra0oFMfvMSBOuN1YFscchdNXG+tFarYXHaq4M4imLMFBzZRAHHMKDzdxFNu2owvjk+aULDuG2/I0yaUcUbvdhUsv5CEJn+zo173AIC1ZlJyxYlZWwvNtnLsylhq1Q94ZrKqxqfMZCj1l4P2YW9nU+U6F2gaZCPb8rZP8qwv7dBgAAAAAAAAAAAP+Lb4Qtq0R4e5WOAAAAAElFTkSuQmCC'
   },
 
@@ -102,6 +102,10 @@ export default {
   /** 获取所有商品分类 */
   GetCategories() {
     return doGet(this.CONFIG.cmsCtx + '/datadic/childrens?parentPath=cms/basedata/tea/type');
+  },
+  /** 获取商品分类统计值 */
+  getTeaTotal() {
+    return doGet(this.CONFIG.webCtx + '/service/tea/total');
   },
   /** 查询数据字典配置值 */
   GetConfigList(parent) {
@@ -120,6 +124,41 @@ export default {
    */
   mark(params) {
     return doPost(this.CONFIG.cmsCtx + '/user/collect', params);
+  },
+
+  /**
+   * 获取用户商品收藏
+   */
+  getUserCollect(params) {
+    return doGet(this.CONFIG.webCtx + '/user/artwork/collects', params);
+  },
+
+  /**
+   * 删除指定商品收藏
+   */
+  removeCollect(params) {
+    return doDelete(this.CONFIG.webCtx + '/user/collect', params);
+  },
+
+  /**
+   * 获取用户足迹
+   */
+  getFootprint(params) {
+    return doGet(this.CONFIG.webCtx + '/history/list', params);
+  },
+
+  /**
+   * 删除用户足迹
+   */
+  removeFootprint(oid) {
+    return doDelete(this.CONFIG.webCtx + '/history?id=' + oid);
+  },
+
+  /**
+   * 清空用户足迹
+   */
+  clearFootprint(userId) {
+    return doDelete(this.CONFIG.webCtx + '/history/clear?userId=' + userId);
   },
 
   /**
@@ -167,5 +206,26 @@ export default {
     */
   updateAddress(address) {
     return doPut(this.CONFIG.cmsCtx + '/user/address', address);
+  },
+
+   /**
+    * 查询优惠券明细
+    */
+  getCoupons(userId) {
+    return doGet(this.CONFIG.cmsCtx + '/coupon/list?userId=' + userId);
+  },
+
+   /**
+    * 优惠券充值
+    */
+  depositCoupon(params) {
+    return doPost(this.CONFIG.cmsCtx + '/user/wallet/recharge', params);
+  },
+
+   /**
+    * 优惠券账户余额
+    */
+  getCouponAmount(userId) {
+    return doGet(this.CONFIG.cmsCtx + '/user/wallet?userId=' + userId);
   }
 };

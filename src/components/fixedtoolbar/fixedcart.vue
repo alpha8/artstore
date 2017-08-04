@@ -67,7 +67,22 @@
         this.$emit('add');
       },
       pay() {
-        this.$emit('add');
+        if (!this.good.count) {
+          this.$emit('add');
+        }
+        let good = {
+          id: this.good.id,
+          name: this.good.name,
+          pictures: this.good.pictures,
+          src: this.good.src,
+          content: this.good.content,
+          price: this.good.price,
+          oldPrice: this.good.oldPrice,
+          count: this.good.count,
+          icon: (this.good.pictures && this.good.pictures.length) ? api.CONFIG.psCtx + this.good.pictures[0].id + '?w=114&h=114' : api.CONFIG.defaultImg,
+          checked: false
+        };
+        this.$store.dispatch('addPayGoods', [good]);
         this.$router.push('/pay');
       },
       mark() {

@@ -55,7 +55,7 @@
         products: [],
         pageNumber: 1,
         pageSize: 10,
-        totalPages: 0,
+        totalPages: -1,
         loadEnd: false,
         scroller: null,
         loading: false,
@@ -72,9 +72,9 @@
     },
     activated() {
       this.show();
+      this._reset();
       this.keyword = this.$route.query.key || '';
       this.params.categoryName = this.$route.query.cat || '';
-      this._reset();
       this.fetchData(true);
     },
     deactivated() {
@@ -89,7 +89,7 @@
     },
     methods: {
       fetchData(force) {
-        if (this.totalPages && this.pageNumber > this.totalPages) {
+        if (this.totalPages > -1 && this.pageNumber > this.totalPages) {
           return;
         }
         let now = +new Date();
@@ -114,12 +114,14 @@
         }).catch(response => {
           this.loadEnd = false;
           this.loading = false;
+          this.totalPages = 0;
         });
       },
       _reset() {
         this.products = [];
+        this.params.categoryName = '';
         this.pageNumber = 1;
-        this.totalPages = 0;
+        this.totalPages = -1;
         this.loadEnd = false;
       },
       showSidebar() {
@@ -175,7 +177,8 @@
       },
       clearText() {
         this.keyword = '';
-        this.search();
+        this._reset();
+        this.fetchData(true);
       },
       loadMore() {
         this.fetchData();

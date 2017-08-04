@@ -78,14 +78,18 @@
   export default {
     data() {
       return {
-        products: this.$store.getters.cartProducts,
-        defaultAddress: this.$store.getters.getDefaultAddress,
         showBox: false,
         totalFee: 0,
         paying: false
       };
     },
     computed: {
+      products() {
+        return this.$store.getters.getPayGoods;
+      },
+      defaultAddress() {
+        return this.$store.getters.getDefaultAddress;
+      },
       totalPrice() {
         let total = 0;
         this.products.forEach((item) => {
@@ -96,6 +100,10 @@
       }
     },
     activated() {
+      if (!this.$store.getters.getPayGoods.length) {
+        this.$router.replace('/cart');
+        return;
+      }
       this.show();
       this._initScroll();
     },
@@ -141,15 +149,15 @@
       weixinPay() {
         let userInfo = this.$store.getters.getUserInfo;
         if (!userInfo.openid) {
-          alert('请先登录！');
+          this.$store.dispatch('openToast', '请先登录！');
           return;
         }
         if (!this.defaultAddress.address) {
-          alert('请选择收货人信息');
+          this.$store.dispatch('openToast', '请选择收货人信息');
           return;
         }
         if (this.paying) {
-          alert('正在支付中...');
+          this.$store.dispatch('openToast', '正在支付中...');
           return;
         }
         let params = {
@@ -171,11 +179,11 @@
         this.paying = true;
         api.createOrder(params).then(response => {
           if (response.result !== 0) {
-            alert('生成订单失败！');
+            this.$store.dispatch('openToast', '生成订单失败！');
             this.paying = false;
             return;
           }
-          this.$store.dispatch('clearCart');
+          this.$store.dispatch('clearPayGoods');
           let order = response.order;
           let payParams = {
             totalFee: order.totalFee,
@@ -185,7 +193,16 @@
           };
           api.wxpay(payParams).then((response) => {
             this.paying = false;
-            onBridgeReady(response);
+            onBridgeReady(response, function(res) {
+              // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+              if (res.err_msg === 'get_brand_wcpay_request:ok') {
+                this.$store.dispatch('openToast', '支付成功！');
+              } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
+                this.$store.dispatch('openToast', '取消支付！');
+              } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
+                this.$store.dispatch('openToast', '支付失败！');
+              }
+            });
             pay();
             this.$router.push('order');
           }).catch(response => {
@@ -193,6 +210,7 @@
             this.$router.push('order');
           });
         }).catch(response => {
+          this.$store.dispatch('openToast', '网络故障，请稍候重试.');
           this.paying = false;
         });
       }

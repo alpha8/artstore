@@ -17,8 +17,12 @@ import orderdetail from '@/components/order/orderdetail';
 import auction from '@/components/auction/auction';
 import auctionList from '@/components/auction/auctionList';
 import coupon from '@/components/coupon/coupon';
+import couponhistory from '@/components/coupon/coupon-history';
 import footprint from '@/components/footprint/footprint';
 import follow from '@/components/follow/follow';
+import personInfo from '@/components/my/personInfo';
+import wallet from '@/components/my/wallet';
+import cashdetail from '@/components/my/cashdetail';
 
 import '@/common/stylus/index.styl';
 
@@ -42,8 +46,12 @@ export default new Router({
     {path: '/auction', component: auction, name: 'auction'},
     {path: '/auction/list/:id', component: auctionList, name: 'auctionList'},
     {path: '/coupon', component: coupon, name: 'coupon'},
+    {path: '/couponhistory', component: couponhistory, name: 'couponHistory'},
     {path: '/footprint', component: footprint, name: 'footprint'},
     {path: '/follow', component: follow, name: 'follow'},
+    {path: '/personInfo', component: personInfo},
+    {path: '/wallet', component: wallet},
+    {path: '/cashdetail', component: cashdetail},
     {path: '/my', component: my}
   ]
 });

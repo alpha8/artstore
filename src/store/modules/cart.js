@@ -5,7 +5,8 @@ import api from '@/api/api';
 
 // initial state
 const state = {
-  added: load('cartAdded', [])
+  added: load('cartAdded', []),
+  payGoods: load('payGoods', [])
 };
 
 // getters
