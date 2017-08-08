@@ -6,6 +6,7 @@ import goodDetail from '@/components/good-detail/good-detailv2';
 import home from '@/components/home/home';
 import shopcart from '@/components/cart/shopcart';
 import pay from '@/components/cart/pay';
+import remark from '@/components/cart/remark';
 import category from '@/components/category/category';
 import search from '@/components/search/search';
 import my from '@/components/my/my';
@@ -38,6 +39,7 @@ export default new Router({
     {path: '/good/:id', component: goodDetail, name: 'good'},
     {path: '/cart', component: shopcart},
     {path: '/pay', component: pay},
+    {path: '/pay/remark', component: remark},
     {path: '/address', component: addressList},
     {path: '/addAddress', component: addAddress},
     {path: '/editAddress/:id', component: editAddress, name: 'address'},

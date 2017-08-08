@@ -120,7 +120,7 @@
             vertical-align: top
           textarea
             width: 100%
-            border:none
+            border: none
             resize: none
             font-size: 14px
             line-height: 1.5

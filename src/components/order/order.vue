@@ -17,11 +17,11 @@
               <div class="item-summary border-top-1px border-1px">
                 <div class="summary">
                   <p class="status"><label>状&nbsp;&nbsp;&nbsp;&nbsp;态：</label><span class="text">{{statusDesc(order.status)}}</span></p>
-                  <p class="price"><label>总&nbsp;&nbsp;&nbsp;&nbsp;价：</label><span class="text">{{order.totalPrice | currency}}</span></p>
+                  <p class="price"><label>总&nbsp;&nbsp;&nbsp;&nbsp;价：</label><span class="text">{{order.totalFee | currency}}</span></p>
                 </div>
                 <div class="ops">
                   <span class="button btn-red" v-show="order.status === 0" @click.stop.prevent="weixinPay(order)">去支付</span>
-                  <span class="button btn-green" v-show="order.status === 1">催单</span>
+                  <span class="button btn-green" v-show="order.status === 10">催单</span>
                   <span class="button btn-blue" v-show="order.status === 5">去评价</span>
                   <span class="button btn-orange" v-show="order.status === 5">再次购买</span>
                   <span class="button btn-white" v-show="order.status === 10">看相似</span>
@@ -54,7 +54,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
   import api from '@/api/api';
-  import {onBridgeReady, pay} from '@/common/js/pay';
+  import {pay} from '@/common/js/pay';
 
   export default {
     data() {
@@ -70,7 +70,7 @@
         activeItem: -1,
         mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消'],
         pageNumber: 1,
-        pageSize: 5,
+        pageSize: 10,
         totalPages: -1,
         loadEnd: false,
         scroller: null,
@@ -192,27 +192,46 @@
       weixinPay(order) {
         let userInfo = this.$store.getters.getUserInfo;
         if (!userInfo.openid) {
-          alert('请先登录！');
+          this.$store.dispatch('openToast', '请先登录！');
           return;
         }
         if (this.paying) {
-          alert('正在支付中...');
+          this.$store.dispatch('openToast', '正在支付中...');
           return;
         }
         this.paying = true;
         let payParams = {
-          totalFee: order.totalPrice || 0,
+          totalFee: order.totalFee || 0,
           openid: userInfo.openid,
-          orderNo: order.orderNo
+          orderNo: order.orderNo,
+          body: order.title || order.products[0].name
         };
         api.wxpay(payParams).then((response) => {
           this.paying = false;
-          onBridgeReady(response);
+          let that = this;
+          WeixinJSBridge.invoke(
+            'getBrandWCPayRequest', {
+              'appId': response.appId,
+              'timeStamp': response.timeStamp || +new Date(),
+              'nonceStr': response.nonceStr,
+              'package': response.packageValue,
+              'signType': response.signType || 'MD5',
+              'paySign': response.paySign
+            }, function(res) {
+              // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+              if (res.err_msg === 'get_brand_wcpay_request:ok') {
+                that.$store.dispatch('openToast', '支付成功！');
+              } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
+                that.$store.dispatch('openToast', '取消支付！');
+              } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
+                that.$store.dispatch('openToast', '支付失败！');
+              }
+              that.$router.push('order');
+            }
+          );
           pay();
-          this.$router.push('order');
         }).catch(response => {
           this.paying = false;
-          this.$router.push('order');
         });
       }
     },

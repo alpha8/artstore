@@ -27,8 +27,8 @@
     margin-top: -22px
     font-size: 12px
     padding: 8px
-    background: #fff
-    color: #666
+    background: rgba(7, 17, 27, 0.85)
+    color: #fff
     text-align: center
     border-radius: 4px 0 0 4px
     box-sizing: border-box

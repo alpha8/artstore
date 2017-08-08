@@ -169,6 +169,13 @@ export default {
   },
 
   /**
+   * 取消订单
+   */
+  cancelOrder(params) {
+    return doPut(this.CONFIG.cmsCtx + '/order/cancel', params);
+  },
+
+  /**
    * 查询订单列表
    */
   getOrders(params) {
@@ -184,7 +191,7 @@ export default {
 
   /** 获取微信支付接口参数 */
   wxpay(params) {
-    return doGet('/wxservice/wx/pay', params);
+    return doPost('/wxservice/wx/pay', params);
   },
 
    /**

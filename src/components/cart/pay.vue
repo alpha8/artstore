@@ -37,9 +37,13 @@
             <strong>配送方式：</strong>
             <span>快递</span>
           </li>
-          <li class="checkout-item change">
+         <!--  <li class="checkout-item change">
             <strong>发票信息</strong>
             <span>明细</span>
+          </li> -->
+          <li class="checkout-item change" @click.stop.prevent="openRemarkBox">
+            <strong>备注</strong>
+            <span class="nowrap-line">{{payRemarks}}</span>
           </li>
         </ul>
         <split></split>
@@ -73,14 +77,15 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import addressList from '@/components/my/addressList';
   import api from '@/api/api';
-  import {onBridgeReady, pay} from '@/common/js/pay';
+  import {pay} from '@/common/js/pay';
 
   export default {
     data() {
       return {
         showBox: false,
         totalFee: 0,
-        paying: false
+        paying: false,
+        remarks: ''
       };
     },
     computed: {
@@ -97,6 +102,10 @@
         });
         this.totalFee = total;
         return total;
+      },
+      payRemarks() {
+        this.remarks = this.$store.getters.getPayRemark;
+        return this.remarks;
       }
     },
     activated() {
@@ -125,6 +134,9 @@
             this.scroll.refresh();
           }
         });
+      },
+      openRemarkBox() {
+        this.$router.push('/pay/remark');
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -169,7 +181,7 @@
             mobile: this.defaultAddress.mobile,
             receiver: this.defaultAddress.name
           },
-          remarks: '只工作日发货'
+          remarks: this.remarks
         };
         let items = [];
         this.products.forEach(product => {
@@ -183,7 +195,6 @@
             this.paying = false;
             return;
           }
-          this.$store.dispatch('clearPayGoods');
           let order = response.order;
           let payParams = {
             totalFee: order.totalFee,
@@ -193,24 +204,33 @@
           };
           api.wxpay(payParams).then((response) => {
             this.paying = false;
-            onBridgeReady(response, function(res) {
-              // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
-              if (res.err_msg === 'get_brand_wcpay_request:ok') {
-                this.$store.dispatch('openToast', '支付成功！');
-              } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
-                this.$store.dispatch('openToast', '取消支付！');
-              } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
-                this.$store.dispatch('openToast', '支付失败！');
+            let that = this;
+            WeixinJSBridge.invoke(
+              'getBrandWCPayRequest', {
+                'appId': response.appId,
+                'timeStamp': response.timeStamp || +new Date(),
+                'nonceStr': response.nonceStr,
+                'package': response.packageValue,
+                'signType': response.signType || 'MD5',
+                'paySign': response.paySign
+              }, function(res) {
+                that.$store.dispatch('clearPayGoods');
+                // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+                if (res.err_msg === 'get_brand_wcpay_request:ok') {
+                  that.$store.dispatch('openToast', '支付成功！');
+                } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
+                  that.$store.dispatch('openToast', '取消支付！');
+                } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
+                  that.$store.dispatch('openToast', '支付失败！');
+                }
+                that.$router.push('order');
               }
-            });
+            );
             pay();
-            this.$router.push('order');
           }).catch(response => {
             this.paying = false;
-            this.$router.push('order');
           });
         }).catch(response => {
-          this.$store.dispatch('openToast', '网络故障，请稍候重试.');
           this.paying = false;
         });
       }
@@ -377,6 +397,14 @@
             span
               flex: 1
               text-align: right
+              &.nowrap-line
+                display: -webkit-box
+                word-wrap: break-word
+                word-break: break-all
+                text-overflow: ellipsis
+                overflow: hidden
+                -webkit-line-clamp: 2
+                -webkit-box-orient: vertical
             &.change:after
               content: ""
               display: block

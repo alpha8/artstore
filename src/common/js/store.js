@@ -73,7 +73,11 @@ export function loadCookie(key, def) {
   }
   var arr = document.cookie.match(new RegExp('(^| )' + key + '=([^;]*)(;|$)'));
   if (arr) {
-    return unescape(arr[2]);
+    try {
+      return unescape(arr[2]);
+    } catch (e) {
+      return def;
+    }
   }
   return def;
 }

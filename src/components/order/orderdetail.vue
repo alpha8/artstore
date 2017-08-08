@@ -36,19 +36,21 @@
         <split></split>
         <div class="price-summary">
           <ul>
-            <li>商品总额<span class="text-red">{{order.totalPrice | currency}}</span></li>
+            <li>商品总额<span class="text-red">{{order.totalFee + (order.couponFee || 0) + (order.discount || 0) | currency}}</span></li>
             <li>运费<span class="text-red">+ {{order.shipFee || 0 | currency}}</span></li>
+            <li>优惠券<span class="text-red">- {{order.couponFee || 0 | currency}}</span></li>
+            <li>商家折扣<span class="text-red">- {{order.discount || 0 | currency}}</span></li>
           </ul>
           <p class="total">
-            实付金额：<strong class="text-red">{{order.totalPrice + (order.shipFee || 0) | currency}}</strong>
+            实付金额：<strong class="text-red">{{order.totalFee | currency}}</strong>
           </p>
         </div>
       </div>
     </div>
     <div class="footer border-top-1px">
       <div class="btn-group">
-        <div class="button" v-show="order.status === 0"><span class="btn-red">支付</span></div>
-        <div class="button" v-show="order.status === 0"><span class="btn-white">取消订单</span></div>
+        <div class="button" v-show="order.status === 0" @click.stop.prevent="weixinpay"><span class="btn-red">支付</span></div>
+        <div class="button" v-show="order.status === 0" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
         <div class="button" v-show="order.status === 6"><span class="btn-white">看相似</span></div>
         <div class="button" v-show="order.status === 6"><span class="btn-orange">再次购买</span></div>
       </div>
@@ -62,12 +64,14 @@
   import split from '@/components/split/split';
   import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
+  import {pay} from '@/common/js/pay';
 
   export default {
     data() {
       return {
         order: {},
-        mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消']
+        mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消'],
+        paying: false
       };
     },
     activated() {
@@ -76,6 +80,7 @@
     },
     deactivated() {
       this.hide();
+      this.paying = false;
     },
     computed: {
       statusDesc() {
@@ -123,6 +128,62 @@
         } else {
           return api.CONFIG.defaultImg;
         }
+      },
+      cancelOrder() {
+        api.cancelOrder({
+          id: this.order.id
+        }).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('openToast', '订单已取消！');
+            this.$router.push('/order');
+          } else {
+            this.$store.dispatch('openToast', '订单取消失败！');
+          }
+        });
+      },
+      weixinpay() {
+        let userInfo = this.$store.getters.getUserInfo;
+        if (!userInfo.openid) {
+          this.$store.dispatch('openToast', '请先登录！');
+          return;
+        }
+        if (this.paying) {
+          this.$store.dispatch('openToast', '正在支付中...');
+          return;
+        }
+        this.paying = true;
+        let payParams = {
+          totalFee: this.order.totalFee || 0,
+          openid: userInfo.openid,
+          orderNo: this.order.orderNo,
+          body: order.title || order.products[0].name
+        };
+        api.wxpay(payParams).then((response) => {
+          this.paying = false;
+          let that = this;
+          WeixinJSBridge.invoke(
+            'getBrandWCPayRequest', {
+              'appId': response.appId,
+              'timeStamp': response.timeStamp || +new Date(),
+              'nonceStr': response.nonceStr,
+              'package': response.packageValue,
+              'signType': response.signType || 'MD5',
+              'paySign': response.paySign
+            }, function(res) {
+              // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+              if (res.err_msg === 'get_brand_wcpay_request:ok') {
+                that.$store.dispatch('openToast', '支付成功！');
+              } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
+                that.$store.dispatch('openToast', '取消支付！');
+              } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
+                that.$store.dispatch('openToast', '支付失败！');
+              }
+            }
+          );
+          pay();
+        }).catch(response => {
+          this.paying = false;
+        });
       }
     },
     components: {

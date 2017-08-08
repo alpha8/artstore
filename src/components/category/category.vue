@@ -13,12 +13,11 @@
         <ul>
           <li class="good-list good-list-hook">
             <ul class="itemList">
-              <li v-for="good in good.childrens">
+              <li v-for="good in good.childrens" :class="typeStatus(good.status)">
                 <router-link :to="{path: '/search', query: {cat: good.propertyName, key: good.value}}" class="good-item">
-                  <div class="icon" v-show="good.desc">
-                    <!-- <img :src="good.icon" width="57" height="57" alt=""> -->
+                  <!-- <div class="icon" v-show="good.desc">
                     <i :class="good.desc"></i>
-                  </div>
+                  </div> -->
                   <div class="content">
                     <h2 class="name">{{good.value}}<em>({{good.count || 0}})</em></h2>
                   </div>
@@ -96,6 +95,7 @@
           if (this.goods.length) {
             this.good = this.goods[0];
           }
+          this._initScroll();
           this.$store.dispatch('closeLoading');
         }).catch(response => {
           this.$store.dispatch('closeLoading');
@@ -104,10 +104,22 @@
         this.$store.dispatch('closeLoading');
       });
     },
+    updated() {
+      this._initScroll();
+    },
     activated() {
       this._initScroll();
     },
     methods: {
+      typeStatus(status) {
+        let last = this.lastCol;
+        if (last === 2 && status === last) {
+          this.lastCol = 0;
+          return 'type' + status + 'delta';
+        }
+        this.lastCol = status;
+        return 'type' + status;
+      },
       selectMenu(index) {
         this.good = this.goods[index];
         this.$nextTick(() => {
@@ -213,13 +225,28 @@
           position: relative
           width: 50%
           height: auto
+          overflow: hidden
+          box-sizing: border-box
+          border-1px(rgba(7, 17, 27, 0.1))
+          clear: both
+          &.type0
+            width: 50%
+          &.type1
+            width: 100%
+          &.type2
+            width: 33.3%
+          &.type2delta
+            width: 66.6%
+          &.type3
+            width: 33.3%
           .good-item
             display: inline-block
             width: 100%
-            padding: 15px 0
-            text-align: center
+            padding: 15px 10px
+            text-align: left
             border-1px(rgba(7, 17, 27, 0.1))
             color: #00bb9c
+            box-sizing: border-box
             &:last-child
               border-none()
               margin-bottom: 0
@@ -234,6 +261,12 @@
                 line-height: 14px
                 font-size: 12px
                 color: rgb(7, 17, 27)
+                word-wrap: break-word
+                word-break: break-all
+                text-overflow: ellipsis
+                -webkit-line-clamp: 1
+                -webkit-box-orient: vertical
                 em
+                  display: block
                   font-size: 8px
 </style>

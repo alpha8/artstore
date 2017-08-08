@@ -5,12 +5,12 @@ import * as types from './types';
 import cart from './modules/cart';
 import loading from './modules/loading';
 import { save, load, loadCookie } from '../common/js/store';
-
 Vue.use(Vuex);
 
 const ADDRESS_LIST = 'addresses';
 const USER_AMOUNT = 'userAmount';
 const COUPON_AMOUNT = 'couponAmount';
+const PAY_REMARK = 'remark';
 
 // states
 export const state = {
@@ -24,7 +24,8 @@ export const state = {
   addressList: load(ADDRESS_LIST, []),
   toastList: [],
   couponAmount: load(COUPON_AMOUNT, 0),  // 优惠券账户余额
-  userAmount: load(USER_AMOUNT, 0)     // 用户账户余额
+  userAmount: load(USER_AMOUNT, 0),     // 用户账户余额
+  payRemark: load(PAY_REMARK, '工作日收货')
 };
 
 // getters
@@ -48,7 +49,8 @@ export const getters = {
   },
   getFooterState: state => state.showFooter,
   getUserAmount: state => state.userAmount,
-  getCouponAmount: state => state.couponAmount
+  getCouponAmount: state => state.couponAmount,
+  getPayRemark: state => state.payRemark
 };
 
 // actions
@@ -263,6 +265,10 @@ export const mutations = {
   [types.UPDATE_COUPON_AMOUNT] (state, amount) {
     state.couponAmount = amount;
     save(COUPON_AMOUNT, state.couponAmount);
+  },
+  [types.PAY_REMARK] (state, remark) {
+    state.payRemark = remark;
+    save(PAY_REMARK, state.payRemark);
   }
 };
 
