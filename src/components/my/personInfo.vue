@@ -100,7 +100,7 @@
             height: 60px
             line-height: 60px
             padding: 10px 15px 10px 10px
-          a
+          >a, >div
             display: block
             &.more:after
               position: absolute

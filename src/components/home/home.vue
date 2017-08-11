@@ -52,11 +52,11 @@
           icon: 'icon-classify'
         }, {
           name: '茶席艺术',
-          url: '/category',
+          url: '/search?parentCat=teaart&key=茶席艺术',
           icon: 'icon-kettle'
         }, {
           name: '精选茶',
-          url: '/category',
+          url: '/search?parentCat=welltea&key=精选茶',
           icon: 'icon-teapot_and_cup'
         }, {
           name: '二折抢拍',

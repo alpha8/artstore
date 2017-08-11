@@ -20,7 +20,7 @@ export const state = {
   searchDialog: false,
   showSidebar: false,
   showSidebarMask: false,
-  userInfo: JSON.parse(loadCookie('wxuser', '{}')),
+  userInfo: JSON.parse(loadCookie('wxuser', '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}')),
   addressList: load(ADDRESS_LIST, []),
   toastList: [],
   couponAmount: load(COUPON_AMOUNT, 0),  // 优惠券账户余额

@@ -14,11 +14,11 @@
           <li class="good-list good-list-hook">
             <ul class="itemList">
               <li v-for="good in good.childrens" :class="typeStatus(good.status)">
-                <router-link :to="{path: '/search', query: {cat: good.propertyName, key: good.value}}" class="good-item">
-                  <!-- <div class="icon" v-show="good.desc">
-                    <i :class="good.desc"></i>
-                  </div> -->
-                  <div class="content">
+                <router-link :to="{path: '/search', query: {cat: good.propertyName, key: (good.value === 'thumbnail' ? '' : good.value)}}" class="good-item" :class="{'thumbnail': good.value === 'thumbnail'}">
+                  <div class="icon" v-if="good.value==='thumbnail'">
+                    <img :src="good.desc" border="0" />
+                  </div>
+                  <div class="content" v-if="good.value!=='thumbnail'">
                     <h2 class="name">{{good.value}}<em>({{good.count || 0}})</em></h2>
                   </div>
                 </router-link>
@@ -250,17 +250,20 @@
             &:last-child
               border-none()
               margin-bottom: 0
+            &.thumbnail
+              padding: 0
+              vertical-align: middle
+              .icon
+                font-size: 12px
             .icon
               display: block
               font-size: 40px
             .content
               display: block
               .name
-                margin: 2px 0 8px 0
-                height: 14px
-                line-height: 14px
-                font-size: 12px
-                color: rgb(7, 17, 27)
+                line-height: 1.2
+                font-size: 14px
+                color: #505050
                 word-wrap: break-word
                 word-break: break-all
                 text-overflow: ellipsis

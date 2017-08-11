@@ -51,14 +51,6 @@
         return this.$store.getters.getCouponAmount;
       }
     },
-    created() {
-      let user = this.$store.getters.getUserInfo;
-      api.getCouponAmount(user.userId || 0).then(response => {
-        if (response.totalValue) {
-          this.$store.dispatch('updateCouponAmount', response.totalValue);
-        }
-      });
-    },
     methods: {
       _initScroll() {
         this.$nextTick(() => {

@@ -74,7 +74,12 @@
       this.show();
       this._reset();
       this.keyword = this.$route.query.key || '';
-      this.params.categoryName = this.$route.query.cat || '';
+      let parentCategory = this.$route.query.parentCat;
+      if (parentCategory) {
+        this.params.categoryParentName = parentCategory || '';
+      } else {
+        this.params.categoryName = this.$route.query.cat || '';
+      }
       this.fetchData(true);
     },
     deactivated() {
@@ -151,6 +156,7 @@
         this.params.categoryName = form.categoryName || '';
         this.params.price = form.price || '';
         this.params.shelfTime = form.shelfTime || '0';
+        this.params.categoryParentName = form.categoryParentName || '';
         this.keyword = form.keyword || '';
         this.fetchData(true);
       },

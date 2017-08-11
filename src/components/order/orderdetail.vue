@@ -16,8 +16,11 @@
           <p><label>收货地址：</label><span>{{order.express.expressAddress}}</span></p>
           <p><label>收货人：</label><span>{{order.express.receiver}}</span></p>
           <p><label>联系方式：</label><span>{{order.express.mobile}}</span></p>
+          <p v-if="order.express.expressNo"><label>快递单号：</label><span><a :href="trackExpressState" target="_blank">{{order.express.expressNo}}</a></span></p>
+          <p v-if="order.express.expressCompany"><label>快递公司：</label><span>{{order.express.expressCompany}}</span></p>
+          <p v-if="order.express.deliverAt"><label>发货时间：</label><span>{{order.express.deliverAt | formatDate}}</span></p>
           <p><label>支付方式：</label><span>在线支付</span></p>
-          <p><label>发票信息：</label><span>普通发票</span></p>
+          <!-- <p><label>发票信息：</label><span>普通发票</span></p> -->
         </div>
         <split></split>
         <div class="title">商品列表</div>
@@ -49,10 +52,11 @@
     </div>
     <div class="footer border-top-1px">
       <div class="btn-group">
-        <div class="button" v-show="order.status === 0" @click.stop.prevent="weixinpay"><span class="btn-red">支付</span></div>
-        <div class="button" v-show="order.status === 0" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
-        <div class="button" v-show="order.status === 6"><span class="btn-white">看相似</span></div>
-        <div class="button" v-show="order.status === 6"><span class="btn-orange">再次购买</span></div>
+        <div class="button" v-if="order.status === 0" @click.stop.prevent="weixinPay"><span class="btn-red">支付</span></div>
+        <div class="button" v-if="order.status === 0" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
+        <div class="button" v-if="order.status === 2"><a :href="trackExpressState" target="_blank"><span class="btn-white">查看物流</span></a></div>
+        <div class="button" v-if="order.status === 6"><span class="btn-white">看相似</span></div>
+        <div class="button" v-if="order.status === 6"><span class="btn-orange">再次购买</span></div>
       </div>
     </div>
   </div>
@@ -69,7 +73,9 @@
   export default {
     data() {
       return {
-        order: {},
+        order: {
+          express: {}
+        },
         mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消'],
         paying: false
       };
@@ -85,6 +91,12 @@
     computed: {
       statusDesc() {
         return this.mapStatus[this.order.status];
+      },
+      trackExpressState() {
+        if (this.order.status === 2) {
+          return `https://m.kuaidi100.com/index_all.html?type=${this.order.express.expressCompany}&postid=${this.order.express.expressNo}`;
+        }
+        return '';
       }
     },
     filters: {
@@ -141,7 +153,7 @@
           }
         });
       },
-      weixinpay() {
+      weixinPay() {
         let userInfo = this.$store.getters.getUserInfo;
         if (!userInfo.openid) {
           this.$store.dispatch('openToast', '请先登录！');
@@ -156,7 +168,7 @@
           totalFee: this.order.totalFee || 0,
           openid: userInfo.openid,
           orderNo: this.order.orderNo,
-          body: order.title || order.products[0].name
+          body: this.order.title || this.order.products[0].name
         };
         api.wxpay(payParams).then((response) => {
           this.paying = false;

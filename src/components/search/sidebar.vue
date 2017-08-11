@@ -10,7 +10,7 @@
           </div>
           <div class="filter-wrapper" ref="filter">
             <ul class="filter">
-              <div v-for="(filter, index) in filters" key="index">
+              <div v-for="(filter, index) in filters" key="index" v-show="filter.children.length">
                 <li class="filter-item border-1px">
                   <div class="item-name">{{filter.name}}</div>
                   <div class="status" @click.stop.prevent="toggle(filter)">
@@ -19,13 +19,13 @@
                     <i class="icon-arrow_down" v-show="!filter.checked"></i>
                   </div>
                 </li>
-                <ul class="list" v-show="filter.multiple && filter.children" :class="{'mini': !filter.checked}">
+                <ul class="list" v-show="filter.multiple && filter.children.length" :class="{'mini': !filter.checked}">
                   <li v-for="item in filter.children" :class="{'on': item.checked}">
                     <span v-show="!item.val" @click.stop.prevent="checkAll(item, filter)">{{item.name}}</span>
                     <span v-show="item.val" @click.stop.prevent="checkItem(item, filter)">{{item.name}}</span>
                   </li>
                 </ul>
-                <ul class="list" v-show="!filter.multiple && filter.children">
+                <ul class="list" v-show="!filter.multiple && filter.children.length">
                   <li class="half" v-for="item in filter.children" :class="{'on': item.checked}"><span @click.stop.prevent="checkOnly(item, filter)">{{item.name}}</span></li>
                   <li class="half" v-show="filter.val === 'price'">
                     <span>
@@ -51,32 +51,26 @@
 
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
+  import api from '@/api/api';
   export default {
     data() {
       return {
         filters: [
           {
             name: '分类',
+            val: 'categoryParentName',
+            checked: false,
+            selectText: '全部展开',
+            multiple: true,
+            children: []
+          },
+          {
+            name: '子分类',
             val: 'categoryName',
             checked: false,
             selectText: '全部展开',
             multiple: true,
-            children: [
-              {name: '全部', val: '', checked: false},
-              {name: '茶杯', val: 'teacup', checked: false},
-              {name: '茶壶', val: 'teapot', checked: false},
-              {name: '雕塑', val: 'sculpture', checked: false},
-              {name: '配画', val: 'withpaint', checked: false},
-              {name: '茶仓', val: 'teahouse', checked: false},
-              {name: '火炉', val: 'stove', checked: false},
-              {name: '红茶', val: 'reatea', checked: false},
-              {name: '绿茶', val: 'greentea', checked: false},
-              {name: '乌龙', val: 'oolong', checked: false},
-              {name: '普洱', val: 'puertea', checked: false},
-              {name: '黑茶', val: 'blacktea', checked: false},
-              {name: '白茶', val: 'whitetea', checked: false},
-              {name: '黄茶', val: 'yellowtea', checked: false}
-            ]
+            children: []
           },
           {
             name: '价格',
@@ -114,6 +108,15 @@
           maxPrice: ''
         }
       };
+    },
+    activated() {
+      api.GetConfigList('cms/basedata/tea/type').then(response => {
+        let items = [{name: '全部', val: '', checked: false}];
+        response.childrens.forEach(item => {
+          items.push({id: item.id, name: item.value, val: item.propertyName, checked: false, children: item.childrens});
+        });
+        this.filters[0].children = items;
+      });
     },
     computed: {
       showSidebar() {
@@ -183,6 +186,32 @@
         }
         if (!parent.selectText) {
           parent.selectText = parent.checked ? '全部收起' : '全部展开';
+        }
+
+        // 显示二级分类
+        if (item.checked && item.children && item.children.length) {
+          let items = [];
+          item.children.forEach(node => {
+            items.push({id: node.id, name: node.value, val: node.propertyName, checked: false});
+          });
+          if (this.filters[1].children.length) {
+            Array.prototype.push.apply(this.filters[1].children, items);
+          } else {
+            items.splice(0, 0, {name: '全部', val: '', checked: false});
+            this.filters[1].children = items;
+          }
+        } else if (!item.checked && item.children && item.children.length) {
+          let items = this.filters[1].children;
+          item.children.forEach(o => {
+            for (let i = 0; i < items.length; i++) {
+              if (items[i].id === o.id) {
+                items.splice(i, 1);
+              }
+            }
+          });
+          this.filters[1].children = items;
+        } else if (!item.val || !parent.val) {
+          this.filters[1].children = [];
         }
       },
       checkOnly(item, parent) {

@@ -72,7 +72,8 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import split from '@/components/split/split';
   import {mapGetters} from 'vuex';
-  // import {removeCookie} from '@/common/js/store';
+  import {removeCookie} from '@/common/js/store';
+  import api from '@/api/api';
 
   export default {
     data() {
@@ -99,7 +100,8 @@
             noPage: true,
             callable: () => {
               window.localStorage.clear();
-              alert('缓存清理成功！');
+              removeCookie('wxuser', '', '.yihuyixi.com');
+              this.$store.dispatch('openToast', '缓存清理成功！');
             }
           }
           /*
@@ -124,6 +126,14 @@
         this.wallet[0].amount = this.$store.getters.getUserAmount;
         this.wallet[1].amount = this.$store.getters.getCouponAmount;
       }
+    },
+    created() {
+      let user = this.$store.getters.getUserInfo;
+      api.getCouponAmount(user.userId || 0).then(response => {
+        if (response.totalValue) {
+          this.$store.dispatch('updateCouponAmount', response.totalValue);
+        }
+      });
     },
     computed: {
       getVipTitle() {
