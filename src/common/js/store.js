@@ -111,3 +111,12 @@ export function removeCookie(name, path, domain) {
     ';path=' + opts.path +
     (domain ? ';domain=' + domain : '');
 }
+
+export function parseJson(val, def) {
+  try {
+    val = JSON.parse(val);
+  } catch (e) {
+    val = def;
+  }
+  return val;
+}

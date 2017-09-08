@@ -9,20 +9,23 @@
         </div>
         <topchanel :channels="channels"></topchanel>
         <split></split>
-        <modal-title title="精选茶"></modal-title>
-        <channel :items="teas" :cols="2" @select="selectGood"></channel>
+        <modal-title title="茶席艺术" moreText="更多" catKey="art" catName="茶席艺术"></modal-title>
+        <channel :items="arts" :cols="2" @select="selectGood"></channel>
         <split></split>
-        <modal-title title="人气商品"></modal-title>
-        <channel :items="hotGoods" :cols="2" @select="selectGood"></channel>
+        <modal-title title="优质茶器" moreText="更多" catKey="teaart" catName="优质茶器"></modal-title>
+        <channel :items="teaPots" :cols="2" @select="selectGood"></channel>
         <split></split>
-        <modal-title title="精选茶席器皿"></modal-title>
-        <channel :items="teapotGoods" :cols="2" @select="selectGood"></channel>
+        <modal-title title="好茶" moreText="更多" catKey="welltea" catName="好茶"></modal-title>
+        <channel :items="goodTeas" :cols="2" @select="selectGood"></channel>
         <split></split>
-        <modal-title title="雕塑"></modal-title>
-        <channel :items="sculptures" :cols="2" @select="selectGood"></channel>
+        <modal-title title="茶室专业配画" moreText="更多" catKey="paint" catName="茶室专业配画"></modal-title>
+        <channel :items="paints" :cols="2" @select="selectGood"></channel>
+        <split></split>
+        <modal-title title="茶室空间雅物" moreText="更多" catKey="graceful" catName="茶室空间雅物"></modal-title>
+        <channel :items="ya" :cols="2" @select="selectGood"></channel>
       </div>
     </div>
-    <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
+    <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
 
@@ -42,10 +45,11 @@
     data() {
       return {
         scrollY: 0,
-        teas: [],
-        hotGoods: [],
-        teapotGoods: [],
-        sculptures: [],
+        arts: [],
+        teaPots: [],
+        goodTeas: [],
+        paints: [],
+        ya: [],
         channels: [{
           name: '分类',
           url: '/category',
@@ -55,17 +59,21 @@
           url: '/search?parentCat=teaart&key=茶席艺术',
           icon: 'icon-kettle'
         }, {
-          name: '精选茶',
-          url: '/search?parentCat=welltea&key=精选茶',
+          name: '好茶',
+          url: '/search?parentCat=welltea&key=好茶',
           icon: 'icon-teapot_and_cup'
         }, {
-          name: '二折抢拍',
+          name: '三折秒杀',
+          url: '/seckill',
+          icon: 'icon-miaosha'
+        }, {
+          name: '四折团购',
+          url: '/category',
+          icon: 'icon-group_purchase'
+        }, {
+          name: '四折抢拍',
           url: '/auction',
           icon: 'icon-auction'
-        }, {
-          name: '团购',
-          url: '/category',
-          icon: 'icon-funds'
         }],
         swiperSlides: [
           'http://www.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=410',
@@ -74,37 +82,43 @@
         ],
         selectedGood: {},
         showTop: false,
-        showFixed: false,
-        winHeight: document.documentElement.clientHeight
+        swipeHeight: 0
       };
     },
     created() {
       api.GetGoods({
         artworkTypeName: 'tea',
+        categoryParentName: 'art'
+      }).then((response) => {
+        this.arts = response.artworks;
+      });
+
+      api.GetGoods({
+        artworkTypeName: 'tea',
+        categoryParentName: 'teaart'
+      }).then((response) => {
+        this.teaPots = response.artworks;
+      });
+
+      api.GetGoods({
+        artworkTypeName: 'tea',
         categoryParentName: 'welltea'
       }).then((response) => {
-        this.teas = response.artworks;
+        this.goodTeas = response.artworks;
       });
 
       api.GetGoods({
         artworkTypeName: 'tea',
-        categoryName: 'teahouse'
+        categoryParentName: 'paint'
       }).then((response) => {
-        this.hotGoods = response.artworks;
+        this.paints = response.artworks;
       });
 
       api.GetGoods({
         artworkTypeName: 'tea',
-        categoryName: 'teacup'
+        categoryParentName: 'graceful'
       }).then((response) => {
-        this.teapotGoods = response.artworks;
-      });
-
-      api.GetGoods({
-        artworkTypeName: 'tea',
-        categoryName: 'sculpture'
-      }).then((response) => {
-        this.sculptures = response.artworks;
+        this.ya = response.artworks;
       });
     },
     mounted() {
@@ -116,26 +130,24 @@
     activated() {
       this._initScroll();
     },
+    computed: {
+      showFixed() {
+        return this.scrollY >= this.swipeHeight;
+      }
+    },
     methods: {
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
             this.scroll = new BScroll(this.$refs.mainWrapper, {
               click: true,
-              probeType: 3
+              probeType: 3,
+              bounce: false
             });
             let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
-            let h = swipe.clientHeight;
-            let search = this.$refs.search.$el;
+            this.swipeHeight = swipe.clientHeight;
             this.scroll.on('scroll', (pos) => {
               this.scrollY = Math.abs(Math.round(pos.y));
-              if (this.scrollY > h) {
-                search.className = 'toolbar fixed';
-                this.showFixed = true;
-              } else {
-                search.className = 'toolbar';
-                this.showFixed = false;
-              }
             });
           } else {
             this.scroll.refresh();

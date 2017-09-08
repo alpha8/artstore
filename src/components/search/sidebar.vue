@@ -161,6 +161,8 @@
         this.form[parent.val] = categoryList.join(',');
         if (parent.val === 'categoryName') {
           this.form.keyword = parent.selectText === '全部' ? '' : parent.selectText;
+        } else if (parent.val === 'categoryParentName') {
+          this.form.parentKeyword = parent.selectText === '全部' ? '' : parent.selectText;
         }
         if (!parent.selectText) {
           parent.selectText = parent.checked ? '全部收起' : '全部展开';
@@ -183,6 +185,8 @@
         this.form[parent.val] = categoryList.join(',');
         if (parent.val === 'categoryName') {
           this.form.keyword = parent.selectText === '全部' ? '' : parent.selectText;
+        } else if (parent.val === 'categoryParentName') {
+          this.form.parentKeyword = parent.selectText === '全部' ? '' : parent.selectText;
         }
         if (!parent.selectText) {
           parent.selectText = parent.checked ? '全部收起' : '全部展开';
@@ -257,6 +261,20 @@
         };
         this.$emit('fireAction');
       },
+      clearForm() {
+        this.form.minPrice = this.form.maxPrice = '';
+        this.filters.forEach(item => {
+          item.checked = false;
+          item.selectText = '全部展开';
+          item.children.forEach(child => {
+            child.checked = false;
+          });
+        });
+        this.form = {
+          minPrice: '',
+          maxPrice: ''
+        };
+      },
       ok() {
         if (this.form.minPrice || this.form.maxPrice) {
           this.price = (this.form.minPrice || 0) + '-' + this.maxPrice;
@@ -274,13 +292,13 @@
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin';
   .mask
-    position: absolute
+    position: fixed
     top: 0
     bottom: 0
     left: 0
     right: 0
-    z-index: 18
-    background: rgba(0, 0, 0, 0.5)
+    z-index: 20
+    background: rgba(0, 0, 0, 0.75)
   .sidebar
     position: fixed
     right: 0
@@ -352,7 +370,7 @@
           box-sizing: border-box
           overflow: hidden
           &.mini
-            max-height: 106px
+            max-height: 120px
             height: auto
           li
             display: block

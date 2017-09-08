@@ -64,7 +64,7 @@
     },
     methods: {
       addGood() {
-        this.$emit('add');
+        this.$emit('add', event.target);
       },
       pay() {
         if (!this.good.count) {
@@ -86,17 +86,29 @@
         this.$router.push('/pay');
       },
       mark() {
-        if (this.marked) {
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (!uid) {
+          this.$store.dispatch('openToast', '请先登录！');
           return;
         }
-        let uid = this.$store.getters.getUserInfo.userId;
-        api.mark({
+        let params = {
           userId: uid,
           type: 1,
           artworkId: this.good.id,
           fromCart: false
-        }).then(response => {
-          if (response.code === 0) {
+        };
+        if (this.marked) {
+          // 已关注，再次点击取消关注
+          api.unmark(params).then(response => {
+            if (response.result === 0) {
+              this.good.collected = [];
+            }
+          });
+          this.marked = false;
+          return;
+        }
+        api.mark(params).then(response => {
+          if (response.result === 0) {
             if (this.good.collected) {
               this.good.collected.push(uid);
             } else {
@@ -163,7 +175,7 @@
     right: 0
     bottom: 0
     height: 50px
-    z-index: 99
+    z-index: 80
     background: #fafafa
     .foot-wrapper
       display: flex

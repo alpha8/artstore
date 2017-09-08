@@ -56,6 +56,12 @@
         return false;
       }
     },
+    activated() {
+      this.show();
+    },
+    deactivated() {
+      this.hide();
+    },
     methods: {
       addAddress() {
         if (!this.user.mobile || !this.user.address) {
@@ -77,6 +83,12 @@
       },
       doClearAddr() {
         this.user.address = '';
+      },
+      show() {
+        this.$store.commit('HIDE_FOOTER');
+      },
+      hide() {
+        this.$store.commit('SHOW_FOOTER');
       }
     },
     components: {

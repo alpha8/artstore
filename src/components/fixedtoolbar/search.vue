@@ -8,7 +8,7 @@
         </div>
         <ul class="tags">
           <li class="tag" v-for="item in historySearch">
-            <router-link :to="{path: '/search', query: {key: item.text}}">{{item.text}}</router-link>
+            <router-link :to="{path: '/search', query: {keyword: item.text}}">{{item.text}}</router-link>
           </li>
         </ul>
       </div>
@@ -19,7 +19,7 @@
         </div>
         <ul class="tags">
           <li class="tag" v-for="item in hotSearch">
-            <router-link :to="{path: '/search', query: {key: item.text}}">{{item.text}}</router-link>
+            <router-link :to="{path: '/search', query: {keyword: item.text}}">{{item.text}}</router-link>
           </li>
         </ul>
       </div>
@@ -33,7 +33,6 @@
       return {
         showBox: false,
         hotSearch: [
-          {text: '正山小种', pv: 2000},
           {text: '绿茶', pv: 500},
           {text: '铁观音', pv: 2000},
           {text: '乔木生普', pv: 2000},
@@ -47,7 +46,6 @@
         ],
         historySearch: [
           {text: '茶杯', pv: 2000},
-          {text: '正山小种', pv: 2000},
           {text: '绿茶', pv: 2000}
         ],
         keyword: ''

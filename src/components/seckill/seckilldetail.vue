@@ -13,23 +13,12 @@
             <span class="sell-count">月售{{good.sellCount}}份</span>
           </div> -->
           <div class="price">
-            <span class="now">¥{{good.price}}</span><span class="old" v-show="good.oldPrice">¥{{good.oldPrice}}</span>
-          </div>          
-          <div class="cartcontrol-wrapper">
-            <cartcontrol @add="addGood" :good="good"></cartcontrol>
+            <span class="now">¥{{good.killPrice}}</span><span class="old" v-show="good.price">¥{{good.price}}</span>
+            <span class="stock">库存： {{good.number}}</span>          
           </div>
-          <transition name="fade">
-            <div @click.stop.prevent="addFirst" class="buy" v-show="!good.count || good.count === 0">加入购物车</div>
-          </transition>
+          <div class="duration">秒杀时间： {{good.startTime | formatDate2}} ~ {{good.endTime | formatDate2}}</div>          
+          <div class="duration" v-if="countdownStats.milliseconds">结束倒计时：<span v-if="countdownStats.days"><span class="red-text">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="red-text">{{countdownStats.hours}}</span>小时</span><span v-if="countdownStats.mins"><span class="red-text">{{countdownStats.mins}}</span>分</span><span v-if="countdownStats.seconds"><span class="red-text">{{countdownStats.seconds}}</span>秒</span></div>          
         </div>
-        <!--  <div class="sku-wrap">
-          <div class="sku">
-            <label>数量</label>
-            <span class="num-wrap">
-              <cartcontrol @add="addGood" :good="good"></cartcontrol>
-            </span>
-          </div>
-        </div> -->
         <split v-show="good.content"></split>
         <div class="info" v-show="good.content">
           <h1 class="title">商品介绍</h1>
@@ -56,19 +45,32 @@
           </div>
         </div>
       </div>
-      <fixedcart ref="shopcart" @add="addToCart" :good="good"></fixedcart>
+    </div>
+    <div class="fixed-foot">
+      <div class="foot-wrapper">
+        <span class="mini-favorite-item" @click.stop.prevent="mark">
+          <span class="button-lg"><i :class="favorited"></i></span>
+        </span>
+        <div class="foot-item" v-show="seckill.leftStartTimes > 0" @click.stop.prevent="killNotify">
+          <span class="button-lg orange">秒杀提醒</span>
+        </div>
+        <div class="foot-item" v-show="seckill.leftEndTimes <= 0 || seckill.number <= 0">
+          <span class="button-lg gray">已结束</span>
+        </div>
+        <div class="foot-item" v-show="seckill.leftStartTimes <= 0 && seckill.leftEndTimes > 0 && seckill.number > 0" @click.stop.prevent="pay">
+          <span class="button-lg red">立即抢购</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {formatDate} from '@/common/js/date';
+  import {formatDate, countdown} from '@/common/js/date';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
   import ratingselect from '@/components/ratingselect/ratingselect';
-  import fixedcart from '@/components/fixedtoolbar/fixedcart';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import swipe from '@/components/swipe/quietswipe';
   import api from '@/api/api';
@@ -82,11 +84,14 @@
       this.fetchData();
     },
     deactivated() {
+      this.stopTimer();
       this.hide();
+      this.marked = false;
     },
     data() {
       return {
         good: {},
+        seckill: {},
         selectType: ALL,
         onlyContent: true,
         desc: {
@@ -95,7 +100,13 @@
           negative: '吐槽'
         },
         psCtx: api.CONFIG.psCtx,
-        addedProducts: this.$store.getters.addedProducts
+        balls: [{show: false}, {show: false}, {show: false}, {show: false}, {show: false}],
+        dropBalls: [],
+        marked: false,
+        timer: null,
+        nowTimes: +new Date(),
+        md5: '',
+        countdownStats: {}
       };
     },
     computed: {
@@ -110,12 +121,24 @@
           }
         });
         return sliders;
+      },
+      favorited() {
+        let uid = this.$store.getters.getUserInfo.userId;
+        let ids = this.good.collected || [];
+        for (let i = 0; i < ids.length; i++) {
+          if (uid === ids[i]) {
+            this.marked = true;
+            return 'icon-favorite';
+          }
+        }
+        this.marked = false;
+        return 'icon-heart';
       }
     },
     mounted() {
       let picUrl = api.CONFIG.defaultImg;
-      if (this.good.pictures && this.good.pictures.length) {
-        picUrl = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=375&h=375';
+      if (this.seckill.icon) {
+        picUrl = api.CONFIG.psCtx + seckill + '?w=375&h=375';
       }
       var shareParams = {
         title: '「一虎一席」' + this.good.name,
@@ -156,18 +179,50 @@
       fetchData() {
         let id = this.$route.params.id;
         this.$store.dispatch('openLoading');
-        api.GetGood(id).then(response => {
-          let good = response;
-          let sid = 'p' + good.id;
-          var qty = this.addedProducts && this.addedProducts[sid];
-          good.count = qty || 0;
-          this.good = good;
-          this.show();
-          this.lazyload();
-          this.$store.dispatch('closeLoading');
-        }).catch(response => {
-          this.$store.dispatch('closeLoading');
+        api.getSeckillDetail(id).then(res => {
+          if (!res.success) {
+            this.$store.dispatch('closeLoading');
+            return;
+          }
+          let seckill = res.data;
+          this.seckill = seckill;
+          this.timerLoop();
+          api.GetGood(seckill.goodsId).then(response => {
+            let good = response;
+            this.good = good;
+            Object.assign(this.good, this.seckill);
+            this.show();
+            this.lazyload();
+            this.$store.dispatch('closeLoading');
+          }).catch(response => {
+            this.$store.dispatch('closeLoading');
+          });
         });
+      },
+      serverTime() {
+        api.getServerTime().then(res => {
+          if (res.success) {
+            this.nowTimes = res.data;
+          }
+        });
+      },
+      timerLoop() {
+        if (this.seckill.leftStartTimes) {
+          this.seckill.leftStartTimes--;
+        }
+        if (this.seckill.leftEndTimes) {
+          this.seckill.leftEndTimes--;
+        }
+        this.countdownStats = countdown(this.seckill.leftEndTimes);
+        if (this.seckill.leftEndTimes <= 0) {
+          clearTimeout(this.timer);
+        }
+        this.timer = setTimeout(this.timerLoop, 1000);
+      },
+      stopTimer() {
+        if (this.timer) {
+          clearTimeout(this.timer);
+        }
       },
       _initScroll() {
         this.$nextTick(() => {
@@ -190,31 +245,6 @@
       back() {
         this.$router.back();
       },
-      addFirst(event) {
-        Vue.set(this.good, 'count', 1);
-        this._drop(event.target);
-        this.$store.commit('ADD_QUANTITY', this.good.id);
-        this.$store.dispatch('addToCart', this.good);
-      },
-      addGood(target) {
-        this._drop(target);
-      },
-      addToCart(target) {
-        if (!this.good.count) {
-          Vue.set(this.good, 'count', 1);
-        } else {
-          this.good.count++;
-        }
-        this._drop(target);
-        this.$store.commit('ADD_QUANTITY', this.good.id);
-        this.$store.dispatch('addToCart', this.good);
-      },
-      _drop(target) {
-        // 优化体验，异步执行小球下落动画
-        this.$nextTick(() => {
-          this.$refs.shopcart.drop(target);
-        });
-      },
       selectRating(type) {
         this.selectType = type;
         this.$nextTick(() => {
@@ -236,6 +266,83 @@
         } else {
           return this.selectType === type;
         }
+      },
+      pay() {
+        let killResult = {'REPEAT_KILL': '重复秒杀', 'INNER_ERROR': '系统异常，请重试', 'END': '秒杀已结束', 'SUCCESS': '秒杀成功'};
+        api.getSeckillUrl(this.seckill.seckillId).then(response => {
+          if (response.success) {
+            let md5 = response.data.md5;
+            if (!md5) {
+              this.$store.dispatch('openToast', '秒杀活动未开始或已结束！');
+              return;
+            }
+            api.killGoods(this.seckill.seckillId, md5).then(res => {
+              if (!res.success) {
+                this.$store.dispatch('openToast', res.error || killResult[res.data.statEnum]);
+                return;
+              }
+              let good = {
+                id: this.seckill.seckillId,
+                name: this.good.name,
+                pictures: this.good.pictures,
+                src: this.good.src,
+                content: this.good.content,
+                price: this.good.killPrice,
+                oldPrice: this.good.price,
+                count: 1,
+                icon: (this.good.pictures && this.good.pictures.length) ? api.CONFIG.psCtx + this.good.pictures[0].id + '?w=114&h=114' : api.CONFIG.defaultImg,
+                checked: false,
+                createTime: res.data.seccessKilled && res.data.seccessKilled.createTime
+              };
+              this.$store.dispatch('addPayGoods', [good]);
+              this.$router.push({name: 'pay', query: {orderType: 3}});
+            });
+          }
+        });
+      },
+      mark() {
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (!uid) {
+          this.$store.dispatch('openToast', '请先登录！');
+          return;
+        }
+        let params = {
+          userId: uid,
+          type: 1,
+          artworkId: this.good.id,
+          fromCart: false
+        };
+        if (this.marked) {
+          // 已关注，再次点击取消关注
+          api.unmark(params).then(response => {
+            if (response.result === 0) {
+              this.good.collected = [];
+            }
+          });
+          this.marked = false;
+          return;
+        }
+        api.mark(params).then(response => {
+          if (response.result === 0) {
+            if (this.good.collected) {
+              this.good.collected.push(uid);
+            } else {
+              this.good.collected = [uid];
+            }
+          }
+        });
+      },
+      killNotify() {
+        let openid = this.$store.getters.getUserInfo.openid;
+        api.reservedNotify({
+          pid: this.seckill.seckillId,
+          pname: this.seckill.name,
+          type: 0,
+          openid: openid,
+          strDate: formatDate(new Date(this.seckill.startTime), 'yyyy-MM-dd hh:mm')
+        }).then(response => {
+          this.$store.dispatch('openToast', '设置成功, 请留意微信通知！');
+        });
       },
       lazyload() {
         let w = window.innerWidth;
@@ -284,10 +391,14 @@
       formatDate(time) {
         let date = new Date(time);
         return formatDate(date, 'yyyy-MM-dd hh:mm');
+      },
+      formatDate2(time) {
+        let date = new Date(time.replace(/\s/, 'T'));
+        return formatDate(date, 'yyyy-MM-dd hh:mm');
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe
+      cartcontrol, split, ratingselect, fixedheader, swipe
     }
   };
 </script>
@@ -342,6 +453,10 @@
         font-size: 14px
         font-weight: 700
         color: rgb(7, 17, 27)
+        word-spacing: 1.2
+      .red-text
+        color: #e4393c
+        font-weight: 700
       .detail
         margin-bottom: 18px
         line-height: 10px
@@ -353,6 +468,7 @@
         .sell-count
           margin-right: 12px
       .price
+        position: relative
         font-weight: 700
         line-height: 24px
         .now
@@ -364,6 +480,17 @@
           text-decoration: line-through
           font-size: 10px
           color: rgb(147, 153, 159)
+        .stock
+          position: absolute
+          right: 0
+          top: 0
+          font-size: 12px
+          color: #666
+      .duration
+        display: block
+        padding: 5px 0
+        font-size: 12px
+        color: #666
       .cartcontrol-wrapper
         position: absolute
         right: 12px
@@ -468,4 +595,91 @@
           padding: 16px 0
           font-size: 12px
           color: rgb(147, 153, 159)
+  .fixed-foot
+    position: fixed
+    left: 0
+    right: 0
+    bottom: 0
+    height: 50px
+    z-index: 80
+    background: #fafafa
+    .foot-wrapper
+      display: flex
+      height: 100%
+      .foot-item, .mini-favorite-item
+        flex: 1
+        position: relative
+        height: 100%
+        font-size: 12px
+        text-align: center
+        color: #666
+        &.active
+          color: #00bb9c
+        .icon
+          display: block
+          line-height: 1
+          padding-top: 5px
+          i
+            display: inline-block
+            width: 20px
+            height: 20px
+            font-size: 16px
+        .text
+          display: block
+          line-height: 1
+          font-size: 10px
+        .button-lg
+          display: block
+          line-height: 50px
+          font-family: "黑体"
+          font-size: 14px
+          i
+            font-size: 22px
+          &.gray
+            background: #999
+            color: #fff
+          &.orange
+            background: rgba(250,180,90,0.93)
+            color: #fff
+          &.red
+            background: #ff463c
+            color: #fff
+          .icon-favorite
+            color: #ff463c  
+      .mini-favorite-item
+        flex: 70px 0 0
+        .button-lg
+          height: 50px
+          line-height: 30px
+          margin-top: 15px
+          overflow: hidden
+        .badge
+          display: inline-block
+          position: absolute
+          top: 6px
+          right: 13px
+          background: #f23030
+          color: #fff
+          border-radius: 50%
+          padding: 2px
+          width: 14px
+          height: 14px
+          line-height: 14px
+          font-size: 10px
+          overflow: hidden
+          text-overflow: ellipsis
+          white-space: nowrap
+    .ball-container
+      .ball
+        position: fixed
+        left: 32px
+        bottom: 22px
+        z-index: 200
+        transition: all 0.4s cubic-bezier(0.49, -0.29, 0.75, 0.41)
+        .inner
+          width: 16px
+          height: 16px
+          border-radius: 50%
+          background: rgb(0, 160, 220)
+          transition: all 0.4s linear
 </style>

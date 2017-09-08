@@ -1,14 +1,17 @@
 <template>
-  <div class="back-home" v-show="!showTop" @click.stop.prevent="goHome">
-    <i class="icon-home"></i><span class="text">回首页</span>
+  <div class="back-home" v-show="!showHome" @click.stop.prevent="goHome" :class="{'up': moveUp}">
+    <i class="icon-home"></i><span class="text">首页</span>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   export default {
     computed: {
-      showTop() {
+      showHome() {
         return this.$store.getters.getFooterState;
+      },
+      moveUp() {
+        return this.$store.getters.isShowTop;
       }
     },
     methods: {
@@ -22,23 +25,28 @@
 <style lang="stylus" rel="stylesheet/stylus">
   .back-home
     position: fixed
-    right: 0
-    bottom: 50%
-    margin-top: -22px
+    right: 4px
+    bottom: 55px
     font-size: 12px
     padding: 8px
-    background: rgba(7, 17, 27, 0.85)
-    color: #fff
+    background: #fff
+    color: #666
     text-align: center
-    border-radius: 4px 0 0 4px
+    width: 44px
+    height: 44px
+    border-radius: 50%
+    border: 1px solid #999
+    transition: bottom 0.3s linear
     box-sizing: border-box
-    opacity: 0.75
     z-index: 9
+    &.up
+      bottom: 106px
     .icon-home
       display: block
-      font-size: 16px
+      font-size: 14px
       margin-bottom: 3px
     .text
       display: block
+      font-size: 10px
 </style>
 

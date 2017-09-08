@@ -4,7 +4,7 @@ import Vuex from 'vuex';
 import * as types from './types';
 import cart from './modules/cart';
 import loading from './modules/loading';
-import { save, load, loadCookie } from '../common/js/store';
+import { save, load, loadCookie, parseJson } from '../common/js/store';
 Vue.use(Vuex);
 
 const ADDRESS_LIST = 'addresses';
@@ -15,12 +15,13 @@ const PAY_REMARK = 'remark';
 // states
 export const state = {
   showFooter: true,
+  showTop: false,
   cartAmount: load('cartAmount', 0),
   products: load('products', {}),
   searchDialog: false,
   showSidebar: false,
   showSidebarMask: false,
-  userInfo: JSON.parse(loadCookie('wxuser', '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}')),
+  userInfo: parseJson(loadCookie('wxuser', '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}'), {}),
   addressList: load(ADDRESS_LIST, []),
   toastList: [],
   couponAmount: load(COUPON_AMOUNT, 0),  // 优惠券账户余额
@@ -30,6 +31,7 @@ export const state = {
 
 // getters
 export const getters = {
+  isShowTop: state => state.showTop,
   cartProducts: state => state.cart.added,
   addedProducts: state => state.products,
   showSearchBox: state => state.searchDialog,
@@ -269,6 +271,12 @@ export const mutations = {
   [types.PAY_REMARK] (state, remark) {
     state.payRemark = remark;
     save(PAY_REMARK, state.payRemark);
+  },
+  [types.HIDE_TOP] (state) {
+    state.showTop = false;
+  },
+  [types.SHOW_TOP] (state) {
+    state.showTop = true;
   }
 };
 

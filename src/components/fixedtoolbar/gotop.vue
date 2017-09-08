@@ -6,18 +6,30 @@
 
 <script type="text/ecmascript-6">
   export default {
+    props: {
+      scrollY: {
+        type: Number
+      }
+    },
     data() {
       return {
-        showTop: false
+        winHeight: document.documentElement.clientHeight
       };
     },
+    computed: {
+      showTop() {
+        if (this.scrollY > this.winHeight) {
+          this.$store.commit('SHOW_TOP');
+          return true;
+        }
+        this.$store.commit('HIDE_TOP');
+        return false;
+      }
+    },
+    deactivated() {
+      this.$store.commit('HIDE_TOP');
+    },
     methods: {
-      show() {
-        this.showTop = true;
-      },
-      hide() {
-        this.showTop = false;
-      },
       goTop() {
         this.$emit('top');
       }
@@ -28,8 +40,8 @@
 <style lang="stylus" rel="stylesheet/stylus">
   .back-top
     position: fixed
-    right: 10px
-    bottom: 52px
+    right: 4px
+    bottom: 55px
     z-index: 9
     img
       background: transparent

@@ -28,7 +28,7 @@
         <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
       </div>
     </div>
-    <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
+    <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
 
@@ -73,7 +73,6 @@
         scroller: null,
         loading: false,
         scrollY: 0,
-        winHeight: document.documentElement.clientHeight,
         timer: null
       };
     },

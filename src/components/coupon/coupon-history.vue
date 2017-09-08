@@ -30,7 +30,7 @@
           <img src="../../common/images/ticket.png" alt="">
           <p>啊哦，还没有相关记录哦</p>
         </div>
-        <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
+        <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
   </div>
@@ -55,8 +55,7 @@
         scroller: null,
         loading: false,
         lastExec: +new Date(),
-        scrollY: 0,
-        winHeight: document.documentElement.clientHeight
+        scrollY: 0
       };
     },
     computed: {
@@ -66,9 +65,11 @@
     },
     activated() {
       this.fetchData(true);
+      this.show();
     },
     deactivated() {
       this._reset();
+      this.hide();
     },
     mounted() {
       this.scroller = this.$refs.couponlist;

@@ -5,8 +5,13 @@ import Vue from 'vue';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import VueAwesomeSwiper from 'vue-awesome-swiper';
-import vuePicturePreview from 'vue-picture-preview';
-Vue.use(vuePicturePreview);
+
+// import VueLazyload from 'vue-lazyload';
+// Vue.use(VueLazyload);
+
+// import AlloyFinger from 'alloyfinger/alloy_finger';
+// import AlloyFingerVue from 'alloyfinger/vue/alloy_finger.vue';
+// Vue.use(AlloyFingerVue, {AlloyFinger});
 
 import App from './App';
 import router from './router';

@@ -1,11 +1,11 @@
 ﻿<template>
   <div>
-    <fixedheader title="商品分类"></fixedheader>
+    <fixedheader title="商品分类" right-icon="icon-more"></fixedheader>
     <div class="goods">
       <div class="menu-wrapper" ref="menuWrapper">
         <ul>
           <li v-for="(item, index) in goods" class="menu-item" :class="{'current': item.id===good.id}" @click.stop.prevent="selectMenu(index)">
-            <span class="text border-1px">{{item.value}}</span>
+            <span class="text border-1px">{{item.value}}<em>({{item.count || 0}})</em></span>
           </li>
         </ul>
       </div>
@@ -69,9 +69,12 @@
             totalPivot[key] = {};
             let item = type[key];
             if (item.length) {
+              let total = 0;
               item.forEach(o => {
                 totalPivot[key][o.name] = o.count || 0;
+                total += o.count || 0;
               });
+              totalPivot[key].total = total;
             }
           }
         });
@@ -80,6 +83,11 @@
         api.GetCategories().then((response) => {
           this.goods = response.childrens;
           this.goods.forEach(good => {
+            try {
+              good.count = this.teaTotal[good.propertyName] && this.teaTotal[good.propertyName].total;
+            } catch (e) {
+              console.log(e);
+            }
             let lv2Category = good.childrens;
             if (lv2Category.length) {
               lv2Category.forEach(inner => {
@@ -181,16 +189,18 @@
     width: 100%
     overflow: hidden
     .menu-wrapper
-      flex: 0 0 80px
-      width: 80px
+      position: relative
+      flex: 0 0 30vw
+      width: 30vw
       background: #f3f5f7
+      overflow: hidden
       .menu-item
-        display: table
+        flex: 1
         height: 54px
-        width: 56px
-        line-height: 14px
+        line-height: 54px
         padding: 0 12px
         border-left: 4px solid transparent
+        box-sizing: border-box
         &.current
           position: relative
           z-index: 10
@@ -202,11 +212,15 @@
           .text
             border-none()
         .text
-          display: table-cell
-          width: 56px
+          display: block
+          width: 100%
           vertical-align: middle
           font-size: 12px
           border-1px(rgba(7, 17, 27, 0.1))
+          box-sizing: border-box
+          em
+            margin-left: 3px
+            font-size: 8px
     .goods-wrapper
       flex: 1
       .title
@@ -225,6 +239,7 @@
           position: relative
           width: 50%
           height: auto
+          max-height: 80px
           overflow: hidden
           box-sizing: border-box
           border-1px(rgba(7, 17, 27, 0.1))
@@ -255,6 +270,8 @@
               vertical-align: middle
               .icon
                 font-size: 12px
+              img
+                height: 100%
             .icon
               display: block
               font-size: 40px

@@ -7,7 +7,8 @@
         </div>
         <div class="item-info">
           <h3>{{item.name}}</h3>
-          <div class="price">¥<span class="num">{{item.price}}</span></div>
+          <div class="price"><span class="num">{{item.price | currency}}</span></div>
+          <div class="icon" @click.stop.prevent="mark(item)"><i :class="favorited(item)"></i></div>
         </div>
       </router-link>
     </div>
@@ -29,6 +30,11 @@
         default: 3
       }
     },
+    data() {
+      return {
+        screenWidth: window.innerWidth
+      };
+    },
     methods: {
       selectGood(target) {
         this.$emit('select', target);
@@ -40,6 +46,50 @@
         } else {
           return api.CONFIG.defaultImg;
         }
+      },
+      favorited(good) {
+        let uid = this.$store.getters.getUserInfo.userId;
+        let ids = good.collected || [];
+        for (let i = 0; i < ids.length; i++) {
+          if (uid === ids[i]) {
+            good.marked = true;
+            return 'icon-favorite';
+          }
+        }
+        good.marked = false;
+        return 'icon-heart';
+      },
+      mark(good) {
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (!uid) {
+          this.$store.dispatch('openToast', '请先登录！');
+          return;
+        }
+        let params = {
+          userId: uid,
+          type: 1,
+          artworkId: good.id,
+          fromCart: false
+        };
+        if (good.marked) {
+          // 已关注，再次点击取消关注
+          api.unmark(params).then(response => {
+            if (response.result === 0) {
+              good.collected = [];
+            }
+          });
+          good.marked = false;
+          return;
+        }
+        api.mark(params).then(response => {
+          if (response.result === 0) {
+            if (good.collected) {
+              good.collected.push(uid);
+            } else {
+              good.collected = [uid];
+            }
+          }
+        });
       }
     }
   };
@@ -71,6 +121,10 @@
           width: 100%
           height: auto
       .item-info
+        position: relative
+        width: 100%
+        padding-right: 40px
+        box-sizing: border-box
         h3
           line-height: 1.5
           height: 20px
@@ -81,11 +135,24 @@
           -webkit-line-clamp: 1
           -webkit-box-orient: vertical
         .price
-          margin-top: 3px
+          margin-top: 1px
           color: #ff463c
           font-size: 14px
           font-weight: 700
           white-space: nowrap
           overflow: hidden
           text-overflow: ellipsis
+        .icon
+          position: absolute
+          top: 50%
+          margin-top: -20px
+          right: 0
+          width: 40px
+          height: 40px
+          line-height: 40px
+          text-align: center
+          font-size: 20px
+          box-sizing: border-box
+          .icon-favorite
+            color: #ff463c
 </style>

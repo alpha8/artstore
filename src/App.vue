@@ -7,7 +7,6 @@
     <loading :show="loading.show" :text="loading.text"></loading>
     <toast v-show="toast.show" :text="toast.text"></toast>
     <gohome></gohome>
-    <lg-preview></lg-preview>
   </div>
 </template>
 
@@ -21,8 +20,8 @@ export default {
   data () {
     return {
       items: [{
-        icon: 'icon-recommend',
-        text: '选购',
+        icon: 'icon-home',
+        text: '首页',
         active: true,
         link: '/home'
       }, {

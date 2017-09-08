@@ -20,7 +20,7 @@
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
         <div class="no-follow" v-show="follows.length === 0">啊哦，还没有相关记录哦</div>
-        <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
+        <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
   </div>
@@ -42,8 +42,7 @@
         scroller: null,
         loading: false,
         lastExec: +new Date(),
-        scrollY: 0,
-        winHeight: document.documentElement.clientHeight
+        scrollY: 0
       };
     },
     activated() {
@@ -213,6 +212,7 @@
           position: relative
           width: 100%
           .follow-item
+            position: relative
             display: flex
             margin-bottom: 15px
             padding: 0 8px
@@ -243,7 +243,7 @@
                 font-weight: 700
             .item-ops
               position: absolute
-              right: 0
+              right: 8px
               top: 0
               width: 50px
               bottom: 0

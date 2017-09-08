@@ -45,6 +45,10 @@
     },
     activated() {
       this._initScroll();
+      this.show();
+    },
+    deactivated() {
+      this.hide();
     },
     computed: {
       balance() {
@@ -64,7 +68,7 @@
         });
       },
       detail() {
-        this.$router.push('/couponhistory');
+        this.$router.push('/coupon/history');
       },
       pay() {
         if (this.amount.length) {
@@ -88,6 +92,12 @@
       },
       back() {
         this.$router.back();
+      },
+      show() {
+        this.$store.commit('HIDE_FOOTER');
+      },
+      hide() {
+        this.$store.commit('SHOW_FOOTER');
       }
     },
     components: {
@@ -129,7 +139,7 @@
     position: absolute
     left: 0
     top: 44px
-    bottom: 50px
+    bottom: 0
     width: 100%
     overflow: hidden
     .wallet-wrapper
@@ -154,6 +164,7 @@
           font-size: 40px
           line-height:1
           font-weight: lighter
+          margin-top: 5px
       .wallet-content
         padding: 13px 10px
         color: #666

@@ -16,7 +16,7 @@
         <div class="wallet-content">
           <p class="content-title">账户余额是什么？</p>
           <p class="content-text">
-            当您出现退款失败等情况时会有账户余额，您可前往「一虎一席艺术平台公众号—个人中心—账户余额」中查看账户余额交易明细，账户余额可在 「实物商品」下单结算时最大化使用。
+            &nbsp;&nbsp;&nbsp;&nbsp;当您出现退款失败等情况时会有账户余额，您可前往「一虎一席艺术平台公众号—个人中心—账户余额」中查看账户余额交易明细，账户余额可在 「实物商品」下单结算时最大化使用。
           </p>
         </div>
       </div>
@@ -32,6 +32,10 @@
   export default {
     activated() {
       this._initScroll();
+      this.show();
+    },
+    deactivated() {
+      this.hide();
     },
     methods: {
       _initScroll() {
@@ -50,6 +54,12 @@
       },
       back() {
         this.$router.back();
+      },
+      show() {
+        this.$store.commit('HIDE_FOOTER');
+      },
+      hide() {
+        this.$store.commit('SHOW_FOOTER');
       }
     },
     components: {
@@ -91,7 +101,7 @@
     position: absolute
     left: 0
     top: 44px
-    bottom: 50px
+    bottom: 0
     width: 100%
     overflow: hidden
     .wallet-wrapper
@@ -112,6 +122,7 @@
           font-size: 40px
           line-height:1
           font-weight: lighter
+          margin-top: 5px
       .wallet-content
         padding: 13px 10px
         color: #666

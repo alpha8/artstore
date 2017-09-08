@@ -86,7 +86,9 @@ export function doPut(url, params) {
 export default {
   CONFIG: {
    cmsCtx: 'http://www.yihuyixi.com/cms',
+   wxCtx: 'http://www.yihuyixi.com/wxservice',
    webCtx: 'http://www.yihuyixi.com/yihu',
+   seckillCtx: 'http://www.yihuyixi.com/goodsKill',
    psCtx: 'http://www.yihuyixi.com/ps/download/',
    defaultImg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAAMFBMVEX///+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpufk+pAAAAD3RSTlMAESIzRFVmd4iZqrvM3e5GKvWZAAABv0lEQVRoge2YP1ICMRSH2R0UYZiRwlI5glfAylZP4G5twxGwt0BPgKVDs44XAFsbqW32CFTCiEAkhF3235DJyxud0d9XZRLyTXjJe9ndUgkAAAAAAAAAAADgx3DfhI5nI2Fd6xNfRsJDvVAYCt/7uwlNhQ+aXwQQ/hmhc/14xiq8EmLWYBTuyYx4yoydN+jCphRO0kNl8UIXelI4Tw+dqLJAE3alcJkOYqCCwCasrHpmZGE7/5dbsuvOalOmyQEnlF2fVOG+nD1MDlRVcb2hHuzOqtSnQugp4ZQqdG9fL5P97nhT/32m4hBfXh89HmE3Ei557pSyxa1XKGwmfEsO4YBFeBSfm4rNRR8LnXAYNVsswnpcEFXaWQsDsdi0aikfNYYyeX3VbAuOFa6yWYzWrTjtrITra0oFMfvMSBOuN1YFscchdNXG+tFarYXHaq4M4imLMFBzZRAHHMKDzdxFNu2owvjk+aULDuG2/I0yaUcUbvdhUsv5CEJn+zo173AIC1ZlJyxYlZWwvNtnLsylhq1Q94ZrKqxqfMZCj1l4P2YW9nU+U6F2gaZCPb8rZP8qwv7dBgAAAAAAAAAAAP+Lb4Qtq0R4e5WOAAAAAElFTkSuQmCC'
   },
@@ -116,7 +118,7 @@ export default {
    * 用户登录
    */
   Login() {
-    return doGet('/wxservice/baseInfo');
+    return doGet(this.CONFIG.wxCtx + '/baseInfo');
   },
 
   /**
@@ -124,6 +126,13 @@ export default {
    */
   mark(params) {
     return doPost(this.CONFIG.cmsCtx + '/user/collect', params);
+  },
+
+  /**
+   * 取消收藏
+   */
+  unmark(params) {
+    return doDelete(this.CONFIG.cmsCtx + '/user/collect', params);
   },
 
   /**
@@ -172,7 +181,7 @@ export default {
    * 取消订单
    */
   cancelOrder(params) {
-    return doPut(this.CONFIG.cmsCtx + '/order/cancel', params);
+    return doPost(this.CONFIG.cmsCtx + '/order/cancel', params);
   },
 
   /**
@@ -191,7 +200,7 @@ export default {
 
   /** 获取微信支付接口参数 */
   wxpay(params) {
-    return doPost('/wxservice/wx/pay', params);
+    return doPost(this.CONFIG.wxCtx + '/wx/pay', params);
   },
 
    /**
@@ -234,5 +243,83 @@ export default {
     */
   getCouponAmount(userId) {
     return doGet(this.CONFIG.cmsCtx + '/user/wallet?userId=' + userId);
+  },
+
+   /**
+    * 发送手机验证码
+    */
+  getVerifyCode(mobile) {
+    return doGet(this.CONFIG.webCtx + '/user/code?mobileNumber=' + mobile);
+  },
+
+   /**
+    * 验证手机验证码
+    */
+  verifyCode(mobile, code) {
+    return doGet(this.CONFIG.webCtx + '/user/verificationCodeByMobile?mobileNumber=' + mobile + '&code=' + code);
+  },
+
+   /**
+    * 跟踪物流
+    */
+  trackingGoods(expressNo, expressCode) {
+    return doGet(this.CONFIG.wxCtx + '/order/express?expressNo=' + expressNo + '&expressCode=' + expressCode);
+  },
+
+   /**
+    * 秒杀列表
+    */
+  getSeckills(params) {
+    return doGet(this.CONFIG.seckillCtx + '/seckill/list', params);
+  },
+
+   /**
+    * 秒杀单品详情
+    */
+  getSeckillDetail(id) {
+    return doGet(this.CONFIG.seckillCtx + '/seckill/' + id + '/detail');
+  },
+
+   /**
+    * 获取秒杀URL
+    */
+  getSeckillUrl(seckillId) {
+    return doPost(this.CONFIG.seckillCtx + '/seckill/' + seckillId + '/exposer');
+  },
+
+   /**
+    * 执行秒杀
+    */
+  killGoods(seckillId, md5) {
+    return doPost(this.CONFIG.seckillCtx + '/seckill/' + seckillId + '/' + md5 + '/execution');
+  },
+
+   /**
+    * 秒杀成功列表
+    */
+  getSuccessSeckills(params) {
+    return doGet(this.CONFIG.seckillCtx + '/seckill/successkilled/list', params);
+  },
+
+  /**
+   * 取消秒杀订单
+   */
+  cancelSeckillOrder(params) {
+    return doPost(this.CONFIG.seckillCtx + '/seckill/' + params.seckillId + '/cancel', params);
+  },
+
+   /**
+    * 当前时间
+    */
+  getServerTime() {
+    return doGet(this.CONFIG.seckillCtx + '/seckill/time/now');
+  },
+
+   /**
+    * 预售提醒
+    * type;  //0,秒杀，1：拍卖
+    */
+  reservedNotify(params) {
+    return doPost(this.CONFIG.cmsCtx + '/artwork/attention', params);
   }
 };

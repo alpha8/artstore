@@ -5,9 +5,11 @@
         <div class="search-form-box">
           <i class="icon-search"></i>
           <div class="search-form-input">
-            <input type="text" name="txtSearch" class="txtSearch" placeholder="优雅茶道，由你传承！" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" @change="search">
+            <form action="" v-on:submit.stop.prevent="search">
+              <input type="search" name="txtSearch" class="txtSearch" placeholder="优质茶生活、茶文化高端礼品" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" v-on:input="changeText">
+            </form>
           </div>
-          <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i>
+          <!-- <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i> -->
         </div>
       </div>
       <div class="ext-tools">
@@ -55,12 +57,23 @@
         return this.isLogin;
       }
     },
+    deactivated() {
+      this.hideDialog();
+      this.keyword = '';
+    },
     methods: {
       search() {
-        this.$router.push({path: '/search', query: {key: this.keyword || ''}});
+        this.$router.push({path: '/search', query: {keyword: this.keyword || ''}});
       },
       showLoginForm() {
         this.showLogin = !this.isLogin;
+      },
+      changeText() {
+        if (!this.keyword.length) {
+          this.typing = false;
+          this.showDiscard = true;
+          this.keyword = '';
+        }
       },
       openSmartSearch() {
         this.$store.commit('SHOW_SEARCH');
@@ -97,7 +110,7 @@
       background: #fff
     &.fixed
       background: #b80d10
-      animation: searchTop .5s ease-in-out
+      animation: searchTop .4s ease-in-out
     @-webkit-keyframes searchTop
       from { top: -50px; }
       to { top: 0;}
@@ -115,7 +128,7 @@
           position: relative
           height: 29px
           overflow: hidden
-          background: white
+          background: rgba(255,255,255,0.9)
           -moz-border-radius: 15px
           -webkit-border-radius: 15px
           border-radius: 15px

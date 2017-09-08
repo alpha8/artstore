@@ -53,7 +53,7 @@
       </div>
       <split></split>
       <div class="other-wrapper">
-        <div class="title">其他</div>
+        <div class="title border-1px">其他</div>
         <div class="otherList">
           <router-link :to="item.link" class="item border-1px" v-for="(item, index) in others" key="index" :class="{'highlight': item.highlight}">
             <i :class="item.icon"></i>
@@ -89,6 +89,7 @@
           { amount: 0, text: '优惠券余额', link: '/coupon' }
         ],
         others: [
+          { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
           { icon: 'icon-heart', text: '我的收藏', link: '/follow' },
           { icon: 'icon-footprint', text: '浏览足迹', link: '/footprint' },
           { icon: 'icon-address', text: '收货地址', link: '/address' },
@@ -321,10 +322,12 @@
     width: 100%
     .title
       padding: 0 10px
-      height: 50px
-      line-height: 50px
+      height: 40px
+      line-height: 40px
       font-size: 14px
       color: #7e8c8d
+      border-1px(rgba(7, 17, 27, 0.1))
+      box-sizing: border-box
       i
         padding-right: 3px
     .otherList

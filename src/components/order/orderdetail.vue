@@ -16,7 +16,7 @@
           <p><label>收货地址：</label><span>{{order.express.expressAddress}}</span></p>
           <p><label>收货人：</label><span>{{order.express.receiver}}</span></p>
           <p><label>联系方式：</label><span>{{order.express.mobile}}</span></p>
-          <p v-if="order.express.expressNo"><label>快递单号：</label><span><a :href="trackExpressState" target="_blank">{{order.express.expressNo}}</a></span></p>
+          <p v-if="order.express.expressNo"><label>快递单号：</label><span>{{order.express.expressNo}}</span></p>
           <p v-if="order.express.expressCompany"><label>快递公司：</label><span>{{order.express.expressCompany}}</span></p>
           <p v-if="order.express.deliverAt"><label>发货时间：</label><span>{{order.express.deliverAt | formatDate}}</span></p>
           <p><label>支付方式：</label><span>在线支付</span></p>
@@ -54,7 +54,7 @@
       <div class="btn-group">
         <div class="button" v-if="order.status === 0" @click.stop.prevent="weixinPay"><span class="btn-red">支付</span></div>
         <div class="button" v-if="order.status === 0" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
-        <div class="button" v-if="order.status === 2"><a :href="trackExpressState" target="_blank"><span class="btn-white">查看物流</span></a></div>
+        <div class="button" v-if="order.status === 2" @click.stop.prevent="trackExpress"><span class="btn-white">查看物流</span></div>
         <div class="button" v-if="order.status === 6"><span class="btn-white">看相似</span></div>
         <div class="button" v-if="order.status === 6"><span class="btn-orange">再次购买</span></div>
       </div>
@@ -107,7 +107,7 @@
     },
     methods: {
       fetchData() {
-        let id = this.$route.query.deal_id || '';
+        let id = this.$route.params.id || '';
         api.getOrderDetail(id).then(response => {
           this.order = response;
           this._initScroll();
@@ -152,6 +152,9 @@
             this.$store.dispatch('openToast', '订单取消失败！');
           }
         });
+      },
+      trackExpress() {
+        this.$router.push({name: 'expresslog', params: {expressNo: this.order.express.expressNo, expressCode: this.order.express.expressCode || 'unknown'}});
       },
       weixinPay() {
         let userInfo = this.$store.getters.getUserInfo;

@@ -49,11 +49,15 @@
       };
     },
     activated() {
+      this.show();
       let id = this.$route.params.id;
       if (!id) {
         return;
       }
       this.user = this.$store.getters.getAddressList.find((addr) => addr.id === id);
+    },
+    deactivated() {
+      this.hide();
     },
     computed: {
       clearAddress() {
@@ -78,6 +82,12 @@
       },
       doClearAddr() {
         this.user.address = '';
+      },
+      show() {
+        this.$store.commit('HIDE_FOOTER');
+      },
+      hide() {
+        this.$store.commit('SHOW_FOOTER');
       }
     },
     components: {

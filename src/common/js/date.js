@@ -19,6 +19,20 @@ export function formatDate(date, fmt) {
   return fmt;
 }
 
+export function countdown(time) {
+  let days = Math.floor(time / 3600 / 24);
+  let hours = Math.floor(time / 3600) - (days * 24);
+  let mins = Math.floor(time / 60) - (days * 24 * 60) - (hours * 60);
+  let seconds = Math.floor(time) - (days * 24 * 3600) - (hours * 3600) - (mins * 60);
+  return {
+    days: days,
+    hours: hours,
+    mins: mins,
+    seconds: seconds,
+    milliseconds: time
+  };
+}
+
 function padLeftZero(str) {
   return ('00' + str).substr(str.length);
 }

@@ -31,6 +31,10 @@ export function currency (value, cur, decimals) {
   }
   cur = cur != null ? cur : '¥';
   decimals = decimals != null ? decimals : 2;
+  var regex = /^([0-9]*)$/;
+  if (regex.test(Math.abs(value))) {
+    decimals = 0;
+  }
   return cur + Math.abs(value).toFixed(decimals);
   /*
   var stringified = Math.abs(value).toFixed(decimals);

@@ -44,7 +44,7 @@
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
         <div class="no-order" v-show="showRecords === 0">啊哦，还没有相关记录哦</div>
-        <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
+        <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
   </div>
@@ -77,7 +77,6 @@
         loading: false,
         lastExec: +new Date(),
         scrollY: 0,
-        winHeight: document.documentElement.clientHeight,
         paying: false
       };
     },
@@ -168,7 +167,7 @@
         return this.activeItem === -1 || order.status === this.activeItem;
       },
       showOrderDetail(order) {
-        this.$router.push({name: 'orderdetail', query: {deal_id: order.id}});
+        this.$router.push({name: 'orderdetail', params: {id: order.id}});
       },
       showProductDetail(product) {
         this.$router.push({name: 'good', params: {id: product.productId}});

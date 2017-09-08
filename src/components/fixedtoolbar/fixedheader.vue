@@ -53,9 +53,12 @@
         }, {
           link: '/cart', icon: 'icon-cart', text: '购物车'
         }, {
-          link: '/my', icon: 'icon-user2', text: '我的'
+          link: '/my', icon: 'icon-user2', text: '个人中心'
         }]
       };
+    },
+    activated() {
+      this.hide();
     },
     methods: {
       toggle() {

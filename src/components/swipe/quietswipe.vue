@@ -1,13 +1,14 @@
 <template>
   <swiper :options="swiperOption">
     <swiper-slide v-for="(slide, index) in swiperSlides" key="index">
-      <div class="slide" :style="getSlideUrl(slide)" v-preview="slide"></div>
+      <div class="slide" :style="getSlideUrl(slide)" @click.stop.prevent="preview(slide.src)"></div>
     </swiper-slide>
     <div class="swiper-pagination pager" slot="pagination"></div>
   </swiper>
 </template>
 
 <script type="text/ecmascript-6">
+  import wx from 'weixin-js-sdk';
   export default {
     props: {
       swiperSlides: {
@@ -27,7 +28,17 @@
     },
     methods: {
       getSlideUrl(slide) {
-        return `background-image: url(${slide})`;
+        return `background-image: url(${slide.thumbnail})`;
+      },
+      preview(img) {
+        let pics = [];
+        this.swiperSlides.forEach(item => {
+          pics.push(item.src);
+        });
+        wx.previewImage({
+          current: img,
+          urls: pics
+        });
       }
     }
   };

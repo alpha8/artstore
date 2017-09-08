@@ -57,6 +57,8 @@
             <!-- <div class="btns btn-red"><span>京东支付</span></div>
             <div class="btns btn-lightblue"><span>货到付款</span></div> -->
           </div>
+          <div class="countdownTips" v-if="countdownStats && countdownStats.milliseconds > 0">
+            请在<span v-if="countdownStats.hours"><span class="red-text">{{countdownStats.hours}}</span>小时</span><span v-if="countdownStats.mins"><span class="red-text">{{countdownStats.mins}}</span>分</span><span v-if="countdownStats.seconds"><span class="red-text">{{countdownStats.seconds}}</span>秒</span>内完成支付，否则订单将自动取消。</div>
         </div>
       </div>
     </div>
@@ -78,6 +80,7 @@
   import addressList from '@/components/my/addressList';
   import api from '@/api/api';
   import {pay} from '@/common/js/pay';
+  import {countdown} from '@/common/js/date';
 
   export default {
     data() {
@@ -85,7 +88,10 @@
         showBox: false,
         totalFee: 0,
         paying: false,
-        remarks: ''
+        remarks: '',
+        countdownStats: {},
+        timer: null,
+        seckill: {}
       };
     },
     computed: {
@@ -115,10 +121,15 @@
       }
       this.show();
       this._initScroll();
+      this.countdown();
     },
     deactivated() {
       this.hide();
       this.paying = false;
+      this.seckill = {};
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
     },
     mounted() {
       this._initScroll();
@@ -155,6 +166,43 @@
         this.showBox = false;
         this.defaultAddress = this.$store.getters.getDefaultAddress;
       },
+      countdown() {
+        let createTime = 0;
+        this.products.forEach((item) => {
+          createTime = item.createTime;
+          if (createTime) {
+            this.seckill = item;
+          }
+        });
+        if (!createTime) {
+          return;
+        }
+        let cTime = (new Date(createTime + 40 * 60000).getTime() - (+new Date())) / 1000;
+        this.countdownStats = countdown(cTime);
+        this.timer = setInterval(() => {
+          if (this.countdownStats.milliseconds <= 0) {
+            clearInterval(this.timer);
+            if (!this.seckill.id) {
+              return;
+            }
+            // 取消订单
+            let userId = this.$store.getters.getUserInfo.userId;
+            api.cancelSeckillOrder({
+              seckillId: this.seckill.id,
+              userId: userId
+            }).then(response => {
+              if (response.success) {
+                this.$store.dispatch('openToast', '支付超时，订单已取消');
+                setTimeout(() => {
+                  this.$router.push('/home');
+                }, 1500);
+                return;
+              }
+            });
+          }
+          this.countdownStats = countdown(--cTime);
+        }, 1000);
+      },
       back() {
         this.$router.back();
       },
@@ -181,7 +229,8 @@
             mobile: this.defaultAddress.mobile,
             receiver: this.defaultAddress.name
           },
-          remarks: this.remarks
+          remarks: this.remarks,
+          type: this.$route.query.orderType || 0
         };
         let items = [];
         this.products.forEach(product => {
@@ -430,6 +479,13 @@
             font-size: 16px
             .totalPrice
               color: #e4393c
+          .countdownTips
+            font-size: 12px
+            text-align: left
+            color: #666
+            .red-text
+              color: #e4393c
+              font-weight: 700
     >.address-list-wrap
       position: absolute
       left: 0
@@ -461,7 +517,6 @@
       z-index: 40
       transition: all 0.5s
       background: rgba(7, 17, 27, 0.6)
-      backdrop-filter: blur(10px)
       &.fade-transition
         transition: all 0.5s
         opacity: 1

@@ -6,20 +6,22 @@
       </div>
       <div class="title">
         <div class="search-form-box">
-          <i class="icon-search" @click.stop.prevent="search"></i>
+          <i class="icon-search"></i>
           <div class="search-form-input">
-            <input type="text" name="txtSearch" class="txtSearch" placeholder="搜索所有商品" autocomplete="off" v-model="keyword" @change.stop.prevent="search">
+            <form action="" v-on:submit.stop.prevent="search">
+              <input type="search" name="txtSearch" class="txtSearch" placeholder="搜索所有商品" autocomplete="off" v-model="keyword" @keyup.delete.stop.prevent="changeText">
+            </form>
           </div>
-          <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i>
+          <!-- <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i> -->
         </div>
       </div>
-      <div class="right" @click.stop.prevent="showSidebar">筛选</div>
+      <div class="right"><span @click.stop.prevent="search">搜索</span><span @click.stop.prevent="showSidebar">筛选</span></div>
     </div>
     <div class="sortbar-wrapper">
       <div class="sortbar-item" :class="{'active': sort === 'scoreSort'}" @click.stop.prevent="fireSort('scoreSort')">专业评分</div>
       <div class="sortbar-item" :class="{'active': sort === 'saleSort'}" @click.stop.prevent="fireSort('saleSort')">销量</div>
       <div class="sortbar-item" :class="{'active': sort === 'priceSort'}" @click.stop.prevent="fireSort('priceSort')"><span class="sort">价格<i class="arrow_up" :class="{'on': priceSort === '2'}"></i><i class="arrow_down" :class="{'on': priceSort === '1'}"></i></span></div>
-      <div class="sortbar-item" :class="{'active': sort === 'commentSort'}" @click.stop.prevent="fireSort('commentSort')">评论数</div>
+      <div class="sortbar-item" :class="{'active': sort === 'commentSort'}" @click.stop.prevent="fireSort('commentSort')">上架时间</div>
     </div>
     <div class="product-wrapper">
       <div class="productlist" ref="productWrapper">
@@ -39,7 +41,7 @@
       </div>
     </div>
     <sidebar ref="sidebar" @fireAction="search"></sidebar>
-    <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
+    <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
 
@@ -66,8 +68,7 @@
           categoryName: ''
         },
         sort: 'saleSort',
-        priceSort: '',
-        winHeight: document.documentElement.clientHeight
+        priceSort: ''
       };
     },
     activated() {
@@ -79,6 +80,13 @@
         this.params.categoryParentName = parentCategory || '';
       } else {
         this.params.categoryName = this.$route.query.cat || '';
+      }
+      let searchKeyword = this.$route.query.keyword;
+      if (searchKeyword) {
+        this.params.keyword = searchKeyword;
+        this.keyword = searchKeyword;
+      } else {
+        this.params.keyword = '';
       }
       this.fetchData(true);
     },
@@ -132,6 +140,11 @@
       showSidebar() {
         this.$store.commit('SHOW_SIDEBAR');
       },
+      changeText() {
+        if (!this.keyword.length) {
+          this.$refs.sidebar.clearForm();
+        }
+      },
       getThumbnail(item) {
         let pic = item.pictures;
         if (pic && pic.length) {
@@ -157,7 +170,21 @@
         this.params.price = form.price || '';
         this.params.shelfTime = form.shelfTime || '0';
         this.params.categoryParentName = form.categoryParentName || '';
-        this.keyword = form.keyword || '';
+        if (this.keyword) {
+          this.params.keyword = this.keyword;
+        } else {
+          this.params.keyword = '';
+        }
+        let kw = '';
+        if (form.keyword) {
+          kw = form.keyword;
+        } else if (form.parentKeyword) {
+          kw = form.parentKeyword;
+        }
+        if (kw) {
+          this.keyword = kw;
+          this.params.keyword = '';
+        }
         this.fetchData(true);
       },
       fireSort(sortKey) {
@@ -183,6 +210,7 @@
       },
       clearText() {
         this.keyword = '';
+        this.params.keyword = '';
         this._reset();
         this.fetchData(true);
       },
@@ -205,7 +233,8 @@
   .header
     position: fixed
     display: flex
-    padding: 0 8px
+    padding-left: 8px
+    padding-right: 5px
     top: 0
     width: 100%
     height: 44px
@@ -222,7 +251,7 @@
         font-size: 18px
     .title
       flex: 1
-      padding: 0 10px
+      padding: 0 5px 0 10px
       .search-form-box
         position: relative
         height: 44px
@@ -266,8 +295,17 @@
           background: url(../../common/images/close.png) no-repeat
           background-size: 20px auto
     .right
-      flex: 0 0 50px
+      flex: 0 0 90px
       font-size: 14px
+      box-sizing: border-box
+      span
+        padding-right: 10px
+        border-right: 1px solid rgba(7, 17, 27,0.1)
+        box-sizing: border-box
+        &:last-child
+          padding-left: 10px
+          padding-right: 0
+          border-right: none
       i
         font-size: 18px
         color: #666
@@ -356,14 +394,15 @@
           display: -webkit-box
           color: #666
           font-size: 14px
-          line-height: 1.3
+          height: 20px
+          line-height: 20px
           white-space: normal
           word-break: break-all
           text-overflow: ellipsis
-          -webkit-line-clamp: 2
+          -webkit-line-clamp: 1
           -webkit-box-orient: vertical
         .product-price
-          margin-top: 8px
+          margin-top: 2px
           font-size: 12px
           color: #e4393c
           .num

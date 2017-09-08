@@ -17,6 +17,10 @@ export const SHOW_TOAST = 'SHOW_TOAST';
 export const HIDE_FOOTER = 'HIDE_FOOTER';
 export const SHOW_FOOTER = 'SHOW_FOOTER';
 
+// SHOW TOP
+export const HIDE_TOP = 'HIDE_TOP';
+export const SHOW_TOP = 'SHOW_TOP';
+
 // SEARCH
 export const HIDE_SEARCH = 'HIDE_SEARCH';
 export const SHOW_SEARCH = 'SHOW_SEARCH';
