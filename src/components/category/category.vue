@@ -4,16 +4,17 @@
     <div class="goods">
       <div class="menu-wrapper" ref="menuWrapper">
         <ul>
-          <li v-for="(item, index) in goods" class="menu-item" :class="{'current': item.id===good.id}" @click.stop.prevent="selectMenu(index)">
-            <span class="text border-1px">{{item.value}}<em>({{item.count || 0}})</em></span>
+          <li v-for="(item, index) in goods" class="menu-item border-1px" :class="{'current': item.id===good.id, 'twoline': item.desc}" @click.stop.prevent="selectMenu(index)">
+            <span class="text"><span>{{item.value}}</span><em>({{item.count || 0}})</em></span>
+            <i v-if="item.desc">{{item.desc}}</i>
           </li>
         </ul>
       </div>
       <div class="goods-wrapper" ref="goodsWrapper">
         <ul>
           <li class="good-list good-list-hook">
-            <ul class="itemList">
-              <li v-for="good in good.childrens" :class="typeStatus(good.status)">
+            <ul class="itemList" v-if="good.childrens && good.childrens[0].childrens && !good.childrens[0].childrens.length">
+              <li v-for="good in good.childrens" :class="typeStatus(good.status)" v-if="!good.hide">
                 <router-link :to="{path: '/search', query: {cat: good.propertyName, key: (good.value === 'thumbnail' ? '' : good.value)}}" class="good-item" :class="{'thumbnail': good.value === 'thumbnail'}">
                   <div class="icon" v-if="good.value==='thumbnail'">
                     <img :src="good.desc" border="0" />
@@ -24,6 +25,21 @@
                 </router-link>
               </li>
             </ul>
+            <div v-if="innergood && innergood.childrens.length" v-for="innergood in good.childrens">
+              <h1 class="title border-1px">{{innergood.value}}：</h1>
+              <ul class="itemList">
+                <li v-for="good in innergood.childrens" :class="typeStatus(good.status)" v-if="!good.hide">
+                  <router-link :to="{path: '/search', query: {ck: innergood.propertyName, cv: good.propertyName, key: (good.value === 'thumbnail' ? '' : good.value)}}" class="good-item" :class="{'thumbnail': good.value === 'thumbnail'}">
+                    <div class="icon" v-if="good.value==='thumbnail'">
+                      <img :src="good.desc" border="0" />
+                    </div>
+                    <div class="content" v-if="good.value!=='thumbnail'">
+                      <h2 class="name">{{good.value}}<em>({{good.count || 0}})</em></h2>
+                    </div>
+                  </router-link>
+                </li>
+              </ul>
+            </div>
           </li>
         </ul>
       </div>
@@ -32,6 +48,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import Vue from 'vue';
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import api from '@/api/api';
@@ -131,6 +148,14 @@
       selectMenu(index) {
         this.good = this.goods[index];
         this.$nextTick(() => {
+          if (this.good.propertyName === 'ticket') {
+            this.good.childrens.forEach(item => {
+              Vue.set(item, 'hide', false);
+              if (!this.show4Months(item.propertyName)) {
+                item.hide = true;
+              }
+            });
+          }
           this._initScroll();
         });
       },
@@ -170,6 +195,16 @@
           height += item.clientHeight;
           this.heightArr.push(height);
         }
+      },
+      show4Months(month) {
+        let now = new Date();
+        var months = [];
+        for (let i = 0; i < 4; i++) {
+          let m = now.getMonth() + 1;
+          months.push(m);
+          now.setMonth(m);
+        }
+        return months.find(item => item === Number(month));
       }
     },
     components: {
@@ -196,11 +231,12 @@
       overflow: hidden
       .menu-item
         flex: 1
-        height: 54px
-        line-height: 54px
+        height: 60px
+        line-height: 60px
         padding: 0 12px
         border-left: 4px solid transparent
         box-sizing: border-box
+        border-1px(rgba(7, 17, 27, 0.1))
         &.current
           position: relative
           z-index: 10
@@ -211,26 +247,38 @@
           color: #00bb9c
           .text
             border-none()
+        &.twoline
+          position: relative
+          .text
+            line-height: 40px
+            height: 40px
+          i
+            height: 10px
+            line-height: 10px
+            display: block
+            font-size: 8px
+            color: #ccc
         .text
           display: block
           width: 100%
           vertical-align: middle
-          font-size: 12px
-          border-1px(rgba(7, 17, 27, 0.1))
+          font-size: 0
           box-sizing: border-box
+          span
+            font-size: 12px
           em
             margin-left: 3px
             font-size: 8px
     .goods-wrapper
       flex: 1
       .title
-        padding: 8px 0 8px 14px
-        height: 26px
-        line-height: 26px
+        padding-left: 10px
+        height: 40px
+        line-height: 40px
         font-size: 12px
-        font-weight: 700
-        color: #666
-        background: #f1f1f1
+        color: #333
+        background: #f2f2f2
+        border-1px(rgba(7, 17, 27, 0.1))
       .itemList
         display: flex
         flex-wrap: wrap
@@ -270,6 +318,8 @@
               vertical-align: middle
               .icon
                 font-size: 12px
+                height: 60px
+                overflow: hidden
               img
                 height: 100%
             .icon

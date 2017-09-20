@@ -68,7 +68,7 @@
           icon: 'icon-miaosha'
         }, {
           name: '四折团购',
-          url: '/category',
+          url: '/groupbuy',
           icon: 'icon-group_purchase'
         }, {
           name: '四折抢拍',

@@ -7,29 +7,24 @@
           <swipe :swiperSlides="swiperSlides"></swipe>
           <!-- <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div> -->
         </div>
+        <div class="detail bg_pink">
+          <div class="price">¥<em>{{good.groupPrice}}</em></div>
+          <div class="msg">
+            <div class="text"><del class="old_price" v-show="good.oldPrice">{{good.oldPrice | currency}}</del></div>
+            <div class="text"><span class="type_seckill">商品团购</span></div>
+          </div>
+          <div class="countdown">
+            <p class="countdown_text">已团{{good.bookmoq}}件·{{good.moq}}人团</p>
+          </div>
+        </div>
         <div class="content">
           <h1 class="title">{{good.name}}</h1>
-          <!-- <div class="detail">
-            <span class="sell-count">月售{{good.sellCount}}份</span>
-          </div> -->
           <div class="price">
-            <span class="now">¥{{good.price}}</span><span class="old" v-show="good.oldPrice">¥{{good.oldPrice}}</span>
-          </div>          
-          <div class="cartcontrol-wrapper">
-            <cartcontrol @add="addGood" :good="good"></cartcontrol>
+            <span class="now">¥{{good.groupPrice}}</span><span class="old" v-show="good.oldPrice">{{good.oldPrice | currency}}</span>
+            <span class="stock"></span>          
           </div>
-          <transition name="fade">
-            <div @click.stop.prevent="addFirst" class="buy" v-show="!good.count || good.count === 0">加入购物车</div>
-          </transition>
+          <div class="duration">团购时间： {{good.startDate | formatDate}} ~ {{good.endDate | formatDate}}</div>  
         </div>
-        <!--  <div class="sku-wrap">
-          <div class="sku">
-            <label>数量</label>
-            <span class="num-wrap">
-              <cartcontrol @add="addGood" :good="good"></cartcontrol>
-            </span>
-          </div>
-        </div> -->
         <split v-show="good.content"></split>
         <div class="info" v-show="good.content">
           <h1 class="title">商品介绍</h1>
@@ -56,7 +51,22 @@
           </div>
         </div>
       </div>
-      <fixedcart ref="shopcart" @add="addToCart" :good="good"></fixedcart>
+    </div>
+    <div class="fixed-foot">
+      <div class="foot-wrapper">
+        <span class="mini-favorite-item" @click.stop.prevent="mark">
+          <span class="button-lg"><i :class="favorited"></i></span>
+        </span>
+        <div class="foot-item" v-show="good.status === 2">
+          <span class="button-lg gray">已结束</span>
+        </div>
+        <div class="foot-item" v-show="good.bookmoq === good.moq">
+          <span class="button-lg gray">已抢完</span>
+        </div>
+        <div class="foot-item" v-show="good.bookmoq != good.moq" @click.stop.prevent="pay">
+          <span class="button-lg red">立即抢购</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -68,7 +78,6 @@
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
   import ratingselect from '@/components/ratingselect/ratingselect';
-  import fixedcart from '@/components/fixedtoolbar/fixedcart';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import swipe from '@/components/swipe/quietswipe';
   import api from '@/api/api';
@@ -80,9 +89,11 @@
   export default {
     activated() {
       this.fetchData();
+      this.show();
     },
     deactivated() {
       this.hide();
+      this.marked = false;
     },
     data() {
       return {
@@ -95,12 +106,17 @@
           negative: '吐槽'
         },
         psCtx: api.CONFIG.psCtx,
-        addedProducts: this.$store.getters.addedProducts
+        balls: [{show: false}, {show: false}, {show: false}, {show: false}, {show: false}],
+        dropBalls: [],
+        marked: false,
+        timer: null,
+        nowTimes: +new Date(),
+        countdownStats: {}
       };
     },
     computed: {
       swiperSlides() {
-        let pics = this.good.pictures || [];
+        let pics = this.good.artwork && this.good.artwork.pictures || [];
         let sliders = [];
         pics.forEach(pic => {
           if (pic) {
@@ -110,18 +126,30 @@
           }
         });
         return sliders;
+      },
+      favorited() {
+        let uid = this.$store.getters.getUserInfo.userId;
+        let ids = this.good.artwork && this.good.artwork.collected || [];
+        for (let i = 0; i < ids.length; i++) {
+          if (uid === ids[i]) {
+            this.marked = true;
+            return 'icon-favorite';
+          }
+        }
+        this.marked = false;
+        return 'icon-heart';
       }
     },
     methods: {
       fetchData() {
         let id = this.$route.params.id;
         this.$store.dispatch('openLoading');
-        api.GetGood(id).then(response => {
-          let good = response;
-          let sid = 'p' + good.id;
-          var qty = this.addedProducts && this.addedProducts[sid];
-          good.count = qty || 0;
-          this.good = good;
+        api.getGroupbuyDetail(id).then(res => {
+          if (res.result === 1) {
+            this.$store.dispatch('closeLoading');
+            return;
+          }
+          this.good = res;
           this.wxReady();
           this.show();
           this.lazyload();
@@ -153,28 +181,8 @@
       },
       addFirst(event) {
         Vue.set(this.good, 'count', 1);
-        this._drop(event.target);
-        this.$store.commit('ADD_QUANTITY', this.good.id);
-        this.$store.dispatch('addToCart', this.good);
       },
       addGood(target) {
-        this._drop(target);
-      },
-      addToCart(target) {
-        if (!this.good.count) {
-          Vue.set(this.good, 'count', 1);
-        } else {
-          this.good.count++;
-        }
-        this._drop(target);
-        this.$store.commit('ADD_QUANTITY', this.good.id);
-        this.$store.dispatch('addToCart', this.good);
-      },
-      _drop(target) {
-        // 优化体验，异步执行小球下落动画
-        this.$nextTick(() => {
-          this.$refs.shopcart.drop(target);
-        });
       },
       selectRating(type) {
         this.selectType = type;
@@ -198,6 +206,54 @@
           return this.selectType === type;
         }
       },
+      pay() {
+        let good = {
+          id: this.good.id,
+          name: this.good.name,
+          pictures: this.good.artwork.pictures,
+          src: this.good.icon,
+          content: this.good.content,
+          price: this.good.groupPrice,
+          oldPrice: this.good.oldPrice,
+          count: 1,
+          icon: (this.good.icon) ? api.CONFIG.psCtx + this.good.icon + '?w=114&h=114' : api.CONFIG.defaultImg,
+          checked: false
+        };
+        this.$store.dispatch('addPayGoods', [good]);
+        this.$router.push({name: 'pay', query: {orderType: 4}});
+      },
+      mark() {
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (!uid) {
+          this.$store.dispatch('openToast', '请先登录！');
+          return;
+        }
+        let params = {
+          userId: uid,
+          type: 1,
+          artworkId: this.good.artwork.id,
+          fromCart: false
+        };
+        if (this.marked) {
+          // 已关注，再次点击取消关注
+          api.unmark(params).then(response => {
+            if (response.result === 0) {
+              this.good.artwork.collected = [];
+            }
+          });
+          this.marked = false;
+          return;
+        }
+        api.mark(params).then(response => {
+          if (response.result === 0) {
+            if (this.good.artwork.collected) {
+              this.good.artwork.collected.push(uid);
+            } else {
+              this.good.artwork.collected = [uid];
+            }
+          }
+        });
+      },
       wxReady() {
         api.wxsignature(encodeURIComponent(location.href.split('#')[0])).then(response => {
           wx.config({
@@ -206,12 +262,12 @@
             timestamp: response.timestamp,  // 必填，生成签名的时间戳
             nonceStr: response.nonceStr,   // 必填，生成签名的随机串
             signature: response.signature,  // 必填，签名，见附录1
-            jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone']
+            jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
           });
         });
         let shareData = {
           title: this.good.name,
-          desc: '售价：¥' + this.good.price + '。「一虎一席商城」正品保证，微信专享。',
+          desc: '团购价：¥' + this.good.groupPrice + '。「一虎一席商城」正品保证，微信专享。',
           link: location.href,
           imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
         };
@@ -226,7 +282,6 @@
           clearTimeout(timer);
           let previewImgList = [];
           let imgs = this.$refs.goodContent.getElementsByTagName('img');
-          let prefix = 'http://www.yihuyixi.com';
           let html = this.good.content;
           for (let i = 0; i < imgs.length; i++) {
             let img = imgs[i];
@@ -278,10 +333,17 @@
       formatDate(time) {
         let date = new Date(time);
         return formatDate(date, 'yyyy-MM-dd hh:mm');
+      },
+      formatDate2(time) {
+        if (!time) {
+          return '';
+        }
+        let date = new Date(time.replace(/\s/, 'T'));
+        return formatDate(date, 'yyyy-MM-dd hh:mm');
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe
+      cartcontrol, split, ratingselect, fixedheader, swipe
     }
   };
 </script>
@@ -327,6 +389,91 @@
       position: relative
       width: 100%
       padding-bottom: 30px
+    .detail
+      position: relative
+      z-index: 5
+      &.bg_pink
+        display: flex
+        -webkit-box-align: center
+        align-items: center
+        height: 49px
+        color: #fff
+        background:url(../../common/images/bg_pink.png) no-repeat,-webkit-linear-gradient(top,#fc5997,#ef4747)
+        background-size: 259px,100%
+      .price
+        margin: 0 10px
+        font-size: 14px
+        font-weight: 700
+        em
+          font-size: 24px
+      .msg
+        flex: 1
+        font-size: 12px
+        .text
+          height: 18px
+          line-height: 18px
+        .type_seckill
+          position: relative
+          display: inline-block
+          margin: -2px 3px 0 0
+          padding: 0 3px 0 18px
+          height: 15px
+          vertical-align: middle
+          line-height: 15px
+          font-size: 10px
+          &::before
+            content: ""
+            position: absolute
+            left: 0
+            top: 0
+            width: 15px
+            height: 15px
+            border-top-left-radius: 1px
+            border-bottom-left-radius: 1px
+            background:#fff url(../../common/images/clock.png) no-repeat 50%
+            background-size: 12px
+          &::after
+            content: ""
+            display: block
+            border: 1px solid #e5e5e5
+            position: absolute
+            top: 0
+            left: 0
+            pointer-events: none
+            -webkit-transform: scale(.5);
+            -webkit-transform-origin: 0 0;
+            bottom: -100%;
+            right: -100%;
+            border-color: #fff
+            border-radius: 1px
+          @media only screen and (-webkit-min-device-pixel-ratio: 2)
+            border-radius: 2px
+      .countdown
+        position: relative
+        height: 100%
+        text-align: center
+        height: 49px
+        line-height: 49px
+        padding-right: 8px
+        box-sizing: border-box
+        overflow: hidden
+        .countdown_text
+          font-size: 12px
+          color: #fff
+    .bg_green
+      display: flex
+      -webkit-box-align: center
+      align-items: center
+      height: 49px
+      color: #fff
+      background: -webkit-linear-gradient(top, #56cd5c, #44b549)
+      .countdown_start
+        padding-right: 10px
+        font-size: 12px
+        color: #035807
+        text-align: center
+        p
+          color: #fff
     .content
       position: relative
       padding: 18px
@@ -336,6 +483,10 @@
         font-size: 14px
         font-weight: 700
         color: rgb(7, 17, 27)
+        word-spacing: 1.2
+      .red-text
+        color: #e4393c
+        font-weight: 700
       .detail
         margin-bottom: 18px
         line-height: 10px
@@ -347,6 +498,7 @@
         .sell-count
           margin-right: 12px
       .price
+        position: relative
         font-weight: 700
         line-height: 24px
         .now
@@ -358,14 +510,25 @@
           text-decoration: line-through
           font-size: 10px
           color: rgb(147, 153, 159)
+        .stock
+          position: absolute
+          right: 0
+          top: 0
+          font-size: 12px
+          color: #666
+      .duration
+        display: block
+        padding: 5px 0
+        font-size: 12px
+        color: #666
       .cartcontrol-wrapper
         position: absolute
         right: 12px
-        bottom: 12px
+        top: 12px
       .buy
         position: absolute
         right: 18px
-        bottom: 18px
+        top: 18px
         z-index: 10
         height: 24px
         line-height: 24px
@@ -462,4 +625,94 @@
           padding: 16px 0
           font-size: 12px
           color: rgb(147, 153, 159)
+  .fixed-foot
+    position: fixed
+    left: 0
+    right: 0
+    bottom: 0
+    height: 50px
+    z-index: 80
+    background: #fafafa
+    .foot-wrapper
+      display: flex
+      height: 100%
+      .foot-item, .mini-favorite-item
+        flex: 1
+        position: relative
+        height: 100%
+        font-size: 12px
+        text-align: center
+        color: #666
+        &.active
+          color: #00bb9c
+        .icon
+          display: block
+          line-height: 1
+          padding-top: 5px
+          i
+            display: inline-block
+            width: 20px
+            height: 20px
+            font-size: 16px
+        .text
+          display: block
+          line-height: 1
+          font-size: 10px
+        .button-lg
+          display: block
+          line-height: 50px
+          font-family: "黑体"
+          font-size: 14px
+          i
+            font-size: 22px
+          &.gray
+            background: #999
+            color: #fff
+          &.green
+            background: #44b549
+            color: #fff
+          &.orange
+            background: rgba(250,180,90,0.93)
+            color: #fff
+          &.red
+            background: #ff463c
+            color: #fff
+          .icon-favorite
+            color: #ff463c  
+      .mini-favorite-item
+        flex: 70px 0 0
+        .button-lg
+          height: 50px
+          line-height: 30px
+          margin-top: 15px
+          overflow: hidden
+        .badge
+          display: inline-block
+          position: absolute
+          top: 6px
+          right: 13px
+          background: #f23030
+          color: #fff
+          border-radius: 50%
+          padding: 2px
+          width: 14px
+          height: 14px
+          line-height: 14px
+          font-size: 10px
+          overflow: hidden
+          text-overflow: ellipsis
+          white-space: nowrap
+    .ball-container
+      .ball
+        position: fixed
+        left: 32px
+        bottom: 22px
+        z-index: 200
+        transition: all 0.4s cubic-bezier(0.49, -0.29, 0.75, 0.41)
+        .inner
+          width: 16px
+          height: 16px
+          border-radius: 50%
+          background: rgb(0, 160, 220)
+          transition: all 0.4s linear
 </style>

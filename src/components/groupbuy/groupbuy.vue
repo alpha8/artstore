@@ -1,24 +1,21 @@
 <template>
   <div>
-    <fixedheader title="商品秒杀"></fixedheader>
+    <fixedheader title="商品团购"></fixedheader>
     <div class="order">
       <div class="order-wrap">
-        <div class="order-container" ref="seckList" v-if="seckills.length">
+        <div class="order-container" ref="groupbuy" v-if="groupbuys.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
-            <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in seckills" :key="index" v-if="item.number > 0">
+            <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in groupbuys" :key="index">
               <div class="item-content">
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
                   <div class="price-wrap">
-                    <span>{{item.killPrice | currency}}</span>
-                    <del>{{item.price | currency}}</del>
+                    <span>{{item.groupPrice | currency}}</span>
+                    <del>{{item.oldPrice | currency}}</del>
                   </div>
                   <div class="more-ops">
-                    <span class="btn-buy orange" v-show="existKilled(item)">抢过了</span>
-                    <span class="btn-buy" v-show="!existKilled(item) && item.leftStartTimes <= 0 && item.leftEndTimes > 0" @click.stop.prevent="showDetail(item)">立即抢购</span>
-                    <span class="btn-buy green" v-show="item.leftStartTimes > 0" @click.stop.prevent="killNotify(item)">秒杀提醒</span>
-                    <span class="btn-buy disabled" v-show="item.leftEndTimes <= 0">已结束</span>
+                    <span class="btn-buy" @click.stop.prevent="showDetail(item)">去拼单</span>
                     <span class="items-reserve">
                       <strong>已售{{calcLeftPercent(item)}}%</strong>
                       <span class="progress-bar"><em :style="transDeltaPercent(item)"></em></span>
@@ -31,7 +28,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-if="!seckills.length">啊哦，还没有相关记录哦</div>
+        <div class="no-order" v-if="!groupbuys.length">啊哦，还没有相关记录哦</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -41,13 +38,12 @@
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
-  import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
 
   export default {
     data() {
       return {
-        seckills: [],
+        groupbuys: [],
         pageNumber: 1,
         pageSize: 10,
         totalPages: -1,
@@ -60,17 +56,15 @@
       };
     },
     activated() {
-      this.timerLoop();
       this.fetchData(true);
       this.show();
     },
     deactivated() {
-      this.stopTimer();
       this._reset();
       this.hide();
     },
     mounted() {
-      this.scroller = this.$refs.seckList;
+      this.scroller = this.$refs.groupbuy;
       window.onscroll = () => {
         this.scrollY = window.pageYOffset;
       };
@@ -85,17 +79,17 @@
           return;
         }
         this.loading = true;
-        api.getSeckills({
-          pageIndex: this.pageNumber,
+        api.getGroupbuys({
+          currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          endLongTime: +new Date()
+          type: 1
         }).then(response => {
-          if (response.list && response.list.length) {
-            response.list.forEach(item => {
-              this.seckills.push(item);
+          if (response.groupBuies && response.groupBuies.length) {
+            response.groupBuies.forEach(item => {
+              this.groupbuys.push(item);
             });
           }
-          this.totalPages = response.pages;
+          this.totalPages = response.totalPages;
           this.pageNumber++;
           this.lastExec = +new Date();
           this.loading = false;
@@ -106,35 +100,15 @@
           this.totalPages = 0;
         });
       },
-      timerLoop() {
-        for (let i = 0; i < this.seckills.length; i++) {
-          let seckill = this.seckills[i];
-          if (seckill.leftStartTimes) {
-            seckill.leftStartTimes--;
-          }
-          if (seckill.leftEndTimes) {
-            seckill.leftEndTimes--;
-          }
-        }
-        this.timer = setTimeout(this.timerLoop, 1000);
-      },
-      stopTimer() {
-        if (this.timer) {
-          clearTimeout(this.timer);
-        }
-      },
       calcLeftPercent(item) {
-        return Math.round((1 - item.number / item.stock) * 100);
+        return Math.round(item.bookmoq / item.moq * 100);
       },
       transDeltaPercent(item) {
-        let delta = Math.round((1 - item.number / item.stock) * 100);
+        let delta = Math.round(item.bookmoq / item.moq * 100);
         return `width: ${delta}%`;
       },
-      existKilled(item) {
-        return !!this.$store.getters.getKilledProduct.find(id => id === item.seckillId);
-      },
       _reset() {
-        this.seckills = [];
+        this.groupbuys = [];
         this.pageNumber = 1;
         this.totalPages = -1;
         this.loadEnd = false;
@@ -148,19 +122,7 @@
         }
       },
       showDetail(item) {
-        this.$router.push({name: 'seckillDetail', params: {id: item.seckillId}});
-      },
-      killNotify(item) {
-        let openid = this.$store.getters.getUserInfo.openid;
-        api.reservedNotify({
-          pid: item.seckillId,
-          pname: item.name,
-          type: 0,
-          openid: openid,
-          strDate: formatDate(new Date(item.startTime.replace(/\s/, 'T')), 'yyyy-MM-dd hh:mm')
-        }).then(response => {
-          this.$store.dispatch('openToast', '设置成功, 请留意微信通知！');
-        });
+        this.$router.push({name: 'groupbuyDetail', params: {id: item.id}});
       },
       show() {
         this.$store.commit('HIDE_FOOTER');

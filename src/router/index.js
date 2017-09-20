@@ -29,6 +29,8 @@ import cashdetail from '@/components/my/cashdetail';
 import seckill from '@/components/seckill/seckill';
 import seckillDetail from '@/components/seckill/seckilldetail';
 import myseckill from '@/components/seckill/myseckill';
+import groupbuy from '@/components/groupbuy/groupbuy';
+import groupbuyDetail from '@/components/groupbuy/groupbuydetail';
 
 import '@/common/stylus/index.styl';
 
@@ -61,6 +63,8 @@ export default new Router({
     {path: '/seckill', component: seckill, name: 'seckill'},
     {path: '/seckill/:id/detail', component: seckillDetail, name: 'seckillDetail'},
     {path: '/myseckill', component: myseckill, name: 'myseckill'},
+    {path: '/groupbuy', component: groupbuy, name: 'groupbuy'},
+    {path: '/groupbuy/:id/detail', component: groupbuyDetail, name: 'groupbuyDetail'},
     {path: '/personInfo', component: personInfo},
     {path: '/wallet', component: wallet},
     {path: '/cashdetail', component: cashdetail},

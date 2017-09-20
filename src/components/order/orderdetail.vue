@@ -6,6 +6,7 @@
         <div class="order-info">
           <div class="order-state">
             <p><label>订单状态：</label><span class="text-blue">{{statusDesc}}</span></p>
+            <p v-if="order.type"><label>订单类型：</label><span>{{orderTypeDesc}}</span></p>
             <p><label>订单编号：</label><span>{{order.orderNo}}</span></p>
             <p><label>下单时间：</label><span>{{order.createAt | formatDate}}</span></p>
           </div>
@@ -95,6 +96,14 @@
       trackExpressState() {
         if (this.order.status === 2) {
           return `https://m.kuaidi100.com/index_all.html?type=${this.order.express.expressCompany}&postid=${this.order.express.expressNo}`;
+        }
+        return '';
+      },
+      orderTypeDesc() {
+        if (this.order.type === 3) {
+          return '秒杀';
+        } else if (this.order.type === 4) {
+          return '团购';
         }
         return '';
       }

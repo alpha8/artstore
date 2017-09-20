@@ -11,7 +11,7 @@
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(order, index) in orders" v-show="showOrder(order)" :key="index">
               <div class="item-title" @click.stop.prevent="showOrderDetail(order)">
-                <span class="productNo">订单号：{{order.orderNo}}</span>
+                <span class="productNo">订单号：{{order.orderNo}}<span class="orderflag" v-if="order.type">({{orderTypeDesc(order)}})</span></span>
                 <span class="op-btns"></span>
               </div>
               <div class="item-summary border-top-1px border-1px">
@@ -123,7 +123,8 @@
         api.getOrders({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          userId: this.$store.getters.getUserInfo.userId || -1
+          userId: this.$store.getters.getUserInfo.userId || -1,
+          status: this.activeItem
         }).then(response => {
           if (response.code === 0) {
             if (response.orders && response.orders.length) {
@@ -160,8 +161,19 @@
       statusDesc(status) {
         return this.mapStatus[status];
       },
+      orderTypeDesc(item) {
+        if (item.type === 3) {
+          return '秒杀';
+        } else if (item.type === 4) {
+          return '团购';
+        } else {
+          return '';
+        }
+      },
       changeTab(item) {
         this.activeItem = item.val;
+        this._reset();
+        this.fetchData(true);
       },
       showOrder(order) {
         return this.activeItem === -1 || order.status === this.activeItem;
@@ -312,7 +324,7 @@
               width: 100%
               height: 40px
               line-height: 40px
-              font-size: 14px              
+              font-size: 14px
               &:after
                 position: absolute
                 display: block
@@ -332,6 +344,10 @@
                 display: inline-block
                 float: right
                 padding-right: 20px
+              .orderflag
+                margin-left: 5px
+                font-size: 10px
+                color: #999
             .item-summary
               position: relative
               display: flex

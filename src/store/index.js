@@ -11,6 +11,7 @@ const ADDRESS_LIST = 'addresses';
 const USER_AMOUNT = 'userAmount';
 const COUPON_AMOUNT = 'couponAmount';
 const PAY_REMARK = 'remark';
+const KILL_PRODUCT = 'killProducts';
 
 // states
 export const state = {
@@ -26,7 +27,8 @@ export const state = {
   toastList: [],
   couponAmount: load(COUPON_AMOUNT, 0),  // 优惠券账户余额
   userAmount: load(USER_AMOUNT, 0),     // 用户账户余额
-  payRemark: load(PAY_REMARK, '工作日收货')
+  payRemark: load(PAY_REMARK, '工作日收货'),
+  killProducts: load(KILL_PRODUCT, [])  // 已参与的秒杀列表
 };
 
 // getters
@@ -52,7 +54,8 @@ export const getters = {
   getFooterState: state => state.showFooter,
   getUserAmount: state => state.userAmount,
   getCouponAmount: state => state.couponAmount,
-  getPayRemark: state => state.payRemark
+  getPayRemark: state => state.payRemark,
+  getKilledProduct: state => state.killProducts
 };
 
 // actions
@@ -130,6 +133,12 @@ export const actions = {
   },
   updateCouponAmount(context, amount) {
     context.commit(types.UPDATE_COUPON_AMOUNT, amount);
+  },
+  addKillProduct(context, seckillId) {
+    context.commit(types.ADD_SECKILL, seckillId);
+  },
+  removeKillProduct(context, seckillId) {
+    context.commit(types.REMOVE_SECKILL, seckillId);
   }
 };
 
@@ -277,6 +286,20 @@ export const mutations = {
   },
   [types.SHOW_TOP] (state) {
     state.showTop = true;
+  },
+  [types.ADD_SECKILL] (state, seckillId) {
+    state.killProducts.push(seckillId);
+    save(KILL_PRODUCT, state.killProducts);
+  },
+  [types.REMOVE_SECKILL] (state, seckillId) {
+    let killList = state.killProducts;
+    for (let i = 0; i < killList.length; i++) {
+      if (killList[i] === seckillId) {
+        killList.splice(i, 1);
+      }
+    }
+    state.killProducts = killList;
+    save(KILL_PRODUCT, killList);
   }
 };
 

@@ -93,6 +93,32 @@ export default {
    defaultImg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAAMFBMVEX///+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpufk+pAAAAD3RSTlMAESIzRFVmd4iZqrvM3e5GKvWZAAABv0lEQVRoge2YP1ICMRSH2R0UYZiRwlI5glfAylZP4G5twxGwt0BPgKVDs44XAFsbqW32CFTCiEAkhF3235DJyxud0d9XZRLyTXjJe9ndUgkAAAAAAAAAAADgx3DfhI5nI2Fd6xNfRsJDvVAYCt/7uwlNhQ+aXwQQ/hmhc/14xiq8EmLWYBTuyYx4yoydN+jCphRO0kNl8UIXelI4Tw+dqLJAE3alcJkOYqCCwCasrHpmZGE7/5dbsuvOalOmyQEnlF2fVOG+nD1MDlRVcb2hHuzOqtSnQugp4ZQqdG9fL5P97nhT/32m4hBfXh89HmE3Ei557pSyxa1XKGwmfEsO4YBFeBSfm4rNRR8LnXAYNVsswnpcEFXaWQsDsdi0aikfNYYyeX3VbAuOFa6yWYzWrTjtrITra0oFMfvMSBOuN1YFscchdNXG+tFarYXHaq4M4imLMFBzZRAHHMKDzdxFNu2owvjk+aULDuG2/I0yaUcUbvdhUsv5CEJn+zo173AIC1ZlJyxYlZWwvNtnLsylhq1Q94ZrKqxqfMZCj1l4P2YW9nU+U6F2gaZCPb8rZP8qwv7dBgAAAAAAAAAAAP+Lb4Qtq0R4e5WOAAAAAElFTkSuQmCC'
   },
 
+  /**
+   * 微信登录
+   */
+  Login() {
+    return doGet(this.CONFIG.wxCtx + '/baseInfo');
+  },
+
+  /** 获取微信支付接口参数 */
+  wxpay(params) {
+    return doPost(this.CONFIG.wxCtx + '/wx/pay', params);
+  },
+
+   /**
+    * 微信公众号签名
+    */
+  wxsignature(url) {
+    return doGet(this.CONFIG.wxCtx + '/wx/sign?url=' + url);
+  },
+
+   /**
+    * 跟踪物流
+    */
+  trackingGoods(expressNo, expressCode) {
+    return doGet(this.CONFIG.wxCtx + '/order/express?expressNo=' + expressNo + '&expressCode=' + expressCode);
+  },
+
   /** 获取所有商品列表 */
   GetGoods(params) {
     return doGet(this.CONFIG.cmsCtx + '/artwork/list', params);
@@ -112,13 +138,6 @@ export default {
   /** 查询数据字典配置值 */
   GetConfigList(parent) {
     return doGet(this.CONFIG.cmsCtx + '/datadic/childrens?parentPath=' + (parent || ''));
-  },
-
-  /**
-   * 用户登录
-   */
-  Login() {
-    return doGet(this.CONFIG.wxCtx + '/baseInfo');
   },
 
   /**
@@ -198,11 +217,6 @@ export default {
     return doGet(this.CONFIG.cmsCtx + '/order/' + id);
   },
 
-  /** 获取微信支付接口参数 */
-  wxpay(params) {
-    return doPost(this.CONFIG.wxCtx + '/wx/pay', params);
-  },
-
    /**
     * 获取用户收货地址列表
     */
@@ -260,13 +274,6 @@ export default {
   },
 
    /**
-    * 跟踪物流
-    */
-  trackingGoods(expressNo, expressCode) {
-    return doGet(this.CONFIG.wxCtx + '/order/express?expressNo=' + expressNo + '&expressCode=' + expressCode);
-  },
-
-   /**
     * 秒杀列表
     */
   getSeckills(params) {
@@ -321,5 +328,33 @@ export default {
     */
   reservedNotify(params) {
     return doPost(this.CONFIG.cmsCtx + '/artwork/attention', params);
+  },
+
+   /**
+    * 查询二维码领取优惠券活动
+    */
+  resolveQrcode(id) {
+    return doGet(this.CONFIG.cmsCtx + '/qrcode/resolve?id=' + id);
+  },
+
+   /**
+    * 二维码领取
+    */
+  receiveQrcode(params) {
+    return doGet(this.CONFIG.cmsCtx + '/coupon/receive', params);
+  },
+
+   /**
+    * 团购列表
+    */
+  getGroupbuys(params) {
+    return doGet(this.CONFIG.cmsCtx + '/groupBuy/list', params);
+  },
+
+   /**
+    * 团购单品详情
+    */
+  getGroupbuyDetail(id) {
+    return doGet(this.CONFIG.cmsCtx + '/groupBuy/' + id);
   }
 };

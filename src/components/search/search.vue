@@ -88,6 +88,14 @@
       } else {
         this.params.keyword = '';
       }
+      this.params.yearName = '';
+      this.params.cfName = '';
+      this.params.qualityName = '';
+      let ck = this.$route.query.ck;
+      let cv = this.$route.query.cv;
+      if (ck && cv) {
+        this.params[ck] = cv;
+      }
       this.fetchData(true);
     },
     deactivated() {
@@ -133,6 +141,9 @@
       _reset() {
         this.products = [];
         this.params.categoryName = '';
+        this.params.yearName = '';
+        this.params.cfName = '';
+        this.params.qualityName = '';
         this.pageNumber = 1;
         this.totalPages = -1;
         this.loadEnd = false;

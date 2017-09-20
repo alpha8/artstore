@@ -17,11 +17,12 @@
         <div class="coupon-rules">
           <div class="rule-title">————  活动规则 ———— </div>
           <div class="rule-content">
-            <ol>
+            <ol v-if="!qrcode.content">
               <li>领取的优惠券将与填写的手机号码进行绑定</li>
               <li>优惠券可叠加使用，订单支付时系统将自动抵扣</li>
               <li>如有其它疑问，请咨询一虎一席艺术平台客服</li>
             </ol>
+            <div v-html="qrcode.content"></div>
           </div>
         </div>
       </div>
@@ -41,7 +42,9 @@
         phone: '',
         code: '',
         sendLock: false,
-        waitSecs: 60
+        waitSecs: 60,
+        qrcode: {},
+        openid: ''
       };
     },
     computed: {
@@ -60,7 +63,7 @@
       }
     },
     activated() {
-      this._initScroll();
+      this.fetchData();
       this.show();
     },
     deactivated() {
@@ -77,6 +80,21 @@
             this.scroll.refresh();
           }
         });
+      },
+      fetchData() {
+        let qrid = this.$route.query.qrid;
+        let openid = this.$route.query.openid || '';
+        if (qrid) {
+          this.$store.dispatch('openLoading');
+          api.resolveQrcode(qrid).then(response => {
+            this.qrcode = response;
+            this.openid = openid;
+            this._initScroll();
+            this.$store.dispatch('closeLoading');
+          }).catch(response => {
+            this.$store.dispatch('closeLoading');
+          });
+        }
       },
       sendVerifyCode() {
         if (this.phone.length !== 11 || this.sendLock) {
@@ -98,10 +116,28 @@
         });
       },
       doAction() {
-        api.verifyCode(this.phone, this.code).then(response => {
-          if (response.code === 0) {
-            this.$store.dispatch('openToast', '领取成功！');
-            this.$router.push('/home');
+        if (!this.phone || !this.code) {
+          return;
+        }
+        api.verifyCode(this.phone, this.code).then(res => {
+          if (res.result === 0) {
+            api.receiveQrcode({
+              qrid: this.qrcode.id,
+              mobileNumber: this.phone,
+              openid: this.openid
+            }).then(response => {
+              if (response.result === 0) {
+                this.$store.dispatch('openToast', '领取成功！');
+                this.$router.push('/home');
+              } else if (response.code === 1001) {
+                this.$store.dispatch('openToast', '您已领取过此优惠券！');
+              } else if (response.code === 1002) {
+                this.$store.dispatch('openToast', '优惠券已领完！');
+              } else {
+                this.$store.dispatch('openToast', '优惠券太火爆了，请稍候再来！');
+              }
+              this.code = '';
+            });
           }
         });
       },
@@ -205,6 +241,4 @@
           font-size: 14px
           line-height: 1.5
           color: #ccc
-          li
-            list-style: decimal
 </style>

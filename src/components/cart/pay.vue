@@ -24,7 +24,7 @@
             </div>
             <div class="sku-info">
               <p class="sku-name">{{product.name}}</p>
-              <p class="sku-item">规格：标准</p>
+              <p class="sku-item"></p>
             </div>
             <div class="sku-ext">
               <p class="sku-price">{{product.price | currency}}</p>
@@ -43,7 +43,7 @@
           </li> -->
           <li class="checkout-item change" @click.stop.prevent="openRemarkBox">
             <strong>备注</strong>
-            <span class="nowrap-line">{{payRemarks}}</span>
+            <span class="nowrap-line remark">{{payRemarks}}</span>
           </li>
         </ul>
         <split></split>
@@ -193,8 +193,9 @@
             }).then(response => {
               if (response.success) {
                 this.$store.dispatch('openToast', '支付超时，订单已取消');
+                this.$store.dispatch('removeKillProduct', this.seckill.id);
                 setTimeout(() => {
-                  this.$router.push('/home');
+                  this.$router.push('/my');
                 }, 1500);
                 return;
               }
@@ -454,6 +455,8 @@
                 overflow: hidden
                 -webkit-line-clamp: 2
                 -webkit-box-orient: vertical
+              &.remark
+                font-size: 10px
             &.change:after
               content: ""
               display: block

@@ -74,7 +74,7 @@
         }
         this.user.userId = this.$store.getters.getUserInfo.userId;
         api.updateAddress(this.user).then(response => {
-          if (response.code === RESPONSE_OK) {
+          if (response.result === RESPONSE_OK) {
             this.$store.dispatch('updateAddress', this.user);
             this.$router.back();
           }

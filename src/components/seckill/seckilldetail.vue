@@ -7,6 +7,27 @@
           <swipe :swiperSlides="swiperSlides"></swipe>
           <!-- <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div> -->
         </div>
+        <div class="detail bg_pink" v-if="seckill.leftStartTimes <= 0">
+          <div class="price">¥<em>{{good.killPrice}}</em></div>
+          <div class="msg">
+            <div class="text"><del class="old_price" v-show="good.price">{{good.price | currency}}</del></div>
+            <div class="text"><span class="type_seckill">商品秒杀</span></div>
+          </div>
+          <div class="countdown">
+            <p class="countdown_text">距秒杀结束还剩</p>
+            <p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>:</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p>
+          </div>
+        </div>
+        <div class="detail bg_green" v-if="seckill.leftStartTimes > 0">
+          <div class="price">¥<em>{{good.killPrice}}</em></div>
+          <div class="msg">
+            <div class="text"><del class="old_price" v-show="good.price">{{good.price | currency}}</del></div>
+            <div class="text"><span class="type_seckill">商品秒杀</span></div>
+          </div>
+          <div class="countdown_start bg_green">
+            <p v-html="countdownTips()"></p>
+          </div>
+        </div>
         <div class="content">
           <h1 class="title">{{good.name}}</h1>
           <!-- <div class="detail">
@@ -17,7 +38,7 @@
             <span class="stock">库存： {{good.number}}</span>          
           </div>
           <div class="duration">秒杀时间： {{good.startTime | formatDate2}} ~ {{good.endTime | formatDate2}}</div>          
-          <div class="duration" v-if="countdownStats.milliseconds">结束倒计时：<span v-if="countdownStats.days"><span class="red-text">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="red-text">{{countdownStats.hours}}</span>小时</span><span v-if="countdownStats.mins"><span class="red-text">{{countdownStats.mins}}</span>分</span><span v-if="countdownStats.seconds"><span class="red-text">{{countdownStats.seconds}}</span>秒</span></div>          
+          <!-- <div class="duration" v-if="countdownStats.milliseconds">结束倒计时：<span v-if="countdownStats.days"><span class="red-text">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="red-text">{{countdownStats.hours}}</span>小时</span><span v-if="countdownStats.mins"><span class="red-text">{{countdownStats.mins}}</span>分</span><span v-if="countdownStats.seconds"><span class="red-text">{{countdownStats.seconds}}</span>秒</span></div>  -->         
         </div>
         <split v-show="good.content"></split>
         <div class="info" v-show="good.content">
@@ -52,12 +73,18 @@
           <span class="button-lg"><i :class="favorited"></i></span>
         </span>
         <div class="foot-item" v-show="seckill.leftStartTimes > 0" @click.stop.prevent="killNotify">
-          <span class="button-lg orange">秒杀提醒</span>
+          <span class="button-lg green">秒杀提醒</span>
         </div>
-        <div class="foot-item" v-show="seckill.leftEndTimes <= 0 || seckill.number <= 0">
+        <div class="foot-item" v-show="seckill.leftEndTimes <= 0">
           <span class="button-lg gray">已结束</span>
         </div>
-        <div class="foot-item" v-show="seckill.leftStartTimes <= 0 && seckill.leftEndTimes > 0 && seckill.number > 0" @click.stop.prevent="pay">
+        <div class="foot-item" v-show="seckill.number <= 0">
+          <span class="button-lg gray">已抢完</span>
+        </div>
+        <div class="foot-item" v-show="existKilled()">
+          <span class="button-lg orange">抢过了</span>
+        </div>
+        <div class="foot-item" v-show="!existKilled() && seckill.leftStartTimes <= 0 && seckill.leftEndTimes > 0 && seckill.number > 0" @click.stop.prevent="pay">
           <span class="button-lg red">立即抢购</span>
         </div>
       </div>
@@ -135,46 +162,6 @@
         return 'icon-heart';
       }
     },
-    mounted() {
-      let picUrl = api.CONFIG.defaultImg;
-      if (this.seckill.icon) {
-        picUrl = api.CONFIG.psCtx + seckill + '?w=375&h=375';
-      }
-      var shareParams = {
-        title: '「一虎一席」' + this.good.name,
-        link: location.href,
-        icon: picUrl
-      };
-      // 分享朋友圈
-      wx.onMenuShareTimeline({
-        title: shareParams.title, // 分享标题
-        link: shareParams.link, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-        imgUrl: shareParams.icon, // 分享图标
-        success: function () {
-          // 用户确认分享后执行的回调函数
-          this.$store.dispatch('openToast', '分享成功！');
-        },
-        cancel: function () {
-          // 用户取消分享后执行的回调函数
-        }
-      });
-      // 分享给朋友
-      wx.onMenuShareAppMessage({
-        title: shareParams.title, // 分享标题
-        desc: shareParams.title + ' - 商品详情页', // 分享描述
-        link: shareParams.link, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-        imgUrl: shareParams.icon, // 分享图标
-        type: 'link', // 分享类型,music、video或link，不填默认为link
-        dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
-        success: function () {
-          // 用户确认分享后执行的回调函数
-          this.$store.dispatch('openToast', '分享成功！');
-        },
-        cancel: function () {
-          // 用户取消分享后执行的回调函数
-        }
-      });
-    },
     methods: {
       fetchData() {
         let id = this.$route.params.id;
@@ -191,6 +178,7 @@
             let good = response;
             this.good = good;
             Object.assign(this.good, this.seckill);
+            this.wxReady();
             this.show();
             this.lazyload();
             this.$store.dispatch('closeLoading');
@@ -213,7 +201,11 @@
         if (this.seckill.leftEndTimes) {
           this.seckill.leftEndTimes--;
         }
-        this.countdownStats = countdown(this.seckill.leftEndTimes);
+        if (this.seckill.leftStartTimes) {
+          this.countdownStats = countdown(this.seckill.leftStartTimes);
+        } else {
+          this.countdownStats = countdown(this.seckill.leftEndTimes);
+        }
         if (this.seckill.leftEndTimes <= 0) {
           clearTimeout(this.timer);
         }
@@ -223,6 +215,25 @@
         if (this.timer) {
           clearTimeout(this.timer);
         }
+      },
+      countdownTips() {
+        let text = '';
+        if (this.countdownStats.days) {
+          text += this.countdownStats.days + '天';
+        }
+        if (this.countdownStats.hours) {
+          text += this.countdownStats.hours + '小时';
+        }
+        if (this.countdownStats.mins) {
+          text += this.countdownStats.mins + '分';
+        }
+        if (this.countdownStats.seconds) {
+          text += this.countdownStats.seconds + '秒';
+        }
+        if (this.seckill.leftStartTimes) {
+          return `距开抢 ${text}`;
+        }
+        return '';
       },
       _initScroll() {
         this.$nextTick(() => {
@@ -295,6 +306,7 @@
                 createTime: res.data.seccessKilled && res.data.seccessKilled.createTime
               };
               this.$store.dispatch('addPayGoods', [good]);
+              this.$store.dispatch('addKillProduct', this.seckill.seckillId);
               this.$router.push({name: 'pay', query: {orderType: 3}});
             });
           }
@@ -332,6 +344,9 @@
           }
         });
       },
+      existKilled() {
+        return !!this.$store.getters.getKilledProduct.find(id => id === this.seckill.seckillId);
+      },
       killNotify() {
         let openid = this.$store.getters.getUserInfo.openid;
         api.reservedNotify({
@@ -339,9 +354,31 @@
           pname: this.seckill.name,
           type: 0,
           openid: openid,
-          strDate: formatDate(new Date(this.seckill.startTime), 'yyyy-MM-dd hh:mm')
+          strDate: formatDate(new Date(this.seckill.startTime.replace(/\s/, 'T')), 'yyyy-MM-dd hh:mm')
         }).then(response => {
           this.$store.dispatch('openToast', '设置成功, 请留意微信通知！');
+        });
+      },
+      wxReady() {
+        api.wxsignature(encodeURIComponent(location.href.split('#')[0])).then(response => {
+          wx.config({
+            // debug: true, // 开启调试模式
+            appId: response.appId,      // 必填，公众号的唯一标识
+            timestamp: response.timestamp,  // 必填，生成签名的时间戳
+            nonceStr: response.nonceStr,   // 必填，生成签名的随机串
+            signature: response.signature,  // 必填，签名，见附录1
+            jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
+          });
+        });
+        let shareData = {
+          title: this.good.name,
+          desc: '秒杀价：¥' + this.good.killPrice + '。「一虎一席商城」正品保证，微信专享。',
+          link: location.href,
+          imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
+        };
+        wx.ready(function() {
+          wx.onMenuShareTimeline(shareData);
+          wx.onMenuShareAppMessage(shareData);
         });
       },
       lazyload() {
@@ -350,23 +387,35 @@
           clearTimeout(timer);
           let previewImgList = [];
           let imgs = this.$refs.goodContent.getElementsByTagName('img');
+          let html = this.good.content;
           for (let i = 0; i < imgs.length; i++) {
             let img = imgs[i];
             let src = img.getAttribute('data-original');
             let width = img.getAttribute('width');
             let height = img.getAttribute('height');
             let key = '<img class="lazy" data-original="' + src + '" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"';
+            let suffix = '';
             if (width) {
-              key += ' width="' + width + '"';
+              suffix += ' width="' + width + '"';
             }
             if (height) {
-              key += ' height="' + height + '"';
+              suffix += ' height="' + height + '"';
             }
-            this.good.content = this.good.content.replace(key, '<img src="http://www.yihuyixi.com' + src + '?w=' + w + '"');
+            let key2 = key + ' alt=""' + suffix;
+            key += suffix;
+            if (src.indexOf('http:') < 0) {
+              src = prefix + src;
+            }
+            if (src.lastIndexOf('?') < 0) {
+              src += '?1';
+            }
+            src = src + '&w=' + w;
+            html = html.replace(key, '<img src="' + src + '"').replace(key2, '<img src="' + src + '"');
             if (width && width > 100) {
-              previewImgList.push('http://www.yihuyixi.com' + src);
+              previewImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
           }
+          this.good.content = html;
           setTimeout(() => {
             this._initScroll();
             let newImgs = this.$refs.goodContent.getElementsByTagName('img');
@@ -374,9 +423,7 @@
               newImgs[j].addEventListener('click',
                 (e) => {
                   let pic = (e.target || e.srcElement).src;
-                  if (pic.lastIndexOf('?') > -1) {
-                    pic = pic.substring(0, pic.lastIndexOf('?'));
-                  }
+                  pic = pic.substring(0, pic.lastIndexOf('?'));
                   wx.previewImage({
                     current: pic,
                     urls: previewImgList
@@ -393,8 +440,10 @@
         return formatDate(date, 'yyyy-MM-dd hh:mm');
       },
       formatDate2(time) {
-        let date = new Date(time.replace(/\s/, 'T'));
-        return formatDate(date, 'yyyy-MM-dd hh:mm');
+        if (!time) {
+          return '';
+        }
+        return time.substring(0, time.length - 3);
       }
     },
     components: {
@@ -444,6 +493,104 @@
       position: relative
       width: 100%
       padding-bottom: 30px
+    .detail
+      position: relative
+      z-index: 5
+      &.bg_pink
+        display: flex
+        -webkit-box-align: center
+        align-items: center
+        height: 49px
+        color: #fff
+        background:url(../../common/images/bg_pink.png) no-repeat,-webkit-linear-gradient(top,#fc5997,#ef4747)
+        background-size: 259px,100%
+      .price
+        margin: 0 10px
+        font-size: 14px
+        font-weight: 700
+        em
+          font-size: 24px
+      .msg
+        flex: 1
+        font-size: 12px
+        .text
+          height: 18px
+          line-height: 18px
+        .type_seckill
+          position: relative
+          display: inline-block
+          margin: -2px 3px 0 0
+          padding: 0 3px 0 18px
+          height: 15px
+          vertical-align: middle
+          line-height: 15px
+          font-size: 10px
+          &::before
+            content: ""
+            position: absolute
+            left: 0
+            top: 0
+            width: 15px
+            height: 15px
+            border-top-left-radius: 1px
+            border-bottom-left-radius: 1px
+            background:#fff url(../../common/images/clock.png) no-repeat 50%
+            background-size: 12px
+          &::after
+            content: ""
+            display: block
+            border: 1px solid #e5e5e5
+            position: absolute
+            top: 0
+            left: 0
+            pointer-events: none
+            -webkit-transform: scale(.5);
+            -webkit-transform-origin: 0 0;
+            bottom: -100%;
+            right: -100%;
+            border-color: #fff
+            border-radius: 1px
+          @media only screen and (-webkit-min-device-pixel-ratio: 2)
+            border-radius: 2px
+      .countdown
+        position: absolute
+        right: 0
+        top: 0
+        width: 116px
+        height: 100%
+        text-align: center
+        background-color: #f8f8f8
+        .countdown_text
+          margin: 5px 0
+          font-size: 10px
+          color: #666
+        .countdown_nums
+          color: #ef4747
+          font-size: 14px
+          .box
+            display:inline-block
+            margin:0 1px
+            width: 20px
+            height: 21px
+            line-height: 21px
+            font-weight:700
+            color:#fff
+            background:#fff url(../../common/images/countdown.png)
+            background-size:13px
+    .bg_green
+      display: flex
+      -webkit-box-align: center
+      align-items: center
+      height: 49px
+      color: #fff
+      background: -webkit-linear-gradient(top, #56cd5c, #44b549)
+      .countdown_start
+        padding-right: 10px
+        font-size: 12px
+        color: #035807
+        text-align: center
+        p
+          color: #fff
     .content
       position: relative
       padding: 18px
@@ -453,7 +600,6 @@
         font-size: 14px
         font-weight: 700
         color: rgb(7, 17, 27)
-        word-spacing: 1.2
       .red-text
         color: #e4393c
         font-weight: 700
@@ -637,6 +783,9 @@
             font-size: 22px
           &.gray
             background: #999
+            color: #fff
+          &.green
+            background: #44b549
             color: #fff
           &.orange
             background: rgba(250,180,90,0.93)
