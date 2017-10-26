@@ -10,7 +10,7 @@
             </div>
             <div class="line">
               <div class="userName" v-show="!hasLogin()"><a href="/wxservice/baseInfo">未登录</a></div>
-              <div class="userName" v-show="hasLogin()">{{user().nickName}}</div>
+              <div class="userName" v-show="hasLogin()">{{user().nickName}}<span class="supplier" v-if="userExt.model === 2">(代理商)</span></div>
               <div class="info" v-show="hasLogin()"><span class="vip" :class="getVipIcon">{{getVipTitle}}</span></div>
             </div>
             <span class="setting" v-show="hasLogin()"><router-link to="/personInfo"><img src="../../common/images/settings.png"/><span>账号管理</span></router-link></span>
@@ -118,30 +118,41 @@
             }
           }
            */
-        ]
+        ],
+        userExt: {}
       };
     },
     activated() {
       this._initScroll();
-      if (this.wallet.length >= 2) {
-        this.wallet[0].amount = this.$store.getters.getUserAmount;
-        this.wallet[1].amount = this.$store.getters.getCouponAmount;
-      }
     },
     created() {
       let user = this.$store.getters.getUserInfo;
-      api.getCouponAmount(user.userId || 0).then(response => {
-        if (response.totalValue) {
-          this.$store.dispatch('updateCouponAmount', response.totalValue);
+      api.getUserProfile(user.userId || 0).then(response => {
+        if (response.result === 0) {
+          this.$store.dispatch('updateUserProfile', response);
+          if (this.wallet.length >= 2) {
+            this.wallet[0].amount = response.wallet && response.wallet.accountValue || 0;
+            this.wallet[1].amount = response.wallet && response.wallet.totalValue || 0;
+          }
+          this.userExt = response.user || {};
         }
       });
     },
     computed: {
       getVipTitle() {
-        return this.user().userId === 38 ? '金牌会员' : '普通会员';
+        let userLevel = {'lv0': '初级用户', 'lv1': 'VIP一钻', 'lv2': 'VIP二钻', 'lv3': 'VIP三钻', 'lv4': 'VIP四钻', 'lv5': 'VIP五钻'};
+        let agentLevel = {'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
+        let level = this.userExt.level;
+        if (this.userExt.model === 1) {
+          // 普通用户
+          return userLevel[level];
+        } else if (this.userExt.model === 2) {
+          // 供应商
+          return agentLevel[level];
+        }
       },
       getVipIcon() {
-        return this.user().userId === 38 ? 'v4' : 'v1';
+        return this.userExt.level;
       }
     },
     methods: {
@@ -229,6 +240,9 @@
             box-sizing: border-box
             a
               color: #fff
+            .supplier
+              font-size: 10px
+              color: #fafafa
           .info
             margin-top: 10px
             .vip
@@ -252,15 +266,15 @@
                 margin-top: -10px
                 background: url(../../common/images/icon_vip.png) no-repeat 0 0
                 background-size: 100px 20px
-              &.v5:before
+              &.lv5:before
                 background-position: -80px 0
-              &.v4:before
+              &.lv4:before
                 background-position: -60px 0
-              &.v3:before
+              &.lv3:before
                 background-position: -40px 0
-              &.v2:before
+              &.lv2:before
                 background-position: -20px 0
-              &.v1:before
+              &.lv1:before, &.lv0:before
                 background-position: 0 0
         .setting
           margin-left: 10px

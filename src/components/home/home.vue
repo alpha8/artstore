@@ -10,19 +10,19 @@
         <topchanel :channels="channels"></topchanel>
         <split></split>
         <modal-title title="茶席艺术" moreText="更多" catKey="art" catName="茶席艺术"></modal-title>
-        <channel :items="arts" :cols="2" @select="selectGood"></channel>
+        <channel :items="arts" :cols="2"></channel>
         <split></split>
         <modal-title title="优质茶器" moreText="更多" catKey="teaart" catName="优质茶器"></modal-title>
-        <channel :items="teaPots" :cols="2" @select="selectGood"></channel>
+        <channel :items="teaPots" :cols="2"></channel>
         <split></split>
         <modal-title title="好茶" moreText="更多" catKey="welltea" catName="好茶"></modal-title>
-        <channel :items="goodTeas" :cols="2" @select="selectGood"></channel>
+        <channel :items="goodTeas" :cols="2"></channel>
         <split></split>
         <modal-title title="茶室专业配画" moreText="更多" catKey="paint" catName="茶室专业配画"></modal-title>
-        <channel :items="paints" :cols="2" @select="selectGood"></channel>
+        <channel :items="paints" :cols="2"></channel>
         <split></split>
         <modal-title title="茶室空间雅物" moreText="更多" catKey="graceful" catName="茶室空间雅物"></modal-title>
-        <channel :items="ya" :cols="2" @select="selectGood"></channel>
+        <channel :items="ya" :cols="2"></channel>
       </div>
     </div>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
@@ -76,9 +76,9 @@
           icon: 'icon-auction'
         }],
         swiperSlides: [
-          'http://www.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=410',
-          'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?h=410',
-          'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a19?h=410'
+          'http://www.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=500',
+          'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?h=500',
+          'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a19?h=500'
         ],
         selectedGood: {},
         showTop: false,
@@ -88,35 +88,45 @@
     created() {
       api.GetGoods({
         artworkTypeName: 'tea',
-        categoryParentName: 'art'
+        categoryParentName: 'art',
+        currentPage: 1,
+        pageSize: 20
       }).then((response) => {
         this.arts = response.artworks;
       });
 
       api.GetGoods({
         artworkTypeName: 'tea',
-        categoryParentName: 'teaart'
+        categoryParentName: 'teaart',
+        currentPage: 1,
+        pageSize: 20
       }).then((response) => {
         this.teaPots = response.artworks;
       });
 
       api.GetGoods({
         artworkTypeName: 'tea',
-        categoryParentName: 'welltea'
+        categoryParentName: 'welltea',
+        currentPage: 1,
+        pageSize: 20
       }).then((response) => {
         this.goodTeas = response.artworks;
       });
 
       api.GetGoods({
         artworkTypeName: 'tea',
-        categoryParentName: 'paint'
+        categoryParentName: 'paint',
+        currentPage: 1,
+        pageSize: 20
       }).then((response) => {
         this.paints = response.artworks;
       });
 
       api.GetGoods({
         artworkTypeName: 'tea',
-        categoryParentName: 'graceful'
+        categoryParentName: 'graceful',
+        currentPage: 1,
+        pageSize: 20
       }).then((response) => {
         this.ya = response.artworks;
       });
@@ -129,6 +139,9 @@
     },
     activated() {
       this._initScroll();
+    },
+    deactivated() {
+      this.scrollY = 0;
     },
     computed: {
       showFixed() {

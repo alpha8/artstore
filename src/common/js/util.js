@@ -49,6 +49,19 @@ export function currency (value, cur, decimals) {
   */
 }
 
+export function mixUsername (name) {
+  if (!name) {
+    return '匿名';
+  }
+  if (name === 'yihuyixi') {
+    return name;
+  }
+  if (name.length > 2) {
+    return name.substring(0, 1) + '*' + name.substring(name.length - 1);
+  }
+  return name.substring(0, 1) + '*';
+}
+
 /**
  * 格式化时间
  * @param {String} str

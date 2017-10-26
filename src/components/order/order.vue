@@ -22,8 +22,8 @@
                 <div class="ops">
                   <span class="button btn-red" v-show="order.status === 0" @click.stop.prevent="weixinPay(order)">去支付</span>
                   <span class="button btn-green" v-show="order.status === 10">催单</span>
-                  <span class="button btn-blue" v-show="order.status === 5">去评价</span>
-                  <span class="button btn-orange" v-show="order.status === 5">再次购买</span>
+                  <span class="button btn-blue" v-show="order.status === 10">去评价</span>
+                  <span class="button btn-orange" v-show="order.status === 10">再次购买</span>
                   <span class="button btn-white" v-show="order.status === 10">看相似</span>
                 </div>
               </div>
@@ -64,11 +64,11 @@
           { text: '待付款', val: 0 },
           { text: '待发货', val: 1 },
           { text: '待收货', val: 2 },
-          { text: '退换货', val: 6 }
+          { text: '退换货', val: 5 }
         ],
         orders: [],
         activeItem: -1,
-        mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消'],
+        mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消', '退款申请中', '退款中', '已退款'],
         pageNumber: 1,
         pageSize: 10,
         totalPages: -1,
@@ -382,7 +382,8 @@
               padding: 8px 0
               font-size: 12px
               .item-img
-                flex: 15vw 0 0
+                display: inline-block
+                float: left
                 img
                   width: 70px
                   height: 70px

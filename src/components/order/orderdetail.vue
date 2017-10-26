@@ -9,6 +9,13 @@
             <p v-if="order.type"><label>订单类型：</label><span>{{orderTypeDesc}}</span></p>
             <p><label>订单编号：</label><span>{{order.orderNo}}</span></p>
             <p><label>下单时间：</label><span>{{order.createAt | formatDate}}</span></p>
+            <div v-if="order.refund">
+              <p v-if="order.refund.userStage"><label>发起退款：</label><span>{{order.refund.userStage.createTime | formatDate}}</span></p>
+              <p v-if="order.refund.userStage"><label>退款原因：</label><span>{{order.refund.userStage.desc}}</span></p>
+              <p v-if="order.refund.auditStage && order.refund.auditStage.createTime"><label>审批退款：</label><span>{{order.refund.auditStage.createTime | formatDate}}</span></p>
+              <p v-if="order.refund.auditStage"><label>审批备注：</label><span>{{order.refund.auditStage.desc}}</span></p>
+              <p v-if="order.refund.finishStage"><label>退款成功：</label><span>{{order.refund.finishStage.createTime | formatDate}}</span></p>
+            </div>
           </div>
         </div>
         <split></split>
@@ -55,11 +62,21 @@
       <div class="btn-group">
         <div class="button" v-if="order.status === 0" @click.stop.prevent="weixinPay"><span class="btn-red">支付</span></div>
         <div class="button" v-if="order.status === 0" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
+        <div class="button" v-if="order.status === 1" @click.stop.prevent="showRefund"><span class="btn-red">申请退款</span></div>
+        <div class="button" v-if="order.status === 5" @click.stop.prevent="cancelRefund"><span class="btn-red">取消退款申请</span></div>
         <div class="button" v-if="order.status === 2" @click.stop.prevent="trackExpress"><span class="btn-white">查看物流</span></div>
         <div class="button" v-if="order.status === 6"><span class="btn-white">看相似</span></div>
         <div class="button" v-if="order.status === 6"><span class="btn-orange">再次购买</span></div>
       </div>
     </div>
+    <transition name="move">
+      <div class="order-refund-wrap" v-show="showBox">
+        <refund :order="order" ref="refund" @update="hideRefund"></refund>
+      </div>
+    </transition>
+    <transition name="fade">
+      <div class="list-mask" @click.stop.prevent="hideRefund" v-show="showBox"></div>
+    </transition>
   </div>
 </template>
 
@@ -67,6 +84,7 @@
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import split from '@/components/split/split';
+  import refund from '@/components/order/refund';
   import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
   import {pay} from '@/common/js/pay';
@@ -74,10 +92,11 @@
   export default {
     data() {
       return {
+        showBox: false,
         order: {
           express: {}
         },
-        mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消'],
+        mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消', '退款申请中', '退款中', '已退款'],
         paying: false
       };
     },
@@ -208,10 +227,29 @@
         }).catch(response => {
           this.paying = false;
         });
+      },
+      hideRefund() {
+        this.showBox = false;
+      },
+      showRefund() {
+        this.showBox = true;
+        this.$refs.refund.show();
+      },
+      cancelRefund() {
+        api.cancelRefund({
+          orderNo: this.order.orderNo
+        }).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('openToast', '退款申请已取消！');
+            this.order.status = 1;
+          } else {
+            this.$store.dispatch('openToast', '网络太忙，请稍候再试！');
+          }
+        });
       }
     },
     components: {
-      fixedheader, split
+      fixedheader, split, refund
     }
   };
 </script>
@@ -283,7 +321,8 @@
         padding: 8px 0
         font-size: 12px
         .item-img
-          flex: 15vw 0 0
+          display: inline-block
+          float: left
           img
             width: 60px
             height: 60px
@@ -309,6 +348,42 @@
             padding-bottom: 8px
           .nums
             text-align: right
+  .order-refund-wrap
+    position: absolute
+    left: 0
+    top: auto
+    bottom: 0
+    z-index: 42
+    width: 100%
+    min-height: 300px
+    max-height: 395px
+    background: #fff
+    transform: translate3d(0, 0, 0)
+    overflow: hidden
+    &.move-enter-active, &.move-leave-active
+      transform: translate3d(0, 0, 0)
+      transition: all 0.5s
+    &.move-enter, &.move-leave-active
+      transform: translate3d(0, 100%, 0)
+  .list-mask
+    position: fixed
+    top: 0
+    left: 0
+    width: 100%
+    bottom: 0
+    z-index: 40
+    transition: all 0.5s
+    background: rgba(7, 17, 27, 0.6)
+    &.fade-transition
+      transition: all 0.5s
+      opacity: 1
+      background: rgba(7, 17, 27, 0.6)
+    &.fade-enter-active, &.fade-leave-active
+      opacity: 1
+      background: rgba(7, 17, 27, 0.6)
+    &.fade-enter, &.fade-leave-active
+      opacity: 0
+      background: rgba(7, 17, 27, 0)
   .footer
     border-top-1px(rgba(7, 17, 27, 0.1))
     position: fixed

@@ -3,7 +3,7 @@
     <div class="chanel-item" v-for="(item, index) in items" key="index" :class="{'p50': cols===2, 'p100': cols===1}">
       <router-link :to="{name:'good', params: { id: item.id }}" class="good-item">
         <div class="item-img">
-          <img :src="getThumbnail(item)" alt="">
+          <img v-lazy="getThumbnail(item)" alt="">
         </div>
         <div class="item-info">
           <h3>{{item.name}}</h3>
@@ -42,7 +42,7 @@
       getThumbnail(item) {
         let pic = item.pictures;
         if (pic && pic.length) {
-          return api.CONFIG.psCtx + pic[0].id + '?w=228&h=128';
+          return api.CONFIG.psCtx + pic[0].id + '?w=750&h=500';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -50,7 +50,7 @@
       favorited(good) {
         let uid = this.$store.getters.getUserInfo.userId;
         let ids = good.collected || [];
-        for (let i = 0; i < ids.length; i++) {
+        for (let i = 0, len = ids.length; i < len; i++) {
           if (uid === ids[i]) {
             good.marked = true;
             return 'icon-favorite';
@@ -69,9 +69,15 @@
           userId: uid,
           type: 1,
           artworkId: good.id,
+          price: good.price,
+          name: good.name,
+          icons: good.pictures,
           fromCart: false
         };
         if (good.marked) {
+          delete params.name;
+          delete params.icons;
+          delete params.price;
           // 已关注，再次点击取消关注
           api.unmark(params).then(response => {
             if (response.result === 0) {
@@ -88,8 +94,10 @@
             } else {
               good.collected = [uid];
             }
+            good.marked = true;
           }
         });
+        this.favorited(good);
       }
     }
   };
@@ -107,9 +115,14 @@
       vertical-align: top
       box-sizing: border-box
       padding-bottom: 10px
-      .item-img img
-        width: 31.5vw
-        height: auto
+      .item-img
+        position: relative
+        width: 100%
+        min-height: 102px
+        overflow: hidden
+        img
+          width: 31.5vw
+          height: auto
       &.p50
         width: 50%
         .item-img img

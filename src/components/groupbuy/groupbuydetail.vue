@@ -33,21 +33,39 @@
         <split></split>
         <div class="rating">
           <h1 class="title">商品评价</h1>
-          <ratingselect @select="selectRating" @toggle="toggleContent" :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="good.ratings"></ratingselect>
           <div class="rating-wrapper">
-            <ul v-show="good.ratings && good.ratings.length">
-              <li class="rating-item border-1px" v-for="rating in good.ratings" v-show="needShow(rating.rateType, rating.text)">
+            <ul v-if="good.ratings && good.ratings.length">
+              <li class="rating-item" v-for="rating in good.ratings" v-show="needShow(rating.score, rating.content)">
                 <div class="user">
-                  <span class="name">{{rating.username}}</span>
-                  <img :src="rating.avatar" width="12" height="12" alt="" class="avatar">
+                  <img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10" width="20" height="20" alt="" class="avatar">
+                  <span class="name">{{rating.from.userName | mix}}</span>
                 </div>
-                <div class="time">{{rating.rateTime | formatDate}}</div>
+                <div class="time">{{rating.createdAt | formatDate}}</div>
                 <p class="text">
-                  <span :class="{'icon-thumb_up': rating.rateType===0, 'icon-thumb_down': rating.rateType===1}"></span>{{rating.text}}
+                  <star size="24" :score="rating.score"></star>{{rating.content}}
                 </p>
+                <ul class="piclist" v-if="rating.pictures && rating.pictures.length">
+                  <li v-for="pic in rating.pictures" :class="getPicCls(rating)">
+                    <img :src="getPicture(pic.pid) + '?h=90'" :data-img="getPicture(pic.pid)" height="90" v-if="rating.pictures.length === 1 || rating.pictures.length === 2 || rating.pictures.length === 4" @click.stop.prevent="previewImg(rating.pictures, pic)" />
+                    <img :src="getThumbnail(pic.pid)" :data-img="getPicture(pic.pid)" width="90" height="90" v-else-if="rating.pictures.length === 3 || rating.pictures.length >= 5" @click.stop.prevent="previewImg(rating.pictures, pic)" />
+                  </li>
+                </ul>
+                <ul v-if="rating.replys && rating.replys.length" class="reply-item">
+                  <li class="rating-item" v-for="reply in rating.replys">
+                    <div class="user">
+                      <img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a11" width="20" height="20" alt="" class="avatar">
+                      <span class="name">{{reply.from.userName | mix}}</span>
+                    </div>
+                    <div class="time">{{reply.createdAt | formatDate}}</div>
+                    <p class="text">
+                      {{reply.content}}
+                    </p>
+                  </li>
+                </ul>
               </li>
             </ul>
             <div class="no-rating" v-show="!good.ratings || !good.ratings.length">暂无评论</div>
+            <div class="more-rating" v-show="good.ratings && good.ratings.length" @click.stop.prevent="viewMore">———— 查看更多评论 ————</div>
           </div>
         </div>
       </div>
@@ -57,13 +75,13 @@
         <span class="mini-favorite-item" @click.stop.prevent="mark">
           <span class="button-lg"><i :class="favorited"></i></span>
         </span>
-        <div class="foot-item" v-show="good.status === 2">
+        <div class="foot-item" v-if="good.status === 2">
           <span class="button-lg gray">已结束</span>
         </div>
-        <div class="foot-item" v-show="good.bookmoq === good.moq">
+        <div class="foot-item" v-else-if="good.bookmoq === good.moq">
           <span class="button-lg gray">已抢完</span>
         </div>
-        <div class="foot-item" v-show="good.bookmoq != good.moq" @click.stop.prevent="pay">
+        <div class="foot-item" v-else-if="good.bookmoq != good.moq" @click.stop.prevent="pay">
           <span class="button-lg red">立即抢购</span>
         </div>
       </div>
@@ -75,11 +93,13 @@
   import Vue from 'vue';
   import BScroll from 'better-scroll';
   import {formatDate} from '@/common/js/date';
+  import {mixUsername} from '@/common/js/util';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import swipe from '@/components/swipe/quietswipe';
+  import star from '@/components/star/star';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
 
@@ -102,8 +122,9 @@
         onlyContent: true,
         desc: {
           all: '全部',
-          positive: '推荐',
-          negative: '吐槽'
+          positive: '好评',
+          common: '中评',
+          negative: '差评'
         },
         psCtx: api.CONFIG.psCtx,
         balls: [{show: false}, {show: false}, {show: false}, {show: false}, {show: false}],
@@ -120,7 +141,7 @@
         let sliders = [];
         pics.forEach(pic => {
           if (pic) {
-            sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=' + (window.innerWidth), 'src': api.CONFIG.psCtx + pic.id});
+            sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
           } else {
             sliders.push({'thumbnail': api.CONFIG.defaultImg, 'src': api.CONFIG.defaultImg});
           }
@@ -154,6 +175,7 @@
           this.show();
           this.lazyload();
           this.$store.dispatch('closeLoading');
+          this.fetchComments();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });
@@ -162,12 +184,61 @@
         this.$nextTick(() => {
           if (!this.scroll) {
             this.scroll = new BScroll(this.$refs.good, {
-              click: true
+              click: true,
+              bounce: false
             });
           } else {
             this.scroll.refresh();
           }
         });
+      },
+      fetchComments() {
+        api.getProductComments({
+          currentPage: 1,
+          pageSize: 5,
+          productId: this.good.artwork && this.good.artwork.id || ''
+        }).then(response => {
+          if (!this.good.ratings) {
+            Vue.set(this.good, 'ratings', response.comments);
+          } else {
+            this.good.ratings = response.comments;
+          }
+        });
+      },
+      getThumbnail(id) {
+        if (id) {
+          return api.CONFIG.psCtx + id + '?w=90&h=90';
+        } else {
+          return api.CONFIG.defaultImg;
+        }
+      },
+      getPicture(id) {
+        if (id) {
+          return api.CONFIG.psCtx + id;
+        } else {
+          return api.CONFIG.defaultImg;
+        }
+      },
+      getPicCls(rating) {
+        let plen = rating.pictures.length;
+        if (plen === 1 || plen === 2 || plen === 4) {
+          return 'p50';
+        } else {
+          return 'p30';
+        }
+      },
+      previewImg(pics, pic) {
+        let imgs = [];
+        for (let i = 0; i < pics.length; i++) {
+          imgs.push(this.getPicture(pics[i].pid));
+        }
+        wx.previewImage({
+          current: this.getPicture(pic.pid),
+          urls: imgs
+        });
+      },
+      viewMore() {
+        this.$router.push({name: 'goodComment', params: {id: this.good.artwork && this.good.artwork.id}});
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -340,10 +411,13 @@
         }
         let date = new Date(time.replace(/\s/, 'T'));
         return formatDate(date, 'yyyy-MM-dd hh:mm');
+      },
+      mix(name) {
+        return mixUsername(name);
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe
+      cartcontrol, split, ratingselect, fixedheader, swipe, star
     }
   };
 </script>
@@ -585,30 +659,35 @@
         font-size: 14px
         color: rgb(7, 17, 27)
       .rating-wrapper
-        padding: 0 18px
+        position: relative
+        padding: 0 10px
         .rating-item
           position: relative
           padding: 16px 0
-          border-1px(rgba(7, 17, 27, 0.1))
+          clear: both
+          .reply-item
+            margin-left: 20px
           .user
             position: absolute
-            right: 0
-            top: 16px
-            line-height: 12px
+            left: 0
+            top: 20px
             font-size: 0
+            height: 25px
+            line-height: 25px
             .name
               display: inline-block
-              margin-right: 6px
+              margin-left: 3px
               vertical-align: top
               font-size: 10px
               color: rgb(147, 153, 159)
+              line-height: 20px
             .avatar
               border-radius: 50%
           .time
-            margin-bottom: 6px
-            line-height: 12px
+            line-height: 30px
             font-size: 10px
             color: rgb(147, 153, 159)
+            text-align: right
           .text
             line-height: 16px
             font-size: 12px
@@ -621,10 +700,32 @@
               color: rgb(0, 160, 220)
             .icon-thumb_down
               color: rgb(147, 153, 159)
+          .piclist
+            position: relative
+            width: 100%
+            min-height: 95px
+            padding: 5px 0
+            clear: both
+            li
+              display: block
+              float: left
+              width: 100%
+              height: 90px
+              margin-right: 3px
+              margin-bottom: 5px
+              &.p50
+                width: 45%
+              &.p30
+                width: 30%
         .no-rating
           padding: 16px 0
           font-size: 12px
           color: rgb(147, 153, 159)
+        .more-rating
+          padding: 6px 0
+          font-size: 12px
+          color: rgb(147, 153, 159)
+          text-align: center
   .fixed-foot
     position: fixed
     left: 0

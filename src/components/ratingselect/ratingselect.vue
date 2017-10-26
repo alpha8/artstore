@@ -1,21 +1,23 @@
 <template>
   <div class="ratingselect">
     <div class="rating-type border-1px">
-      <span @click.stop.prevent="select(2)" class="block positive" :class="{'active': selectType===2}">{{desc.all}}<span class="count">{{ratings.length}}</span></span>
-      <span @click.stop.prevent="select(0)" class="block positive" :class="{'active': selectType===0}">{{desc.positive}}<span class="count">{{positives.length}}</span></span>
-      <span @click.stop.prevent="select(1)" class="block negative" :class="{'active': selectType===1}">{{desc.negative}}<span class="count">{{negatives.length}}</span></span>
+      <span @click.stop.prevent="select(3)" class="block positive" :class="{'active': selectType===3}">{{desc.all}}</span>
+      <span @click.stop.prevent="select(0)" class="block positive" :class="{'active': selectType===0}">{{desc.positive}}</span>
+      <span @click.stop.prevent="select(1)" class="block positive" :class="{'active': selectType===1}">{{desc.common}}</span>
+      <span @click.stop.prevent="select(2)" class="block positive" :class="{'active': selectType===2}">{{desc.negative}}</span>
     </div>
-    <div @click.stop.prevent="toggleContent" class="switch" :class="{'on': onlyContent}">
+    <!--<div @click.stop.prevent="toggleContent" class="switch" :class="{'on': onlyContent}">
       <span class="icon-check_circle"></span>
       <span class="text">只看有内容的评价</span>
-    </div>
+    </div>-->
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   const POSITIVE = 0;
   const NEGATIVE = 1;
-  const ALL = 2;
+  const COMMON = 2;
+  const ALL = 3;
 
   export default {
     props: {
@@ -39,6 +41,7 @@
           return {
             all: '全部',
             positive: '满意',
+            common: '一般',
             negative: '不满意'
           };
         }
@@ -53,6 +56,11 @@
       negatives() {
         return this.ratings.filter((rating) => {
           return rating.rateType === NEGATIVE;
+        });
+      },
+      commons() {
+        return this.ratings.filter((rating) => {
+          return rating.rateType === COMMON;
         });
       }
     },

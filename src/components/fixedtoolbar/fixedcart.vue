@@ -95,9 +95,15 @@
           userId: uid,
           type: 1,
           artworkId: this.good.id,
+          price: this.good.price,
+          name: this.good.name,
+          icons: this.good.pictures,
           fromCart: false
         };
         if (this.marked) {
+          delete params.name;
+          delete params.icons;
+          delete params.price;
           // 已关注，再次点击取消关注
           api.unmark(params).then(response => {
             if (response.result === 0) {

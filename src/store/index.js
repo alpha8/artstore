@@ -10,8 +10,10 @@ Vue.use(Vuex);
 const ADDRESS_LIST = 'addresses';
 const USER_AMOUNT = 'userAmount';
 const COUPON_AMOUNT = 'couponAmount';
+const USER_PROFILE = 'userProfile';
 const PAY_REMARK = 'remark';
 const KILL_PRODUCT = 'killProducts';
+const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
 
 // states
 export const state = {
@@ -22,9 +24,10 @@ export const state = {
   searchDialog: false,
   showSidebar: false,
   showSidebarMask: false,
-  userInfo: parseJson(loadCookie('wxuser', '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}'), {}),
+  userInfo: parseJson(loadCookie('wxuser', DEFAULT_USER), {}),
   addressList: load(ADDRESS_LIST, []),
   toastList: [],
+  userProfile: load(USER_PROFILE, {}),
   couponAmount: load(COUPON_AMOUNT, 0),  // 优惠券账户余额
   userAmount: load(USER_AMOUNT, 0),     // 用户账户余额
   payRemark: load(PAY_REMARK, '工作日收货'),
@@ -38,7 +41,6 @@ export const getters = {
   addedProducts: state => state.products,
   showSearchBox: state => state.searchDialog,
   getUserInfo: state => state.userInfo,
-  checkLogined: state => typeof state.userInfo.openid !== 'undefined',
   getAddressList: state => state.addressList,
   getDefaultAddress: state => {
     let address = state.addressList.find(addr => addr.default);
@@ -51,9 +53,14 @@ export const getters = {
   messageText (state) {
     return state.toastList.length > 0 ? state.toastList[0].text : null;
   },
+  checkLogined (state) {
+    state.userInfo = parseJson(loadCookie('wxuser', DEFAULT_USER), {});
+    return typeof state.userInfo.openid !== 'undefined';
+  },
   getFooterState: state => state.showFooter,
   getUserAmount: state => state.userAmount,
   getCouponAmount: state => state.couponAmount,
+  getUserProfile: state => state.userProfile,
   getPayRemark: state => state.payRemark,
   getKilledProduct: state => state.killProducts
 };
@@ -133,6 +140,9 @@ export const actions = {
   },
   updateCouponAmount(context, amount) {
     context.commit(types.UPDATE_COUPON_AMOUNT, amount);
+  },
+  updateUserProfile(context, profile) {
+    context.commit(types.USER_PROFILE, profile);
   },
   addKillProduct(context, seckillId) {
     context.commit(types.ADD_SECKILL, seckillId);
@@ -276,6 +286,10 @@ export const mutations = {
   [types.UPDATE_COUPON_AMOUNT] (state, amount) {
     state.couponAmount = amount;
     save(COUPON_AMOUNT, state.couponAmount);
+  },
+  [types.USER_PROFILE] (state, profile) {
+    state.userProfile = profile;
+    save(USER_PROFILE, profile);
   },
   [types.PAY_REMARK] (state, remark) {
     state.payRemark = remark;

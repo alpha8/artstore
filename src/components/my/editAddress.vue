@@ -19,7 +19,7 @@
           <li class="border-1px">
             <p>
               <span class="title">详细地址</span>
-              <textarea v-model="user.address" placeholder="详细地址" rows="2" required></textarea>
+              <textarea v-model="user.address" placeholder="详细地址" rows="3" required></textarea>
               <i class="icon-close" v-show="clearAddress" @click.stop.prevent="doClearAddr"></i>
             </p>
           </li>
@@ -101,7 +101,7 @@
   .add-address-wrap
     position: relative
     background: #fff
-    padding-bottom: 40px
+    padding: 0 10px 40px
     ul
       position: relative
       li
@@ -130,13 +130,15 @@
             vertical-align: top
           textarea
             width: 100%
-            border: none
+            border: 1px dashed #ccc
             resize: none
             font-size: 14px
             line-height: 1.5
+            padding-right: 20px
+            box-sizing: border-box
           .icon-close
             position: absolute
             top: 18px
-            right: 10px
+            right: 14px
             font-size: 18px
 </style>

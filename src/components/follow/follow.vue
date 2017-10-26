@@ -116,7 +116,7 @@
           type: 1,
           artworkId: product.id
         }).then(response => {
-          if (response.code === 0) {
+          if (response.result === 0) {
             this.$store.dispatch('openToast', '已取消收藏！');
             let items = this.follows;
             for (let i = 0; i < items.length; i++) {
@@ -220,7 +220,9 @@
             box-sizing: border-box
             font-size: 12px
             .item-img
-              flex: 15vw 0 0
+              display: inline-block
+              float:left
+              width: 20%
               img
                 width: 70px
                 height: 70px

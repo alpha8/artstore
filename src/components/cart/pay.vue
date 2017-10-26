@@ -233,8 +233,10 @@
           remarks: this.remarks,
           type: this.$route.query.orderType || 0
         };
+        let seckillId = 0;
         let items = [];
         this.products.forEach(product => {
+          seckillId = product.id;
           items.push({'id': product.id, 'count': product.count});
         });
         params.products = items;
@@ -244,6 +246,9 @@
             this.$store.dispatch('openToast', '生成订单失败！');
             this.paying = false;
             return;
+          }
+          if (params.type === 3) {
+            api.finishSeckill(seckillId);
           }
           let order = response.order;
           let payParams = {
@@ -408,7 +413,8 @@
             &:last-child
               margin-bottom: 0
             .thumbnail
-              flex: 15vw 0 0
+              display: inline-block
+              float: left
             .sku-info
               flex: 1
               padding: 10px

@@ -48,7 +48,7 @@
         loading: false,
         lastExec: +new Date(),
         scrollY: 0,
-        mapStatus: ['待付款', '已付款', '已失效']
+        mapStatus: ['待付款', '已完成', '已失效']
       };
     },
     activated() {
@@ -232,9 +232,11 @@
               padding: 8px 0
               font-size: 12px
               .item-img
-                flex: 30vw 0 0
+                display: inline-block
+                width: 35%
+                float: left
                 img
-                  width: 30vw
+                  width: 95%
                   height: 22.5vw
                   margin-right: 10px
                   overflow: hidden

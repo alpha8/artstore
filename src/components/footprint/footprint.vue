@@ -238,7 +238,9 @@
             box-sizing: border-box
             font-size: 12px
             .item-img
-              flex: 15vw 0 0
+              display: inline-block
+              width: 20%
+              float: left
               img
                 width: 70px
                 height: 70px

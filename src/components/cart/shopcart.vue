@@ -238,7 +238,9 @@
           position: relative
           border-top-1px(rgba(7, 17, 27, 0.1))
           .icon-check_circle
-            flex: 15vw 0 0
+            display: inline-block
+            width: 15%
+            float: left
             font-size: 24px
             color: #d3d3d3
             text-align: center
@@ -248,8 +250,10 @@
               color: #fb4741
           .pic
             vertical-align: top
-            flex: 15vw 0 0
+            display: inline-block
+            float: left
             padding: 10px 10px 10px 0
+            box-sizing: border-box
             img
               width: 114px
               height: 114px

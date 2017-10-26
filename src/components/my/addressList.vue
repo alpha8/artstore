@@ -13,7 +13,7 @@
                 <span class="mobile">{{item.mobile}}</span>
               </div>
             </div>
-            <span class="ops"><i class="icon-edit" @click.stop.prevent="editAddress(item)"></i></span>
+            <span class="ops"><i class="icon-edit" @click.stop.prevent="editAddress(item)"></i><i class="icon-recycle" @click.stop.prevent="removeAddress(item)"></i></span>
           </li>
         </ul>
         <div class="addAddress">
@@ -90,6 +90,23 @@
       },
       editAddress(item) {
         this.$router.push({name: 'address', params: {id: item.id}});
+      },
+      removeAddress(item) {
+        api.removeAddress(item.id).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('openToast', '收货地址删除成功！');
+            let addressList = this.addressList;
+            for (let i = 0; i < addressList.length; i++) {
+              let addr = addressList[i];
+              if (item.id === addr.id) {
+                addressList.splice(i, 1);
+              }
+            };
+            this.$store.dispatch('setDefaultAddress', this.addressList);
+          } else {
+            this.$store.dispatch('openToast', '网络太忙，删除失败！');
+          }
+        });
       }
     },
     components: {

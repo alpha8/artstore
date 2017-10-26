@@ -1,44 +1,72 @@
 <template>
   <div>
-    <fixedheader title="商品详情" right-icon="icon-more"></fixedheader>
+    <fixedheader title="拍卖详情" right-icon="icon-more"></fixedheader>
     <div class="good" ref="good">
       <div class="good-content">
         <div class="image-header">
           <swipe :swiperSlides="swiperSlides"></swipe>
-          <!-- <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div> -->
-        </div>
-        <div class="detail bg_pink" v-if="seckill.leftStartTimes <= 0">
-          <div class="price">¥<em>{{good.killPrice}}</em></div>
-          <div class="msg">
-            <div class="text"><del class="old_price" v-show="good.price">{{good.price | currency}}</del></div>
-            <div class="text"><span class="type_seckill">商品秒杀</span></div>
-          </div>
-          <div class="countdown">
-            <p class="countdown_text">距秒杀结束还剩</p>
-            <p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>:</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p>
-          </div>
-        </div>
-        <div class="detail bg_green" v-if="seckill.leftStartTimes > 0">
-          <div class="price">¥<em>{{good.killPrice}}</em></div>
-          <div class="msg">
-            <div class="text"><del class="old_price" v-show="good.price">{{good.price | currency}}</del></div>
-            <div class="text"><span class="type_seckill">商品秒杀</span></div>
-          </div>
-          <div class="countdown_start bg_green">
-            <p v-html="countdownTips()"></p>
-          </div>
         </div>
         <div class="content">
           <h1 class="title">{{good.name}}</h1>
-          <!-- <div class="detail">
-            <span class="sell-count">月售{{good.sellCount}}份</span>
-          </div> -->
-          <div class="price">
-            <span class="now">¥{{good.killPrice}}</span><span class="old" v-show="good.price">¥{{good.price}}</span>
-            <span class="stock">库存： {{good.number}}</span>          
+          <div class="price">当前价：<span class="now">{{good.newPrice | currency}}</span></div>
+          <div class="price">成交价：<span class="now">{{good.newPrice | currency}}</span></div>
+        </div>
+        <div class="auction-detail">
+          <ul>
+            <li><label>起拍价:</label><span>{{good.startPrice | currency}}</span></li>
+            <li><label>保留价:</label><span v-if="good.minPrice">{{good.minPrice | currency}}</span><span v-else-if="!good.minPrice">无</span></li>
+            <li><label>加价幅度:</label><span>{{good.markup | currency}}</span></li>
+            <li><label>拍卖类型:</label><span>加价拍</span></li>
+          </ul>
+        </div>
+        <split></split>
+        <div class="info">
+          <h1 class="title">出价记录<span class="num">共5次</span></h1>
+          <table class="auction-pricelist">
+            <tr class="header">
+              <td class="col-1">状态</td>
+              <td class="col-2">出价用户</td>
+              <td class="col-3">金额</td>
+              <td class="col-4">出价时间</td>
+            </tr>
+            <tr>
+              <td class="col-1"><span class="highlight">领先</span></td>
+              <td class="col-2">10085162</td>
+              <td class="col-3">¥210.00</td>
+              <td class="col-4">2017-10-24 16:24:30</td>
+            </tr>
+            <tr>
+              <td class="col-1"><span>出局</span></td>
+              <td class="col-2">10085259</td>
+              <td class="col-3">¥144.00</td>
+              <td class="col-4">2017-10-24 16:23:20</td>
+            </tr>
+            <tr>
+              <td class="col-1"><span>出局</span></td>
+              <td class="col-2">10085253</td>
+              <td class="col-3">¥120.00</td>
+              <td class="col-4">2017-10-24 16:00:00</td>
+            </tr>
+            <tr>
+              <td class="col-1"><span>出局</span></td>
+              <td class="col-2">10084259</td>
+              <td class="col-3">¥100.00</td>
+              <td class="col-4">2017-10-24 13:00:20</td>
+            </tr>
+            <tr>
+              <td class="col-1"><span>出局</span></td>
+              <td class="col-2">10035259</td>
+              <td class="col-3">¥80.00</td>
+              <td class="col-4">2017-10-24 11:00:00</td>
+            </tr>
+          </table>
+        </div>
+        <split></split>
+        <div class="auction-flow">
+          <h1 class="title">拍卖流程</h1>
+          <div>
+            <img src="../../common/images/auction-step.png" alt="">
           </div>
-          <div class="duration">秒杀时间： {{good.startTime | formatDate2}} ~ {{good.endTime | formatDate2}}</div>          
-          <!-- <div class="duration" v-if="countdownStats.milliseconds">结束倒计时：<span v-if="countdownStats.days"><span class="red-text">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="red-text">{{countdownStats.hours}}</span>小时</span><span v-if="countdownStats.mins"><span class="red-text">{{countdownStats.mins}}</span>分</span><span v-if="countdownStats.seconds"><span class="red-text">{{countdownStats.seconds}}</span>秒</span></div>  -->         
         </div>
         <split v-show="good.content"></split>
         <div class="info" v-show="good.content">
@@ -90,20 +118,14 @@
         <span class="mini-favorite-item" @click.stop.prevent="mark">
           <span class="button-lg"><i :class="favorited"></i></span>
         </span>
-        <div class="foot-item" v-show="seckill.leftStartTimes > 0" @click.stop.prevent="killNotify">
+        <div class="foot-item" v-show="auction.leftStartTimes > 0" @click.stop.prevent="killNotify">
           <span class="button-lg green">秒杀提醒</span>
         </div>
-        <div class="foot-item" v-if="seckill.leftEndTimes <= 0">
+        <div class="foot-item" v-if="auction.leftEndTimes <= 0">
           <span class="button-lg gray">已结束</span>
         </div>
-        <div class="foot-item" v-else-if="seckill.number <= 0">
-          <span class="button-lg gray">已抢完</span>
-        </div>
-        <div class="foot-item" v-else-if="existKilled()">
-          <span class="button-lg orange">抢过了</span>
-        </div>
-        <div class="foot-item" v-show="!existKilled() && seckill.leftStartTimes <= 0 && seckill.leftEndTimes > 0 && seckill.number > 0" @click.stop.prevent="pay">
-          <span class="button-lg red">立即抢购</span>
+        <div class="foot-item" v-show="true" @click.stop.prevent="pay">
+          <span class="button-lg red">出价</span>
         </div>
       </div>
     </div>
@@ -113,7 +135,7 @@
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {formatDate, countdown} from '@/common/js/date';
+  import {formatDate} from '@/common/js/date';
   import {mixUsername} from '@/common/js/util';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
@@ -132,14 +154,26 @@
       this.fetchData();
     },
     deactivated() {
-      this.stopTimer();
       this.hide();
       this.marked = false;
     },
     data() {
       return {
-        good: {},
-        seckill: {},
+        good: {
+        },
+        auction: {
+          id: 3,
+          name: '茶生厚土茗冠天下专场',
+          state: '正在进行',
+          leftTime: 36255327,
+          count: 8,
+          buyer: 80,
+          minPrice: 800,
+          startPrice: 500,
+          markup: 50,
+          newPrice: 550,
+          thumbnail: 'http://img11.360buyimg.com/da/jfs/t6103/26/2994096983/90331/c621163a/594b19adN27574e27.jpg'
+        },
         selectType: ALL,
         onlyContent: true,
         desc: {
@@ -160,15 +194,16 @@
     },
     computed: {
       swiperSlides() {
-        let pics = this.good.pictures || [];
+        // let pics = this.good.pictures || [];
         let sliders = [];
-        pics.forEach(pic => {
+        /* pics.forEach(pic => {
           if (pic) {
             sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
           } else {
             sliders.push({'thumbnail': api.CONFIG.defaultImg, 'src': api.CONFIG.defaultImg});
           }
-        });
+        }); */
+        sliders.push({'thumbnail': this.auction.thumbnail, 'src': this.auction.thumbnail});
         return sliders;
       },
       favorited() {
@@ -186,29 +221,10 @@
     },
     methods: {
       fetchData() {
-        let id = this.$route.params.id;
         this.$store.dispatch('openLoading');
-        api.getSeckillDetail(id).then(res => {
-          if (!res.success) {
-            this.$store.dispatch('closeLoading');
-            return;
-          }
-          let seckill = res.data;
-          this.seckill = seckill;
-          this.timerLoop();
-          api.GetGood(seckill.goodsId).then(response => {
-            let good = response;
-            this.good = good;
-            Object.assign(this.good, this.seckill);
-            this.wxReady();
-            this.show();
-            this.lazyload();
-            this.$store.dispatch('closeLoading');
-            this.fetchComments();
-          }).catch(response => {
-            this.$store.dispatch('closeLoading');
-          });
-        });
+        this.good = this.auction;
+        this._initScroll();
+        this.$store.dispatch('closeLoading');
       },
       fetchComments() {
         api.getProductComments({
@@ -258,54 +274,6 @@
       viewMore() {
         this.$router.push({name: 'goodComment', params: {id: this.good.id}});
       },
-      serverTime() {
-        api.getServerTime().then(res => {
-          if (res.success) {
-            this.nowTimes = res.data;
-          }
-        });
-      },
-      timerLoop() {
-        if (this.seckill.leftStartTimes) {
-          this.seckill.leftStartTimes--;
-        }
-        if (this.seckill.leftEndTimes) {
-          this.seckill.leftEndTimes--;
-        }
-        if (this.seckill.leftStartTimes) {
-          this.countdownStats = countdown(this.seckill.leftStartTimes);
-        } else {
-          this.countdownStats = countdown(this.seckill.leftEndTimes);
-        }
-        if (this.seckill.leftEndTimes <= 0) {
-          clearTimeout(this.timer);
-        }
-        this.timer = setTimeout(this.timerLoop, 1000);
-      },
-      stopTimer() {
-        if (this.timer) {
-          clearTimeout(this.timer);
-        }
-      },
-      countdownTips() {
-        let text = '';
-        if (this.countdownStats.days) {
-          text += this.countdownStats.days + '天';
-        }
-        if (this.countdownStats.hours) {
-          text += this.countdownStats.hours + '小时';
-        }
-        if (this.countdownStats.mins) {
-          text += this.countdownStats.mins + '分';
-        }
-        if (this.countdownStats.seconds) {
-          text += this.countdownStats.seconds + '秒';
-        }
-        if (this.seckill.leftStartTimes) {
-          return `距开抢 ${text}`;
-        }
-        return '';
-      },
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -351,38 +319,6 @@
         }
       },
       pay() {
-        let killResult = {'REPEAT_KILL': '重复秒杀', 'INNER_ERROR': '系统异常，请重试', 'END': '秒杀已结束', 'SUCCESS': '秒杀成功'};
-        api.getSeckillUrl(this.seckill.seckillId).then(response => {
-          if (response.success) {
-            let md5 = response.data.md5;
-            if (!md5) {
-              this.$store.dispatch('openToast', '秒杀活动未开始或已结束！');
-              return;
-            }
-            api.killGoods(this.seckill.seckillId, md5).then(res => {
-              if (!res.success) {
-                this.$store.dispatch('openToast', res.error || killResult[res.data.statEnum]);
-                return;
-              }
-              let good = {
-                id: this.seckill.seckillId,
-                name: this.good.name,
-                pictures: this.good.pictures,
-                src: this.good.src,
-                content: this.good.content,
-                price: this.good.killPrice,
-                oldPrice: this.good.price,
-                count: 1,
-                icon: (this.good.pictures && this.good.pictures.length) ? api.CONFIG.psCtx + this.good.pictures[0].id + '?w=114&h=114' : api.CONFIG.defaultImg,
-                checked: false,
-                createTime: res.data.seccessKilled && res.data.seccessKilled.createTime
-              };
-              this.$store.dispatch('addPayGoods', [good]);
-              this.$store.dispatch('addKillProduct', this.seckill.seckillId);
-              this.$router.push({name: 'pay', query: {orderType: 3}});
-            });
-          }
-        });
       },
       mark() {
         let uid = this.$store.getters.getUserInfo.userId;
@@ -416,17 +352,14 @@
           }
         });
       },
-      existKilled() {
-        return !!this.$store.getters.getKilledProduct.find(id => id === this.seckill.seckillId);
-      },
       killNotify() {
         let openid = this.$store.getters.getUserInfo.openid;
         api.reservedNotify({
-          pid: this.seckill.seckillId,
-          pname: this.seckill.name,
+          pid: this.auction.auctionId,
+          pname: this.auction.name,
           type: 0,
           openid: openid,
-          strDate: formatDate(new Date(this.seckill.startTime.replace(/\s/, 'T')), 'yyyy-MM-dd hh:mm')
+          strDate: formatDate(new Date(this.auction.startTime.replace(/\s/, 'T')), 'yyyy-MM-dd hh:mm')
         }).then(response => {
           this.$store.dispatch('openToast', '设置成功, 请留意微信通知！');
         });
@@ -591,7 +524,7 @@
         .text
           height: 18px
           line-height: 18px
-        .type_seckill
+        .type_auction
           position: relative
           display: inline-block
           margin: -2px 3px 0 0
@@ -690,12 +623,11 @@
           margin-right: 12px
       .price
         position: relative
-        font-weight: 700
         line-height: 24px
+        color: #999
+        font-size: 14px
         .now
-          margin-right: 8px
-          font-size: 14px
-          font-weight: 700
+          font-size: 20px
           color: rgb(240, 20, 20)
         .old
           text-decoration: line-through
@@ -756,10 +688,33 @@
       position: relative
       margin-bottom: 18px
       .title
-        padding: 10px 18px
-        line-height: 14px
+        padding-left: 18px
+        height: 40px
+        line-height: 40px
         font-size: 14px
         color: rgb(7, 17, 27)
+        .num
+          position: absolute
+          right: 0
+          top: 0
+          width: 60px
+          height: 40px
+          line-height: 40px
+          font-size: 12px
+          color: #999
+          &:after
+            content: ""
+            display: block
+            position: absolute
+            top: 50%
+            right: 15px
+            margin-top: -4px
+            width: 8px
+            height: 8px
+            border-right: 1px solid #9c9c9c
+            border-bottom: 1px solid #9c9c9c
+            -webkit-transform: rotate(-45deg)
+            transform: rotate(-45deg)
       .text
         padding: 15px 0
         font-size: 12px
@@ -767,6 +722,86 @@
         line-height: 1.3
         box-sizing: border-box
         overflow-x: hidden
+      .auction-pricelist
+        position: relative
+        width: 100%
+        font-size: 12px
+        background-color: #fff
+        text-align: left
+        tr
+          height: 40px
+          line-height: 40px
+        .header
+          background-color: #f3f2f8  
+        .col-1
+          width: 20%
+          padding-left: 10px
+          box-sizing: border-box
+          span
+            display: inline-block
+            height: 15px
+            width: 30px
+            line-height: 15px
+            vertical-align: middle
+            text-align: center
+            color: #fff
+            background-color: #747474
+            border-radius: 1px
+            &.highlight
+              background-color: #3985ff
+        .col-2
+          width: 25%
+          padding-left: 10px
+          box-sizing: border-box
+        .col-3
+          flex: 1
+          padding-left: 10px
+          word-break: break-all
+          overflow: hidden
+          box-sizing: border-box
+        .col-4
+          width: 35%
+          padding-left: 10px
+          text-overflow: ellipsis
+          white-space: nowrap
+          overflow: hidden
+          box-sizing: border-box
+    .auction-detail
+      position: relative
+      padding-bottom: 12px
+      clear: both
+      ul
+        position: relative
+        display: flex
+        flex-wrap: wrap
+        line-height: 20px
+        padding: 0 18px
+        box-sizing: border-box
+        li
+          float: left
+          width: 50%
+          height: auto
+          font-size: 14px
+          white-space: nowrap
+          overflow: hidden
+          box-sizing: border-box
+          label
+            color: #999
+            display: inline-block
+            width: 65px
+    .auction-flow
+      position: relative
+      padding: 18px
+      .title
+        font-size: 14px
+        line-height: 14px
+        margin-bottom: 6px
+        color: #07111b
+      img
+        border: 0 none
+        vertical-align: bottom
+        -ms-interpolation-mode: bicubic
+        max-width: 100%
     .rating
       padding-top: 18px
       .title

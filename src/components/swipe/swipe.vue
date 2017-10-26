@@ -39,7 +39,7 @@
 
 <style lang="stylus" rel="stylesheet/stylus">
   .swiper-container
-    height: 40vw
+    height: 45vw
     .slide
       display: block
       width: 100%

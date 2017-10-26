@@ -3,6 +3,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 // import goods from '@/components/goods/goodsv2';
 import goodDetail from '@/components/good-detail/good-detailv2';
+import goodComment from '@/components/good-detail/comments';
 import home from '@/components/home/home';
 import shopcart from '@/components/cart/shopcart';
 import pay from '@/components/cart/pay';
@@ -15,8 +16,10 @@ import addAddress from '@/components/my/addAddress';
 import editAddress from '@/components/my/editAddress';
 import order from '@/components/order/order';
 import orderdetail from '@/components/order/orderdetail';
+import refund from '@/components/order/refund';
 import expresslog from '@/components/order/expresslog';
-import auction from '@/components/auction/auction';
+import auction from '@/components/auction/auctions';
+import auctiondetail from '@/components/auction/auctiondetail';
 import auctionList from '@/components/auction/auctionList';
 import coupon from '@/components/coupon/coupon';
 import getcoupon from '@/components/coupon/getcoupon';
@@ -44,6 +47,7 @@ export default new Router({
     {path: '/category', component: category},
     {path: '/search', component: search},
     {path: '/good/:id', component: goodDetail, name: 'good'},
+    {path: '/good/:id/comments', component: goodComment, name: 'goodComment'},
     {path: '/cart', component: shopcart},
     {path: '/pay', component: pay, name: 'pay'},
     {path: '/pay/remark', component: remark},
@@ -52,8 +56,10 @@ export default new Router({
     {path: '/editAddress/:id', component: editAddress, name: 'address'},
     {path: '/order', component: order},
     {path: '/order/detail/:id', component: orderdetail, name: 'orderdetail'},
+    {path: '/order/refund/:id', component: refund, name: 'refund'},
     {path: '/order/express/:expressCode/:expressNo', component: expresslog, name: 'expresslog'},
     {path: '/auction', component: auction, name: 'auction'},
+    {path: '/auction/:id/detail', component: auctiondetail, name: 'auctiondetail'},
     {path: '/auction/list/:id', component: auctionList, name: 'auctionList'},
     {path: '/coupon', component: coupon, name: 'coupon'},
     {path: '/getcoupon', component: getcoupon, name: 'getcoupon'},

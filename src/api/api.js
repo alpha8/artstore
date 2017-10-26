@@ -105,18 +105,32 @@ export default {
     return doPost(this.CONFIG.wxCtx + '/wx/pay', params);
   },
 
-   /**
+  /**
     * 微信公众号签名
     */
   wxsignature(url) {
     return doGet(this.CONFIG.wxCtx + '/wx/sign?url=' + url);
   },
 
-   /**
+  /**
     * 跟踪物流
     */
   trackingGoods(expressNo, expressCode) {
     return doGet(this.CONFIG.wxCtx + '/order/express?expressNo=' + expressNo + '&expressCode=' + expressCode);
+  },
+
+  /**
+    * 申请退款
+    */
+  refund(params) {
+    return doPost(this.CONFIG.cmsCtx + '/order/user/refund', params);
+  },
+
+  /**
+    * 取消退款申请
+    */
+  cancelRefund(params) {
+    return doPost(this.CONFIG.cmsCtx + '/order/user/cancelRefund', params);
   },
 
   /** 获取所有商品列表 */
@@ -239,6 +253,13 @@ export default {
   },
 
    /**
+    * 删除收货地址
+    */
+  removeAddress(address) {
+    return doDelete(this.CONFIG.cmsCtx + '/user/address', address);
+  },
+
+   /**
     * 查询优惠券明细
     */
   getCoupons(userId) {
@@ -271,6 +292,13 @@ export default {
     */
   verifyCode(mobile, code) {
     return doGet(this.CONFIG.webCtx + '/user/verificationCodeByMobile?mobileNumber=' + mobile + '&code=' + code);
+  },
+
+   /**
+    * 获取用户基础数据
+    */
+  getUserProfile(userId) {
+    return doGet(this.CONFIG.cmsCtx + '/user/profile?userId=' + userId);
   },
 
    /**
@@ -315,6 +343,13 @@ export default {
     return doPost(this.CONFIG.seckillCtx + '/seckill/' + params.seckillId + '/cancel', params);
   },
 
+  /**
+   * 结束秒杀订单
+   */
+  finishSeckill(seckillId) {
+    return doPost(this.CONFIG.seckillCtx + '/seckill/' + seckillId + '/finish');
+  },
+
    /**
     * 当前时间
     */
@@ -356,5 +391,12 @@ export default {
     */
   getGroupbuyDetail(id) {
     return doGet(this.CONFIG.cmsCtx + '/groupBuy/' + id);
+  },
+
+   /**
+    * 查询商品评论列表
+    */
+  getProductComments(params) {
+    return doGet(this.CONFIG.cmsCtx + '/comment/list', params);
   }
 };

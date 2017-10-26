@@ -159,7 +159,7 @@
       getThumbnail(item) {
         let pic = item.pictures;
         if (pic && pic.length) {
-          return api.CONFIG.psCtx + pic[0].id + '?w=228&h=128';
+          return api.CONFIG.psCtx + pic[0].id + '?w=750&h=500';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -396,6 +396,9 @@
         .product-thumbnail
           position: relative
           background: #f2f2f7
+          width: 100%
+          height: 102px
+          overflow: hidden
           img
             width: 100%
             height: auto

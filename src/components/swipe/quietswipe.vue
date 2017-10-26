@@ -1,7 +1,7 @@
 <template>
   <swiper :options="swiperOption">
     <swiper-slide v-for="(slide, index) in swiperSlides" key="index">
-      <div class="slide" :style="getSlideUrl(slide)" @click.stop.prevent="preview(slide.src)"></div>
+      <div class="slide2" :style="getSlideUrl(slide)" @click.stop.prevent="preview(slide.src)"></div>
     </swiper-slide>
     <div class="swiper-pagination pager" slot="pagination"></div>
   </swiper>
@@ -47,7 +47,7 @@
 <style lang="stylus" rel="stylesheet/stylus">
   .swiper-container
     height: 40vw
-    .slide
+    .slide2
       display: block
       width: 100%
       height: 100%

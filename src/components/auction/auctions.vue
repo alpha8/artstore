@@ -1,28 +1,22 @@
 <template>
   <div>
-    <fixedheader title="商品秒杀"></fixedheader>
+    <fixedheader title="商品拍卖"></fixedheader>
     <div class="order">
       <div class="order-wrap">
-        <div class="order-container" ref="seckList" v-if="seckills.length">
+        <div class="order-container" ref="auctionList" v-if="auctions.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
-            <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in seckills" :key="index" v-if="item.number > 0">
+            <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in auctions" :key="index">
               <div class="item-content">
-                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
+                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="item.thumbnail" alt=""></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
                   <div class="price-wrap">
-                    <span>{{item.killPrice | currency}}</span>
-                    <del>{{item.price | currency}}</del>
+                    <span>{{item.buyer | currency}}</span>
                   </div>
                   <div class="more-ops">
-                    <span class="btn-buy orange" v-show="existKilled(item)">抢过了</span>
-                    <span class="btn-buy" v-show="!existKilled(item) && item.leftStartTimes <= 0 && item.leftEndTimes > 0" @click.stop.prevent="showDetail(item)">立即抢购</span>
-                    <span class="btn-buy green" v-show="item.leftStartTimes > 0" @click.stop.prevent="killNotify(item)">秒杀提醒</span>
+                    <span class="pricing"><i>5</i>次出价</span>
+                    <span class="btn-buy green" v-show="item.leftStartTimes > 0" @click.stop.prevent="killNotify(item)">拍卖提醒</span>
                     <span class="btn-buy disabled" v-show="item.leftEndTimes <= 0">已结束</span>
-                    <span class="items-reserve">
-                      <strong>已售{{calcLeftPercent(item)}}%</strong>
-                      <span class="progress-bar"><em :style="transDeltaPercent(item)"></em></span>
-                    </span>
                   </div>
                 </div>
               </div>
@@ -31,7 +25,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-if="!seckills.length">啊哦，还没有相关记录哦</div>
+        <div class="no-order" v-if="!auctions.length">啊哦，还没有相关记录哦</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -47,7 +41,35 @@
   export default {
     data() {
       return {
-        seckills: [],
+        auctions: [
+          {
+            id: 1,
+            name: '大千木雕珍藏专场',
+            state: '正在进行',
+            leftTime: 36255327,
+            count: 64,
+            buyer: 100,
+            thumbnail: 'http://img11.360buyimg.com/da/jfs/t5701/147/4821084102/193440/8ec5e8bd/5954fef2N9eddc482.jpg'
+          },
+          {
+            id: 2,
+            name: '景德镇精品大师陶瓷专场',
+            state: '正在进行',
+            leftTime: 36255327,
+            count: 10,
+            buyer: 11,
+            thumbnail: 'http://img11.360buyimg.com/da/jfs/t6736/287/1781393521/85063/37a3d251/595797fcN6b7d6eb1.jpg'
+          },
+          {
+            id: 3,
+            name: '茶生厚土茗冠天下专场',
+            state: '正在进行',
+            leftTime: 36255327,
+            count: 8,
+            buyer: 80,
+            thumbnail: 'http://img11.360buyimg.com/da/jfs/t6103/26/2994096983/90331/c621163a/594b19adN27574e27.jpg'
+          }
+        ],
         pageNumber: 1,
         pageSize: 10,
         totalPages: -1,
@@ -60,17 +82,15 @@
       };
     },
     activated() {
-      this.timerLoop();
       this.fetchData(true);
       this.show();
     },
     deactivated() {
-      this.stopTimer();
-      this._reset();
+      // this._reset();
       this.hide();
     },
     mounted() {
-      this.scroller = this.$refs.seckList;
+      this.scroller = this.$refs.auctionList;
       window.onscroll = () => {
         this.scrollY = window.pageYOffset;
       };
@@ -85,56 +105,19 @@
           return;
         }
         this.loading = true;
-        api.getSeckills({
-          pageIndex: this.pageNumber,
-          pageSize: this.pageSize,
-          endLongTime: +new Date()
-        }).then(response => {
-          if (response.list && response.list.length) {
-            response.list.forEach(item => {
-              this.seckills.push(item);
-            });
-          }
-          this.totalPages = response.pages;
-          this.pageNumber++;
-          this.lastExec = +new Date();
-          this.loading = false;
-          this.loadEnd = this.pageNumber > this.totalPages;
-        }).catch(response => {
-          this.loadEnd = false;
-          this.loading = false;
-          this.totalPages = 0;
-        });
-      },
-      timerLoop() {
-        for (let i = 0; i < this.seckills.length; i++) {
-          let seckill = this.seckills[i];
-          if (seckill.leftStartTimes) {
-            seckill.leftStartTimes--;
-          }
-          if (seckill.leftEndTimes) {
-            seckill.leftEndTimes--;
-          }
-        }
-        this.timer = setTimeout(this.timerLoop, 1000);
-      },
-      stopTimer() {
-        if (this.timer) {
-          clearTimeout(this.timer);
-        }
-      },
-      calcLeftPercent(item) {
-        return Math.round((1 - item.number / item.stock) * 100);
-      },
-      transDeltaPercent(item) {
-        let delta = Math.round((1 - item.number / item.stock) * 100);
-        return `width: ${delta}%`;
-      },
-      existKilled(item) {
-        return !!this.$store.getters.getKilledProduct.find(id => id === item.seckillId);
+        /*
+        this.totalPages = response.pages;
+        this.pageNumber++;
+        this.lastExec = +new Date();
+        this.loading = false;
+        this.loadEnd = this.pageNumber > this.totalPages;
+         */
+        this.loadEnd = false;
+        this.loading = false;
+        this.totalPages = 0;
       },
       _reset() {
-        this.seckills = [];
+        this.auctions = [];
         this.pageNumber = 1;
         this.totalPages = -1;
         this.loadEnd = false;
@@ -148,12 +131,12 @@
         }
       },
       showDetail(item) {
-        this.$router.push({name: 'seckillDetail', params: {id: item.seckillId}});
+        this.$router.push({name: 'auctiondetail', params: {id: item.id}});
       },
       killNotify(item) {
         let openid = this.$store.getters.getUserInfo.openid;
         api.reservedNotify({
-          pid: item.seckillId,
+          pid: item.id,
           pname: item.name,
           type: 0,
           openid: openid,
@@ -317,6 +300,18 @@
                     &.green
                       background: #44b549
                       color: #fff
+                  .pricing
+                    position: absolute
+                    right: 0
+                    bottom: 15px
+                    width: 80px
+                    height: 25px
+                    line-height: 25px
+                    text-align: right
+                    font-size: 12px
+                    color: #a9a9a9
+                    i
+                      color: #f15353                      
                   .items-reserve
                     display: block
                     position: absolute

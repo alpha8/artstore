@@ -116,7 +116,7 @@
       getThumbnail(item) {
         let icon = item.icon;
         if (icon) {
-          return api.CONFIG.psCtx + icon + '?w=228&h=228';
+          return api.CONFIG.psCtx + icon + '?w=750&h=500';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -219,10 +219,12 @@
               padding: 8px 0
               font-size: 12px
               .item-img
-                flex: 30vw 0 0
+                display: inline-block
+                width: 35%
+                float: left
                 img
-                  width: 30vw
-                  height: 22.5vw
+                  width: 95%
+                  height: 20vw
                   margin-right: 10px
                   overflow: hidden
               .item-info

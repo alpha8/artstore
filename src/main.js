@@ -6,8 +6,8 @@ import axios from 'axios';
 import VueAxios from 'vue-axios';
 import VueAwesomeSwiper from 'vue-awesome-swiper';
 
-// import VueLazyload from 'vue-lazyload';
-// Vue.use(VueLazyload);
+import VueLazyload from 'vue-lazyload';
+Vue.use(VueLazyload);
 
 // import AlloyFinger from 'alloyfinger/alloy_finger';
 // import AlloyFingerVue from 'alloyfinger/vue/alloy_finger.vue';
