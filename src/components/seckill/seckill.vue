@@ -262,7 +262,6 @@
                 float: left
                 img
                   width: 95%
-                  height: 22.5vw
                   margin-right: 10px
                   overflow: hidden
               .item-info

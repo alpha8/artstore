@@ -26,6 +26,7 @@
       </div>
     </div>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
+    <frame></frame>
   </div>
 </template>
 
@@ -39,6 +40,7 @@
   import channel from '@/components/channel/channel';
   import gotop from '@/components/fixedtoolbar/gotop';
   import search from '@/components/fixedtoolbar/search';
+  import frame from '@/components/common/myiframe';
   import api from '@/api/api';
 
   export default {
@@ -186,7 +188,8 @@
       channel,
       fixedsearch,
       gotop,
-      search
+      search,
+      frame
     }
   };
 </script>

@@ -79,7 +79,9 @@
         <channel :items="guessGoods" :cols="2"></channel>
       </div>
       <fixedcart ref="shopcart" @add="addToCart" :good="good"></fixedcart>
+      <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
+    <frame></frame>
   </div>
 </template>
 
@@ -94,6 +96,8 @@
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedcart from '@/components/fixedtoolbar/fixedcart';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import frame from '@/components/common/myiframe';
+  import gotop from '@/components/fixedtoolbar/gotop';
   import swipe from '@/components/swipe/quietswipe';
   import star from '@/components/star/star';
   import api from '@/api/api';
@@ -109,8 +113,20 @@
     deactivated() {
       this.hide();
     },
+    watch: {
+      $route (to, from) {
+        if (to.params.id !== from.params.id) {
+          this.fetchData();
+        }
+        if (to.name === from.name) {
+          let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
+          this.scroll.scrollToElement(goodWrapper, 300);
+        }
+      }
+    },
     data() {
       return {
+        scrollY: 0,
         good: {},
         guessGoods: [],
         selectType: ALL,
@@ -145,6 +161,9 @@
     methods: {
       fetchData() {
         let id = this.$route.params.id;
+        if (!id) {
+          return;
+        }
         this.$store.dispatch('openLoading');
         api.GetGood(id).then(response => {
           let good = response;
@@ -177,11 +196,15 @@
           if (!this.scroll) {
             this.scroll = new BScroll(this.$refs.good, {
               click: true,
-              bounce: false
+              bounce: false,
+              probeType: 3
             });
           } else {
             this.scroll.refresh();
           }
+          this.scroll.on('scroll', (pos) => {
+            this.scrollY = Math.abs(Math.round(pos.y));
+          });
         });
       },
       getLikeGoods() {
@@ -294,6 +317,66 @@
       viewMore() {
         this.$router.push({name: 'goodComment', params: {id: this.good.id}});
       },
+      getThumbnailPic(item) {
+        let pic = item.pictures;
+        if (pic && pic.length) {
+          return api.CONFIG.psCtx + pic[0].id + '?w=750&h=500';
+        } else {
+          return api.CONFIG.defaultImg;
+        }
+      },
+      favorited(good) {
+        let uid = this.$store.getters.getUserInfo.userId;
+        let ids = good.collected || [];
+        for (let i = 0, len = ids.length; i < len; i++) {
+          if (uid === ids[i]) {
+            good.marked = true;
+            return 'icon-favorite';
+          }
+        }
+        good.marked = false;
+        return 'icon-heart';
+      },
+      mark(good) {
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (!uid) {
+          this.$store.dispatch('openToast', '请先登录！');
+          return;
+        }
+        let params = {
+          userId: uid,
+          type: 1,
+          artworkId: good.id,
+          price: good.price,
+          name: good.name,
+          icons: good.pictures,
+          fromCart: false
+        };
+        if (good.marked) {
+          delete params.name;
+          delete params.icons;
+          delete params.price;
+          // 已关注，再次点击取消关注
+          api.unmark(params).then(response => {
+            if (response.result === 0) {
+              good.collected = [];
+            }
+          });
+          good.marked = false;
+          return;
+        }
+        api.mark(params).then(response => {
+          if (response.result === 0) {
+            if (good.collected) {
+              good.collected.push(uid);
+            } else {
+              good.collected = [uid];
+            }
+            good.marked = true;
+          }
+        });
+        this.favorited(good);
+      },
       wxReady() {
         api.wxsignature(encodeURIComponent(location.href.split('#')[0])).then(response => {
           wx.config({
@@ -327,6 +410,9 @@
           for (let i = 0; i < imgs.length; i++) {
             let img = imgs[i];
             let src = img.getAttribute('data-original');
+            if (!src) {
+              continue;
+            }
             let width = img.getAttribute('width');
             let height = img.getAttribute('height');
             let key = '<img class="lazy" data-original="' + src + '" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"';
@@ -368,6 +454,10 @@
             }
           }, 500);
         }, 1000);
+      },
+      goTop() {
+        let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
+        this.scroll.scrollToElement(goodWrapper, 300);
       }
     },
     filters: {
@@ -379,7 +469,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop
     }
   };
 </script>
@@ -425,6 +515,70 @@
       position: relative
       width: 100%
       padding-bottom: 30px
+      .channel
+        display: flex
+        flex-wrap: wrap
+        margin-left: 5px
+        .chanel-item
+          position: relative
+          width: 33.3%
+          height: auto
+          vertical-align: top
+          box-sizing: border-box
+          padding-bottom: 10px
+          &.p50
+            width: 50%
+            .item-img img
+              width: 48vw
+              height: auto
+          &.p100
+            width: 100%
+            .item-img img
+              width: 100%
+              height: auto
+          .item-img
+            position: relative
+            width: 100%
+            min-height: 102px
+            overflow: hidden
+            img
+              width: 31.5vw
+              height: auto
+          .item-info
+            position: relative
+            width: 100%
+            padding-right: 40px
+            box-sizing: border-box
+            h3
+              line-height: 1.5
+              height: 20px
+              font-size: 14px
+              overflow: hidden
+              text-overflow: ellipsis
+              display: -webkit-box
+              -webkit-line-clamp: 1
+              -webkit-box-orient: vertical
+            .price
+              margin-top: 1px
+              color: #ff463c
+              font-size: 14px
+              font-weight: 700
+              white-space: nowrap
+              overflow: hidden
+              text-overflow: ellipsis
+            .icon
+              position: absolute
+              top: 50%
+              margin-top: -20px
+              right: 0
+              width: 40px
+              height: 40px
+              line-height: 40px
+              text-align: center
+              font-size: 20px
+              box-sizing: border-box
+              .icon-favorite
+                color: #ff463c
     .content
       position: relative
       padding: 18px

@@ -7,21 +7,21 @@
           <swipe :swiperSlides="swiperSlides"></swipe>
         </div>
         <div class="content">
-          <h1 class="title">{{good.name}}</h1>
-          <div class="price">当前价：<span class="now">{{good.newPrice | currency}}</span></div>
-          <div class="price">成交价：<span class="now">{{good.newPrice | currency}}</span></div>
+          <h1 class="title">{{auction.name}}</h1>
+          <div class="price">当前价：<span class="now">{{highPrice | currency}}</span></div>
+          <div class="price" v-if="false">成交价：<span class="now">{{highPrice | currency}}</span></div>
         </div>
         <div class="auction-detail">
           <ul>
-            <li><label>起拍价:</label><span>{{good.startPrice | currency}}</span></li>
-            <li><label>保留价:</label><span v-if="good.minPrice">{{good.minPrice | currency}}</span><span v-else-if="!good.minPrice">无</span></li>
-            <li><label>加价幅度:</label><span>{{good.markup | currency}}</span></li>
+            <li><label>起拍价:</label><span>{{auction.startPrice | currency}}</span></li>
+            <li><label>保留价:</label><span v-if="auction.minPrice">{{auction.minPrice | currency}}</span><span v-else-if="!auction.minPrice">无</span></li>
+            <li><label>加价幅度:</label><span>{{auction.markup | currency}}</span></li>
             <li><label>拍卖类型:</label><span>加价拍</span></li>
           </ul>
         </div>
         <split></split>
         <div class="info">
-          <h1 class="title">出价记录<span class="num">共5次</span></h1>
+          <h1 class="title" @click.stop.prevent="gotoBidPrices">出价记录<span class="num">共{{auction.countAppr}}次</span></h1>
           <table class="auction-pricelist">
             <tr class="header">
               <td class="col-1">状态</td>
@@ -29,35 +29,11 @@
               <td class="col-3">金额</td>
               <td class="col-4">出价时间</td>
             </tr>
-            <tr>
-              <td class="col-1"><span class="highlight">领先</span></td>
-              <td class="col-2">10085162</td>
-              <td class="col-3">¥210.00</td>
-              <td class="col-4">2017-10-24 16:24:30</td>
-            </tr>
-            <tr>
-              <td class="col-1"><span>出局</span></td>
-              <td class="col-2">10085259</td>
-              <td class="col-3">¥144.00</td>
-              <td class="col-4">2017-10-24 16:23:20</td>
-            </tr>
-            <tr>
-              <td class="col-1"><span>出局</span></td>
-              <td class="col-2">10085253</td>
-              <td class="col-3">¥120.00</td>
-              <td class="col-4">2017-10-24 16:00:00</td>
-            </tr>
-            <tr>
-              <td class="col-1"><span>出局</span></td>
-              <td class="col-2">10084259</td>
-              <td class="col-3">¥100.00</td>
-              <td class="col-4">2017-10-24 13:00:20</td>
-            </tr>
-            <tr>
-              <td class="col-1"><span>出局</span></td>
-              <td class="col-2">10035259</td>
-              <td class="col-3">¥80.00</td>
-              <td class="col-4">2017-10-24 11:00:00</td>
+            <tr v-for="(item, index) in bidPrices" :key="index">
+              <td class="col-1"><span :class="{'highlight': item.state !== '淘汰'}">{{item.state}}</span></td>
+              <td class="col-2">{{item.userNameId || item.userName}}</td>
+              <td class="col-3">{{item.price | currency}}</td>
+              <td class="col-4">{{item.time | formatDate}}</td>
             </tr>
           </table>
         </div>
@@ -68,17 +44,17 @@
             <img src="../../common/images/auction-step.png" alt="">
           </div>
         </div>
-        <split v-show="good.content"></split>
-        <div class="info" v-show="good.content">
+        <split v-show="auction.content"></split>
+        <div class="info" v-show="auction.content">
           <h1 class="title">商品介绍</h1>
-          <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
+          <div class="text" v-html="auction.content" ref="goodContent" id="productIntro"></div>
         </div>
         <split></split>
         <div class="rating">
           <h1 class="title">商品评价</h1>
           <div class="rating-wrapper">
-            <ul v-if="good.ratings && good.ratings.length">
-              <li class="rating-item" v-for="rating in good.ratings" v-show="needShow(rating.score, rating.content)">
+            <ul v-if="auction.ratings && auction.ratings.length">
+              <li class="rating-item" v-for="rating in auction.ratings" v-show="needShow(rating.score, rating.content)">
                 <div class="user">
                   <img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10" width="20" height="20" alt="" class="avatar">
                   <span class="name">{{rating.from.userName | mix}}</span>
@@ -107,24 +83,28 @@
                 </ul>
               </li>
             </ul>
-            <div class="no-rating" v-show="!good.ratings || !good.ratings.length">暂无评论</div>
-            <div class="more-rating" v-show="good.ratings && good.ratings.length" @click.stop.prevent="viewMore">———— 查看更多评论 ————</div>
+            <div class="no-rating" v-show="!auction.ratings || !auction.ratings.length">暂无评论</div>
+            <div class="more-rating" v-show="auction.ratings && auction.ratings.length" @click.stop.prevent="viewMore">———— 查看更多评论 ————</div>
           </div>
         </div>
       </div>
     </div>
     <div class="fixed-foot">
       <div class="foot-wrapper">
-        <span class="mini-favorite-item" @click.stop.prevent="mark">
-          <span class="button-lg"><i :class="favorited"></i></span>
-        </span>
-        <div class="foot-item" v-show="auction.leftStartTimes > 0" @click.stop.prevent="killNotify">
-          <span class="button-lg green">秒杀提醒</span>
+        <div class="foot-item" v-if="auction.leftStartTimes > 0" @click.stop.prevent="notify">
+          <span class="button-lg green">拍卖提醒</span>
         </div>
         <div class="foot-item" v-if="auction.leftEndTimes <= 0">
           <span class="button-lg gray">已结束</span>
         </div>
-        <div class="foot-item" v-show="true" @click.stop.prevent="pay">
+        <div class="foot-item">
+          <div class="input-group">
+            <span class="input-group-btn"><button class="btn" @click.stop.prevent="reduce">-</button></span>
+            <input type="number" class="form-control" v-model="highPrice" />
+            <span class="input-group-btn"><button class="btn" @click.stop.prevent="add">+</button></span>
+          </div>
+        </div>
+        <div class="foot-item" @click.stop.prevent="bid">
           <span class="button-lg red">出价</span>
         </div>
       </div>
@@ -145,6 +125,8 @@
   import star from '@/components/star/star';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
+  import SockJS from 'sockjs-client';
+  import Stomp from 'stompjs';
 
   const ALL = 2;
   // const ERR_OK = 0;
@@ -152,28 +134,18 @@
   export default {
     activated() {
       this.fetchData();
+      this.connectSocket();
     },
     deactivated() {
       this.hide();
-      this.marked = false;
+      this.disconnect();
     },
     data() {
       return {
-        good: {
-        },
-        auction: {
-          id: 3,
-          name: '茶生厚土茗冠天下专场',
-          state: '正在进行',
-          leftTime: 36255327,
-          count: 8,
-          buyer: 80,
-          minPrice: 800,
-          startPrice: 500,
-          markup: 50,
-          newPrice: 550,
-          thumbnail: 'http://img11.360buyimg.com/da/jfs/t6103/26/2994096983/90331/c621163a/594b19adN27574e27.jpg'
-        },
+        auction: {},
+        bidPrices: [],
+        bidsTotal: 0,
+        highPrice: 0,
         selectType: ALL,
         onlyContent: true,
         desc: {
@@ -188,55 +160,72 @@
         marked: false,
         timer: null,
         nowTimes: +new Date(),
-        md5: '',
-        countdownStats: {}
+        config: {
+          dest: 'http://localhost:8080/cmsAuction/stomp',
+          topic: '/topic/14'
+        },
+        client: null
       };
     },
     computed: {
       swiperSlides() {
-        // let pics = this.good.pictures || [];
         let sliders = [];
-        /* pics.forEach(pic => {
-          if (pic) {
-            sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
-          } else {
-            sliders.push({'thumbnail': api.CONFIG.defaultImg, 'src': api.CONFIG.defaultImg});
-          }
-        }); */
-        sliders.push({'thumbnail': this.auction.thumbnail, 'src': this.auction.thumbnail});
-        return sliders;
-      },
-      favorited() {
-        let uid = this.$store.getters.getUserInfo.userId;
-        let ids = this.good.collected || [];
-        for (let i = 0; i < ids.length; i++) {
-          if (uid === ids[i]) {
-            this.marked = true;
-            return 'icon-favorite';
-          }
+        if (this.auction.icon) {
+          sliders.push({'thumbnail': api.CONFIG.psCtx + this.auction.icon + '?w=750&h=500', 'src': api.CONFIG.psCtx + this.auction.icon});
+        } else {
+          sliders.push({'thumbnail': api.CONFIG.defaultImg, 'src': api.CONFIG.defaultImg});
         }
-        this.marked = false;
-        return 'icon-heart';
+        return sliders;
       }
     },
     methods: {
       fetchData() {
+        let id = this.$route.params.id;
+        if (!id) {
+          return;
+        }
         this.$store.dispatch('openLoading');
-        this.good = this.auction;
-        this._initScroll();
-        this.$store.dispatch('closeLoading');
+        api.getAuction(id).then(response => {
+          this.auction = response;
+          this.wxReady();
+          this.show();
+          this.lazyload();
+          this.$store.dispatch('closeLoading');
+          this.fetchBids();
+          this.fetchComments();
+        }).catch(response => {
+          this.$store.dispatch('closeLoading');
+        });
       },
       fetchComments() {
         api.getProductComments({
           currentPage: 1,
           pageSize: 5,
-          productId: this.good.id || ''
+          productId: this.auction.productId || ''
         }).then(response => {
-          if (!this.good.ratings) {
-            Vue.set(this.good, 'ratings', response.comments);
+          if (!this.auction.ratings) {
+            Vue.set(this.auction, 'ratings', response.comments);
           } else {
-            this.good.ratings = response.comments;
+            this.auction.ratings = response.comments;
           }
+        });
+      },
+      fetchBids() {
+        api.getBidPrices({
+          paging: 1,
+          pageSize: 5,
+          auctionProductId: this.auction.id || ''
+        }).then(response => {
+          if (response.result === 0) {
+            if (response.info.apprList && response.info.apprList.length) {
+              this.bidPrices = response.info.apprList;
+              this.highPrice = this.bidPrices[0].price;
+            } else {
+              this.highPrice = this.auction.startPrice;
+            }
+          }
+        }).catch(response => {
+          this.bidPrices = [];
         });
       },
       getThumbnail(id) {
@@ -272,7 +261,32 @@
         });
       },
       viewMore() {
-        this.$router.push({name: 'goodComment', params: {id: this.good.id}});
+        this.$router.push({name: 'goodComment', params: {id: this.auction.productId}});
+      },
+      gotoBidPrices() {
+        this.$router.push({name: 'bidlist', params: {id: this.auction.id}});
+      },
+      connectSocket() {
+        let socket = new SockJS(this.config.dest);
+        this.client = Stomp.over(socket);
+        this.client.connect({}, function(frame) {
+          this.client.subscribe(this.config.topic, function(event) {
+            handleEvent(JSON.parse(event.body));
+          });
+        }, function(frame) {
+          console.log(frame);
+          console.error(new Date() + ' websocket失去连接！');
+        });
+      },
+      handleEvent(data) {
+        console.log(data);
+      },
+      disconnect() {
+        if (this.client) {
+          this.client.disconnect();
+          this.client = null;
+          console.log('连接已断开');
+        }
       },
       _initScroll() {
         this.$nextTick(() => {
@@ -318,41 +332,39 @@
           return this.selectType === type;
         }
       },
-      pay() {
-      },
-      mark() {
-        let uid = this.$store.getters.getUserInfo.userId;
-        if (!uid) {
+      bid() {
+        let userInfo = this.$store.getters.getUserInfo;
+        if (!userInfo.openid) {
           this.$store.dispatch('openToast', '请先登录！');
           return;
         }
-        let params = {
-          userId: uid,
-          type: 1,
-          artworkId: this.good.id,
-          fromCart: false
-        };
-        if (this.marked) {
-          // 已关注，再次点击取消关注
-          api.unmark(params).then(response => {
-            if (response.result === 0) {
-              this.good.collected = [];
-            }
-          });
-          this.marked = false;
-          return;
-        }
-        api.mark(params).then(response => {
+        api.bidPrice({
+          'userName': userInfo.nickName || '',
+          'userNameID': userInfo.userId,
+          'openid': userInfo.openid,
+          'price': this.highPrice,
+          'auctionProductId': this.auction.id
+        }).then(response => {
           if (response.result === 0) {
-            if (this.good.collected) {
-              this.good.collected.push(uid);
-            } else {
-              this.good.collected = [uid];
-            }
+            this.$store.dispatch('openToast', '出价成功！');
+          } else if (response.result === 3) {
+            this.$store.dispatch('openToast', '已经是最高价了，看好你哦！');
+          } else if (response.result === 2) {
+            this.$store.dispatch('openToast', '出价太低了，有人超过你了！');
           }
+        }).catch(response => {
+          this.$store.dispatch('openToast', '网络太忙，稍后再试！');
         });
       },
-      killNotify() {
+      reduce() {
+        if (this.highPrice > this.auction.markup) {
+          this.highPrice -= this.auction.markup;
+        }
+      },
+      add() {
+        this.highPrice += this.auction.markup;
+      },
+      notify() {
         let openid = this.$store.getters.getUserInfo.openid;
         api.reservedNotify({
           pid: this.auction.auctionId,
@@ -375,11 +387,15 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
           });
         });
+        let icon = 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423';
+        if (this.auction.icon) {
+          icon = api.CONFIG.psCtx + this.auction.icon + '?w=423&h=423';
+        }
         let shareData = {
-          title: this.good.name,
-          desc: '秒杀价：¥' + this.good.killPrice + '。「一虎一席商城」正品保证，微信专享。',
+          title: this.auction.name,
+          desc: '起拍价：¥' + this.auction.startPrice + '。「一虎一席商城」正品保证，微信专享。',
           link: location.href,
-          imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
+          imgUrl: icon
         };
         wx.ready(function() {
           wx.onMenuShareTimeline(shareData);
@@ -392,7 +408,7 @@
           clearTimeout(timer);
           let previewImgList = [];
           let imgs = this.$refs.goodContent.getElementsByTagName('img');
-          let html = this.good.content;
+          let html = this.auction.content;
           for (let i = 0; i < imgs.length; i++) {
             let img = imgs[i];
             let src = img.getAttribute('data-original');
@@ -420,7 +436,7 @@
               previewImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
           }
-          this.good.content = html;
+          this.auction.content = html;
           setTimeout(() => {
             this._initScroll();
             let newImgs = this.$refs.goodContent.getElementsByTagName('img');
@@ -932,6 +948,47 @@
             color: #fff
           .icon-favorite
             color: #ff463c  
+        .input-group
+          position: relative
+          display: inline-table
+          border-collapse: separate
+          vertical-align: middle
+          box-sizing: border-box
+          .input-group-btn
+            display: table-cell
+            vertical-align: middle
+            position: relative
+            font-size: 0
+            white-space: nowrap
+            .btn
+              display: inline-block
+              height: 50px
+              line-height: 50px
+              width: 35px
+              font-size: 24px
+              text-align: center
+              white-space: nowrap
+              vertical-align: middle
+              cursor: pointer
+              outline: none
+              border: 0
+              background-color: #ddd
+              color: #FFF
+          .form-control
+            position: relative
+            display: table-cell
+            vertical-align: middle
+            text-align: center
+            float: left
+            width: 100%
+            height: 50px
+            line-height: 50px
+            font-size: 20px
+            color: #555
+            background-color: #fff
+            background-image: none
+            border: none
+            box-sizing: border-box
       .mini-favorite-item
         flex: 70px 0 0
         .button-lg

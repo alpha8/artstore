@@ -7,14 +7,14 @@
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in auctions" :key="index">
               <div class="item-content">
-                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="item.thumbnail" alt=""></div>
+                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
                   <div class="price-wrap">
-                    <span>{{item.buyer | currency}}</span>
+                    <span>{{item.state}}</span>
                   </div>
                   <div class="more-ops">
-                    <span class="pricing"><i>5</i>次出价</span>
+                    <span class="pricing"><i>{{item.countAppr}}</i>次出价</span>
                     <span class="btn-buy green" v-show="item.leftStartTimes > 0" @click.stop.prevent="killNotify(item)">拍卖提醒</span>
                     <span class="btn-buy disabled" v-show="item.leftEndTimes <= 0">已结束</span>
                   </div>
@@ -41,35 +41,7 @@
   export default {
     data() {
       return {
-        auctions: [
-          {
-            id: 1,
-            name: '大千木雕珍藏专场',
-            state: '正在进行',
-            leftTime: 36255327,
-            count: 64,
-            buyer: 100,
-            thumbnail: 'http://img11.360buyimg.com/da/jfs/t5701/147/4821084102/193440/8ec5e8bd/5954fef2N9eddc482.jpg'
-          },
-          {
-            id: 2,
-            name: '景德镇精品大师陶瓷专场',
-            state: '正在进行',
-            leftTime: 36255327,
-            count: 10,
-            buyer: 11,
-            thumbnail: 'http://img11.360buyimg.com/da/jfs/t6736/287/1781393521/85063/37a3d251/595797fcN6b7d6eb1.jpg'
-          },
-          {
-            id: 3,
-            name: '茶生厚土茗冠天下专场',
-            state: '正在进行',
-            leftTime: 36255327,
-            count: 8,
-            buyer: 80,
-            thumbnail: 'http://img11.360buyimg.com/da/jfs/t6103/26/2994096983/90331/c621163a/594b19adN27574e27.jpg'
-          }
-        ],
+        auctions: [],
         pageNumber: 1,
         pageSize: 10,
         totalPages: -1,
@@ -86,7 +58,7 @@
       this.show();
     },
     deactivated() {
-      // this._reset();
+      this._reset();
       this.hide();
     },
     mounted() {
@@ -105,16 +77,27 @@
           return;
         }
         this.loading = true;
-        /*
-        this.totalPages = response.pages;
-        this.pageNumber++;
-        this.lastExec = +new Date();
-        this.loading = false;
-        this.loadEnd = this.pageNumber > this.totalPages;
-         */
-        this.loadEnd = false;
-        this.loading = false;
-        this.totalPages = 0;
+        api.getAuctions({
+          paging: this.pageNumber,
+          pageSize: this.pageSize
+        }).then(response => {
+          if (response.result === 0) {
+            if (response.info.apList && response.info.apList.length) {
+              response.info.apList.forEach(item => {
+                this.auctions.push(item);
+              });
+              this.totalPages = response.info.total <= this.pageSize ? 1 : Math.ceil(response.info.total / this.pageSize);
+            }
+          }
+          this.pageNumber++;
+          this.lastExec = +new Date();
+          this.loading = false;
+          this.loadEnd = this.pageNumber > this.totalPages;
+        }).catch(response => {
+          this.loadEnd = false;
+          this.loading = false;
+          this.totalPages = 0;
+        });
       },
       _reset() {
         this.auctions = [];
@@ -245,7 +228,6 @@
                 float: left
                 img
                   width: 95%
-                  height: 22.5vw
                   margin-right: 10px
                   overflow: hidden
               .item-info
@@ -266,16 +248,12 @@
                   left: 0
                   bottom: 15px
                   margin: 8px 0
-                  line-height: 16px
-                  height: 16px
+                  height: 25px
                   font-family: arial
                   span
-                    color: #e4393c
-                    font-size: 18px
-                  del
-                    display: block
-                    color: #999
+                    color: #f15353
                     font-size: 12px
+                    font-weight: 700
                 .more-ops
                   position: absolute
                   right: 10px

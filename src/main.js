@@ -28,6 +28,21 @@ Vue.use(VueAxios, axios);
 Vue.use(VueAwesomeSwiper);
 Vue.use(MuseUI);
 
+import wx from 'weixin-js-sdk';
+
+/** 全局守卫 */
+router.beforeEach((to, from, next) => {
+  let shareData = {
+    title: '一虎一席茶席艺术商城',
+    desc: '「一虎一席茶席艺术商城」正品保证，微信专享。',
+    link: location.href,
+    imgUrl: 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
+  };
+  wx.onMenuShareTimeline(shareData);
+  wx.onMenuShareAppMessage(shareData);
+  next();
+});
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

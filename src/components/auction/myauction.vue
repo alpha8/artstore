@@ -1,21 +1,17 @@
 <template>
   <div>
-    <fixedheader title="我的秒杀"></fixedheader>
+    <fixedheader title="我的拍卖"></fixedheader>
     <div class="order">
       <div class="order-wrap">
-        <div class="order-container" ref="seckList" v-if="seckills.length">
+        <div class="order-container" ref="auctions" v-if="auctions.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
-            <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in seckills" :key="index">
+            <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in auctions" :key="index">
               <div class="item-content">
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
-                  <p class="line">状态：{{mapStatus[item.status]}}</p>
-                  <p class="line">时间：{{item.createTime | formatDate}}</p>
-                </div>
-                <div class="item-ops">
-                  <span class="btn" v-show="item.status === 0" @click.stop.prevent="pay(item)">去付款</span>
-                  <span class="btn white" v-show="item.status === 1" @click.stop.prevent="showOrders()">我的订单</span>
+                  <p class="line">出价次数：<span class="redtext">{{item.countAppr}}</span>次</p>
+                  <p class="line">拍卖状态：{{item.state}}</p>
                 </div>
               </div>
             </mu-flexbox-item>
@@ -23,7 +19,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-if="!seckills.length">啊哦，还没有相关记录哦</div>
+        <div class="no-order" v-if="!auctions.length">啊哦，还没有相关记录哦</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -39,7 +35,7 @@
   export default {
     data() {
       return {
-        seckills: [],
+        auctions: [],
         pageNumber: 1,
         pageSize: 10,
         totalPages: -1,
@@ -47,8 +43,7 @@
         scroller: null,
         loading: false,
         lastExec: +new Date(),
-        scrollY: 0,
-        mapStatus: ['待付款', '已完成', '已失效']
+        scrollY: 0
       };
     },
     activated() {
@@ -60,7 +55,7 @@
       this.hide();
     },
     mounted() {
-      this.scroller = this.$refs.seckList;
+      this.scroller = this.$refs.auctions;
       window.onscroll = () => {
         this.scrollY = window.pageYOffset;
       };
@@ -76,17 +71,17 @@
         }
         this.loading = true;
         let uid = this.$store.getters.getUserInfo.userId;
-        api.getSuccessSeckills({
-          offset: this.pageNumber,
-          limit: this.pageSize,
+        api.getAuctions({
+          paging: this.pageNumber,
+          pageSize: this.pageSize,
           userId: uid || ''
         }).then(response => {
-          if (response.list && response.list.length) {
-            response.list.forEach(item => {
-              this.seckills.push(item);
+          if (response.info.apList && response.info.apList.length) {
+            response.info.apList.forEach(item => {
+              this.auctions.push(item);
             });
           }
-          this.totalPages = response.pages;
+          this.totalPages = response.info.total <= this.pageSize ? 1 : Math.ceil(response.info.total / this.pageSize);
           this.pageNumber++;
           this.lastExec = +new Date();
           this.loading = false;
@@ -98,7 +93,7 @@
         });
       },
       _reset() {
-        this.seckills = [];
+        this.auctions = [];
         this.pageNumber = 1;
         this.totalPages = -1;
         this.loadEnd = false;
@@ -112,7 +107,7 @@
         }
       },
       showDetail(item) {
-        this.$router.push({name: 'seckillDetail', params: {id: item.seckillId}});
+        this.$router.push({name: 'auctiondetail', params: {id: item.id}});
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -129,23 +124,6 @@
       goTop() {
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
-      },
-      showOrders() {
-        this.$router.push({path: '/order', query: {type: 2}});
-      },
-      pay(item) {
-        let good = {
-          id: item.seckillId,
-          name: item.name,
-          price: item.killPrice,
-          oldPrice: item.price,
-          count: 1,
-          icon: (item.icon) ? api.CONFIG.psCtx + item.icon + '?w=114&h=114' : api.CONFIG.defaultImg,
-          checked: false,
-          createTime: item.createTime
-        };
-        this.$store.dispatch('addPayGoods', [good]);
-        this.$router.push({name: 'pay', query: {orderType: 3}});
       }
     },
     components: {
@@ -255,6 +233,8 @@
                   line-height: 15px
                   font-size: 12px
                   color: #666
+                  .redtext
+                    color: #f15353
               .item-ops
                 position: absolute
                 right: 0

@@ -107,6 +107,7 @@
         </div>
       </div>
     </div>
+    <frame></frame>
   </div>
 </template>
 
@@ -119,6 +120,7 @@
   import split from '@/components/split/split';
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import frame from '@/components/common/myiframe';
   import swipe from '@/components/swipe/quietswipe';
   import star from '@/components/star/star';
   import api from '@/api/api';
@@ -522,7 +524,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame
     }
   };
 </script>

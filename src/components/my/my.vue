@@ -64,6 +64,7 @@
         </div>
       </div>
     </div>
+    <frame></frame>
   </div>
 </template>
 
@@ -73,6 +74,7 @@
   import split from '@/components/split/split';
   import {mapGetters} from 'vuex';
   import {removeCookie} from '@/common/js/store';
+  import frame from '@/components/common/myiframe';
   import api from '@/api/api';
 
   export default {
@@ -90,10 +92,11 @@
         ],
         others: [
           { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
+          { icon: 'icon-group_purchase', text: '我的团购', link: '/mygroupbuy' },
+          { icon: 'icon-auction', text: '我的拍卖', link: '/myauction' },
           { icon: 'icon-heart', text: '我的收藏', link: '/follow' },
           { icon: 'icon-footprint', text: '浏览足迹', link: '/footprint' },
           { icon: 'icon-address', text: '收货地址', link: '/address' },
-          { icon: 'icon-auction', text: '我的拍卖', link: '' },
           {
             icon: 'icon-command',
             text: '清理缓存',
@@ -173,7 +176,7 @@
       }
     },
     components: {
-      fixedheader, split
+      fixedheader, split, frame
     }
   };
 </script>

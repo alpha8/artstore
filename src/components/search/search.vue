@@ -397,12 +397,16 @@
           position: relative
           background: #f2f2f7
           width: 100%
-          height: 102px
+          min-height: 102px
           overflow: hidden
-          img
+          a
+            display: inline-block
             width: 100%
-            height: auto
-            vertical-align: top
+            overflow: hidden
+            img
+              width: 100%
+              vertical-align: top
+              overflow: hidden
         .product-title
           overflow: hidden
           display: -webkit-box

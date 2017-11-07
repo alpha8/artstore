@@ -1,7 +1,7 @@
 <template>
   <div class="channel">
     <div class="chanel-item" v-for="(item, index) in items" key="index" :class="{'p50': cols===2, 'p100': cols===1}">
-      <router-link :to="{name:'good', params: { id: item.id }}" class="good-item">
+      <div @click.stop.prevent="goGoodDetail(item)" class="good-item">
         <div class="item-img">
           <img v-lazy="getThumbnail(item)" alt="">
         </div>
@@ -10,7 +10,7 @@
           <div class="price"><span class="num">{{item.price | currency}}</span></div>
           <div class="icon" @click.stop.prevent="mark(item)"><i :class="favorited(item)"></i></div>
         </div>
-      </router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -32,8 +32,18 @@
     },
     data() {
       return {
-        screenWidth: window.innerWidth
+        screenWidth: window.innerWidth,
+        sameRoute: false
       };
+    },
+    watch: {
+      $route (to, from) {
+        if (to.name === from.name) {
+          this.sameRoute = true;
+        } else {
+          this.sameRoute = false;
+        }
+      }
     },
     methods: {
       selectGood(target) {
@@ -45,6 +55,13 @@
           return api.CONFIG.psCtx + pic[0].id + '?w=750&h=500';
         } else {
           return api.CONFIG.defaultImg;
+        }
+      },
+      goGoodDetail(item) {
+        if (this.sameRoute) {
+          this.$router.replace({name: 'good', params: {id: item.id}});
+        } else {
+          this.$router.push({name: 'good', params: {id: item.id}});
         }
       },
       favorited(good) {

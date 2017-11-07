@@ -21,6 +21,8 @@ import expresslog from '@/components/order/expresslog';
 import auction from '@/components/auction/auctions';
 import auctiondetail from '@/components/auction/auctiondetail';
 import auctionList from '@/components/auction/auctionList';
+import myauction from '@/components/auction/myauction';
+import bidlist from '@/components/auction/bidlist';
 import coupon from '@/components/coupon/coupon';
 import getcoupon from '@/components/coupon/getcoupon';
 import couponhistory from '@/components/coupon/coupon-history';
@@ -34,6 +36,7 @@ import seckillDetail from '@/components/seckill/seckilldetail';
 import myseckill from '@/components/seckill/myseckill';
 import groupbuy from '@/components/groupbuy/groupbuy';
 import groupbuyDetail from '@/components/groupbuy/groupbuydetail';
+import mygroupbuy from '@/components/groupbuy/mygroupbuy';
 
 import '@/common/stylus/index.styl';
 
@@ -61,6 +64,8 @@ export default new Router({
     {path: '/auction', component: auction, name: 'auction'},
     {path: '/auction/:id/detail', component: auctiondetail, name: 'auctiondetail'},
     {path: '/auction/list/:id', component: auctionList, name: 'auctionList'},
+    {path: '/auction/:id/bidlist', component: bidlist, name: 'bidlist'},
+    {path: '/myauction', component: myauction, name: 'myauction'},
     {path: '/coupon', component: coupon, name: 'coupon'},
     {path: '/getcoupon', component: getcoupon, name: 'getcoupon'},
     {path: '/coupon/history', component: couponhistory, name: 'couponHistory'},
@@ -71,9 +76,17 @@ export default new Router({
     {path: '/myseckill', component: myseckill, name: 'myseckill'},
     {path: '/groupbuy', component: groupbuy, name: 'groupbuy'},
     {path: '/groupbuy/:id/detail', component: groupbuyDetail, name: 'groupbuyDetail'},
+    {path: '/mygroupbuy', component: mygroupbuy, name: 'mygroupbuy'},
     {path: '/personInfo', component: personInfo},
     {path: '/wallet', component: wallet},
     {path: '/cashdetail', component: cashdetail},
     {path: '/my', component: my}
   ]
+  // ,scrollBehavior (to, from, savedPosition) {
+  //   if (savedPosition) {
+  //       return savedPosition;
+  //   } else {
+  //       return {x: 0, y: 0};
+  //   }
+  // }
 });

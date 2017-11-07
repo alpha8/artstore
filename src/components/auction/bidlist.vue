@@ -1,25 +1,29 @@
 <template>
   <div>
-    <fixedheader title="我的收藏"></fixedheader>
-    <div class="follow">
-      <div class="follow-wrap">
-        <div class="follow-container" ref="followlist" v-show="follows.length">
-          <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="follow-list">
-            <mu-flexbox-item basis="100%" class="follow-item border-1px" v-for="(follow, index) in follows" :key="index">
-              <div class="item-img" @click.stop.prevent="showProductDetail(follow)"><img :src="getThumbnail(follow)" alt=""></div>
-              <div class="item-info" @click.stop.prevent="showProductDetail(follow)">
-                <h3 class="title">{{follow.name}}</h3>
-                <div class="price">{{follow.price | currency}}</div>
-              </div>
-              <div class="item-ops">
-                <span class="btn" @click.stop.prevent="removeItem(follow)">移除</span>
-              </div>
-            </mu-flexbox-item>
+    <fixedheader title="出价列表"></fixedheader>
+    <div class="bid">
+      <div class="bid-wrap">
+        <div class="bid-container" ref="bidlist" v-show="bids.length">
+          <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="bid-list">
+            <table class="auction-pricelist">
+              <tr class="head">
+                <td class="col-1">状态</td>
+                <td class="col-2">出价用户</td>
+                <td class="col-3">金额</td>
+                <td class="col-4">出价时间</td>
+              </tr>
+              <tr v-for="(bid, index) in bids" :key="index">
+                <td class="col-1"><span :class="{'highlight': bid.state !== '淘汰'}">{{bid.state}}</span></td>
+                <td class="col-2">{{bid.userNameId || bid.userName}}</td>
+                <td class="col-3">{{bid.price | currency}}</td>
+                <td class="col-4">{{bid.time | formatDate}}</td>
+              </tr>
+            </table>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-follow" v-show="follows.length === 0">啊哦，还没有相关记录哦</div>
+        <div class="no-bid" v-show="bids.length === 0">啊哦，还没有相关记录哦</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -29,14 +33,15 @@
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
+  import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
 
   export default {
     data() {
       return {
-        follows: [],
+        bids: [],
         pageNumber: 1,
-        pageSize: 20,
+        pageSize: 10,
         totalPages: 0,
         loadEnd: false,
         scroller: null,
@@ -54,7 +59,7 @@
       this.hide();
     },
     mounted() {
-      this.scroller = this.$refs.followlist;
+      this.scroller = this.$refs.bidlist;
       window.onscroll = () => {
         this.scrollY = window.pageYOffset;
       };
@@ -68,19 +73,19 @@
         if (!force && now - this.lastExec <= 50) {
           return;
         }
-        let user = this.$store.getters.getUserInfo;
-        api.getUserCollect({
-          currentPage: this.pageNumber,
+        let aid = this.$route.params.id;
+        api.getBidPrices({
+          paging: this.pageNumber,
           pageSize: this.pageSize,
-          userId: user.userId || -1
+          auctionProductId: aid
         }).then(response => {
           if (response.result === 0) {
-            if (response.collects && response.collects.length) {
-              response.collects.forEach(item => {
-                this.follows.push(item);
+            if (response.info.apprList && response.info.apprList.length) {
+              response.info.apprList.forEach(item => {
+                this.bids.push(item);
               });
+              this.totalPages = response.info.total <= this.pageSize ? 1 : Math.ceil(response.info.total / this.pageSize);
             }
-            this.totalPages = response.totalPages;
             this.pageNumber++;
             this.lastExec = +new Date();
             this.loading = false;
@@ -93,7 +98,7 @@
         });
       },
       _reset() {
-        this.follows = [];
+        this.bids = [];
         this.pageNumber = 1;
         this.totalPages = 0;
         this.loadEnd = false;
@@ -118,13 +123,13 @@
         }).then(response => {
           if (response.result === 0) {
             this.$store.dispatch('openToast', '已取消收藏！');
-            let items = this.follows;
+            let items = this.bids;
             for (let i = 0; i < items.length; i++) {
               if (items[i].id === product.id) {
                 items.splice(i, 1);
               }
             }
-            this.follows = items;
+            this.bids = items;
           }
         });
       },
@@ -144,6 +149,12 @@
     },
     components: {
       fixedheader, gotop
+    },
+    filters: {
+      formatDate(time) {
+        let date = new Date(time);
+        return formatDate(date, 'yyyy-MM-dd hh:mm:ss');
+      }
     }
   };
 </script>
@@ -157,12 +168,12 @@
     height: 44px
     overflow: hidden
     z-index: 2
-  .follow
+  .bid
     position: absolute
     top: 44px
     bottom: 0
     width: 100%
-    .follow-wrap
+    .bid-wrap
       position: relative
       width: 100%
       .btn-red
@@ -200,7 +211,7 @@
         color: #ccc
         text-align: center
         font-size: 12px
-      .follow-container
+      .bid-container
         position: relative
         width: 100%
         display: flex
@@ -208,56 +219,54 @@
         overflow: auto
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
-        .follow-list
+        .auction-pricelist
           position: relative
           width: 100%
-          .follow-item
-            position: relative
-            display: flex
-            margin-bottom: 15px
-            padding: 0 8px
-            border-1px(rgba(7, 17, 27, 0.1))
+          font-size: 12px
+          background-color: #fff
+          text-align: left
+          tr
+            height: 40px
+            line-height: 40px
+          >.head
+            background-color: #f3f2f8  
+          .col-1
+            width: 20%
+            padding-left: 10px
             box-sizing: border-box
-            font-size: 12px
-            .item-img
+            span
               display: inline-block
-              float:left
-              width: 20%
-              img
-                width: 70px
-                height: 70px
-                overflow: hidden
-            .item-info
-              flex: 1
-              padding: 20px 50px 0 10px
-              >.title
-                overflow: hidden
-                text-overflow: ellipsis
-                word-wrap: break-word
-                display: -webkit-box
-                -webkit-line-clamp: 2
-                -webkit-box-orient: vertical
-                line-height: 1.45
-              div
-                padding-top: 10px
-              .price
-                color: #e4393c
-                font-weight: 700
-            .item-ops
-              position: absolute
-              right: 8px
-              top: 0
-              width: 50px
-              bottom: 0
-              .btn
-                display: inline-block
-                height: 25px
-                line-height: 25px
-                padding: 0 10px
-                border: 1px solid rgba(7, 17, 27,0.1)
-                margin-top: 20px
-                letter-spacing: 1px
-      .no-follow
+              height: 15px
+              width: 30px
+              line-height: 15px
+              vertical-align: middle
+              text-align: center
+              color: #fff
+              background-color: #747474
+              border-radius: 1px
+              &.highlight
+                background-color: #3985ff
+          .col-2
+            width: 25%
+            padding-left: 10px
+            box-sizing: border-box
+          .col-3
+            flex: 1
+            padding-left: 10px
+            word-break: break-all
+            overflow: hidden
+            box-sizing: border-box
+          .col-4
+            width: 35%
+            padding-left: 10px
+            text-overflow: ellipsis
+            white-space: nowrap
+            overflow: hidden
+            box-sizing: border-box
+        .bid-list
+          position: relative
+          width: 100%
+      .no-bid
         width: 100%
         padding: 40px 0
         text-align: center
