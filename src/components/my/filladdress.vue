@@ -1,6 +1,6 @@
 <template>
-  <div class="wxpay">
-    <fixedheader title="确认订单" ref="header"></fixedheader>
+  <div class="filladdress">
+    <fixedheader title="填写收货地址" ref="header"></fixedheader>
     <div class="address-wrap">
       <div class="addressNull" v-show="!defaultAddress || !defaultAddress.address">
         <h3 @click.stop.prevent="showAddressList">！请填写收货地址</h3>
@@ -13,25 +13,8 @@
         </ul>
       </div>
     </div>
-    <div class="pay" ref="pay">
+    <div class="pay" ref="addressRef">
       <div class="order-wrap">
-        <split></split>
-        <div class="order-shop border-1px">一虎一席艺术平台</div>
-        <ul class="orderlist">
-          <li class="product border-1px" v-for="product in products">
-            <div class="thumbnail">
-              <img :src="product.icon" alt="" class="photo">
-            </div>
-            <div class="sku-info">
-              <p class="sku-name">{{product.name}}</p>
-              <p class="sku-item"></p>
-            </div>
-            <div class="sku-ext">
-              <p class="sku-price">{{product.price | currency}}</p>
-              <p class="sku-count">x{{product.count}}</p>
-            </div>
-          </li>
-        </ul>
         <ul class="shop-info">
           <li class="shipping">
             <strong>配送方式：</strong>
@@ -46,19 +29,12 @@
             <span class="nowrap-line remark">{{payRemarks}}</span>
           </li>
         </ul>
-        <split></split>
         <div class="payArea">
-          <p class="price">
-            总价：
-            <span class="totalPrice">{{totalPrice | currency}}</span>
-          </p>
           <div class="payBtnList">
-            <div class="btns btn-green" @click.stop.prevent="weixinPay"><span>微信支付</span></div>
+            <div class="btns btn-green" @click.stop.prevent="saveAddress"><span>保存</span></div>
             <!-- <div class="btns btn-red"><span>京东支付</span></div>
             <div class="btns btn-lightblue"><span>货到付款</span></div> -->
           </div>
-          <div class="countdownTips" v-if="countdownStats && countdownStats.milliseconds > 0">
-            请在<span v-if="countdownStats.hours"><span class="red-text">{{countdownStats.hours}}</span>小时</span><span v-if="countdownStats.mins"><span class="red-text">{{countdownStats.mins}}</span>分</span><span v-if="countdownStats.seconds"><span class="red-text">{{countdownStats.seconds}}</span>秒</span>内完成支付，否则订单将自动取消。</div>
         </div>
       </div>
     </div>
@@ -79,35 +55,17 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import addressList from '@/components/my/addressList';
   import api from '@/api/api';
-  import {pay} from '@/common/js/pay';
-  import {countdown} from '@/common/js/date';
 
   export default {
     data() {
       return {
         showBox: false,
-        totalFee: 0,
-        paying: false,
-        remarks: '',
-        countdownStats: {},
-        timer: null,
-        seckill: {}
+        remarks: ''
       };
     },
     computed: {
-      products() {
-        return this.$store.getters.getPayGoods;
-      },
       defaultAddress() {
         return this.$store.getters.getDefaultAddress;
-      },
-      totalPrice() {
-        let total = 0;
-        this.products.forEach((item) => {
-          total += item.count * item.price;
-        });
-        this.totalFee = total;
-        return total;
       },
       payRemarks() {
         this.remarks = this.$store.getters.getPayRemark;
@@ -115,21 +73,11 @@
       }
     },
     activated() {
-      if (!this.$store.getters.getPayGoods.length) {
-        this.$router.replace('/cart');
-        return;
-      }
       this.show();
       this._initScroll();
-      this.countdown();
     },
     deactivated() {
       this.hide();
-      this.paying = false;
-      this.seckill = {};
-      if (this.timer) {
-        clearInterval(this.timer);
-      }
     },
     mounted() {
       this._initScroll();
@@ -138,7 +86,7 @@
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.pay, {
+            this.scroll = new BScroll(this.$refs.addressRef, {
               click: true
             });
           } else {
@@ -166,127 +114,36 @@
         this.showBox = false;
         this.defaultAddress = this.$store.getters.getDefaultAddress;
       },
-      countdown() {
-        let createTime = 0;
-        this.products.forEach((item) => {
-          createTime = item.createTime;
-          if (createTime) {
-            this.seckill = item;
-          }
-        });
-        if (!createTime) {
-          return;
-        }
-        let cTime = (new Date(createTime + 40 * 60000).getTime() - (+new Date())) / 1000;
-        this.countdownStats = countdown(cTime);
-        this.timer = setInterval(() => {
-          if (this.countdownStats.milliseconds <= 0) {
-            clearInterval(this.timer);
-            if (!this.seckill.id) {
-              return;
-            }
-            // 取消订单
-            let userId = this.$store.getters.getUserInfo.userId;
-            api.cancelSeckillOrder({
-              seckillId: this.seckill.id,
-              userId: userId
-            }).then(response => {
-              if (response.success) {
-                this.$store.dispatch('openToast', '支付超时，订单已取消');
-                this.$store.dispatch('removeKillProduct', this.seckill.id);
-                setTimeout(() => {
-                  this.$router.push('/my');
-                }, 1500);
-                return;
-              }
-            });
-          }
-          this.countdownStats = countdown(--cTime);
-        }, 1000);
-      },
       back() {
         this.$router.back();
       },
-      weixinPay() {
-        let userInfo = this.$store.getters.getUserInfo;
-        if (!userInfo.openid) {
-          this.$store.dispatch('openToast', '请先登录！');
+      saveAddress() {
+        let orderNo = this.$route.params.id;
+        if (!orderNo) {
+          this.$store.dispatch('openToast', '非法访问！');
           return;
         }
-        if (!this.defaultAddress.address) {
+        let addr = this.defaultAddress.address;
+        if (!addr) {
           this.$store.dispatch('openToast', '请选择收货人信息');
           return;
         }
-        if (this.paying) {
-          this.$store.dispatch('openToast', '正在支付中...');
-          return;
-        }
-        let params = {
-          openid: userInfo.openid,
-          userId: userInfo.userId,
-          totalPrice: this.totalFee,
+        api.updateOrderAddress({
+          orderNo: orderNo,
           express: {
-            expressAddress: this.defaultAddress.address,
+            expressAddress: addr,
             mobile: this.defaultAddress.mobile,
             receiver: this.defaultAddress.name
-          },
-          remarks: this.remarks,
-          type: this.$route.query.orderType || 0
-        };
-        let seckillId = 0;
-        let items = [];
-        this.products.forEach(product => {
-          seckillId = product.id;
-          items.push({'id': product.id, 'count': product.count});
-        });
-        params.products = items;
-        this.paying = true;
-        api.createOrder(params).then(response => {
-          if (response.result !== 0) {
-            this.$store.dispatch('openToast', '生成订单失败！');
-            this.paying = false;
-            return;
           }
-          if (params.type === 3) {
-            api.finishSeckill(seckillId);
+        }).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('openToast', '保存收货地址成功！');
+            this.$router.replace({name: 'orderdetail', params: {id: orderNo}});
+          } else {
+            this.$store.dispatch('openToast', '收货信息不完整，请确认！');
           }
-          let order = response.order;
-          let payParams = {
-            totalFee: order.totalFee,
-            openid: userInfo.openid,
-            orderNo: order.orderNo,
-            body: order.body
-          };
-          api.wxpay(payParams).then((response) => {
-            this.paying = false;
-            let that = this;
-            WeixinJSBridge.invoke(
-              'getBrandWCPayRequest', {
-                'appId': response.appId,
-                'timeStamp': response.timeStamp || +new Date(),
-                'nonceStr': response.nonceStr,
-                'package': response.packageValue,
-                'signType': response.signType || 'MD5',
-                'paySign': response.paySign
-              }, function(res) {
-                that.$store.dispatch('clearPayGoods');
-                // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
-                if (res.err_msg === 'get_brand_wcpay_request:ok') {
-                  that.$store.dispatch('openToast', '支付成功！');
-                } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
-                  that.$store.dispatch('openToast', '取消支付！');
-                } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
-                  that.$store.dispatch('openToast', '支付失败！');
-                }
-                that.$router.push('order');
-              }
-            );
-            pay();
-          }).catch(response => {
-            this.paying = false;
-          });
         }).catch(response => {
-          this.paying = false;
+          this.$store.dispatch('openToast', '网络太忙，请稍候再试');
         });
       }
     },
@@ -298,7 +155,7 @@
 
 <style lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin';
-  .wxpay
+  .filladdress
     position: absolute
     left: 0
     right: 0

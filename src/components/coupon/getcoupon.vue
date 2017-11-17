@@ -192,7 +192,7 @@
     top: 44px
     bottom: 0
     width: 100%
-    background: #2A2239 url(http://www.yihuyixi.com/ps/download/59a5191ae4b0f21ffdcbcc85) no-repeat
+    background: #2A2239 url(http://www.yihuyixi.com/ps/download/5a03ed39e4b0f5810b80e402) no-repeat
     background-size: 100% auto
     overflow: hidden
     .coupon-wrapper

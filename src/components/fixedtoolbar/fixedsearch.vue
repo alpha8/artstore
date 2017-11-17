@@ -63,6 +63,7 @@
     },
     methods: {
       search() {
+        this.$store.dispatch('addSearchHistory', this.keyword);
         this.$router.push({path: '/search', query: {keyword: this.keyword || ''}});
       },
       showLoginForm() {

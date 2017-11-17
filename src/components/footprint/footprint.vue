@@ -104,7 +104,7 @@
       getThumbnail(item) {
         let icons = item.icons;
         if (icons && icons.length) {
-          return api.CONFIG.psCtx + icons[0].id + '?w=228&h=228';
+          return api.CONFIG.psCtx + icons[0].id + '?w=750&h=500';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -232,8 +232,8 @@
           width: 100%
           .footprint-item
             display: flex
-            margin-bottom: 15px
-            padding: 0 8px
+            margin-bottom: 5px
+            padding: 8px
             border-1px(rgba(7, 17, 27, 0.1))
             box-sizing: border-box
             font-size: 12px
@@ -242,12 +242,11 @@
               width: 20%
               float: left
               img
-                width: 70px
-                height: 70px
+                width: 95%
                 overflow: hidden
             .item-info
               flex: 1
-              padding: 20px 50px 0 10px
+              padding: 0 50px 0 10px
               >.title
                 overflow: hidden
                 text-overflow: ellipsis

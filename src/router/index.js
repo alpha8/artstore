@@ -14,6 +14,7 @@ import my from '@/components/my/my';
 import addressList from '@/components/my/addressList';
 import addAddress from '@/components/my/addAddress';
 import editAddress from '@/components/my/editAddress';
+import fillAddress from '@/components/my/fillAddress';
 import order from '@/components/order/order';
 import orderdetail from '@/components/order/orderdetail';
 import refund from '@/components/order/refund';
@@ -37,6 +38,9 @@ import myseckill from '@/components/seckill/myseckill';
 import groupbuy from '@/components/groupbuy/groupbuy';
 import groupbuyDetail from '@/components/groupbuy/groupbuydetail';
 import mygroupbuy from '@/components/groupbuy/mygroupbuy';
+import recommend from '@/components/my/recommend';
+import cashback from '@/components/my/cashback';
+import cashbackdetail from '@/components/my/cashbackdetail';
 
 import '@/common/stylus/index.styl';
 
@@ -54,13 +58,14 @@ export default new Router({
     {path: '/cart', component: shopcart},
     {path: '/pay', component: pay, name: 'pay'},
     {path: '/pay/remark', component: remark},
-    {path: '/address', component: addressList},
-    {path: '/addAddress', component: addAddress},
-    {path: '/editAddress/:id', component: editAddress, name: 'address'},
+    {path: '/address', component: addressList, name: 'addresslist'},
+    {path: '/address/add', component: addAddress, name: 'addaddress'},
+    {path: '/address/:id/edit', component: editAddress, name: 'address'},
     {path: '/order', component: order},
     {path: '/order/detail/:id', component: orderdetail, name: 'orderdetail'},
     {path: '/order/refund/:id', component: refund, name: 'refund'},
     {path: '/order/express/:expressCode/:expressNo', component: expresslog, name: 'expresslog'},
+    {path: '/order/:id/address', component: fillAddress, name: 'filladdress'},
     {path: '/auction', component: auction, name: 'auction'},
     {path: '/auction/:id/detail', component: auctiondetail, name: 'auctiondetail'},
     {path: '/auction/list/:id', component: auctionList, name: 'auctionList'},
@@ -80,6 +85,9 @@ export default new Router({
     {path: '/personInfo', component: personInfo},
     {path: '/wallet', component: wallet},
     {path: '/cashdetail', component: cashdetail},
+    {path: '/recommend', component: recommend},
+    {path: '/cashback', component: cashback},
+    {path: '/cashbackdetail', component: cashbackdetail},
     {path: '/my', component: my}
   ]
   // ,scrollBehavior (to, from, savedPosition) {

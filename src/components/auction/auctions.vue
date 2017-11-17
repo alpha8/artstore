@@ -11,12 +11,12 @@
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
                   <div class="price-wrap">
-                    <span>{{item.state}}</span>
+                    <span>{{stateDesc(item.auction_product_state_id)}}</span>
                   </div>
                   <div class="more-ops">
-                    <span class="pricing"><i>{{item.countAppr}}</i>次出价</span>
-                    <span class="btn-buy green" v-show="item.leftStartTimes > 0" @click.stop.prevent="killNotify(item)">拍卖提醒</span>
-                    <span class="btn-buy disabled" v-show="item.leftEndTimes <= 0">已结束</span>
+                    <span class="pricing" v-if="item.auction_product_state_id === 1"><i>{{item.countAppr}}</i>次出价</span>
+                    <span class="btn-buy green" v-else-if="item.auction_product_state_id === 0" @click.stop.prevent="killNotify(item)">拍卖提醒</span>
+                    <span class="btn-buy disabled" v-else>已结束</span>
                   </div>
                 </div>
               </div>
@@ -50,7 +50,14 @@
         loading: false,
         lastExec: +new Date(),
         scrollY: 0,
-        timer: null
+        timer: null,
+        states: {
+          0: '预展',
+          1: '拍卖中',
+          2: '拍卖暂停',
+          3: '拍卖结束',
+          4: '流拍'
+        }
       };
     },
     activated() {
@@ -116,14 +123,17 @@
       showDetail(item) {
         this.$router.push({name: 'auctiondetail', params: {id: item.id}});
       },
+      stateDesc(state) {
+        return this.states[state];
+      },
       killNotify(item) {
         let openid = this.$store.getters.getUserInfo.openid;
         api.reservedNotify({
           pid: item.id,
           pname: item.name,
-          type: 0,
+          type: 1,
           openid: openid,
-          strDate: formatDate(new Date(item.startTime.replace(/\s/, 'T')), 'yyyy-MM-dd hh:mm')
+          strDate: formatDate(new Date(item.startTime), 'yyyy-MM-dd hh:mm')
         }).then(response => {
           this.$store.dispatch('openToast', '设置成功, 请留意微信通知！');
         });
@@ -263,8 +273,8 @@
                     right: 0
                     bottom: 15px
                     width: 80px
-                    height: 25px
-                    line-height: 25px
+                    height: 30px
+                    line-height: 30px
                     text-align: center
                     font-size: 14px
                     background: #e4393c

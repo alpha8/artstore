@@ -1,15 +1,17 @@
 <template>
   <div>
     <fixedheader title="拍卖详情" right-icon="icon-more"></fixedheader>
-    <div class="good" ref="good">
+    <div class="good" ref="auctionRef">
       <div class="good-content">
         <div class="image-header">
           <swipe :swiperSlides="swiperSlides"></swipe>
         </div>
         <div class="content">
           <h1 class="title">{{auction.name}}</h1>
-          <div class="price">当前价：<span class="now">{{highPrice | currency}}</span></div>
-          <div class="price" v-if="false">成交价：<span class="now">{{highPrice | currency}}</span></div>
+          <div class="price" v-if="auction.auction_product_state_id === 0">当前价：<span class="now">{{0 | currency}}</span></div>
+          <div class="price" v-else-if="auction.auction_product_state_id === 4"><span class="now">流拍</span></div>
+          <div class="price" v-else-if="auction.auction_product_state_id <= 2">当前价：<span class="now">{{dealPrice | currency}}</span></div>
+          <div class="price" v-else>成交价：<span class="now">{{highPrice | currency}}</span></div>
         </div>
         <div class="auction-detail">
           <ul>
@@ -21,7 +23,7 @@
         </div>
         <split></split>
         <div class="info">
-          <h1 class="title" @click.stop.prevent="gotoBidPrices">出价记录<span class="num">共{{auction.countAppr}}次</span></h1>
+          <h1 class="title" @click.stop.prevent="gotoBidPrices">出价记录<span class="num"></span></h1>
           <table class="auction-pricelist">
             <tr class="header">
               <td class="col-1">状态</td>
@@ -30,7 +32,7 @@
               <td class="col-4">出价时间</td>
             </tr>
             <tr v-for="(item, index) in bidPrices" :key="index">
-              <td class="col-1"><span :class="{'highlight': item.state !== '淘汰'}">{{item.state}}</span></td>
+              <td class="col-1"><span :class="{'highlight': item.app_state_id === 2 || item.app_state_id === 0}">{{stateDesc(item.app_state_id)}}</span></td>
               <td class="col-2">{{item.userNameId || item.userName}}</td>
               <td class="col-3">{{item.price | currency}}</td>
               <td class="col-4">{{item.time | formatDate}}</td>
@@ -91,20 +93,23 @@
     </div>
     <div class="fixed-foot">
       <div class="foot-wrapper">
-        <div class="foot-item" v-if="auction.leftStartTimes > 0" @click.stop.prevent="notify">
+        <div class="foot-item" v-if="auction.auction_product_state_id === 0" @click.stop.prevent="notify">
           <span class="button-lg green">拍卖提醒</span>
         </div>
-        <div class="foot-item" v-if="auction.leftEndTimes <= 0">
+        <div class="foot-item" v-else-if="auction.auction_product_state_id === 2">
+          <span class="button-lg gray">拍卖暂停</span>
+        </div>
+        <div class="foot-item" v-else-if="auction.auction_product_state_id > 2">
           <span class="button-lg gray">已结束</span>
         </div>
-        <div class="foot-item">
+        <div class="foot-item" v-if="auction.auction_product_state_id === 1">
           <div class="input-group">
-            <span class="input-group-btn"><button class="btn" @click.stop.prevent="reduce">-</button></span>
+            <span class="input-group-btn" @click.stop.prevent="reduce">-</span>
             <input type="number" class="form-control" v-model="highPrice" />
-            <span class="input-group-btn"><button class="btn" @click.stop.prevent="add">+</button></span>
+            <span class="input-group-btn" @click.stop.prevent="add">+</span>
           </div>
         </div>
-        <div class="foot-item" @click.stop.prevent="bid">
+        <div class="foot-item" v-if="auction.auction_product_state_id === 1" @click.stop.prevent="bid">
           <span class="button-lg red">出价</span>
         </div>
       </div>
@@ -125,16 +130,13 @@
   import star from '@/components/star/star';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
-  import SockJS from 'sockjs-client';
-  import Stomp from 'stompjs';
 
   const ALL = 2;
   // const ERR_OK = 0;
 
   export default {
     activated() {
-      this.fetchData();
-      this.connectSocket();
+      this.fetchAuction();
     },
     deactivated() {
       this.hide();
@@ -146,6 +148,7 @@
         bidPrices: [],
         bidsTotal: 0,
         highPrice: 0,
+        dealPrice: 0,
         selectType: ALL,
         onlyContent: true,
         desc: {
@@ -159,12 +162,7 @@
         dropBalls: [],
         marked: false,
         timer: null,
-        nowTimes: +new Date(),
-        config: {
-          dest: 'http://localhost:8080/cmsAuction/stomp',
-          topic: '/topic/14'
-        },
-        client: null
+        nowTimes: +new Date()
       };
     },
     computed: {
@@ -179,7 +177,7 @@
       }
     },
     methods: {
-      fetchData() {
+      fetchAuction() {
         let id = this.$route.params.id;
         if (!id) {
           return;
@@ -191,7 +189,8 @@
           this.show();
           this.lazyload();
           this.$store.dispatch('closeLoading');
-          this.fetchBids();
+          this.connectSocket();
+          // this.fetchBids();
           this.fetchComments();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
@@ -227,6 +226,10 @@
         }).catch(response => {
           this.bidPrices = [];
         });
+      },
+      stateDesc(state) {
+        let stateMap = {0: '中标', 1: '淘汰', 2: '领先', 3: '流拍'};
+        return stateMap[state];
       },
       getThumbnail(id) {
         if (id) {
@@ -267,31 +270,44 @@
         this.$router.push({name: 'bidlist', params: {id: this.auction.id}});
       },
       connectSocket() {
-        let socket = new SockJS(this.config.dest);
-        this.client = Stomp.over(socket);
-        this.client.connect({}, function(frame) {
-          this.client.subscribe(this.config.topic, function(event) {
-            handleEvent(JSON.parse(event.body));
-          });
-        }, function(frame) {
-          console.log(frame);
-          console.error(new Date() + ' websocket失去连接！');
+        let id = this.$route.params.id;
+        let userInfo = this.$store.getters.getUserInfo;
+        socket.emit('join', {userid: userInfo.userId, roomid: id});
+        socket.on('message', (msg) => {
+          switch (msg.event) {
+            case 'join':
+            case 'bid_success':
+              var results = msg.data;
+              if (results && results.length) {
+                this.highPrice = this.dealPrice = results[0].price;
+              } else {
+                this.highPrice = this.dealPrice = this.auction.startPrice;
+              }
+              this.bidPrices = results;
+              break;
+            case 'bid_error':
+              var errorMap = {
+                1000: '网络故障，联系管理员处理！',
+                1001: '您的出价被人超越了',
+                1002: '已经是最高价了，看好你哦！',
+                1003: '网络太忙，稍后再试！',
+                2000: '拍卖结束'
+              };
+              this.$store.dispatch('openToast', errorMap[msg.errno]);
+              if (msg.errno === 2000) {
+                this.auction.auction_product_state_id = 3;
+              }
+              break;
+          }
         });
       },
-      handleEvent(data) {
-        console.log(data);
-      },
       disconnect() {
-        if (this.client) {
-          this.client.disconnect();
-          this.client = null;
-          console.log('连接已断开');
-        }
+        socket.emit('disconnect', '');
       },
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.good, {
+            this.scroll = new BScroll(this.$refs.auctionRef, {
               click: true,
               bounce: false
             });
@@ -338,23 +354,20 @@
           this.$store.dispatch('openToast', '请先登录！');
           return;
         }
-        api.bidPrice({
-          'userName': userInfo.nickName || '',
-          'userNameID': userInfo.userId,
-          'openid': userInfo.openid,
-          'price': this.highPrice,
-          'auctionProductId': this.auction.id
-        }).then(response => {
-          if (response.result === 0) {
-            this.$store.dispatch('openToast', '出价成功！');
-          } else if (response.result === 3) {
-            this.$store.dispatch('openToast', '已经是最高价了，看好你哦！');
-          } else if (response.result === 2) {
-            this.$store.dispatch('openToast', '出价太低了，有人超过你了！');
-          }
-        }).catch(response => {
-          this.$store.dispatch('openToast', '网络太忙，稍后再试！');
-        });
+        if (this.highPrice <= 0) {
+          this.$store.dispatch('openToast', '出价太低，请重新出价！');
+          return;
+        }
+        var data = {
+          price: this.highPrice,
+          userid: userInfo.userId,
+          userName: userInfo.nickName || '',
+          openid: userInfo.openid,
+          productId: this.auction.productId,
+          auctionId: this.auction.id,
+          endTime: this.auction.endTime
+        };
+        socket.emit('bid', data);
       },
       reduce() {
         if (this.highPrice > this.auction.markup) {
@@ -371,7 +384,7 @@
           pname: this.auction.name,
           type: 0,
           openid: openid,
-          strDate: formatDate(new Date(this.auction.startTime.replace(/\s/, 'T')), 'yyyy-MM-dd hh:mm')
+          strDate: formatDate(new Date(this.auction.startTime), 'yyyy-MM-dd hh:mm')
         }).then(response => {
           this.$store.dispatch('openToast', '设置成功, 请留意微信通知！');
         });
@@ -950,44 +963,32 @@
             color: #ff463c  
         .input-group
           position: relative
-          display: inline-table
-          border-collapse: separate
-          vertical-align: middle
+          display: inline-block
           box-sizing: border-box
           .input-group-btn
-            display: table-cell
-            vertical-align: middle
-            position: relative
-            font-size: 0
-            white-space: nowrap
-            .btn
-              display: inline-block
-              height: 50px
-              line-height: 50px
-              width: 35px
-              font-size: 24px
-              text-align: center
-              white-space: nowrap
-              vertical-align: middle
-              cursor: pointer
-              outline: none
-              border: 0
-              background-color: #ddd
-              color: #FFF
-          .form-control
-            position: relative
-            display: table-cell
-            vertical-align: middle
-            text-align: center
+            display: block
             float: left
-            width: 100%
+            width: 20%
+            height: 50px
+            line-height: 50px
+            font-size: 30px
+            background-color: #a51616
+            color: #FFF
+          .form-control
+            float: left
+            width: 60%
             height: 50px
             line-height: 50px
             font-size: 20px
             color: #555
+            text-align: center
             background-color: #fff
             background-image: none
-            border: none
+            border-top: 1px solid #a51616
+            border-bottom: 1px solid #a51616
+            -webkit-appearance: none
+            border-radius: 0
+            outline: none
             box-sizing: border-box
       .mini-favorite-item
         flex: 70px 0 0

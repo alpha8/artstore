@@ -5,6 +5,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import api from '@/api/api';
   export default {
     data() {
       return {
@@ -25,7 +26,7 @@
     },
     computed: {
       getUrl() {
-        if (!this.redirectUrl) {
+        if (this.redirectUrl) {
           return 'about:blank';
         }
         if (this.$store.getters.checkLogined) {
@@ -37,7 +38,7 @@
           redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
         }
         this.redirectUrl = redirect;
-        return 'http://www.yihuyixi.com/wxservice/baseInfo?url=' + escape(redirect);
+        return `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
       }
     }
   };

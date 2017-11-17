@@ -183,6 +183,7 @@
         this.params.categoryParentName = form.categoryParentName || '';
         if (this.keyword) {
           this.params.keyword = this.keyword;
+          this.$store.dispatch('addSearchHistory', this.keyword);
         } else {
           this.params.keyword = '';
         }

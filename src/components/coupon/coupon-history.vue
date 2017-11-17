@@ -17,7 +17,7 @@
               <div class="circle-tag circle-left"></div>
               <div class="circle-tag circle-right"></div>
               <div class="content">
-                <p class="line text">{{coupon.payValue}}元{{getCouponType(coupon.type)}}</p>
+                <p class="line text">{{coupon.payValue}}元{{getCouponType(coupon.type)}}<span class="fastDeposit" v-if="coupon.status === 0" @click.stop.prevent="deposit(coupon)">快速充值</span></p>
                 <p class="line">优惠券码：<strong>{{coupon.cNo}}</strong></p>
                 <p class="line">使用期限：{{getCouponExpire(coupon.createAt)}} ~ {{getCouponExpire(coupon.termOfValidity)}}</p>
               </div>
@@ -108,6 +108,27 @@
       },
       getCouponExpire(times) {
         return formatDate(new Date(times), 'yyyy-MM-dd');
+      },
+      deposit(coupon) {
+        let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
+          this.$store.dispatch('openToast', '请登录！');
+          return;
+        }
+        api.depositCoupon({
+          userId: user.userId,
+          cNo: coupon.cNo
+        }).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('openToast', '充值成功！');
+            this.$store.dispatch('updateCouponAmount', response.couponTotal);
+            coupon.status = 1;
+          } else {
+            this.$store.dispatch('openToast', '请确认优惠券码未被使用或输入错误！');
+          }
+        }).catch(response => {
+          this.$store.dispatch('openToast', '网络故障，请稍候再充值！');
+        });
       },
       _reset() {
         this.coupons = [];
@@ -292,6 +313,7 @@
               box-sizing: border-box
               overflow: hidden
               .line
+                position: relative
                 color: #999
                 font-size: 12px
                 line-height: 1.8
@@ -301,13 +323,26 @@
                 strong
                   font-weight: 700
                 &.text
-                  margin-bottom: 10px
+                  padding-right: 80px
+                  padding-bottom: 10px
                   color: #666
                   -webkit-box-orient: vertical
                   -webkit-line-clamp: 2
                   font-weight: 700
                   font-size: .875rem
                   line-height: 1.0625rem
+                .fastDeposit
+                  position: absolute
+                  display: inline-block
+                  right: 0
+                  top: 0
+                  width: 75px
+                  height: 28px
+                  line-height: 28px
+                  background: #d05148
+                  color: #fff
+                  text-align: center
+                  box-sizing: border-box
       .no-coupon
         width: 100%
         padding: 40px 0

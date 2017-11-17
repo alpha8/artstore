@@ -1,7 +1,7 @@
 <template>
   <div>
     <fixedheader title="商品详情" right-icon="icon-more"></fixedheader>
-    <div class="good" ref="good">
+    <div class="good" ref="seckillRef">
       <div class="good-content">
         <div class="image-header">
           <swipe :swiperSlides="swiperSlides"></swipe>
@@ -311,7 +311,7 @@
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.good, {
+            this.scroll = new BScroll(this.$refs.seckillRef, {
               click: true,
               bounce: false
             });

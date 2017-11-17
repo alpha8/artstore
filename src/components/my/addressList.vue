@@ -86,7 +86,7 @@
         this.$emit('update');
       },
       addAddress() {
-        this.$router.push('/addAddress');
+        this.$router.push('/address/add');
       },
       editAddress(item) {
         this.$router.push({name: 'address', params: {id: item.id}});

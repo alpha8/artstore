@@ -20,11 +20,12 @@
                   <p class="price"><label>总&nbsp;&nbsp;&nbsp;&nbsp;价：</label><span class="text">{{order.totalFee | currency}}</span></p>
                 </div>
                 <div class="ops">
-                  <span class="button btn-red" v-show="order.status === 0" @click.stop.prevent="weixinPay(order)">去支付</span>
-                  <span class="button btn-green" v-show="order.status === 10">催单</span>
-                  <span class="button btn-blue" v-show="order.status === 10">去评价</span>
-                  <span class="button btn-orange" v-show="order.status === 10">再次购买</span>
-                  <span class="button btn-white" v-show="order.status === 10">看相似</span>
+                  <span class="button btn-orange" v-if="order.status === 0 && !order.express" @click.stop.prevent="goFillAddress(order)">填写收货地址</span>
+                  <span class="button btn-red" v-else-if="order.status === 0" @click.stop.prevent="weixinPay(order)">去支付</span>
+                  <!-- <span class="button btn-green" v-if="order.status === 10">催单</span>
+                  <span class="button btn-blue" v-if="order.status === 10">去评价</span>
+                  <span class="button btn-orange" v-if="order.status === 10">再次购买</span>
+                  <span class="button btn-white" v-if="order.status === 10">看相似</span> -->
                 </div>
               </div>
               <div class="item-content" v-for="product in order.products">
@@ -153,7 +154,7 @@
       getThumbnail(item) {
         let icon = item.icon;
         if (icon) {
-          return api.CONFIG.psCtx + icon + '?w=228&h=228';
+          return api.CONFIG.psCtx + icon + '?w=750&h=500';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -166,6 +167,8 @@
           return '秒杀';
         } else if (item.type === 4) {
           return '团购';
+        } else if (item.type === 5) {
+          return '拍卖';
         } else {
           return '';
         }
@@ -179,7 +182,7 @@
         return this.activeItem === -1 || order.status === this.activeItem;
       },
       showOrderDetail(order) {
-        this.$router.push({name: 'orderdetail', params: {id: order.id}});
+        this.$router.push({name: 'orderdetail', params: {id: order.orderNo}});
       },
       showProductDetail(product) {
         this.$router.push({name: 'good', params: {id: product.productId}});
@@ -195,6 +198,9 @@
       },
       loadMore() {
         this.fetchData();
+      },
+      goFillAddress(order) {
+        this.$router.push({name: 'filladdress', params: {id: order.orderNo}});
       },
       goTop() {
         document.body.scrollTop = 0;
@@ -363,7 +369,8 @@
                   .text
                     color: #f15353
               .ops
-                flex: 0 0 45vw
+                width: 45%
+                float: right
                 text-align: right
                 padding: 10px 0
                 height: 50px
@@ -372,7 +379,7 @@
                 .button
                   display: inline-block
                   padding: 8px 12px
-                  text-align: center                  
+                  text-align: center
                   margin-left: 5px
                   &:first-child
                     margin-left: 0
@@ -384,9 +391,9 @@
               .item-img
                 display: inline-block
                 float: left
+                width: 30%
                 img
-                  width: 70px
-                  height: 70px
+                  width: 95%
                   overflow: hidden
               .item-info
                 flex: 1
@@ -414,4 +421,45 @@
         padding: 40px 0
         text-align: center
         font-size: 14px
+  .address-list-wrap
+    position: absolute
+    left: 0
+    top: auto
+    bottom: 0
+    z-index: 42
+    width: 100%
+    max-height: 395px
+    background: #fff
+    transform: translate3d(0, 0, 0)
+    overflow: hidden
+    .address
+      height: 395px
+      overflow: hidden
+     .address-wrap
+        max-height: 385px
+        overflow: hidden
+    &.move-enter-active, &.move-leave-active
+      transform: translate3d(0, 0, 0)
+      transition: all 0.5s
+    &.move-enter, &.move-leave-active
+      transform: translate3d(0, 100%, 0)
+  .list-mask
+    position: fixed
+    top: 0
+    left: 0
+    width: 100%
+    bottom: 0
+    z-index: 40
+    transition: all 0.5s
+    background: rgba(7, 17, 27, 0.6)
+    &.fade-transition
+      transition: all 0.5s
+      opacity: 1
+      background: rgba(7, 17, 27, 0.6)
+    &.fade-enter-active, &.fade-leave-active
+      opacity: 1
+      background: rgba(7, 17, 27, 0.6)
+    &.fade-enter, &.fade-leave-active
+      opacity: 0
+      background: rgba(7, 17, 27, 0)
 </style>

@@ -9,9 +9,9 @@
               <div class="item-content">
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
+                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}<span class="resultFlag" v-if="item.auction_product_state_id > 2">({{resultDesc(item)}})</span></h3>
                   <p class="line">出价次数：<span class="redtext">{{item.countAppr}}</span>次</p>
-                  <p class="line">拍卖状态：{{item.state}}</p>
+                  <p class="line">拍卖状态：{{stateDesc(item.auction_product_state_id)}}</p>
                 </div>
               </div>
             </mu-flexbox-item>
@@ -43,7 +43,14 @@
         scroller: null,
         loading: false,
         lastExec: +new Date(),
-        scrollY: 0
+        scrollY: 0,
+        states: {
+          0: '预展',
+          1: '拍卖中',
+          2: '拍卖暂停',
+          3: '拍卖结束',
+          4: '流拍'
+        }
       };
     },
     activated() {
@@ -71,10 +78,10 @@
         }
         this.loading = true;
         let uid = this.$store.getters.getUserInfo.userId;
-        api.getAuctions({
+        api.getAuctionsByUID({
           paging: this.pageNumber,
           pageSize: this.pageSize,
-          userId: uid || ''
+          userNameId: uid
         }).then(response => {
           if (response.info.apList && response.info.apList.length) {
             response.info.apList.forEach(item => {
@@ -104,6 +111,17 @@
           return api.CONFIG.psCtx + icon + '?w=750&h=500';
         } else {
           return api.CONFIG.defaultImg;
+        }
+      },
+      stateDesc(state) {
+        return this.states[state];
+      },
+      resultDesc(item) {
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (item.apUserNameId === uid) {
+          return '中标';
+        } else {
+          return '未中标';
         }
       },
       showDetail(item) {
@@ -229,10 +247,15 @@
                   -webkit-box-orient: vertical
                   line-height: 1.45
                   height: 35px
+                  .resultFlag
+                    margin-left: 5px
+                    font-size: 10px
+                    color: #999
                 .line
                   line-height: 15px
                   font-size: 12px
                   color: #666
+                  margin-bottom: 3px
                   .redtext
                     color: #f15353
               .item-ops

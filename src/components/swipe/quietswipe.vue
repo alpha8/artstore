@@ -1,5 +1,5 @@
 <template>
-  <swiper :options="swiperOption">
+  <swiper :options="swiperOption" class="swiperHook" :style="getStyle">
     <swiper-slide v-for="(slide, index) in swiperSlides" key="index">
       <div class="slide2" :style="getSlideUrl(slide)" @click.stop.prevent="preview(slide.src)"></div>
     </swiper-slide>
@@ -23,12 +23,28 @@
           paginationClickable: true,
           mousewheelControl: false,
           observeParents: true
+        },
+        screen: {
+          width: document.documentElement.clientWidth,
+          height: screen.width ? screen.width * 2 / 3 : 250
         }
       };
     },
+    computed: {
+      getStyle() {
+        return {
+          width: this.screen.width + 'px',
+          height: this.screen.height + 'px'
+        };
+      }
+    },
     methods: {
       getSlideUrl(slide) {
-        return `background-image: url(${slide.thumbnail})`;
+        return {
+          'background-image': `url(${slide.thumbnail})`,
+          width: this.screen.width + 'px',
+          height: this.screen.height + 'px'
+        };
       },
       preview(img) {
         let pics = [];
@@ -46,11 +62,12 @@
 
 <style lang="stylus" rel="stylesheet/stylus">
   .swiper-container
-    height: 40vw
+    position: relative
     .slide2
       display: block
       width: 100%
       height: 100%
+      min-height: 213px
       content: ""
       background-repeat: no-repeat
       background-position: center

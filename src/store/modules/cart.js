@@ -31,7 +31,7 @@ const mutations = {
         price: product.price,
         oldPrice: product.oldPrice,
         count: product.count,
-        icon: (product.pictures && product.pictures.length) ? api.CONFIG.psCtx + product.pictures[0].id + '?w=114&h=114' : api.CONFIG.defaultImg,
+        icon: (product.pictures && product.pictures.length) ? api.CONFIG.psCtx + product.pictures[0].id + '?w=750&h=500' : api.CONFIG.defaultImg,
         checked: false
       });
     } else {

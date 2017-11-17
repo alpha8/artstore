@@ -134,6 +134,13 @@ export default {
     return doPost(this.CONFIG.cmsCtx + '/order/user/cancelRefund', params);
   },
 
+  /**
+    * 设置订单收货地址(用于拍卖业务)
+    */
+  updateOrderAddress(params) {
+    return doPost(this.CONFIG.cmsCtx + '/order/address', params);
+  },
+
   /** 获取所有商品列表 */
   GetGoods(params) {
     return doGet(this.CONFIG.cmsCtx + '/artwork/list', params);
@@ -226,10 +233,17 @@ export default {
   },
 
   /**
-   * 查询订单列表
+   * 查询单个订单详情
    */
-  getOrderDetail(id) {
-    return doGet(this.CONFIG.cmsCtx + '/order/' + id);
+  getOrderDetail(params) {
+    return doGet(this.CONFIG.cmsCtx + '/order', params);
+  },
+
+  /**
+   * 确认收货
+   */
+  confirmDelivery(params) {
+    return doPost(this.CONFIG.cmsCtx + '/order/received', params);
   },
 
    /**
@@ -367,6 +381,13 @@ export default {
   },
 
    /**
+    * 查询指定代理商活动
+    */
+  getQrcode(id) {
+    return doGet(this.CONFIG.cmsCtx + '/qrcode/list?provideId=' + id);
+  },
+
+   /**
     * 查询二维码领取优惠券活动
     */
   resolveQrcode(id) {
@@ -406,6 +427,13 @@ export default {
     */
   getAuctions(params) {
     return doGet(this.CONFIG.auctionCtx + '/auctionList', params);
+  },
+
+   /**
+    * 查询指定用户参与的所有拍卖
+    */
+  getAuctionsByUID(params) {
+    return doGet(this.CONFIG.auctionCtx + '/auctionListByUserNameId', params);
   },
 
    /**

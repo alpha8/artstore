@@ -43,7 +43,7 @@
           <div class="button-wrapper">
             <div class="button remove" @click.stop.prevent="removeCartItem"><span>删除</span></div>
             <!-- <div class="button favorite"><span>移入收藏</span></div> -->
-            <div class="button share"><span>分享</span></div>
+            <!-- <div class="button share"><span>分享</span></div> -->
           </div>
         </div>
         <div class="content-center" v-show="!editMode">
@@ -244,19 +244,20 @@
             font-size: 24px
             color: #d3d3d3
             text-align: center
-            padding-top: 50px
+            padding-top: 35px
             vertical-align: top
             &.on
               color: #fb4741
           .pic
             vertical-align: top
             display: inline-block
+            width: 35%
             float: left
             padding: 10px 10px 10px 0
             box-sizing: border-box
             img
-              width: 114px
-              height: 114px
+              width: 95%
+              overflow: hidden
           .item-wrapper
             flex: 1
             position: relative

@@ -16,11 +16,12 @@
               <p v-if="order.refund.auditStage"><label>审批备注：</label><span>{{order.refund.auditStage.desc}}</span></p>
               <p v-if="order.refund.finishStage"><label>退款成功：</label><span>{{order.refund.finishStage.createTime | formatDate}}</span></p>
             </div>
+            <p v-if="order.receiverAt"><label>订单完成：</label><span>{{order.receiverAt | formatDate}}</span></p>
           </div>
         </div>
-        <split></split>
-        <div class="title">配送信息</div>
-        <div class="delivery-info">
+        <split v-if="order.express"></split>
+        <div class="title" v-if="order.express">配送信息</div>
+        <div class="delivery-info" v-if="order.express">
           <p><label>收货地址：</label><span>{{order.express.expressAddress}}</span></p>
           <p><label>收货人：</label><span>{{order.express.receiver}}</span></p>
           <p><label>联系方式：</label><span>{{order.express.mobile}}</span></p>
@@ -60,11 +61,13 @@
     </div>
     <div class="footer border-top-1px">
       <div class="btn-group">
-        <div class="button" v-if="order.status === 0" @click.stop.prevent="weixinPay"><span class="btn-red">支付</span></div>
+       <div class="button" v-if="order.status === 0 && !order.express" @click.stop.prevent="goFillAddress"><span class="btn-red">填写收货地址</span></div>
+        <div class="button" v-else-if="order.status === 0" @click.stop.prevent="weixinPay"><span class="btn-red">支付</span></div>
         <div class="button" v-if="order.status === 0" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
         <div class="button" v-if="order.status === 1" @click.stop.prevent="showRefund"><span class="btn-red">申请退款</span></div>
         <div class="button" v-if="order.status === 5" @click.stop.prevent="cancelRefund"><span class="btn-red">取消退款申请</span></div>
         <div class="button" v-if="order.status === 2" @click.stop.prevent="trackExpress"><span class="btn-white">查看物流</span></div>
+        <div class="button" v-if="order.status === 2" @click.stop.prevent="confirmDelivery"><span class="btn-green">确认收货</span></div>
         <div class="button" v-if="order.status === 6"><span class="btn-white">看相似</span></div>
         <div class="button" v-if="order.status === 6"><span class="btn-orange">再次购买</span></div>
       </div>
@@ -123,6 +126,8 @@
           return '秒杀';
         } else if (this.order.type === 4) {
           return '团购';
+        } else if (this.order.type === 5) {
+          return '拍卖';
         }
         return '';
       }
@@ -136,9 +141,17 @@
     methods: {
       fetchData() {
         let id = this.$route.params.id || '';
-        api.getOrderDetail(id).then(response => {
+        if (!id) {
+          this.$store.dispatch('openToast', '非法访问！');
+          return;
+        }
+        api.getOrderDetail({ orderNo: id }).then(response => {
           this.order = response;
           this._initScroll();
+        }).catch(response => {
+          this.$store.dispatch('openToast', '数据出错，请联系后台管理员！');
+          this.$router.back();
+          return;
         });
       },
       _initScroll() {
@@ -183,6 +196,9 @@
       },
       trackExpress() {
         this.$router.push({name: 'expresslog', params: {expressNo: this.order.express.expressNo, expressCode: this.order.express.expressCode || 'unknown'}});
+      },
+      goFillAddress() {
+        this.$router.push({name: 'filladdress', params: {id: this.order.orderNo}});
       },
       weixinPay() {
         let userInfo = this.$store.getters.getUserInfo;
@@ -242,6 +258,18 @@
           if (response.result === 0) {
             this.$store.dispatch('openToast', '退款申请已取消！');
             this.order.status = 1;
+          } else {
+            this.$store.dispatch('openToast', '网络太忙，请稍候再试！');
+          }
+        });
+      },
+      confirmDelivery() {
+        api.confirmDelivery({
+          orderNo: this.order.orderNo
+        }).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('openToast', '订单已完成，期待再会！');
+            this.order.status = 3;
           } else {
             this.$store.dispatch('openToast', '网络太忙，请稍候再试！');
           }

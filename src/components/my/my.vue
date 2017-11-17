@@ -51,6 +51,16 @@
           </li>
         </ul>
       </div>
+      <split v-if="userExt.model === 2"></split>
+      <div class="invite-wrapper" v-if="userExt.model === 2">
+        <div class="title border-1px">推荐有礼</div>
+        <div class="item-list">
+          <router-link class="item border-1px" to="/recommend">
+            <span class="text"><i class="icon-gift_card"></i> 邀请好友加入</span>
+            <span class="more"><i class="icon-keyboard_arrow_right"></i></span>
+          </router-link>
+        </div>
+      </div>
       <split></split>
       <div class="other-wrapper">
         <div class="title border-1px">其他</div>
@@ -88,7 +98,8 @@
         ],
         wallet: [
           { amount: 0, text: '账户余额', link: '/wallet' },
-          { amount: 0, text: '优惠券余额', link: '/coupon' }
+          { amount: 0, text: '优惠券余额', link: '/coupon' },
+          { amount: 0, text: '返利余额', link: '/cashback' }
         ],
         others: [
           { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
@@ -128,6 +139,9 @@
     activated() {
       this._initScroll();
     },
+    mounted() {
+      this._initScroll();
+    },
     created() {
       let user = this.$store.getters.getUserInfo;
       api.getUserProfile(user.userId || 0).then(response => {
@@ -143,14 +157,16 @@
     },
     computed: {
       getVipTitle() {
-        let userLevel = {'lv0': '初级用户', 'lv1': 'VIP一钻', 'lv2': 'VIP二钻', 'lv3': 'VIP三钻', 'lv4': 'VIP四钻', 'lv5': 'VIP五钻'};
-        let agentLevel = {'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
+        // let userLevel = {'lv0': '初级用户', 'lv1': 'VIP一钻', 'lv2': 'VIP二钻', 'lv3': 'VIP三钻', 'lv4': 'VIP四钻', 'lv5': 'VIP五钻'};
+        let agentLevel = {'lv0': '普通用户', 'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
         let level = this.userExt.level;
         if (this.userExt.model === 1) {
           // 普通用户
-          return userLevel[level];
+          return agentLevel[level];
         } else if (this.userExt.model === 2) {
           // 供应商
+          return agentLevel[level];
+        } else {
           return agentLevel[level];
         }
       },
@@ -334,7 +350,7 @@
           padding-top: 5px
           line-height: 1
           font-size: 12px
-  .other-wrapper
+  .other-wrapper, .invite-wrapper
     position: relative
     width: 100%
     .title
@@ -347,7 +363,7 @@
       box-sizing: border-box
       i
         padding-right: 3px
-    .otherList
+    .otherList, .item-list
       position: relative
       width: 100%
       padding-bottom: 30px
@@ -356,6 +372,8 @@
         font-size: 14px
         padding: 10px
         border-1px(rgba(7, 17, 27, 0.1))
+        &:last-child
+          border-none()
         &.highlight
           >i, .text
             color: #ff463c
@@ -368,5 +386,9 @@
         .more
           float: right
           font-size: 18px
+    .item-list
+      padding-bottom: 2px
+  .other-wrapper
+    padding-bottom: 100px
 </style>
 

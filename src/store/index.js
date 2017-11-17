@@ -13,6 +13,8 @@ const COUPON_AMOUNT = 'couponAmount';
 const USER_PROFILE = 'userProfile';
 const PAY_REMARK = 'remark';
 const KILL_PRODUCT = 'killProducts';
+const SEARCH_HISTORY = 'searchhistory';
+const HISTORY_SIZE = 10;
 const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"Alpha","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
 
 // states
@@ -31,7 +33,8 @@ export const state = {
   couponAmount: load(COUPON_AMOUNT, 0),  // 优惠券账户余额
   userAmount: load(USER_AMOUNT, 0),     // 用户账户余额
   payRemark: load(PAY_REMARK, '工作日收货'),
-  killProducts: load(KILL_PRODUCT, [])  // 已参与的秒杀列表
+  killProducts: load(KILL_PRODUCT, []),  // 已参与的秒杀列表
+  searchHistory: load(SEARCH_HISTORY, [])
 };
 
 // getters
@@ -62,7 +65,8 @@ export const getters = {
   getCouponAmount: state => state.couponAmount,
   getUserProfile: state => state.userProfile,
   getPayRemark: state => state.payRemark,
-  getKilledProduct: state => state.killProducts
+  getKilledProduct: state => state.killProducts,
+  loadSearchHistory: state => state.searchHistory
 };
 
 // actions
@@ -149,6 +153,14 @@ export const actions = {
   },
   removeKillProduct(context, seckillId) {
     context.commit(types.REMOVE_SECKILL, seckillId);
+  },
+  addSearchHistory(context, keyword) {
+    if (keyword) {
+      context.commit(types.ADD_SEARCH_HISTORY, keyword);
+    }
+  },
+  clearSearchHistory(context) {
+    context.commit(types.CLEAN_SEARCH_HISTORY);
   }
 };
 
@@ -276,6 +288,20 @@ export const mutations = {
     state.products = goodCount;
     save('products', state.products);
     save('cartAmount', state.cartAmount);
+  },
+  [types.ADD_SEARCH_HISTORY] (state, keyword) {
+    let exist = state.searchHistory.find(item => item === keyword);
+    if (!exist) {
+      state.searchHistory.unshift(keyword);
+      save(SEARCH_HISTORY, state.searchHistory);
+    }
+    if (state.searchHistory.length > HISTORY_SIZE) {
+      state.searchHistory.pop();
+    }
+  },
+  [types.CLEAN_SEARCH_HISTORY] (state) {
+    state.searchHistory.splice(0, state.searchHistory.length);
+    save(SEARCH_HISTORY, state.searchHistory);
   },
   [types.SHOW_TOAST] (state, payload) {
     state.toastList.push({text: payload || '加载中...'});

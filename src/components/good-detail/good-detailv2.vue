@@ -493,7 +493,7 @@
       position: relative
       width: 100%
       .swiper-container
-        height: 80vw
+        height: auto
       img
         position: absolute
         top: 0

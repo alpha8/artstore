@@ -27,8 +27,7 @@
           { key: 'icon', text: '头像', type: 'image', link: '' },
           { key: 'nickName', text: '微信名称', link: '' },
           { key: 'sex', text: '性别', link: '' },
-          { key: 'model', text: '用户类型', link: '' },
-          { key: 'level', text: '用户等级', link: '' }
+          { key: 'model', text: '用户类型', link: '' }
         ],
         user: this.$store.getters.getUserInfo,
         userProfile: this.$store.getters.getUserProfile
@@ -56,11 +55,11 @@
         }
         let SUPPLIER = 2;
         if (key === 'level') {
-          let userLevel = {'lv0': '初级用户', 'lv1': 'VIP一钻', 'lv2': 'VIP二钻', 'lv3': 'VIP三钻', 'lv4': 'VIP四钻', 'lv5': 'VIP五钻'};
-          let agentLevel = {'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
+          // let userLevel = {'lv0': '普通用户', 'lv1': 'VIP一钻', 'lv2': 'VIP二钻', 'lv3': 'VIP三钻', 'lv4': 'VIP四钻', 'lv5': 'VIP五钻'};
+          let agentLevel = {'lv0': '普通用户', 'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
           let level = this.userProfile.user && this.userProfile.user.level || 'lv1';
-          let model = this.userProfile.user && this.userProfile.user.model || 1;
-          return model === SUPPLIER ? agentLevel[level] : userLevel[level];
+          // let model = this.userProfile.user && this.userProfile.user.model || 1;
+          return agentLevel[level];
         }
         if (key === 'model') {
           return this.userProfile.user && this.userProfile.user.model === SUPPLIER ? '代理商' : '会员';

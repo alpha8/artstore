@@ -44,21 +44,25 @@
           {text: '马蹄杯', pv: 2000},
           {text: '瓷雕', pv: 2000}
         ],
-        historySearch: [
-          {text: '茶杯', pv: 2000},
-          {text: '绿茶', pv: 2000}
-        ],
         keyword: ''
       };
     },
     computed: {
       showDialog() {
         return this.$store.state.searchDialog;
+      },
+      historySearch() {
+        let items = this.$store.getters.loadSearchHistory;
+        let hits = [];
+        items.forEach(item => {
+          hits.push({ text: item });
+        });
+        return hits;
       }
     },
     methods: {
       cleanup() {
-        this.historySearch.splice(0, this.historySearch.length);
+        this.$store.dispatch('clearSearchHistory');
       },
       hideDialog() {
         this.$store.commit('HIDE_SEARCH');

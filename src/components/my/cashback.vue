@@ -4,19 +4,19 @@
       <div class="left">
         <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
       </div>
-      <div class="title">账户余额</div>
-      <div class="right" @click.stop.prevent="detail">交易明细</div>
+      <div class="title">返利账户</div>
+      <div class="right" @click.stop.prevent="detail">返利明细</div>
     </div>
-    <div class="wallet" ref="wallet">
-      <div class="wallet-wrapper">
-        <div class="wallet-heading">
-          <p class="balance-name">账户余额（元）</p>
+    <div class="cashback" ref="cashback">
+      <div class="cashback-wrapper">
+        <div class="cashback-heading">
+          <p class="balance-name">返利余额（元）</p>
           <p class="balance-num">{{0 | currency}}</p>
         </div>
-        <div class="wallet-content">
-          <p class="content-title">账户余额是什么？</p>
+        <div class="cashback-content">
+          <p class="content-title">返利余额是什么？</p>
           <p class="content-text">
-            &nbsp;&nbsp;&nbsp;&nbsp;当您出现退款失败等情况时会有账户余额，您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 账户余额」中查看账户余额交易明细，账户余额可在 「实物商品」下单结算时最大化使用。
+            &nbsp;&nbsp;&nbsp;&nbsp;好友通过您分享的商品链接，在平台上完成订单交易，系统将按照一定的额度返还给推荐人；<br/>&nbsp;&nbsp;&nbsp;&nbsp;您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 返利余额」中查看账户余额和交易明细，账户余额可在「实物商品」下单结算时最大化使用。
           </p>
         </div>
       </div>
@@ -41,7 +41,7 @@
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.wallet, {
+            this.scroll = new BScroll(this.$refs.cashback, {
               click: true
             });
           } else {
@@ -50,7 +50,7 @@
         });
       },
       detail() {
-        this.$router.push('/cashdetail');
+        this.$router.push('/cashbackdetail');
       },
       back() {
         this.$router.back();
@@ -97,20 +97,20 @@
       i
         font-size: 18px
         color: #666
-  .wallet
+  .cashback
     position: absolute
     left: 0
     top: 44px
     bottom: 0
     width: 100%
     overflow: hidden
-    .wallet-wrapper
+    .cashback-wrapper
       position: relative
       width: 100%
       background-color: #fff
       box-sizing: border-box
       overflow: hidden
-      .wallet-heading
+      .cashback-heading
         padding: 20px 10px
         color: #fff
         background: #e45050
@@ -123,7 +123,7 @@
           line-height:1
           font-weight: lighter
           margin-top: 5px
-      .wallet-content
+      .cashback-content
         padding: 13px 10px
         color: #666
         background: #fff
