@@ -19,13 +19,14 @@
                     <i class="icon-arrow_down" v-show="!filter.checked"></i>
                   </div>
                 </li>
-                <ul class="list" v-show="filter.multiple && filter.children.length" :class="{'mini': !filter.checked}">
+                <ul class="list" v-show="filter.level === 1 && filter.children.length" :class="{'mini': !filter.checked}">
                   <li v-for="item in filter.children" :class="{'on': item.checked}">
                     <span v-show="!item.val" @click.stop.prevent="checkAll(item, filter)">{{item.name}}</span>
-                    <span v-show="item.val" @click.stop.prevent="checkItem(item, filter)">{{item.name}}</span>
+                    <span v-if="filter.multiple && item.val" @click.stop.prevent="checkItem(item, filter)">{{item.name}}</span>
+                    <span v-else-if="!filter.multiple && item.val" @click.stop.prevent="checkCategoryItem(item, filter)">{{item.name}}</span>
                   </li>
                 </ul>
-                <ul class="list" v-show="!filter.multiple && filter.children.length">
+                <ul class="list" v-show="!filter.level && filter.children.length">
                   <li class="half" v-for="item in filter.children" :class="{'on': item.checked}"><span @click.stop.prevent="checkOnly(item, filter)">{{item.name}}</span></li>
                   <li class="half" v-show="filter.val === 'price'">
                     <span>
@@ -61,7 +62,8 @@
             val: 'categoryParentName',
             checked: false,
             selectText: '全部展开',
-            multiple: true,
+            multiple: false,
+            level: 1,
             children: []
           },
           {
@@ -70,6 +72,7 @@
             checked: false,
             selectText: '全部展开',
             multiple: true,
+            level: 1,
             children: []
           },
           {
@@ -109,7 +112,7 @@
         }
       };
     },
-    activated() {
+    created() {
       api.GetConfigList('cms/basedata/tea/type').then(response => {
         let items = [{name: '全部', val: '', checked: false}];
         response.childrens.forEach(item => {
@@ -152,6 +155,9 @@
         item.checked = true;
         let checkedList = [];
         let categoryList = [];
+        if (parent.val === 'categoryParentName') {
+          this.filters[1].children = [];
+        }
         parent.children.forEach((child) => {
           if (child.val !== item.val && child.checked) {
             child.checked = false;
@@ -198,12 +204,60 @@
           item.children.forEach(node => {
             items.push({id: node.id, name: node.value, val: node.propertyName, checked: false});
           });
-          if (this.filters[1].children.length) {
+          /* if (this.filters[1].children.length) {
             Array.prototype.push.apply(this.filters[1].children, items);
           } else {
             items.splice(0, 0, {name: '全部', val: '', checked: false});
             this.filters[1].children = items;
+          } */
+          items.splice(0, 0, {name: '全部', val: '', checked: false});
+          this.filters[1].children = items;
+        } else if (!item.checked && item.children && item.children.length) {
+          let items = this.filters[1].children;
+          item.children.forEach(o => {
+            for (let i = 0; i < items.length; i++) {
+              if (items[i].id === o.id) {
+                items.splice(i, 1);
+              }
+            }
+          });
+          this.filters[1].children = items;
+        } else if (!item.val || !parent.val) {
+          this.filters[1].children = [];
+        }
+      },
+      checkCategoryItem(item, parent) {
+        item.checked = !item.checked;
+        let checkedList = [];
+        let categoryList = [];
+        parent.children.forEach((child) => {
+          if (child.checked && child.val !== item.val) {
+            child.checked = false;
           }
+        });
+        if (item.checked) {
+          checkedList.push(item.name);
+          categoryList.push(item.val);
+        }
+        parent.selectText = checkedList.join(',');
+        this.form[parent.val] = categoryList.join(',');
+        if (parent.val === 'categoryName') {
+          this.form.keyword = parent.selectText === '全部' ? '' : parent.selectText;
+        } else if (parent.val === 'categoryParentName') {
+          this.form.parentKeyword = parent.selectText === '全部' ? '' : parent.selectText;
+        }
+        if (!parent.selectText) {
+          parent.selectText = parent.checked ? '全部收起' : '全部展开';
+        }
+
+        // 显示二级分类
+        if (item.checked && item.children && item.children.length) {
+          let items = [];
+          item.children.forEach(node => {
+            items.push({id: node.id, name: node.value, val: node.propertyName, checked: false});
+          });
+          items.splice(0, 0, {name: '全部', val: '', checked: false});
+          this.filters[1].children = items;
         } else if (!item.checked && item.children && item.children.length) {
           let items = this.filters[1].children;
           item.children.forEach(o => {
@@ -247,7 +301,6 @@
         this.$store.commit('HIDE_SIDEBAR');
       },
       reset() {
-        this.form.minPrice = this.form.maxPrice = '';
         this.filters.forEach(item => {
           item.checked = false;
           item.selectText = '全部展开';
@@ -255,11 +308,9 @@
             child.checked = false;
           });
         });
-        this.form = {
-          minPrice: '',
-          maxPrice: ''
-        };
-        this.$emit('fireAction');
+        this.form = {};
+        this.$emit('fireReset');
+        this.$store.commit('HIDE_SIDEBAR');
       },
       clearForm() {
         this.form.minPrice = this.form.maxPrice = '';
@@ -270,10 +321,7 @@
             child.checked = false;
           });
         });
-        this.form = {
-          minPrice: '',
-          maxPrice: ''
-        };
+        this.form = {};
       },
       ok() {
         if (this.form.minPrice || this.form.maxPrice) {
@@ -370,7 +418,7 @@
           box-sizing: border-box
           overflow: hidden
           &.mini
-            max-height: 120px
+            max-height: 110px
             height: auto
           li
             display: block

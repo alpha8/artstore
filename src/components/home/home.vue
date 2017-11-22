@@ -9,7 +9,7 @@
         </div>
         <topchanel :channels="channels"></topchanel>
         <split></split>
-        <modal-title title="茶席艺术" moreText="更多" catKey="art" catName="茶席艺术"></modal-title>
+        <modal-title title="茶席套装" moreText="更多" catKey="art" catName="茶席套装"></modal-title>
         <channel :items="arts" :cols="2"></channel>
         <split></split>
         <modal-title title="优质茶器" moreText="更多" catKey="teaart" catName="优质茶器"></modal-title>
@@ -53,12 +53,8 @@
         paints: [],
         ya: [],
         channels: [{
-          name: '分类',
-          url: '/category',
-          icon: 'icon-classify'
-        }, {
-          name: '茶席艺术',
-          url: '/search?parentCat=teaart&key=茶席艺术',
+          name: '茶席套装',
+          url: '/search?parentCat=teaart&key=茶席套装',
           icon: 'icon-kettle'
         }, {
           name: '好茶',

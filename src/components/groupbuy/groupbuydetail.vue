@@ -293,7 +293,8 @@
           checked: false
         };
         this.$store.dispatch('addPayGoods', [good]);
-        this.$router.push({name: 'pay', query: {orderType: 4}});
+        // this.$router.push({name: 'pay', query: {orderType: 4}});
+        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=4';
       },
       mark() {
         let uid = this.$store.getters.getUserInfo.userId;

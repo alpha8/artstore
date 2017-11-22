@@ -210,7 +210,10 @@
       weixinPay() {
         let userInfo = this.$store.getters.getUserInfo;
         if (!userInfo.openid) {
-          this.$store.dispatch('openToast', '请先登录！');
+          this.$store.dispatch('openToast', '正在登录中...');
+          setTimeout(() => {
+            window.location.href = `${api.CONFIG.wxCtx}/baseInfo`;
+          }, 1000);
           return;
         }
         if (!this.defaultAddress.address) {

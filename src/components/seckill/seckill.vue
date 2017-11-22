@@ -5,7 +5,7 @@
       <div class="order-wrap">
         <div class="order-container" ref="seckList" v-if="seckills.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
-            <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in seckills" :key="index" v-if="item.number > 0">
+            <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in seckills" :key="index">
               <div class="item-content">
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
@@ -15,10 +15,11 @@
                     <del>{{item.price | currency}}</del>
                   </div>
                   <div class="more-ops">
-                    <span class="btn-buy orange" v-show="existKilled(item)">抢过了</span>
-                    <span class="btn-buy" v-show="!existKilled(item) && item.leftStartTimes <= 0 && item.leftEndTimes > 0" @click.stop.prevent="showDetail(item)">立即抢购</span>
-                    <span class="btn-buy green" v-show="item.leftStartTimes > 0" @click.stop.prevent="killNotify(item)">秒杀提醒</span>
-                    <span class="btn-buy disabled" v-show="item.leftEndTimes <= 0">已结束</span>
+                    <span class="btn-buy disabled" v-if="item.leftEndTimes <= 0">已结束</span>
+                    <span class="btn-buy disabled" v-else-if="item.number <= 0">已抢完</span>
+                    <span class="btn-buy orange" v-else-if="existKilled(item)">抢过了</span>
+                    <span class="btn-buy" v-else-if="!existKilled(item) && item.leftStartTimes <= 0 && item.leftEndTimes > 0" @click.stop.prevent="showDetail(item)">立即抢购</span>
+                    <span class="btn-buy green" v-else-if="item.leftStartTimes > 0" @click.stop.prevent="killNotify(item)">秒杀提醒</span>
                     <span class="items-reserve">
                       <strong>已售{{calcLeftPercent(item)}}%</strong>
                       <span class="progress-bar"><em :style="transDeltaPercent(item)"></em></span>
@@ -87,8 +88,7 @@
         this.loading = true;
         api.getSeckills({
           pageIndex: this.pageNumber,
-          pageSize: this.pageSize,
-          endLongTime: +new Date()
+          pageSize: this.pageSize
         }).then(response => {
           if (response.list && response.list.length) {
             response.list.forEach(item => {

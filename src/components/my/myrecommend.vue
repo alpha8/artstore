@@ -1,23 +1,22 @@
 <template>
   <div>
-    <fixedheader title="返利明细"></fixedheader>
-    <div class="cashback">
-      <div class="cashback-wrap">
-        <div class="cashback-container" ref="cashbackRef" v-show="cashbacks.length">
-          <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="cashback-list">
-            <mu-flexbox-item basis="100%" class="cashback-item border-1px" v-for="(item, index) in cashbacks" :key="index">
-              <div class="content">
-                <p class="line text">{{item.name}}领取了{{item.payValue}}优惠券</p>
-                <p class="time">{{item.createAt | formatDate}}</p>
+    <fixedheader title="专属优惠活动，推荐好友拿返现"></fixedheader>
+    <div class="myrecommend">
+      <div class="myrecommend-wrap">
+        <div class="myrecommend-container" ref="myrecommendlist" v-show="myrecommends.length">
+          <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="myrecommend-list">
+            <mu-flexbox-item basis="100%" class="myrecommend-item border-1px" v-for="(myrecommend, index) in myrecommends" :key="index">
+              <div class="item-info" @click.stop.prevent="showDetail(myrecommend)">
+                <h3 class="title">活动{{index + 1}}: {{myrecommend.provideTitle}}</h3>
+                <div class="content">&nbsp;&nbsp;&nbsp;&nbsp;{{myrecommend.desc}}</div>
               </div>
-              <div class="amount">+ {{item.rebateValue}}</div>
             </mu-flexbox-item>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-cashback" v-show="cashbacks.length === 0">啊哦，还没有交易记录哦</div>
-        <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
+        <div class="no-myrecommend" v-show="myrecommends.length === 0">啊哦，还没有相关记录哦</div>
+        <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
   </div>
@@ -26,14 +25,12 @@
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
-  import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
-  let Base64 = require('js-base64').Base64;
 
   export default {
     data() {
       return {
-        cashbacks: [],
+        myrecommends: [],
         pageNumber: 1,
         pageSize: 20,
         totalPages: 0,
@@ -41,8 +38,7 @@
         scroller: null,
         loading: false,
         lastExec: +new Date(),
-        scrollY: 0,
-        winHeight: document.documentElement.clientHeight
+        scrollY: 0
       };
     },
     activated() {
@@ -54,7 +50,7 @@
       this.hide();
     },
     mounted() {
-      this.scroller = this.$refs.cashbackRef;
+      this.scroller = this.$refs.myrecommendlist;
       window.onscroll = () => {
         this.scrollY = window.pageYOffset;
       };
@@ -68,21 +64,24 @@
         if (!force && now - this.lastExec <= 50) {
           return;
         }
+        let userProfile = this.$store.getters.getUserProfile;
         let user = this.$store.getters.getUserInfo;
-        api.getRebates({
+        let model = userProfile && userProfile.user && userProfile.user.model || 0;
+        let params = {
           currentPage: this.pageNumber,
-          pageSize: this.pageSize,
-          agentId: user.userId || 0
-        }).then(response => {
-          if (response.code === 0) {
-            if (response.rebates && response.rebates.length) {
-              response.rebates.forEach(item => {
-                if (item.name) {
-                  item.name = Base64.decode(item.name, 'base64');
-                } else {
-                  item.name = item.mobile;
-                }
-                this.cashbacks.push(item);
+          pageSize: this.pageSize
+        };
+        // 代理商用户
+        if (model === 2) {
+          params.provideId = user.userId || -1;
+        } else {
+          params.publishId = user.userId || -1;
+        }
+        api.getCouponList(params).then(response => {
+          if (response.result === 0) {
+            if (response.qrCodes && response.qrCodes.length) {
+              response.qrCodes.forEach(item => {
+                this.myrecommends.push(item);
               });
             }
             this.totalPages = response.totalPages;
@@ -98,10 +97,21 @@
         });
       },
       _reset() {
-        this.cashbacks = [];
+        this.myrecommends = [];
         this.pageNumber = 1;
         this.totalPages = 0;
         this.loadEnd = false;
+      },
+      getThumbnail(item) {
+        let icons = item.icons;
+        if (icons && icons.length) {
+          return api.CONFIG.psCtx + icons[0].id + '?w=750&h=500';
+        } else {
+          return api.CONFIG.defaultImg;
+        }
+      },
+      showDetail(item) {
+        this.$router.push({name: 'recommend', params: {id: item.id}});
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -122,12 +132,6 @@
     },
     components: {
       fixedheader, gotop
-    },
-    filters: {
-      formatDate(time) {
-        let date = new Date(time);
-        return formatDate(date, 'yyyy-MM-dd hh:mm');
-      }
     }
   };
 </script>
@@ -141,12 +145,21 @@
     height: 44px
     overflow: hidden
     z-index: 2
-  .cashback
-    position: absolute
-    top: 44px
+  .footer
+    position: fixed
     bottom: 0
     width: 100%
-    .cashback-wrap
+    height: 40px
+    overflow: hidden
+    z-index: 2
+    .btns
+      margin: 0 auto
+  .myrecommend
+    position: absolute
+    top: 44px
+    bottom: 40px
+    width: 100%
+    .myrecommend-wrap
       position: relative
       width: 100%
       .btn-red
@@ -184,7 +197,7 @@
         color: #ccc
         text-align: center
         font-size: 12px
-      .cashback-container
+      .myrecommend-container
         position: relative
         width: 100%
         display: flex
@@ -192,53 +205,42 @@
         overflow: auto
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
-        .cashback-list
+        .myrecommend-list
           position: relative
           width: 100%
-          padding: 10px
-          box-sizing: border-box
-          .cashback-item
-            position: relative
+          .myrecommend-item
             display: flex
-            margin-bottom: 15px
+            margin-bottom: 5px
+            padding: 8px
             border-1px(rgba(7, 17, 27, 0.1))
-            .content
-              flex: 1
-              background: #fff
-              height: 60px
-              box-sizing: border-box
-              overflow: hidden
-              .line
-                position: relative
-                font-size: 14px
-                line-height: 1.8
-                text-overflow: ellipsis
-                white-space: nowrap
+            box-sizing: border-box
+            font-size: 12px
+            .item-img
+              display: inline-block
+              width: 20%
+              float: left
+              img
+                width: 95%
                 overflow: hidden
-                strong
-                  font-weight: 700
-                &.text
-                  padding-bottom: 10px
-                  -webkit-box-orient: vertical
-                  -webkit-line-clamp: 1
-                  font-weight: 700
-                  font-size: 14px
-                  line-height: 1.0625rem
-              .time
-                color: #666
-                font-size: 12px
-            .amount
-              width: 80px
-              height: 60px
-              color: #44b549
-              font-size: 18px
-              text-align: right
-      .no-cashback
+            .item-info
+              flex: 1
+              padding: 0 10px
+              >.title
+                overflow: hidden
+                text-overflow: ellipsis
+                word-wrap: break-word
+                display: -webkit-box
+                -webkit-line-clamp: 1
+                -webkit-box-orient: vertical
+                font-weight: 700
+                height: 35px
+                line-height:35px
+                font-size: 14px
+              .content
+                margin-top: 8px
+      .no-myrecommend
         width: 100%
         padding: 40px 0
         text-align: center
         font-size: 14px
-        img
-          width: 110px
-          height: 110px
 </style>

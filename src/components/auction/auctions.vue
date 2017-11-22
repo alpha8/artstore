@@ -10,7 +10,7 @@
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
-                  <div class="price-wrap">
+                  <div class="price-wrap" @click.stop.prevent="showDetail(item)">
                     <span>{{stateDesc(item.auction_product_state_id)}}</span>
                   </div>
                   <div class="more-ops">
@@ -86,7 +86,8 @@
         this.loading = true;
         api.getAuctions({
           paging: this.pageNumber,
-          pageSize: this.pageSize
+          pageSize: this.pageSize,
+          state: 1
         }).then(response => {
           if (response.result === 0) {
             if (response.info.apList && response.info.apList.length) {

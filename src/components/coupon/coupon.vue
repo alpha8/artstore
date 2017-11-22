@@ -52,7 +52,8 @@
     },
     computed: {
       balance() {
-        return this.$store.getters.getCouponAmount;
+        let profile = this.$store.getters.getUserProfile;
+        return profile && profile.wallet && profile.wallet.totalValue || 0;
       }
     },
     methods: {

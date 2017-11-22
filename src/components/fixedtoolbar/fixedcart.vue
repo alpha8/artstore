@@ -11,7 +11,10 @@
       <div class="foot-item" @click.stop.prevent="addGood">
         <span class="button-lg orange">加入购物车</span>
       </div>
-      <div class="foot-item" @click.stop.prevent="pay">
+      <div class="foot-item" v-if="good.stock && good.stock.status === 1" @click.stop.prevent="bookBuy">
+        <span class="button-lg red">预定购买</span>
+      </div>
+      <div class="foot-item" v-else @click.stop.prevent="pay">
         <span class="button-lg red">立即购买</span>
       </div>
     </div>
@@ -79,11 +82,15 @@
           price: this.good.price,
           oldPrice: this.good.oldPrice,
           count: this.good.count,
-          icon: (this.good.pictures && this.good.pictures.length) ? api.CONFIG.psCtx + this.good.pictures[0].id + '?w=114&h=114' : api.CONFIG.defaultImg,
+          icon: (this.good.pictures && this.good.pictures.length) ? api.CONFIG.psCtx + this.good.pictures[0].id + '?w=750&h=500' : api.CONFIG.defaultImg,
           checked: false
         };
         this.$store.dispatch('addPayGoods', [good]);
-        this.$router.push('/pay');
+        // this.$router.push('/pay');
+        window.location.href = 'http://' + location.host + location.pathname + '#/pay';
+      },
+      bookBuy() {
+        this.pay();
       },
       mark() {
         let uid = this.$store.getters.getUserInfo.userId;
@@ -160,7 +167,15 @@
           let inner = el.getElementsByClassName('inner-hook')[0];
           inner.style.webkitTransform = 'translate3d(0,0,0)';
           inner.style.transform = 'translate3d(0,0,0)';
-          el.addEventListener('transitionend', done, false);
+          if (el.addEventListener) {
+            el.addEventListener('transitionend', done, false);
+          } else if (el.attachEvent) {
+            el.attachEvent('transitionend', done);
+            el.attachEvent('onTransitionend', done);
+          }
+          setTimeout(() => {
+            this.afterDrop(el);
+          }, 450);
         });
       },
       afterDrop(el) {

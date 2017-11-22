@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // axios 配置
-axios.defaults.timeout = 3000;
+axios.defaults.timeout = 60000;
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 // axios.defaults.baseURL = '';
 
@@ -277,8 +277,8 @@ export default {
    /**
     * 查询优惠券明细
     */
-  getCoupons(userId) {
-    return doGet(this.CONFIG.cmsCtx + '/coupon/list?userId=' + userId);
+  getCoupons(params) {
+    return doGet(this.CONFIG.cmsCtx + '/coupon/list', params);
   },
 
    /**
@@ -314,6 +314,13 @@ export default {
     */
   getUserProfile(userId) {
     return doGet(this.CONFIG.cmsCtx + '/user/profile?userId=' + userId);
+  },
+
+   /**
+    * 获取返现明细
+    */
+  getRebates(params) {
+    return doGet(this.CONFIG.cmsCtx + '/user/rebate', params);
   },
 
    /**
@@ -381,10 +388,10 @@ export default {
   },
 
    /**
-    * 查询指定代理商活动
+    * 查询指定活动
     */
   getQrcode(id) {
-    return doGet(this.CONFIG.cmsCtx + '/qrcode/list?provideId=' + id);
+    return doGet(this.CONFIG.cmsCtx + '/qrcode/' + id);
   },
 
    /**
@@ -392,6 +399,20 @@ export default {
     */
   resolveQrcode(id) {
     return doGet(this.CONFIG.cmsCtx + '/qrcode/resolve?id=' + id);
+  },
+
+   /**
+    * 查询专属活动列表
+    */
+  getCouponList(params) {
+    return doGet(this.CONFIG.cmsCtx + '/qrcode/list', params);
+  },
+
+   /**
+    * 查询专属活动列表
+    */
+  generateQrcode(params) {
+    return doPost(this.CONFIG.cmsCtx + '/qrcode/group2', params);
   },
 
    /**

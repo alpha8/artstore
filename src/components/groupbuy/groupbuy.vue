@@ -15,7 +15,9 @@
                     <del>{{item.oldPrice | currency}}</del>
                   </div>
                   <div class="more-ops">
-                    <span class="btn-buy" @click.stop.prevent="showDetail(item)">去拼单</span>
+                    <span class="btn-buy disabled" v-if="item.status === 2">已结束</span>
+                    <span class="btn-buy disabled" v-else-if="item.bookmoq === item.moq">抢完了</span>
+                    <span class="btn-buy" v-else-if="item.status === 1" @click.stop.prevent="showDetail(item)">去拼单</span>
                     <span class="items-reserve">
                       <strong>已售{{calcLeftPercent(item)}}%</strong>
                       <span class="progress-bar"><em :style="transDeltaPercent(item)"></em></span>
@@ -81,8 +83,8 @@
         this.loading = true;
         api.getGroupbuys({
           currentPage: this.pageNumber,
-          pageSize: this.pageSize,
-          type: 1
+          pageSize: this.pageSize
+          // ,type: 1
         }).then(response => {
           if (response.groupBuies && response.groupBuies.length) {
             response.groupBuies.forEach(item => {

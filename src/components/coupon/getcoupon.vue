@@ -119,12 +119,14 @@
         if (!this.phone || !this.code) {
           return;
         }
+        let publishid = this.$route.query.publishid || 0;
         api.verifyCode(this.phone, this.code).then(res => {
           if (res.result === 0) {
             api.receiveQrcode({
               qrid: this.qrcode.id,
               mobileNumber: this.phone,
-              openid: this.openid
+              openid: this.openid,
+              provideId: publishid
             }).then(response => {
               if (response.result === 0) {
                 this.$store.dispatch('openToast', '领取成功！');

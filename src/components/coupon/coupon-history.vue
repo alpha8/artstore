@@ -87,7 +87,9 @@
           return;
         }
         let user = this.$store.getters.getUserInfo;
-        api.getCoupons(user.userId || -1).then(response => {
+        api.getCoupons({
+          userId: user.userId || -1
+        }).then(response => {
           this.coupons = response;
           this.totalPages = 1;
           this.pageNumber++;

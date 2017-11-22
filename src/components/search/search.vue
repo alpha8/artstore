@@ -40,7 +40,7 @@
         <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
       </div>
     </div>
-    <sidebar ref="sidebar" @fireAction="search"></sidebar>
+    <sidebar ref="sidebar" @fireAction="search" @fireReset="clearSearch"></sidebar>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
@@ -144,6 +144,7 @@
         this.params.yearName = '';
         this.params.cfName = '';
         this.params.qualityName = '';
+        this.params.categoryParentName = '';
         this.pageNumber = 1;
         this.totalPages = -1;
         this.loadEnd = false;
@@ -173,6 +174,10 @@
       },
       back() {
         this.$router.back();
+      },
+      clearSearch() {
+        this.keyword = '';
+        this.search();
       },
       search() {
         this._reset();

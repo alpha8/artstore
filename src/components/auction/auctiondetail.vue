@@ -16,9 +16,9 @@
         <div class="auction-detail">
           <ul>
             <li><label>起拍价:</label><span>{{auction.startPrice | currency}}</span></li>
-            <li><label>保留价:</label><span v-if="auction.minPrice">{{auction.minPrice | currency}}</span><span v-else-if="!auction.minPrice">无</span></li>
+            <!-- <li><label>保留价:</label><span v-if="auction.minPrice">{{auction.minPrice | currency}}</span><span v-else-if="!auction.minPrice">无</span></li> -->
             <li><label>加价幅度:</label><span>{{auction.markup | currency}}</span></li>
-            <li><label>拍卖类型:</label><span>加价拍</span></li>
+            <!-- <li><label>拍卖类型:</label><span>加价拍</span></li> -->
           </ul>
         </div>
         <split></split>
@@ -26,15 +26,15 @@
           <h1 class="title" @click.stop.prevent="gotoBidPrices">出价记录<span class="num"></span></h1>
           <table class="auction-pricelist">
             <tr class="header">
-              <td class="col-1">状态</td>
-              <td class="col-2">出价用户</td>
+              <td class="col-2" nowrap>出价用户</td>
               <td class="col-3">金额</td>
+              <td class="col-1">状态</td>
               <td class="col-4">出价时间</td>
             </tr>
             <tr v-for="(item, index) in bidPrices" :key="index">
-              <td class="col-1"><span :class="{'highlight': item.app_state_id === 2 || item.app_state_id === 0}">{{stateDesc(item.app_state_id)}}</span></td>
-              <td class="col-2">{{item.userNameId || item.userName}}</td>
+              <td class="col-2" nowrap><img :src="getUserIcon(item.icon)" class="thumbnail" />{{item.userName || item.userNameId}}</td>
               <td class="col-3">{{item.price | currency}}</td>
+              <td class="col-1"><span :class="{'highlight': item.app_state_id === 2 || item.app_state_id === 0}">{{stateDesc(item.app_state_id)}}</span></td>
               <td class="col-4">{{item.time | formatDate}}</td>
             </tr>
           </table>
@@ -109,11 +109,13 @@
             <span class="input-group-btn" @click.stop.prevent="add">+</span>
           </div>
         </div>
-        <div class="foot-item" v-if="auction.auction_product_state_id === 1" @click.stop.prevent="bid">
-          <span class="button-lg red">出价</span>
+        <div class="foot-item" v-if="auction.auction_product_state_id === 1">
+          <span class="button-lg orange" v-if="higher">您是最高出价者</span>
+          <span class="button-lg red" v-else @click.stop.prevent="bid">出价</span>
         </div>
       </div>
     </div>
+    <frame></frame>
   </div>
 </template>
 
@@ -126,6 +128,7 @@
   import split from '@/components/split/split';
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import frame from '@/components/common/myiframe';
   import swipe from '@/components/swipe/quietswipe';
   import star from '@/components/star/star';
   import api from '@/api/api';
@@ -149,6 +152,7 @@
         bidsTotal: 0,
         highPrice: 0,
         dealPrice: 0,
+        higher: false,
         selectType: ALL,
         onlyContent: true,
         desc: {
@@ -253,6 +257,12 @@
           return 'p30';
         }
       },
+      getUserIcon(icon) {
+        if (!icon) {
+          return 'http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10';
+        }
+        return icon;
+      },
       previewImg(pics, pic) {
         let imgs = [];
         for (let i = 0; i < pics.length; i++) {
@@ -279,7 +289,14 @@
             case 'bid_success':
               var results = msg.data;
               if (results && results.length) {
-                this.highPrice = this.dealPrice = results[0].price;
+                this.dealPrice = results[0].price;
+                this.higher = (results[0].userNameId === userInfo.userId);
+                // 如果您已经领先，出价框显示您的出价，否则显示当前价+加价幅度
+                if (this.higher) {
+                  this.highPrice = this.dealPrice;
+                } else {
+                  this.highPrice = this.dealPrice + this.markup;
+                }
               } else {
                 this.highPrice = this.dealPrice = this.auction.startPrice;
               }
@@ -365,7 +382,8 @@
           openid: userInfo.openid,
           productId: this.auction.productId,
           auctionId: this.auction.id,
-          endTime: this.auction.endTime
+          endTime: this.auction.endTime,
+          icon: userInfo.icon
         };
         socket.emit('bid', data);
       },
@@ -484,7 +502,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame
     }
   };
 </script>
@@ -637,6 +655,12 @@
         font-size: 14px
         font-weight: 700
         color: rgb(7, 17, 27)
+        text-overflow: ellipsis
+        word-wrap: break-word
+        display: -webkit-box
+        -webkit-line-clamp: 1
+        -webkit-box-orient: vertical
+        overflow: hidden
       .red-text
         color: #e4393c
         font-weight: 700
@@ -781,6 +805,7 @@
         .col-2
           width: 25%
           padding-left: 10px
+          overflow: hidden
           box-sizing: border-box
         .col-3
           flex: 1
@@ -793,6 +818,14 @@
           padding-left: 10px
           text-overflow: ellipsis
           white-space: nowrap
+          overflow: hidden
+          box-sizing: border-box
+        .thumbnail
+          width: 32px
+          height: 32px
+          border-radius: 50%
+          margin-right: 3px
+          vertical-align: middle
           overflow: hidden
           box-sizing: border-box
     .auction-detail

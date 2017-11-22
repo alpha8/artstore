@@ -1,16 +1,39 @@
 <template>
   <div>
-    <fixedheader title="推荐有礼" :showBack="true"></fixedheader>
+    <fixedheader :title="qrcode.provideTitle || '推荐有礼'" :showBack="true"></fixedheader>
     <div class="invitation" ref="invitation">
       <div class="invitation-wrapper">
-        <div class="invitation-heading" v-if="qrcode.gridfsid">
+        <div class="invitation-heading" v-if="qrcode.gridfsids">
           <p class="balance-name">分享二维码</p>
           <p class="balance-num">
-            <img :src="getQrcodeSrc" width="180" height="180" border="0" />
+            <img v-show="icon" :src="getQrcodeSrc" width="180" height="180" border="0" />
           </p>
           <div class="tips" v-if="qrcode.provideTotal - qrcode.receiveTotal <= 10">优惠券可领张数不足，仅有{{qrcode.provideTotal - qrcode.receiveTotal}}张，请联系管理员充值</div>
         </div>
         <div class="invitation-content">
+          <div class="table-responsive">
+            <table class="table">
+              <caption>-----已邀请用户列表----</caption>
+              <tr>
+                <th>用户</th>
+                <th>领取金额</th>
+                <th>领取时间</th>
+              </tr>
+              <tr v-for="(coupon, index) in coupons" :key="index">
+                <td>{{coupon.userId}}</td>
+                <td>{{coupon.payValue | currency}}</td>
+                <td>{{coupon.createAt | formatDate}}</td>
+              </tr>
+            </table>
+          </div>
+          <!-- <div class="pager">
+            <ul class="pagination">
+              <li><span>首页</span></li>
+              <li><span>上一页</span></li>
+              <li><span>下一页</span></li>
+              <li><span>末页</span></li>
+            </ul>
+          </div> -->
           <p class="content-title">转发方式</p>
           <p class="content-text">
             &nbsp;&nbsp;&nbsp;&nbsp;您可通过朋友圈、文章等方式转发此二维码
@@ -37,29 +60,41 @@
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import split from '@/components/split/split';
+  import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
 
   export default {
     data() {
       return {
-        qrcode: {}
+        qrcode: {},
+        icon: '',
+        coupons: [],
+        pageNumber: 1,
+        pageSize: 10,
+        totalPages: 0,
+        loadEnd: false
       };
     },
     activated() {
       this.show();
+      this.fetchData();
     },
     deactivated() {
       this.hide();
-    },
-    created() {
-      this.fetchData();
+      this.icon = '';
     },
     computed: {
       getQrcodeSrc() {
-        if (this.qrcode.gridfsid) {
-          return `${api.CONFIG.cmsCtx}/qrcode/download/${this.qrcode.gridfsid}`;
+        if (this.qrcode.gridfsids) {
+          let user = this.$store.getters.getUserInfo;
+          this.qrcode.gridfsids.forEach(item => {
+            if (item.userid === user.userId) {
+              this.icon = `${api.CONFIG.cmsCtx}/qrcode/download/${item.gridfsid}`;
+              this._initScroll();
+            }
+          });
         }
-        return '';
+        return this.icon || '';
       }
     },
     methods: {
@@ -69,18 +104,63 @@
           this.$store.dispatch('openToast', '请登录!');
           return;
         }
+        let id = this.$route.params.id;
+        if (!id) {
+          this.$store.dispatch('openToast', '非法访问!');
+          return;
+        }
         this.$store.dispatch('openLoading');
-        api.getQrcode(user.userId).then(response => {
-          if (response.result === 0) {
-            let qrcodes = response.qrCodes;
-            if (qrcodes && qrcodes.length) {
-              this.qrcode = qrcodes[0];
-              this._initScroll();
+        api.getQrcode(id).then(response => {
+          if (response && response.id) {
+            this.qrcode = response;
+            if (this.qrcode.gridfsids) {
+              let exist = false;
+              this.qrcode.gridfsids.forEach(item => {
+                if (item.userid === user.userId) {
+                  exist = true;
+                }
+              });
+              if (!exist) {
+                api.generateQrcode({
+                  id: response.id,
+                  provideId: user.userId
+                }).then(res => {
+                  if (res.result === 0) {
+                    this.qrcode.gridfsids = [{userid: user.id, gridfsid: res.gridfsid}];
+                    this.icon = `${api.CONFIG.cmsCtx}/qrcode/download/${res.gridfsid}`;
+                    this._initScroll();
+                  }
+                });
+              }
             }
+            this.fetchCoupons();
+            this._initScroll();
           }
           this.$store.dispatch('closeLoading');
         }).catch(response => {
           this.$store.dispatch('closeLoading');
+        });
+      },
+      fetchCoupons() {
+        if (this.totalPages && this.pageNumber > this.totalPages) {
+          return;
+        }
+        let user = this.$store.getters.getUserInfo;
+        api.getCoupons({
+          agentId: user.userId || -1,
+          qrcodeid: this.qrcode.id
+        }).then(response => {
+          this.coupons = response;
+          this.totalPages = 1;
+          this.pageNumber++;
+          this.lastExec = +new Date();
+          this.loading = false;
+          this.loadEnd = this.pageNumber > this.totalPages;
+          this._initScroll();
+        }).catch(response => {
+          this.loadEnd = false;
+          this.loading = false;
+          this.totalPages = 0;
         });
       },
       _initScroll() {
@@ -106,6 +186,12 @@
     },
     components: {
       fixedheader, split
+    },
+    filters: {
+      formatDate(time) {
+        let date = new Date(time);
+        return formatDate(date, 'yyyy-MM-dd hh:mm');
+      }
     }
   };
 </script>
@@ -183,5 +269,61 @@
           font-size: 12px
           line-height: 1.83em
           padding-bottom: 7px
+        .table-responsive
+          width: 100%
+          margin-bottom: 15px
+          min-height: .01%
+          overflow-x: auto
+          overflow-y: hidden
+          -ms-overflow-style: -ms-autohiding-scrollbar
+          .table
+            width: 100%
+            max-width: 100%
+            margin-bottom: 0
+            display: table
+            border-spacing: 0
+            border-collapse: collapse
+            background-color: transparent
+            font-size: 12px
+            border-left: 1px solid #ddd
+            border-right: 1px solid #ddd
+            border-bottom: 1px solid #ddd
+            caption
+              display: table-caption
+              text-align: center
+              padding: 10px 0
+              color: #666
+              font-size: 14px
+              font-weight: 700
+            th, td
+              padding: 8px 5px
+              line-height: 1.42
+              vertical-align: top
+              border-top: 1px solid #ddd
+              text-align: center
+              &.text-left
+                text-align: left
+            tr:nth-of-type(even)
+              background-color: #fcf8e3
+        .pager
+          width: 100%
+          text-align: center
+          .pagination
+            display: inline-block
+            margin: 5px 0
+            border-radius: 4px
+            >li
+              display: inline;
+              text-align: -webkit-match-parent
+              span
+                position: relative
+                float: left
+                padding: 6px 12px
+                margin-left: -1px
+                line-height: 1.42
+                color: #337ab7
+                background: #fff
+                border: 1px solid #ddd
+                font-size: 12px
 </style>
 

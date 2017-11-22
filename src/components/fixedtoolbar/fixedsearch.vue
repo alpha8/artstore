@@ -110,7 +110,7 @@
     &.searchBox
       background: #fff
     &.fixed
-      background: #b80d10
+      background: #ff463c
       animation: searchTop .4s ease-in-out
     @-webkit-keyframes searchTop
       from { top: -50px; }
@@ -185,7 +185,7 @@
           height: 33px
           line-height: 33px
           .button
-            background: rgba(7, 17, 27, 0.3)
+            background: #ff463c
             &.blue
               background: rgba(0, 187, 156, 0.87)
           .icon-user2

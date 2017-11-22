@@ -7,15 +7,15 @@
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="bid-list">
             <table class="auction-pricelist">
               <tr class="head">
-                <td class="col-1">状态</td>
-                <td class="col-2">出价用户</td>
+                <td class="col-2" nowrap>出价用户</td>
                 <td class="col-3">金额</td>
+                <td class="col-1">状态</td>
                 <td class="col-4">出价时间</td>
               </tr>
               <tr v-for="(bid, index) in bids" :key="index">
-                <td class="col-1"><span :class="{'highlight': bid.state !== '淘汰'}">{{bid.state}}</span></td>
-                <td class="col-2">{{bid.userNameId || bid.userName}}</td>
+                <td class="col-2" nowrap><img :src="getUserIcon(bid.icon)" class="thumbnail" />{{bid.userName || bid.userNameId}}</td>
                 <td class="col-3">{{bid.price | currency}}</td>
+                <td class="col-1"><span :class="{'highlight': bid.state !== '淘汰'}">{{bid.state}}</span></td>
                 <td class="col-4">{{bid.time | formatDate}}</td>
               </tr>
             </table>
@@ -35,6 +35,7 @@
   import gotop from '@/components/fixedtoolbar/gotop';
   import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
+  let Base64 = require('js-base64').Base64;
 
   export default {
     data() {
@@ -82,6 +83,7 @@
           if (response.result === 0) {
             if (response.info.apprList && response.info.apprList.length) {
               response.info.apprList.forEach(item => {
+                item.userName = Base64.decode(item.userName);
                 this.bids.push(item);
               });
               this.totalPages = response.info.total <= this.pageSize ? 1 : Math.ceil(response.info.total / this.pageSize);
@@ -110,6 +112,12 @@
         } else {
           return api.CONFIG.defaultImg;
         }
+      },
+      getUserIcon(icon) {
+        if (!icon) {
+          return 'http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10';
+        }
+        return icon;
       },
       showProductDetail(product) {
         this.$router.push({name: 'good', params: {id: product.artworkId}});
@@ -249,6 +257,7 @@
           .col-2
             width: 25%
             padding-left: 10px
+            overflow: hidden
             box-sizing: border-box
           .col-3
             flex: 1
@@ -261,6 +270,14 @@
             padding-left: 10px
             text-overflow: ellipsis
             white-space: nowrap
+            overflow: hidden
+            box-sizing: border-box
+          .thumbnail
+            width: 32px
+            height: 32px
+            border-radius: 50%
+            margin-right: 3px
+            vertical-align: middle
             overflow: hidden
             box-sizing: border-box
         .bid-list

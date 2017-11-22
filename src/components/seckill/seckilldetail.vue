@@ -83,6 +83,9 @@
             <div class="more-rating" v-show="good.ratings && good.ratings.length" @click.stop.prevent="viewMore">———— 查看更多评论 ————</div>
           </div>
         </div>
+        <split v-show="guessGoods.length"></split>
+        <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
+        <channel :items="guessGoods" :cols="2"></channel>
       </div>
     </div>
     <div class="fixed-foot">
@@ -118,6 +121,8 @@
   import {mixUsername} from '@/common/js/util';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
+  import modalTitle from '@/components/modal-title/modal-title';
+  import channel from '@/components/channel/channel';
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import frame from '@/components/common/myiframe';
@@ -143,6 +148,7 @@
         good: {},
         seckill: {},
         selectType: ALL,
+        guessGoods: [],
         onlyContent: true,
         desc: {
           all: '全部',
@@ -207,6 +213,7 @@
             this.lazyload();
             this.$store.dispatch('closeLoading');
             this.fetchComments();
+            this.getLikeGoods();
           }).catch(response => {
             this.$store.dispatch('closeLoading');
           });
@@ -223,6 +230,28 @@
           } else {
             this.good.ratings = response.comments;
           }
+        });
+      },
+      getLikeGoods() {
+        let kw = '';
+        let cat = '';
+        if (this.good.keyword.length) {
+          kw = this.good.keyword.join(',');
+        } else {
+          cat = this.good.artworkCategory.parent.name;
+        }
+        api.GetGoods({
+          artworkTypeName: 'tea',
+          currentPage: 1,
+          pageSize: 20,
+          keyword: kw,
+          categoryParentName: cat || '',
+          pid: this.good.id
+        }).then((response) => {
+          this.guessGoods = response.artworks;
+          setTimeout(() => {
+            this._initScroll();
+          }, 800);
         });
       },
       getThumbnail(id) {
@@ -381,7 +410,8 @@
               };
               this.$store.dispatch('addPayGoods', [good]);
               this.$store.dispatch('addKillProduct', this.seckill.seckillId);
-              this.$router.push({name: 'pay', query: {orderType: 3}});
+              // this.$router.push({name: 'pay', query: {orderType: 3}});
+              window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=3';
             });
           }
         });
@@ -524,7 +554,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, modalTitle, channel
     }
   };
 </script>

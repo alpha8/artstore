@@ -51,12 +51,12 @@
           </li>
         </ul>
       </div>
-      <split v-if="userExt.model === 2"></split>
-      <div class="invite-wrapper" v-if="userExt.model === 2">
+      <split v-show="profile.hasQrCode"></split>
+      <div class="invite-wrapper" v-show="profile.hasQrCode">
         <div class="title border-1px">推荐有礼</div>
         <div class="item-list">
-          <router-link class="item border-1px" to="/recommend">
-            <span class="text"><i class="icon-gift_card"></i> 邀请好友加入</span>
+          <router-link class="item border-1px" to="/myrecommend">
+            <span class="text"><i class="icon-gift_card"></i> 专属优惠活动，推荐好友拿返现！</span>
             <span class="more"><i class="icon-keyboard_arrow_right"></i></span>
           </router-link>
         </div>
@@ -133,7 +133,8 @@
           }
            */
         ],
-        userExt: {}
+        userExt: {},
+        profile: {}
       };
     },
     activated() {
@@ -147,11 +148,14 @@
       api.getUserProfile(user.userId || 0).then(response => {
         if (response.result === 0) {
           this.$store.dispatch('updateUserProfile', response);
-          if (this.wallet.length >= 2) {
+          if (this.wallet.length >= 3) {
             this.wallet[0].amount = response.wallet && response.wallet.accountValue || 0;
             this.wallet[1].amount = response.wallet && response.wallet.totalValue || 0;
+            this.wallet[2].amount = response.totalRebate || 0;
           }
           this.userExt = response.user || {};
+          this.profile = response;
+          this._initScroll();
         }
       });
     },
@@ -159,7 +163,7 @@
       getVipTitle() {
         // let userLevel = {'lv0': '初级用户', 'lv1': 'VIP一钻', 'lv2': 'VIP二钻', 'lv3': 'VIP三钻', 'lv4': 'VIP四钻', 'lv5': 'VIP五钻'};
         let agentLevel = {'lv0': '普通用户', 'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
-        let level = this.userExt.level;
+        let level = this.userExt.level || 'lv0';
         if (this.userExt.model === 1) {
           // 普通用户
           return agentLevel[level];
@@ -171,7 +175,7 @@
         }
       },
       getVipIcon() {
-        return this.userExt.level;
+        return this.userExt.level || 'lv0';
       }
     },
     methods: {
@@ -388,7 +392,7 @@
           font-size: 18px
     .item-list
       padding-bottom: 2px
-  .other-wrapper
-    padding-bottom: 100px
+    .otherList
+      padding-bottom: 30px
 </style>
 

@@ -24,7 +24,7 @@
           mousewheelControl: false,
           observeParents: true,
           loop: true,
-          speed: 1500,
+          speed: 800,
           autoplayDisableOnInteraction: false
         }
       };

@@ -39,6 +39,7 @@ import groupbuy from '@/components/groupbuy/groupbuy';
 import groupbuyDetail from '@/components/groupbuy/groupbuydetail';
 import mygroupbuy from '@/components/groupbuy/mygroupbuy';
 import recommend from '@/components/my/recommend';
+import myrecommend from '@/components/my/myrecommend';
 import cashback from '@/components/my/cashback';
 import cashbackdetail from '@/components/my/cashbackdetail';
 
@@ -62,7 +63,7 @@ export default new Router({
     {path: '/address/add', component: addAddress, name: 'addaddress'},
     {path: '/address/:id/edit', component: editAddress, name: 'address'},
     {path: '/order', component: order},
-    {path: '/order/detail/:id', component: orderdetail, name: 'orderdetail'},
+    {path: '/order/:id', component: orderdetail, name: 'orderdetail'},
     {path: '/order/refund/:id', component: refund, name: 'refund'},
     {path: '/order/express/:expressCode/:expressNo', component: expresslog, name: 'expresslog'},
     {path: '/order/:id/address', component: fillAddress, name: 'filladdress'},
@@ -85,7 +86,8 @@ export default new Router({
     {path: '/personInfo', component: personInfo},
     {path: '/wallet', component: wallet},
     {path: '/cashdetail', component: cashdetail},
-    {path: '/recommend', component: recommend},
+    {path: '/myrecommend', component: myrecommend, name: 'myrecommend'},
+    {path: '/recommend/:id', component: recommend, name: 'recommend'},
     {path: '/cashback', component: cashback},
     {path: '/cashbackdetail', component: cashbackdetail},
     {path: '/my', component: my}

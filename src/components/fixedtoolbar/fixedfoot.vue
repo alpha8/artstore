@@ -3,7 +3,7 @@
     <div class="foot-wrapper">
       <router-link :to="item.link" class="foot-item" v-for="(item,index) in items" key="index">
         <span class="icon"><i :class="item.icon"></i></span>
-        <span class="text">{{item.text}}</span>
+        <span class="text" :class="{'highlight': item.highlight}">{{item.text}}</span>
       </router-link>
     </div>
   </div>
@@ -57,4 +57,6 @@
         .text
           display: block
           line-height: 1
+          &.highlight
+            font-weight: 700
 </style>

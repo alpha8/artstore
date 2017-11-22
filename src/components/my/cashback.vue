@@ -11,7 +11,7 @@
       <div class="cashback-wrapper">
         <div class="cashback-heading">
           <p class="balance-name">返利余额（元）</p>
-          <p class="balance-num">{{0 | currency}}</p>
+          <p class="balance-num">{{balance | currency}}</p>
         </div>
         <div class="cashback-content">
           <p class="content-title">返利余额是什么？</p>
@@ -36,6 +36,12 @@
     },
     deactivated() {
       this.hide();
+    },
+    computed: {
+      balance() {
+        let profile = this.$store.getters.getUserProfile;
+        return profile && profile.totalRebate || 0;
+      }
     },
     methods: {
       _initScroll() {

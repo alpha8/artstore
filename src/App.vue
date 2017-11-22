@@ -7,6 +7,7 @@
     <loading :show="loading.show" :text="loading.text"></loading>
     <toast v-show="toast.show" :text="toast.text"></toast>
     <gohome></gohome>
+    <layer></layer>
   </div>
 </template>
 
@@ -15,6 +16,7 @@ import fixedfoot from '@/components/fixedtoolbar/fixedfoot';
 import loading from '@/components/common/loading';
 import toast from '@/components/common/toast';
 import gohome from '@/components/fixedtoolbar/gohome';
+import layer from '@/components/common/layer';
 
 export default {
   data () {
@@ -26,7 +28,7 @@ export default {
         link: '/home'
       }, {
         icon: 'icon-classify',
-        text: '分类',
+        text: '商品分类',
         active: false,
         link: '/category'
       }, {
@@ -57,7 +59,7 @@ export default {
     }
   },
   components: {
-    fixedfoot, loading, toast, gohome
+    fixedfoot, loading, toast, gohome, layer
   }
 };
 </script>

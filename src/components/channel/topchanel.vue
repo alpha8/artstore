@@ -20,7 +20,7 @@
       }
     },
     mounted() {
-      this._initScroll();
+      // this._initScroll();  // top_item: width: 22.2vw, float: left
     },
     methods: {
       _initScroll() {
@@ -56,10 +56,10 @@
     .top_list
       position: relative
       height: 100%
+      display: flex
       .top_item
         display: inline-block
-        width: 22.2vw
-        float: left
+        flex: 1
         padding: 15px 0
         text-align: center
         box-sizing: border-box

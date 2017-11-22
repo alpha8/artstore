@@ -35,8 +35,9 @@
     width: 44px
     height: 44px
     border-radius: 50%
-    border: 1px solid #999
+    border: 1px solid #e1e1e1
     transition: bottom 0.3s linear
+    box-shadow: 0px 1px 20px 0px #dfdbdb
     box-sizing: border-box
     z-index: 9
     &.up
@@ -44,6 +45,7 @@
     .icon-home
       display: block
       font-size: 14px
+      margin-top: -1px
       margin-bottom: 3px
     .text
       display: block

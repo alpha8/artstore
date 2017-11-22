@@ -14,12 +14,15 @@
           </div> -->
           <div class="price">
             <span class="now">¥{{getGoodPrice}}</span><span class="old" v-show="good.oldPrice">¥{{good.oldPrice}}</span>
+          </div>
+          <div class="delivery-annouce" v-if="good.deliveryDays">
+            <span class="tips">预计发货时间：{{good.deliveryDays}}天</span>
           </div>          
-          <div class="cartcontrol-wrapper">
+          <div class="cartcontrol-wrapper" v-if="good.count">
             <cartcontrol @add="addGood" :good="good"></cartcontrol>
           </div>
           <transition name="fade">
-            <div @click.stop.prevent="addFirst" class="buy" v-show="!good.count || good.count === 0">加入购物车</div>
+            <div @click.stop.prevent="addFirst" class="buy" v-if="!good.count || good.count === 0">加入购物车</div>
           </transition>
         </div>
         <!--  <div class="sku-wrap">
@@ -74,8 +77,8 @@
             <div class="more-rating" v-show="good.ratings && good.ratings.length" @click.stop.prevent="viewMore">———— 查看更多评论 ————</div>
           </div>
         </div>
-        <split></split>
-        <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName=""></modal-title>
+        <split v-show="guessGoods.length"></split>
+        <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
       </div>
       <fixedcart ref="shopcart" @add="addToCart" :good="good"></fixedcart>
@@ -115,10 +118,10 @@
     },
     watch: {
       $route (to, from) {
-        if (to.params.id !== from.params.id) {
-          this.fetchData();
-        }
-        if (to.name === from.name) {
+        if (to.name === from.name && to.name === 'good') {
+          if (to.params.id !== from.params.id) {
+            this.fetchData();
+          }
           let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
           this.scroll.scrollToElement(goodWrapper, 300);
         }
@@ -610,10 +613,15 @@
           text-decoration: line-through
           font-size: 10px
           color: rgb(147, 153, 159)
+      .delivery-annouce
+        font-size: 12px
+        color: #666
+        padding: 5px 0
       .cartcontrol-wrapper
         position: absolute
         right: 12px
-        bottom: 12px
+        top: 50%
+        margin-top: -16px
       .buy
         position: absolute
         right: 18px
