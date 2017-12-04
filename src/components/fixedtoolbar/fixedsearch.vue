@@ -14,8 +14,8 @@
       </div>
       <div class="ext-tools">
         <span v-show="showLogin"><a href="/wxservice/baseInfo">登录</a></span>
-        <span v-show="showDiscard" @click.stop.prevent="hideDialog"><span class="button">取消</span></span>
-        <span v-show="showSearchBtn"><span class="button" :class="{'blue': !showFixed}" @click.stop.prevent="search">搜索</span></span>
+        <span v-show="showDiscard" @click.stop.prevent="hideDialog"><span class="button" :class="{'active': !showFixed}">取消</span></span>
+        <span v-show="showSearchBtn"><span class="button" :class="{'active': !showFixed}" @click.stop.prevent="search">搜索</span></span>
         <span v-show="hasLogin && !typing"><router-link to="/my"><i class="icon-user2"></i></router-link></span>
       </div>
     </div>
@@ -105,12 +105,12 @@
     left: 0
     right: 0
     z-index: 10
-    height: 39px
+    height: 40px
     padding: 0 10px
     &.searchBox
       background: #fff
     &.fixed
-      background: #ff463c
+      background: #442712
       animation: searchTop .4s ease-in-out
     @-webkit-keyframes searchTop
       from { top: -50px; }
@@ -173,7 +173,7 @@
               padding: 0 28px
               box-sizing: border-box
       .ext-tools
-        flex: 0 0 60px
+        width: 60px
         text-align: center
         box-sizing: border-box
         padding: 3px 0
@@ -185,9 +185,14 @@
           height: 33px
           line-height: 33px
           .button
-            background: #ff463c
-            &.blue
-              background: rgba(0, 187, 156, 0.87)
+            background: #442712
+            color: #fff
+            border: none
+            &.active
+              color: #666
+              background: #efefef
+              border: 1px solid #ddd
+              border-radius: 3px
           .icon-user2
             font-size: 16px
 </style>

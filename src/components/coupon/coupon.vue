@@ -5,7 +5,7 @@
         <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
       </div>
       <div class="title">优惠券账户</div>
-      <div class="right" @click.stop.prevent="detail">优惠券明细</div>
+      <!-- <div class="right" @click.stop.prevent="detail">优惠券明细</div> -->
     </div>
     <div class="wallet" ref="wallet">
       <div class="wallet-wrapper">
@@ -13,6 +13,7 @@
           <p class="balance-name">优惠券余额（元）</p>
           <p class="balance-num">{{balance | currency}}</p>
         </div>
+        <div class="btns"><span class="btn-green" @click.stop.prevent="detail">优惠券明细</span></div>
         <split></split>
         <div class="wallet-content">
           <div class="content-title">优惠券充值</div>
@@ -22,8 +23,8 @@
           <div class="btns"><span class="btn-red" :class="{'btn-gray': amount.length === 0}" @click.stop.prevent="pay">充值</span></div>
           <div class="content-text">
             <strong>充值说明：</strong>
-            <p>优惠券是由「一虎一席茶席艺术平台公众号」派发给用户的，充值成功后系统将自动用于抵扣订单交易金额。</p>
-            <p>您可前往「一虎一席茶席艺术平台公众号—个人中心—优惠券余额」中查看优惠券明细，明细中包含了您名下所有的优惠券信息。状态为「未使用」的优惠券可用于充值。</p>
+            <p>优惠券是由「一虎一席茶席艺术平台公众号」派发给用户的，充值成功后系统将自动用于抵扣订单交易金额的50%。</p>
+            <p>您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 优惠券余额」中查看优惠券明细，明细中包含了您名下所有的优惠券信息。状态为「未使用」的优惠券可用于充值。</p>
           </div>
         </div>
       </div>
@@ -52,8 +53,7 @@
     },
     computed: {
       balance() {
-        let profile = this.$store.getters.getUserProfile;
-        return profile && profile.wallet && profile.wallet.totalValue || 0;
+        return this.$store.getters.getCouponAmount;
       }
     },
     methods: {
@@ -156,7 +156,7 @@
       .wallet-heading
         padding: 20px 10px
         color: #fff
-        background: #e4a450
+        background: #e45050
         .balance-name
           font-size: 14px
           color: hsla(0,0%,100%,.7)
@@ -166,6 +166,11 @@
           line-height:1
           font-weight: lighter
           margin-top: 5px
+      >.btns
+        padding: 0 10px
+        box-sizing: border-box
+        .btn-green
+          letter-spacing: 3px
       .wallet-content
         padding: 13px 10px
         color: #666

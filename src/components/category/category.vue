@@ -231,9 +231,8 @@
       overflow: hidden
       .menu-item
         flex: 1
-        height: 60px
-        line-height: 60px
-        padding: 0 12px
+        height: 65px
+        padding: 6px 10px
         border-left: 4px solid transparent
         box-sizing: border-box
         border-1px(rgba(7, 17, 27, 0.1))
@@ -250,25 +249,35 @@
         &.twoline
           position: relative
           .text
-            line-height: 40px
             height: 40px
           i
             height: 10px
             line-height: 10px
             display: block
-            font-size: 8px
-            color: #ccc
+            font-size: 11px
+            color: #999
         .text
           display: block
           width: 100%
+          height: 100%
           vertical-align: middle
           font-size: 0
           box-sizing: border-box
+          overflow: hidden
           span
-            font-size: 12px
+            display: block
+            font-size: 13px
+            word-wrap: break-word
+            text-overflow: ellipsis
+            -webkit-line-clamp: 2
+            -webkit-box-orient: vertical
+            overflow: hidden
+            line-height: 1.45
+            max-height: 38px
           em
-            margin-left: 3px
-            font-size: 8px
+            font-size: 11px
+            display: block
+            padding-top: 2px
     .goods-wrapper
       flex: 1
       .title
@@ -329,7 +338,7 @@
               display: block
               .name
                 line-height: 1.2
-                font-size: 14px
+                font-size: 13px
                 color: #505050
                 word-wrap: break-word
                 word-break: break-all
@@ -338,5 +347,5 @@
                 -webkit-box-orient: vertical
                 em
                   display: block
-                  font-size: 8px
+                  font-size: 11px
 </style>

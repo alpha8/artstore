@@ -19,8 +19,31 @@
             clearInterval(timer);
           }
         }, 500);
+        /* let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
+        if (!ios && this.retryTimes > 0) {
+          let redirect = location.href;
+          // fixed wexin sharing url
+          if (redirect) {
+            redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
+          }
+          this.retryTimes--;
+          this.$store.dispatch('openToast', '正在登录中...');
+          window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+        } */
       }
     },
+    /* mounted() {
+      setTimeout(() => {
+        try {
+          let ad = document.getElementById('_embed_v3_dc');
+          if (ad) {
+            ad.style.display = 'none';
+          }
+        } catch (e) {
+          console.log(e);
+        }
+      }, 1000);
+    }, */
     deactivated() {
       this.redirectUrl = '';
     },

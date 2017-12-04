@@ -461,8 +461,8 @@
             if (src.lastIndexOf('?') < 0) {
               src += '?1';
             }
-            src = src + '&w=' + w;
-            html = html.replace(key, '<img src="' + src + '"').replace(key2, '<img src="' + src + '"');
+            src = src + '&w=750';
+            html = html.replace(key, '<img src="' + src + '" width="' + w + '"').replace(key2, '<img src="' + src + '" width="' + w + '"');
             if (width && width > 100) {
               previewImgList.push(src.substring(0, src.lastIndexOf('?')));
             }

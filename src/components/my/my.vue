@@ -9,7 +9,7 @@
               <img :src="user().icon" alt="" class="pic" v-show="hasLogin()">
             </div>
             <div class="line">
-              <div class="userName" v-show="!hasLogin()"><a href="/wxservice/baseInfo">未登录</a></div>
+              <div class="userName" v-show="!hasLogin()"><a href="/wxservice/baseInfo">点击登录</a></div>
               <div class="userName" v-show="hasLogin()">{{user().nickName}}<span class="supplier" v-if="userExt.model === 2">(代理商)</span></div>
               <div class="info" v-show="hasLogin()"><span class="vip" :class="getVipIcon">{{getVipTitle}}</span></div>
             </div>
@@ -53,10 +53,10 @@
       </div>
       <split v-show="profile.hasQrCode"></split>
       <div class="invite-wrapper" v-show="profile.hasQrCode">
-        <div class="title border-1px">推荐有礼</div>
+        <div class="title border-1px">分享有礼</div>
         <div class="item-list">
           <router-link class="item border-1px" to="/myrecommend">
-            <span class="text"><i class="icon-gift_card"></i> 专属优惠活动，推荐好友拿返现！</span>
+            <span class="text"><i class="icon-gift_card"></i> 专属优惠活动，推荐好友拿奖金！</span>
             <span class="more"><i class="icon-keyboard_arrow_right"></i></span>
           </router-link>
         </div>
@@ -99,7 +99,7 @@
         wallet: [
           { amount: 0, text: '账户余额', link: '/wallet' },
           { amount: 0, text: '优惠券余额', link: '/coupon' },
-          { amount: 0, text: '返利余额', link: '/cashback' }
+          { amount: 0, text: '奖金余额', link: '/cashback' }
         ],
         others: [
           { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
@@ -138,26 +138,7 @@
       };
     },
     activated() {
-      this._initScroll();
-    },
-    mounted() {
-      this._initScroll();
-    },
-    created() {
-      let user = this.$store.getters.getUserInfo;
-      api.getUserProfile(user.userId || 0).then(response => {
-        if (response.result === 0) {
-          this.$store.dispatch('updateUserProfile', response);
-          if (this.wallet.length >= 3) {
-            this.wallet[0].amount = response.wallet && response.wallet.accountValue || 0;
-            this.wallet[1].amount = response.wallet && response.wallet.totalValue || 0;
-            this.wallet[2].amount = response.totalRebate || 0;
-          }
-          this.userExt = response.user || {};
-          this.profile = response;
-          this._initScroll();
-        }
-      });
+      this.refreshData();
     },
     computed: {
       getVipTitle() {
@@ -183,6 +164,26 @@
         hasLogin: 'checkLogined',
         user: 'getUserInfo'
       }),
+      refreshData() {
+        let user = this.$store.getters.getUserInfo;
+        api.getUserProfile(user.userId || 0).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('updateUserProfile', response);
+            if (this.wallet.length >= 3) {
+              this.wallet[0].amount = response.wallet && response.wallet.accountValue || 0;
+              let couponValue = response.wallet && response.wallet.totalValue || 0;
+              this.wallet[1].amount = couponValue;
+              this.$store.dispatch('updateCouponAmount', couponValue);
+              this.wallet[2].amount = response.totalRebate || 0;
+            }
+            this.userExt = response.user || {};
+            this.profile = response;
+            this._initScroll();
+          }
+        }).catch(response => {
+          this._initScroll();
+        });
+      },
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -253,6 +254,7 @@
           .userName
             position: relative
             display: inline-block
+            width: 100%
             max-width: 100%
             font-size: 14px
             text-overflow: ellipsis
@@ -262,7 +264,16 @@
             -webkit-line-clamp: 1
             box-sizing: border-box
             a
+              display: inline-block
+              width: 60%
+              text-align: center
+              height: 40px
+              line-height: 40px
+              background-color: #af3030
+              border-radius: 5px
               color: #fff
+              letter-spacing: 3px
+              box-sizing: border-box
             .supplier
               font-size: 10px
               color: #fafafa
@@ -347,7 +358,8 @@
           font-size: 22px
           line-height: 1
         .amount
-          font-size: 18px
+          font-size: 22px
+          color: rgb(255, 95, 62)
           line-height: 1 
           margin-bottom: 2px       
         .text

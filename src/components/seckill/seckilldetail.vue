@@ -15,7 +15,7 @@
           </div>
           <div class="countdown">
             <p class="countdown_text">距秒杀结束还剩</p>
-            <p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>:</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p>
+            <p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p>
           </div>
         </div>
         <div class="detail bg_green" v-if="seckill.leftStartTimes > 0">
@@ -513,8 +513,8 @@
             if (src.lastIndexOf('?') < 0) {
               src += '?1';
             }
-            src = src + '&w=' + w;
-            html = html.replace(key, '<img src="' + src + '"').replace(key2, '<img src="' + src + '"');
+            src = src + '&w=750';
+            html = html.replace(key, '<img src="' + src + '" width="' + w + '"').replace(key2, '<img src="' + src + '" width="' + w + '"');
             if (width && width > 100) {
               previewImgList.push(src.substring(0, src.lastIndexOf('?')));
             }

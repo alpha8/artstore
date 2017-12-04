@@ -13,7 +13,7 @@
           </li>
         </ul>
         <div class="btns">
-          <span class="btn-blue" @click.stop.prevent="saveRemarks">保存</span>
+          <span class="btn-green" @click.stop.prevent="saveRemarks">保存</span>
         </div>
       </div>
     </div>
@@ -91,9 +91,13 @@
               resize: none
               font-size: 14px
               line-height: 1.5
+              border: 1px dashed #ccc
             .icon-close
               position: absolute
               top: 18px
               right: 10px
               font-size: 18px
+    .btns
+      padding: 0 10px
+      box-sizing: border-box
 </style>

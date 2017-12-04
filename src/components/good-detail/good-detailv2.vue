@@ -9,15 +9,15 @@
         </div>
         <div class="content">
           <h1 class="title">{{good.name}}</h1>
-          <!-- <div class="detail">
-            <span class="sell-count">月售{{good.sellCount}}份</span>
-          </div> -->
           <div class="price">
             <span class="now">¥{{getGoodPrice}}</span><span class="old" v-show="good.oldPrice">¥{{good.oldPrice}}</span>
           </div>
           <div class="delivery-annouce" v-if="good.deliveryDays">
-            <span class="tips">预计发货时间：{{good.deliveryDays}}天</span>
-          </div>          
+            <span class="tips">预计发货：{{good.deliveryDays}}天</span>
+          </div>
+          <div class="detail">
+            <span class="stock">商品库存: {{good.stock && good.stock.total || 0}}</span>
+          </div>      
           <div class="cartcontrol-wrapper" v-if="good.count">
             <cartcontrol @add="addGood" :good="good"></cartcontrol>
           </div>
@@ -434,8 +434,8 @@
             if (src.lastIndexOf('?') < 0) {
               src += '?1';
             }
-            src = src + '&w=' + w;
-            html = html.replace(key, '<img src="' + src + '"').replace(key2, '<img src="' + src + '"');
+            src = src + '&w=750';
+            html = html.replace(key, '<img src="' + src + '" width="' + w + '"').replace(key2, '<img src="' + src + '" width="' + w + '"');
             if (width && width > 100) {
               previewImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
@@ -592,15 +592,14 @@
         font-weight: 700
         color: rgb(7, 17, 27)
       .detail
-        margin-bottom: 18px
-        line-height: 10px
-        height: 10px
+        margin: 10px 0 0
         font-size: 0
-        .sell-count, .rating
+        .stock, .rating, .follower
           font-size: 10px
           color: rgb(147, 153, 159)
-        .sell-count
-          margin-right: 12px
+        .stock
+          display: inline-block
+          font-size: 12px
       .price
         font-weight: 700
         line-height: 24px
@@ -615,8 +614,8 @@
           color: rgb(147, 153, 159)
       .delivery-annouce
         font-size: 12px
-        color: #666
-        padding: 5px 0
+        color: rgb(147, 153, 159)
+        margin: 10px 0 0
       .cartcontrol-wrapper
         position: absolute
         right: 12px
@@ -624,8 +623,9 @@
         margin-top: -16px
       .buy
         position: absolute
-        right: 18px
-        bottom: 18px
+        right: 12px
+        top: 50%
+        margin-top: -12px
         z-index: 10
         height: 24px
         line-height: 24px

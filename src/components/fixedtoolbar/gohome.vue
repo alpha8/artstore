@@ -26,7 +26,7 @@
   .back-home
     position: fixed
     right: 4px
-    bottom: 55px
+    bottom: 57px
     font-size: 12px
     padding: 8px
     background: #fff

@@ -7,7 +7,7 @@
     <loading :show="loading.show" :text="loading.text"></loading>
     <toast v-show="toast.show" :text="toast.text"></toast>
     <gohome></gohome>
-    <layer></layer>
+    <messagebox></messagebox>
   </div>
 </template>
 
@@ -16,7 +16,7 @@ import fixedfoot from '@/components/fixedtoolbar/fixedfoot';
 import loading from '@/components/common/loading';
 import toast from '@/components/common/toast';
 import gohome from '@/components/fixedtoolbar/gohome';
-import layer from '@/components/common/layer';
+import messagebox from '@/components/common/messagebox';
 
 export default {
   data () {
@@ -58,8 +58,29 @@ export default {
       };
     }
   },
+  created() {
+    let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
+    if (!ios) {
+      if (typeof (WeixinJSBridge) === 'undefined') {
+        if (document.addEventListener) {
+          document.addEventListener('WeixinJSBridgeReady', function (e) {
+            WeixinJSBridge.invoke('setFontSizeCallback', {'fontSize': 0});
+          });
+        } else if (document.attachEvent) {
+          document.attachEvent('WeixinJSBridgeReady', function (e) {
+            WeixinJSBridge.invoke('setFontSizeCallback', {'fontSize': 0});
+          });
+          document.attachEvent('onWeixinJSBridgeReady', function (e) {
+            WeixinJSBridge.invoke('setFontSizeCallback', {'fontSize': 0});
+          });
+        }
+      } else {
+        WeixinJSBridge.invoke('setFontSizeCallback', {'fontSize': 0});
+      }
+    }
+  },
   components: {
-    fixedfoot, loading, toast, gohome, layer
+    fixedfoot, loading, toast, gohome, messagebox
   }
 };
 </script>

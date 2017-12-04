@@ -25,7 +25,7 @@ import auctionList from '@/components/auction/auctionList';
 import myauction from '@/components/auction/myauction';
 import bidlist from '@/components/auction/bidlist';
 import coupon from '@/components/coupon/coupon';
-import getcoupon from '@/components/coupon/getcoupon';
+import getcoupon from '@/components/coupon/getcoupon2';
 import couponhistory from '@/components/coupon/coupon-history';
 import footprint from '@/components/footprint/footprint';
 import follow from '@/components/follow/follow';
@@ -42,6 +42,7 @@ import recommend from '@/components/my/recommend';
 import myrecommend from '@/components/my/myrecommend';
 import cashback from '@/components/my/cashback';
 import cashbackdetail from '@/components/my/cashbackdetail';
+// import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
 
@@ -88,6 +89,7 @@ export default new Router({
     {path: '/cashdetail', component: cashdetail},
     {path: '/myrecommend', component: myrecommend, name: 'myrecommend'},
     {path: '/recommend/:id', component: recommend, name: 'recommend'},
+    // {path: '/address/citychoose', component: citychoose, name: 'citychoose'},
     {path: '/cashback', component: cashback},
     {path: '/cashbackdetail', component: cashbackdetail},
     {path: '/my', component: my}

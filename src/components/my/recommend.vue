@@ -6,14 +6,14 @@
         <div class="invitation-heading" v-if="qrcode.gridfsids">
           <p class="balance-name">分享二维码</p>
           <p class="balance-num">
-            <img v-show="icon" :src="getQrcodeSrc" width="180" height="180" border="0" />
+            <img v-show="icon" :src="getQrcodeSrc" width="260" height="260" border="0" class="qrcodeIcon" />
           </p>
           <div class="tips" v-if="qrcode.provideTotal - qrcode.receiveTotal <= 10">优惠券可领张数不足，仅有{{qrcode.provideTotal - qrcode.receiveTotal}}张，请联系管理员充值</div>
         </div>
         <div class="invitation-content">
           <div class="table-responsive">
             <table class="table">
-              <caption>-----已邀请用户列表----</caption>
+              <caption>-----已邀请用户列表<span v-if="coupons.length">({{coupons.length}}人)</span>----</caption>
               <tr>
                 <th>用户</th>
                 <th>领取金额</th>
@@ -36,19 +36,19 @@
           </div> -->
           <p class="content-title">转发方式</p>
           <p class="content-text">
-            &nbsp;&nbsp;&nbsp;&nbsp;您可通过朋友圈、文章等方式转发此二维码
+            您可通过朋友圈、文章等方式转发此二维码。
           </p>
           <p class="content-title">好友福利</p>
           <p class="content-text">
-            &nbsp;&nbsp;&nbsp;&nbsp;受邀请的好友，可扫描二维码领取优惠券，可直接用于抵扣订单金额
+            受邀请的好友，可扫描二维码领取优惠券，可直接用于抵扣订单金额。
           </p>
           <p class="content-title">您的福利</p>
           <p class="content-text">
-            &nbsp;&nbsp;&nbsp;&nbsp;领券的好友，之后 3 年在平台上进行的所有交易（用券或不用），您都将获得 3% 的返利.您可前往「一虎一席茶席艺术平台公众号 — 个人中心 - 返利」中查询到返现总额
+            领券的好友，之后 3 年在平台上进行的所有交易（用券或不用），您都将获得 3% 的返利.您可前往「一虎一席茶席艺术平台公众号 — 个人中心 - 返利」中查询到返现总额。
           </p>
           <p class="content-title">会员福利</p>
           <p class="content-text">
-            &nbsp;&nbsp;&nbsp;&nbsp;当好友交易额或您的推荐人数达到一定数量，也会提升您的会员等级，获得更大的优惠折扣
+            当好友交易额或您的推荐人数达到一定数量，也会提升您的会员等级，获得更大的优惠折扣。
           </p>
         </div>
       </div>
@@ -80,6 +80,7 @@
       this.fetchData();
     },
     deactivated() {
+      this._reset();
       this.hide();
       this.icon = '';
     },
@@ -113,25 +114,25 @@
         api.getQrcode(id).then(response => {
           if (response && response.id) {
             this.qrcode = response;
+            let exist = false;
             if (this.qrcode.gridfsids) {
-              let exist = false;
               this.qrcode.gridfsids.forEach(item => {
                 if (item.userid === user.userId) {
                   exist = true;
                 }
               });
-              if (!exist) {
-                api.generateQrcode({
-                  id: response.id,
-                  provideId: user.userId
-                }).then(res => {
-                  if (res.result === 0) {
-                    this.qrcode.gridfsids = [{userid: user.id, gridfsid: res.gridfsid}];
-                    this.icon = `${api.CONFIG.cmsCtx}/qrcode/download/${res.gridfsid}`;
-                    this._initScroll();
-                  }
-                });
-              }
+            }
+            if (!exist) {
+              api.generateQrcode({
+                id: response.id,
+                provideId: user.userId
+              }).then(res => {
+                if (res.result === 0) {
+                  this.qrcode.gridfsids = [{userid: user.id, gridfsid: res.gridfsid}];
+                  this.icon = `${api.CONFIG.cmsCtx}/qrcode/download/${res.gridfsid}`;
+                  this._initScroll();
+                }
+              });
             }
             this.fetchCoupons();
             this._initScroll();
@@ -174,6 +175,12 @@
           }
         });
       },
+      _reset() {
+        this.coupons = [];
+        this.pageNumber = 1;
+        this.totalPages = 0;
+        this.loadEnd = false;
+      },
       back() {
         this.$router.back();
       },
@@ -201,7 +208,6 @@
   .header
     position: fixed
     display: flex
-    padding: 0 8px
     top: 0
     width: 100%
     height: 44px
@@ -268,7 +274,7 @@
         .content-text
           font-size: 12px
           line-height: 1.83em
-          padding-bottom: 7px
+          padding-bottom: 9px
         .table-responsive
           width: 100%
           margin-bottom: 15px
@@ -295,6 +301,8 @@
               color: #666
               font-size: 14px
               font-weight: 700
+              span
+                font-size: 12px
             th, td
               padding: 8px 5px
               line-height: 1.42

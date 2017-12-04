@@ -81,7 +81,7 @@
         api.getAuctionsByUID({
           paging: this.pageNumber,
           pageSize: this.pageSize,
-          userNameId: uid
+          userNameId: uid || ''
         }).then(response => {
           if (response.info.apList && response.info.apList.length) {
             response.info.apList.forEach(item => {

@@ -1,13 +1,13 @@
 <template>
   <div>
-    <fixedheader title="返利明细"></fixedheader>
+    <fixedheader title="奖金明细"></fixedheader>
     <div class="cashback">
       <div class="cashback-wrap">
         <div class="cashback-container" ref="cashbackRef" v-show="cashbacks.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="cashback-list">
             <mu-flexbox-item basis="100%" class="cashback-item border-1px" v-for="(item, index) in cashbacks" :key="index">
               <div class="content">
-                <p class="line text">{{item.name}}领取了{{item.payValue}}优惠券</p>
+                <p class="line text">{{item.name || item.userId}}领取了{{item.payValue}}优惠券</p>
                 <p class="time">{{item.createAt | formatDate}}</p>
               </div>
               <div class="amount">+ {{item.rebateValue}}</div>

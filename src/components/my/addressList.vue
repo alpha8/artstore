@@ -129,13 +129,13 @@
         .address-item
           position: relative
           display: flex
-          font-size: 12px
+          font-size: 14px
           border-1px(rgba(7, 17, 27, 0.1))
           .icon-check_circle
-            flex: 10vw 0 0
+            width: 15%
             color: #d3d3d3
             text-align: center
-            font-size: 18px
+            font-size: 22px
             line-height: 50px
             &.on
               color: #fb4741
@@ -152,7 +152,7 @@
               -webkit-box-orient: vertical
               overflow: hidden
           .ops
-            flex: 0 0 10vw
+            width: 25%
             line-height: 50px
             text-align: right
             i
@@ -163,13 +163,13 @@
       .addAddress
         position: relative
         padding: 15px 0
-        font-size: 12px
+        font-size: 14px
         .item
           position: relative
           i
             position: absolute
             right: 0
             top: 0
-            font-size: 18px
+            font-size: 22px
             color: #6e6767
 </style>

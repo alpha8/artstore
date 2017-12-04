@@ -8,14 +8,17 @@
       <span class="mini-favorite-item" @click.stop.prevent="mark">
         <span class="button-lg"><i :class="favorited"></i></span>
       </span>
-      <div class="foot-item" @click.stop.prevent="addGood">
+      <div class="foot-item" v-if="good.stock && good.stock.total > 0" @click.stop.prevent="addGood">
         <span class="button-lg orange">加入购物车</span>
       </div>
       <div class="foot-item" v-if="good.stock && good.stock.status === 1" @click.stop.prevent="bookBuy">
         <span class="button-lg red">预定购买</span>
       </div>
-      <div class="foot-item" v-else @click.stop.prevent="pay">
+      <div class="foot-item" v-else-if="good.stock && good.stock.total > 0" @click.stop.prevent="pay">
         <span class="button-lg red">立即购买</span>
+      </div>
+      <div class="foot-item" v-else-if="good.stock && good.stock.total <= 0">
+        <span class="button-lg disable">已售磬</span>
       </div>
     </div>
     <div class="ball-container">
@@ -226,7 +229,6 @@
         .button-lg
           display: block
           line-height: 50px
-          font-family: "黑体"
           font-size: 14px
           i
             font-size: 22px
@@ -235,6 +237,9 @@
             color: #fff
           &.red
             background: #ff463c
+            color: #fff
+          &.disable
+            background: #aaa
             color: #fff
           .icon-favorite
             color: #ff463c  

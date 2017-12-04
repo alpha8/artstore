@@ -29,7 +29,7 @@
                 </div>
               </div>
               <div class="item-content" v-for="product in order.products">
-                <div class="item-img" @click.stop.prevent="showProductDetail(product)"><img :src="getThumbnail(product)" alt=""></div>
+                <div class="item-img" @click.stop.prevent="showProductDetail(order, product)"><img :src="getThumbnail(product)" alt=""></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showOrderDetail(order)">{{product.name}}</h3>
                   <div class="specs" v-show="product.specs">规格：{{product.specs}}</div>
@@ -184,8 +184,16 @@
       showOrderDetail(order) {
         this.$router.push({name: 'orderdetail', params: {id: order.orderNo}});
       },
-      showProductDetail(product) {
-        this.$router.push({name: 'good', params: {id: product.productId}});
+      showProductDetail(order, product) {
+        if (order.type === 3) { // 秒杀
+          this.$router.push({name: 'seckillDetail', params: {id: product.id}});
+        } else if (order.type === 4) {  // 团购
+          this.$router.push({name: 'groupbuyDetail', params: {id: product.id}});
+        } else if (order.type === 5) {  // 拍卖
+          this.$router.push({name: 'auctiondetail', params: {id: product.id}});
+        } else {
+          this.$router.push({name: 'good', params: {id: product.id}});
+        }
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -238,6 +246,8 @@
               // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
               if (res.err_msg === 'get_brand_wcpay_request:ok') {
                 that.$store.dispatch('openToast', '支付成功！');
+                that._reset();
+                that.fetchData(true);
               } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
                 that.$store.dispatch('openToast', '取消支付！');
               } else if (res.err_msg === 'get_brand_wcpay_request:fail') {

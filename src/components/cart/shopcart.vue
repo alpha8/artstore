@@ -4,7 +4,7 @@
     <div class="cart-wrapper" ref="cart">
       <div>
         <div class="toolbars">
-          <div class="delivery"><span class="icon-address"></span><span class="address">{{defaultAddress}}</span></div>
+          <div class="delivery"><span class="icon-address"></span><span v-show="defaultAddress" class="address">{{defaultAddress.address}}</span></div>
           <div class="edit" @click.stop.prevent="editProduct">{{editDesc}}</div>
         </div>
         <ul class="good-list" v-show="cartProducts && cartProducts.length > 0">
@@ -66,13 +66,15 @@
     data() {
       return {
         checkedAll: false,
-        defaultAddress: '深圳市',
         editMode: false,
         cartProducts: [],
         total: 0
       };
     },
     computed: {
+      defaultAddress() {
+        return this.$store.getters.getDefaultAddress;
+      },
       editDesc() {
         if (this.editMode) {
           return '完成';
@@ -210,24 +212,33 @@
     background: #fff
     overflow: hidden
     .toolbars
-      position: relative
+      display: flex
+      align-items: center
+      justify-content: space-between
       height: 40px
       line-height: 40px
-      width: 100%
       color: #666
       background: #fafafa
       font-size: 14px
       .delivery
-        display: inline-block
-        float: left
-        padding-left: 15px
+        display: flex
+        align-items: center
+        width: 60%
+        .icon-address
+          width: 15px
+          padding-right: 3px
+          padding-left: 10px
+          overflow: hidden
         .address
-          padding-left: 5px
+          max-width: 80%
+          white-space: nowrap
+          overflow: hidden
+          text-overflow: ellipsis
       .edit
-        display: inline-block
-        float: right
+        display: flex
+        align-items: center
         padding: 0 15px
-        text-align: center
+        font-weight: 700
         .icon-edit
           padding-right: 5px
     .good-list
@@ -381,11 +392,9 @@
         .pay
           height: 50px
           line-height: 50px
-          font-family: "黑体"
           font-size: 16px
           background: rgb(147, 153, 159)
           span
-            font-family: none
             font-size: 12px
             font-weight: 400
           &.disable

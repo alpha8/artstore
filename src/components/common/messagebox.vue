@@ -1,63 +1,51 @@
 <template>
   <div v-show="isOpen">
-    <div class="layer">
-      <div class="layer-title">{{title}}<span class="closeIcon" @click.stop.prevent="closeLayer"><i class="icon-close2"></i></span></div>
-      <div class="layer-content" v-html="text"></div>
-      <div class="layer-footer">
-        <span class="btn" v-if="btn.callback" @click.stop.prevent="doAction">{{btn.text}}</span>
-        <span class="btn" v-else @click.stop.prevent="closeLayer">{{btn.text}}</span></div>
+    <div class="msgBox">
+      <div class="msgBox-title">温馨提示<span class="closeIcon" @click.stop.prevent="closeLayer"><i class="icon-close2"></i></span></div>
+      <div class="msgBox-content">
+        <p>公测版，仅供预览试用，欢迎您从【一虎一席茶席艺术平台】微信公众号的聊天窗口中反馈宝贵建议，建议一经采用将致谢您一份一虎一席精美礼品。</p>
+        <p><strong>正式版</strong>（界面外观美化、规模化商品库发布）将于 12月 10 号之前闪亮登场...</p>
+      </div>
+      <div class="msgBox-footer"><span class="btn" @click.stop.prevent="closeLayer">知道了!</span></div>
     </div>
-    <div class="mask"></div>
+    <div class="msgBox-mask"></div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   export default {
-    props: {
-      title: {
-        type: String,
-        default: ''
-      },
-      text: {
-        type: String,
-        default: ''
-      },
-      btn: {
-        type: Object,
-        default() {
-          return {};
-        }
-      }
-    },
     data() {
       return {
-        isOpen: false
+        isOpen: true
       };
     },
-    methods: {
-      show() {
-        this.isOpen = true;
-      },
-      closeLayer() {
-        this.doAction();
-      },
-      doAction() {
+    created() {
+      let isOpen = window.sessionStorage.getItem('isOpen');
+      if (isOpen === 'false') {
         this.isOpen = false;
-        if (this.btn && this.btn.callback) {
-          this.btn.callback();
-        }
+      } else if (isOpen === 'true') {
+        this.isOpen = true;
+      }
+    },
+    methods: {
+      closeLayer() {
+        this.isOpen = false;
+        window.sessionStorage.setItem('isOpen', false);
+      },
+      hide() {
+        this.isOpen = false;
       }
     }
   };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  .layer
+  .msgBox
     position: absolute
     top: 50%
     left: 50%
     width: 300px
-    max-height: 230px
+    height: 230px
     margin-top: -115px
     margin-left: -150px
     z-index: 100
@@ -66,23 +54,23 @@
     box-shadow: 1px 1px 50px rgba(0,0,0,.3)
     border-radius: 10px
     overflow: hidden
-    .layer-title
+    .msgBox-title
       position: relative
       width: 100%
       background: #009f95
       color: #fff
       border: none
       padding-left: 8px
+      border-top-left-radius: 10px
+      border-top-right-radius: 10px
+      background-clip: padding-box
+      box-sizing: border-box
       height: 42px
       line-height: 42px
       font-size: 14px
-      overflow: hidden
       text-overflow: ellipsis
+      overflow: hidden
       white-space: nowrap
-      border-top-left-radius: 10px
-      border-top-right-radius: 10px
-      box-sizing: border-box
-      background-clip: padding-box
       .closeIcon
         position:absolute
         display: inline-block
@@ -100,11 +88,12 @@
           margin-top: -8px
           text-align: center
           font-size: 14px
-    .layer-content
+    .msgBox-content
       line-height: 1.3
       padding: 8px 10px 13px
+      height: 140px
       overflow: hidden
-      font-size: 14px
+      box-sizing: border-box
       p
         text-indent: 20px
         font-size: 14px
@@ -112,11 +101,10 @@
         margin-bottom: 3px
         strong
           font-weight: 700
-    .layer-footer
+    .msgBox-footer
       height: 32px
       line-height: 32px
       text-align: center
-      padding: 15px 0
       span
         padding: 8px 25px
         background: #1ab394
@@ -124,7 +112,7 @@
         font-size: 14px
         color: #fff
         border-radius: 3px
-  .mask
+  .msgBox-mask
     position: absolute
     top: 0
     left: 0

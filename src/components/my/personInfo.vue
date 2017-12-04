@@ -39,17 +39,18 @@
           return;
         }
         if (key === 'sex') {
-          let gender = this.user[key] || '1';
+          let gender = this.user[key];
           let value = '男';
           switch (gender) {
             case '1':
               value = '男';
               break;
-            case '0':
+            case '2':
               value = '女';
               break;
             default:
-              value = gender;
+              value = '';
+              break;
           }
           return value;
         }

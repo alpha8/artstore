@@ -60,7 +60,11 @@
     },
     computed: {
       getHeaderTitle() {
-        return `我的优惠券(${this.coupons.length})`;
+        if (this.coupons && this.coupons.length) {
+          return `我的优惠券(${this.coupons.length})`;
+        } else {
+           return `我的优惠券`;
+        }
       }
     },
     activated() {

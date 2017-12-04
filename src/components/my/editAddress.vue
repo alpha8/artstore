@@ -17,6 +17,13 @@
             </p>
           </li>
           <li class="border-1px">
+            <p class="more">
+              <span class="title">所在地区</span>
+              <div class="text-control" v-if="city" @click.stop.prevent="openCityChoose">{{city}}</div>
+              <div class="text-control tips" v-else @click.stop.prevent="openCityChoose">选择所在地区</div>
+            </p>
+          </li>
+          <li class="border-1px">
             <p>
               <span class="title">详细地址</span>
               <textarea v-model="user.address" placeholder="详细地址" rows="3" required></textarea>
@@ -26,14 +33,16 @@
           <input type="hidden" v-model="user.default">
           <input type="hidden" v-model="user.id">
         </ul>
-        <div class="btns btn-blue" @click.stop.prevent="updateAddress"><span>保存</span></div>
+        <div class="btns btn-green" @click.stop.prevent="updateAddress"><span>保存</span></div>
       </div>
     </div>
+    <citychoose ref="city" @selectCity="cityChosed"></citychoose>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import citychoose from '@/components/my/citychoose';
   import api from '@/api/api';
   const RESPONSE_OK = 0;
 
@@ -45,7 +54,8 @@
           mobile: '',
           address: '',
           default: false
-        }
+        },
+        city: ''
       };
     },
     activated() {
@@ -73,12 +83,21 @@
           return;
         }
         this.user.userId = this.$store.getters.getUserInfo.userId;
+        // this.user.city = this.city;
         api.updateAddress(this.user).then(response => {
           if (response.result === RESPONSE_OK) {
             this.$store.dispatch('updateAddress', this.user);
             this.$router.back();
           }
         });
+      },
+      openCityChoose() {
+        this.$refs.city.choseAdd();
+      },
+      cityChosed(city) {
+        if (city && city.city) {
+          this.city = city.province + city.city + (city.district || '');
+        }
       },
       doClearAddr() {
         this.user.address = '';
@@ -91,7 +110,7 @@
       }
     },
     components: {
-      fixedheader
+      fixedheader, citychoose
     }
   };
 </script>
@@ -108,6 +127,15 @@
         padding: 12px 10px 12px 75px
         box-sizing: border-box
         border-1px(rgba(7, 17, 27, 0.1))
+        .text-control
+          height: 20px
+          line-height: normal
+          border: 0 none
+          font-size: 14px
+          width: 100%
+          vertical-align: top
+          &.tips
+            color: #BBBBBB
         p
           display: block
           .title
@@ -141,4 +169,19 @@
             top: 18px
             right: 14px
             font-size: 18px
+          &.more:after
+            position: absolute
+            display: block
+            width: 10px
+            height: 10px
+            content: ""
+            border-top: 1px solid #666
+            border-left: 1px solid #666
+            -webkit-transform-origin: 50%
+            transform-origin: 50%
+            -webkit-transform: rotate(135deg)
+            transform: rotate(135deg)
+            top: 50%
+            right: 5px
+            margin-top: -4px
 </style>

@@ -4,19 +4,20 @@
       <div class="left">
         <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
       </div>
-      <div class="title">返利账户</div>
-      <div class="right" @click.stop.prevent="detail">返利明细</div>
+      <div class="title">奖金账户</div>
+      <!-- <div class="right" @click.stop.prevent="detail">奖金明细</div> -->
     </div>
     <div class="cashback" ref="cashback">
       <div class="cashback-wrapper">
         <div class="cashback-heading">
-          <p class="balance-name">返利余额（元）</p>
+          <p class="balance-name">奖金余额（元）</p>
           <p class="balance-num">{{balance | currency}}</p>
         </div>
         <div class="cashback-content">
-          <p class="content-title">返利余额是什么？</p>
+          <div class="btns"><span class="btn-green" @click.stop.prevent="detail">奖金明细</span></div>
+          <p class="content-title">奖金余额是什么？</p>
           <p class="content-text">
-            &nbsp;&nbsp;&nbsp;&nbsp;好友通过您分享的商品链接，在平台上完成订单交易，系统将按照一定的额度返还给推荐人；<br/>&nbsp;&nbsp;&nbsp;&nbsp;您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 返利余额」中查看账户余额和交易明细，账户余额可在「实物商品」下单结算时最大化使用。
+            &nbsp;&nbsp;&nbsp;&nbsp;好友通过您分享的商品链接，在平台上完成订单交易，系统将按照一定的额度返还给推荐人；<br/>&nbsp;&nbsp;&nbsp;&nbsp;您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 奖金余额」中查看账户余额和交易明细，账户余额可在「实物商品」下单结算时最大化使用。
           </p>
         </div>
       </div>
@@ -130,7 +131,7 @@
           font-weight: lighter
           margin-top: 5px
       .cashback-content
-        padding: 13px 10px
+        padding: 0 10px 13px
         color: #666
         background: #fff
         .content-title
@@ -141,5 +142,7 @@
         .content-text
           font-size: 12px
           line-height: 1.83em
+        .btn-green
+          letter-spacing: 3px
 </style>
 

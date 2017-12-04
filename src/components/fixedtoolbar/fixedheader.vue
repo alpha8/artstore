@@ -68,7 +68,11 @@
         this.toggleFlag = false;
       },
       back() {
-        this.$router.back();
+        if (window.history.length <= 1) {
+          this.$router.push('/home');
+        } else {
+          this.$router.back();
+        }
       }
     }
   };
@@ -108,12 +112,13 @@
       right: 0
       top: 44px
       z-index: 99
-      background: #fff
+      background: #f1f1f1
+      border-top: 1px solid rgba(7, 17, 27, 0.1)
       &.active
         border-bottom: 1px solid #d8d8d8
       ul
         display: flex
-        padding: 4px 0
+        padding: 8px 0
         li
           flex: 1
           .icon
@@ -125,6 +130,5 @@
             display: block
             line-height: 1
             font-size: 12px
-
 </style>
 

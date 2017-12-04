@@ -41,16 +41,26 @@
             <strong>发票信息</strong>
             <span>明细</span>
           </li> -->
-          <li class="checkout-item change" @click.stop.prevent="openRemarkBox">
+        </ul>
+        <split></split>
+        <ul class="shop-info">
+          <li class="checkout-item change item-border" @click.stop.prevent="openRemarkBox">
             <strong>备注</strong>
             <span class="nowrap-line remark">{{payRemarks}}</span>
           </li>
         </ul>
-        <split></split>
         <div class="payArea">
           <p class="price">
-            总价：
+            <span class="label">商品总额：</span>
             <span class="totalPrice">{{totalPrice | currency}}</span>
+          </p>
+          <p class="price">
+            <span class="label">优惠券可抵扣：</span>
+            <span class="totalPrice">{{computeCouponValue | currency}}</span>
+          </p>
+          <p class="price">
+            <span class="label">应付金额：</span>
+            <span class="totalPrice"><strong>{{totalPrice - computeCouponValue | currency}}</strong></span>
           </p>
           <div class="payBtnList">
             <div class="btns btn-green" @click.stop.prevent="weixinPay"><span>微信支付</span></div>
@@ -91,7 +101,8 @@
         remarks: '',
         countdownStats: {},
         timer: null,
-        seckill: {}
+        seckill: {},
+        couponValue: 0
       };
     },
     computed: {
@@ -112,6 +123,19 @@
       payRemarks() {
         this.remarks = this.$store.getters.getPayRemark;
         return this.remarks;
+      },
+      computeCouponValue() {
+        let type = this.$route.query.orderType || 0;
+        if (type >= 3) {
+          return 0;
+        }
+        if (this.couponValue && this.couponValue <= this.totalFee / 2) {
+          return this.couponValue;
+        } else if (this.couponValue > this.totalFee / 2) {
+          return this.totalFee / 2;
+        } else {
+          return 0;
+        }
       }
     },
     activated() {
@@ -119,6 +143,7 @@
         this.$router.replace('/cart');
         return;
       }
+      this.loadCouponData();
       this.show();
       this._initScroll();
       this.countdown();
@@ -135,6 +160,15 @@
       this._initScroll();
     },
     methods: {
+      loadCouponData() {
+        let user = this.$store.getters.getUserInfo;
+        api.getUserProfile(user.userId || 0).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('updateUserProfile', response);
+            this.couponValue = response.wallet && response.wallet.totalValue || 0;
+          }
+        });
+      },
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -208,16 +242,21 @@
         this.$router.back();
       },
       weixinPay() {
+        if (!this.defaultAddress.address) {
+          this.$store.dispatch('openToast', '请选择收货人信息');
+          return;
+        }
         let userInfo = this.$store.getters.getUserInfo;
         if (!userInfo.openid) {
           this.$store.dispatch('openToast', '正在登录中...');
           setTimeout(() => {
-            window.location.href = `${api.CONFIG.wxCtx}/baseInfo`;
-          }, 1000);
-          return;
-        }
-        if (!this.defaultAddress.address) {
-          this.$store.dispatch('openToast', '请选择收货人信息');
+            let redirect = 'http://' + location.host + location.pathname + '#/pay';
+            let type = this.$route.query.orderType || 0;
+            if (type >= 3) {
+              redirect += '?orderType=' + type;
+            }
+            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+          }, 1500);
           return;
         }
         if (this.paying) {
@@ -468,10 +507,8 @@
                 word-break: break-all
                 text-overflow: ellipsis
                 overflow: hidden
-                -webkit-line-clamp: 2
+                -webkit-line-clamp: 1
                 -webkit-box-orient: vertical
-              &.remark
-                font-size: 10px
             &.change:after
               content: ""
               display: block
@@ -487,16 +524,25 @@
               right: 5px
               top: 50%
               margin-top: -5px
+          .item-border
+            background: #fff url(../../common/images/line.png) -7px bottom repeat-x
+            background-size: 60px 4px
         >.payArea
           position: relative
-          text-align: center
+          text-align: left
           background: #fff
           padding: 0 10px
           .price
-            margin: 20px 0
-            font-size: 16px
+            margin: 13px 0
+            font-size: 15px
+            .label
+              display: inline-block
+              width: 120px
             .totalPrice
               color: #e4393c
+            strong
+              font-weight: 700
+              font-size: 20px
           .countdownTips
             font-size: 12px
             text-align: left

@@ -7,7 +7,7 @@
         </div>
         <div class="item-info">
           <h3>{{item.name}}</h3>
-          <div class="price"><span class="num">{{item.price | currency}}</span></div>
+          <div class="price"><span class="num">{{item.price | currency}}</span><span class="salesCount">(已售:{{item.stock && item.stock.salesCount || 0}}件)</span></div>
           <div class="icon" @click.stop.prevent="mark(item)"><i :class="favorited(item)"></i></div>
         </div>
       </div>
@@ -32,18 +32,8 @@
     },
     data() {
       return {
-        screenWidth: window.innerWidth,
-        sameRoute: false
+        screenWidth: window.innerWidth
       };
-    },
-    watch: {
-      $route (to, from) {
-        if (to.name === from.name) {
-          this.sameRoute = true;
-        } else {
-          this.sameRoute = false;
-        }
-      }
     },
     methods: {
       selectGood(target) {
@@ -58,11 +48,7 @@
         }
       },
       goGoodDetail(item) {
-        if (this.sameRoute) {
-          this.$router.replace({name: 'good', params: {id: item.id}});
-        } else {
-          this.$router.push({name: 'good', params: {id: item.id}});
-        }
+        this.$router.push({name: 'good', params: {id: item.id}});
       },
       favorited(good) {
         let uid = this.$store.getters.getUserInfo.userId;
@@ -165,13 +151,22 @@
           -webkit-line-clamp: 1
           -webkit-box-orient: vertical
         .price
-          margin-top: 1px
+          position: relative
+          margin-top: 2px
           color: #ff463c
           font-size: 14px
           font-weight: 700
           white-space: nowrap
           overflow: hidden
           text-overflow: ellipsis
+          vertical-align: bottom
+          .num
+            display: inline-block
+          .salesCount
+            display: inline-block
+            color: #999
+            font-size: 11px
+            margin-left: 9px
         .icon
           position: absolute
           top: 50%

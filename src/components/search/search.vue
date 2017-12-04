@@ -94,7 +94,11 @@
       let ck = this.$route.query.ck;
       let cv = this.$route.query.cv;
       if (ck && cv) {
-        this.params[ck] = cv;
+        if (ck === 'teabrand' || ck === 'tearoombrand') {
+          this.params.categoryParentName = ck;
+        } else {
+          this.params[ck] = cv;
+        }
       }
       this.fetchData(true);
     },

@@ -1,17 +1,10 @@
 <template>
   <div>
-    <fixedheader title="优惠券领取" :showBack="false"></fixedheader>
+    <fixedheader :title="getCouponTitle" :showBack="false"></fixedheader>
     <div class="coupon" ref="coupon">
       <div class="coupon-wrapper">
         <div class="coupon-content">
-          <div class="form-group">
-            <input type="tel" name="phoneNo" v-model="phone" class="phone" placeholder="请输入您的手机号" minlength="11" maxlength="11">
-          </div>
-          <div class="form-group">
-            <input type="text" name="verifyCode" v-model="code" class="code" placeholder="请输入验证码" minlength="6" maxlength="6">
-            <span class="sendCode" :class="{'active': phone.length === 11}" @click.stop.prevent="sendVerifyCode">{{resendTips}}</span>
-          </div>
-          <div class="form-group btns" @click.stop.prevent="doAction"><span class="btn-red" :class="{'btn-gray': !isValid}">立即领取</span></div>
+          <div class="btns" @click.stop.prevent="doAction"><span class="btn-red">立即领取</span></div>
         </div>
         <div class="split"></div>
         <div class="coupon-rules">
@@ -69,6 +62,9 @@
         } else {
           return '发送验证码';
         }
+      },
+      getCouponTitle() {
+        return this.qrcode.provideTitle || '优惠券领取';
       }
     },
     activated() {
@@ -139,42 +135,33 @@
         });
       },
       doAction() {
-        if (!this.phone || !this.code) {
-          return;
-        }
+        let that = this;
+        this.layer.button.callback = function() {
+          that.$router.push('/home');
+        };
         let publishid = this.$route.query.publishid || 0;
-        api.verifyCode(this.phone, this.code).then(res => {
-          if (res.result === 0) {
-            api.receiveQrcode({
-              qrid: this.qrcode.id,
-              mobileNumber: this.phone,
-              openid: this.openid,
-              provideId: publishid
-            }).then(response => {
-              if (response.result === 0) {
-                this.layer.text = '领取成功，您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 优惠券余额」中查看明细!';
-                this.$refs.layerWin.show();
-                this.$router.push('/home');
-              } else if (response.code === 1001) {
-                this.layer.text = '您已领取过此优惠券';
-                this.$refs.layerWin.show();
-              } else if (response.code === 1002) {
-                this.layer.text = '优惠券已领完';
-                this.$refs.layerWin.show();
-              } else {
-                this.layer.text = '优惠券太火爆了，请稍候再来!';
-                this.$refs.layerWin.show();
-              }
-              this.code = '';
-            }).catch(response => {
-              this.$store.dispatch('openToast', '优惠券太火爆了，请稍候再来!');
-            });
+        api.receiveQrcode({
+          qrid: this.qrcode.id,
+          openid: this.openid,
+          provideId: publishid
+        }).then(response => {
+          if (response.result === 0) {
+            this.layer.text = '领取成功，您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 优惠券余额」中查看明细!';
+            this.$refs.layerWin.show();
+          } else if (response.code === 1001) {
+            this.layer.text = '您已领取过此优惠券';
+            this.$refs.layerWin.show();
+          } else if (response.code === 1002) {
+            this.layer.text = '优惠券已领完';
+            this.$refs.layerWin.show();
           } else {
-            this.layer.text = '验证码不正确，请重试一下!';
+            this.layer.text = '优惠券太火爆了，请稍候再来!';
             this.$refs.layerWin.show();
           }
+          this.code = '';
         }).catch(response => {
-          this.$store.dispatch('openToast', '网络故障，请稍候再试!');
+          this.layer.text = '优惠券太火爆了，请稍候再来!';
+          this.$refs.layerWin.show();
         });
       },
       back() {
@@ -262,6 +249,8 @@
             color: #fff
             &.active
               background: #d05148
+        .btns
+          padding-top: 40px
       .coupon-rules
         position: relative
         padding: 10px 20px

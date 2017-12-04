@@ -8,7 +8,7 @@
             <mu-flexbox-item basis="100%" class="myrecommend-item border-1px" v-for="(myrecommend, index) in myrecommends" :key="index">
               <div class="item-info" @click.stop.prevent="showDetail(myrecommend)">
                 <h3 class="title">活动{{index + 1}}: {{myrecommend.provideTitle}}</h3>
-                <div class="content">&nbsp;&nbsp;&nbsp;&nbsp;{{myrecommend.desc}}</div>
+                <div class="content">{{myrecommend.desc}}</div>
               </div>
             </mu-flexbox-item>
           </mu-flexbox>
@@ -237,7 +237,7 @@
                 line-height:35px
                 font-size: 14px
               .content
-                margin-top: 8px
+                margin-top: 2px
       .no-myrecommend
         width: 100%
         padding: 40px 0

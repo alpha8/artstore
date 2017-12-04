@@ -60,7 +60,7 @@
       </div>
     </div>
     <div class="footer border-top-1px">
-      <div class="btn-group">
+      <div class="btn-group" v-if="loginUser && loginUser.userId === order.userId">
        <div class="button" v-if="order.status === 0 && !order.express" @click.stop.prevent="goFillAddress"><span class="btn-red">填写收货地址</span></div>
         <div class="button" v-else-if="order.status === 0" @click.stop.prevent="weixinPay"><span class="btn-red">支付</span></div>
         <div class="button" v-if="order.status === 0" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
@@ -100,7 +100,8 @@
           express: {}
         },
         mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消', '退款申请中', '退款中', '已退款'],
-        paying: false
+        paying: false,
+        loginUser: this.$store.getters.getUserInfo
       };
     },
     activated() {
