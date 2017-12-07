@@ -5,7 +5,7 @@
         <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
       </div>
       <div class="title">优惠券账户</div>
-      <!-- <div class="right" @click.stop.prevent="detail">优惠券明细</div> -->
+      <div class="right"></div>
     </div>
     <div class="wallet" ref="wallet">
       <div class="wallet-wrapper">
@@ -13,7 +13,7 @@
           <p class="balance-name">优惠券余额（元）</p>
           <p class="balance-num">{{balance | currency}}</p>
         </div>
-        <div class="btns"><span class="btn-green" @click.stop.prevent="detail">优惠券明细</span></div>
+        <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">优惠券明细</span></div>
         <split></split>
         <div class="wallet-content">
           <div class="content-title">优惠券充值</div>
@@ -23,8 +23,8 @@
           <div class="btns"><span class="btn-red" :class="{'btn-gray': amount.length === 0}" @click.stop.prevent="pay">充值</span></div>
           <div class="content-text">
             <strong>充值说明：</strong>
-            <p>优惠券是由「一虎一席茶席艺术平台公众号」派发给用户的，充值成功后系统将自动用于抵扣订单交易金额的50%。</p>
-            <p>您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 优惠券余额」中查看优惠券明细，明细中包含了您名下所有的优惠券信息。状态为「未使用」的优惠券可用于充值。</p>
+            <p>优惠券是由「一虎一席茶席艺术平台」派发给用户的，充值成功后系统将自动用于抵扣订单交易金额。</p>
+            <p>您可前往「个人中心 — 优惠券余额」中查看优惠券明细，明细中包含了您名下所有的优惠券信息。状态为「未使用」的优惠券可用于充值。</p>
           </div>
         </div>
       </div>
@@ -124,14 +124,14 @@
     overflow: hidden
     z-index: 20
     .left
-      flex: 30px 0 0
+      width: 30px
       i
         font-size: 18px
     .title
       flex: 1
       padding: 0 10px
     .right
-      flex: 0 0 80px
+      width: 30px
       font-size: 14px
       i
         font-size: 18px
@@ -186,8 +186,6 @@
           line-height: 1.83em
           strong
             font-weight: 700
-          p
-            text-indent: 20px
         .form-control
           display: flex
           position: relative

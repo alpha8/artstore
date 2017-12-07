@@ -6,7 +6,7 @@
         <span class="button-lg"><i class="icon-cart"></i></span>
       </router-link>
       <span class="mini-favorite-item" @click.stop.prevent="mark">
-        <span class="button-lg"><i :class="favorited"></i></span>
+        <span class="button-lg"><i :class="{'icon-favorite': marked, 'icon-heart': !marked}"></i></span>
       </span>
       <div class="foot-item" v-if="good.stock && good.stock.total > 0" @click.stop.prevent="addGood">
         <span class="button-lg orange">加入购物车</span>
@@ -51,24 +51,31 @@
     computed: {
       getCartAmount() {
         return this.$store.state.cartAmount;
-      },
-      favorited() {
-        let uid = this.$store.getters.getUserInfo.userId;
-        let ids = this.good.collected || [];
-        for (let i = 0; i < ids.length; i++) {
-          if (uid === ids[i]) {
-            this.marked = true;
-            return 'icon-favorite';
-          }
-        }
-        this.marked = false;
-        return 'icon-heart';
       }
+    },
+    watch: {
+      'good'() {
+        this._initMarkState();
+      }
+    },
+    activated() {
+      this._initMarkState();
     },
     deactivated() {
       this.marked = false;
     },
     methods: {
+      _initMarkState() {
+        let uid = this.$store.getters.getUserInfo.userId;
+        let ids = this.good && this.good.collected || [];
+        let flag = false;
+        for (let i = 0; i < ids.length; i++) {
+          if (uid === ids[i]) {
+            flag = true;
+          }
+        }
+        this.marked = flag;
+      },
       addGood() {
         this.$emit('add', event.target);
       },
@@ -130,6 +137,7 @@
             } else {
               this.good.collected = [uid];
             }
+            this.marked = true;
           }
         });
       },

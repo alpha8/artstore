@@ -476,7 +476,7 @@
         });
         let shareData = {
           title: this.good.name,
-          desc: '秒杀价：¥' + this.good.killPrice + '。「一虎一席商城」正品保证，微信专享。',
+          desc: '秒杀价：¥' + this.good.killPrice + '。「一虎一席茶席艺术平台」精品。新关注用户送百元现金券。',
           link: location.href,
           imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
         };
@@ -700,18 +700,23 @@
           color: #fff
     .content
       position: relative
-      padding: 18px
+      padding: 16px 18px 15px 14px
       .title
-        line-height: 14px
-        margin-bottom: 8px
+        line-height: 15px
+        margin-bottom: 2px
         font-size: 14px
         font-weight: 700
         color: rgb(7, 17, 27)
+        overflow: hidden
+        text-overflow: ellipsis
+        display: -webkit-box
+        -webkit-line-clamp: 2
+        -webkit-box-orient: vertical
       .red-text
         color: #e4393c
         font-weight: 700
       .detail
-        margin-bottom: 18px
+        margin: 5px 0 0
         line-height: 10px
         height: 10px
         font-size: 0
@@ -723,7 +728,7 @@
       .price
         position: relative
         font-weight: 700
-        line-height: 24px
+        line-height: 18px
         .now
           margin-right: 8px
           font-size: 14px
@@ -786,30 +791,28 @@
           vertical-align: bottom
     .info
       position: relative
-      margin-bottom: 18px
+      margin-bottom: 10px
       .title
-        padding: 10px 18px
+        padding: 10px 18px 10px 14px
         line-height: 14px
         font-size: 14px
         color: rgb(7, 17, 27)
       .text
-        padding: 15px 0
         font-size: 12px
         color: rgb(77, 85, 93)
         line-height: 1.3
         box-sizing: border-box
         overflow-x: hidden
     .rating
-      padding-top: 18px
+      position: relative
       .title
-        margin-left: 18px
         line-height: 14px
-        margin-bottom: 6px
+        padding: 10px 14px
         font-size: 14px
         color: rgb(7, 17, 27)
       .rating-wrapper
         position: relative
-        padding: 0 10px
+        padding: 0 14px
         .rating-item
           position: relative
           padding: 16px 0
@@ -867,7 +870,7 @@
               &.p30
                 width: 30%
         .no-rating
-          padding: 16px 0
+          padding-bottom: 10px
           font-size: 12px
           color: rgb(147, 153, 159)
         .more-rating
@@ -911,7 +914,6 @@
         .button-lg
           display: block
           line-height: 50px
-          font-family: "黑体"
           font-size: 14px
           i
             font-size: 22px

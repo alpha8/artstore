@@ -17,7 +17,6 @@
           </div>
         </div>
       </div>
-      <split></split>
       <div class="order-wrapper">
         <div class="title border-1px">
           <router-link to="/order">
@@ -140,6 +139,9 @@
     activated() {
       this.refreshData();
     },
+    mounted() {
+      this._initScroll();
+    },
     computed: {
       getVipTitle() {
         // let userLevel = {'lv0': '初级用户', 'lv1': 'VIP一钻', 'lv2': 'VIP二钻', 'lv3': 'VIP三钻', 'lv4': 'VIP四钻', 'lv5': 'VIP五钻'};
@@ -178,8 +180,8 @@
             }
             this.userExt = response.user || {};
             this.profile = response;
-            this._initScroll();
           }
+          this._initScroll();
         }).catch(response => {
           this._initScroll();
         });
@@ -281,10 +283,9 @@
             margin-top: 10px
             .vip
               position: relative
-              padding: 0 6px 0 10px
+              padding: 0 6px 0 15px
               height: 16px
               line-height: 16px
-              margin: 0 3px 0 8px
               font-size: 10px
               color: #fff
               background: #9f3838
@@ -292,24 +293,27 @@
               &:before
                 content: ""
                 display: block
-                width: 20px
-                height: 20px
+                width: 14px
+                height: 14px
                 position: absolute
-                left: -10px
+                left: 0
                 top: 50%
-                margin-top: -10px
-                background: url(../../common/images/icon_vip.png) no-repeat 0 0
-                background-size: 100px 20px
+                margin-top: -8px
+                background: url(../../common/images/icons.png) no-repeat 0 0
+              &.lv6:before
+                background-position: -25px -125px
               &.lv5:before
-                background-position: -80px 0
+                background-position: -25px -100px
               &.lv4:before
-                background-position: -60px 0
+                background-position: -25px -75px
               &.lv3:before
-                background-position: -40px 0
+                background-position: -25px -50px
               &.lv2:before
-                background-position: -20px 0
-              &.lv1:before, &.lv0:before
-                background-position: 0 0
+                background-position: -25px -25px
+              &.lv1:before
+                background-position: -25px 0
+              &.lv0:before
+                background-position: 0 -200px
         .setting
           margin-left: 10px
           color: rgba(76,0,0,.7)

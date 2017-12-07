@@ -65,6 +65,7 @@
         return;
       }
       this.user = this.$store.getters.getAddressList.find((addr) => addr.id === id);
+      this.city = this.user.city || '';
     },
     deactivated() {
       this.hide();
@@ -83,7 +84,7 @@
           return;
         }
         this.user.userId = this.$store.getters.getUserInfo.userId;
-        // this.user.city = this.city;
+        this.user.city = this.city;
         api.updateAddress(this.user).then(response => {
           if (response.result === RESPONSE_OK) {
             this.$store.dispatch('updateAddress', this.user);

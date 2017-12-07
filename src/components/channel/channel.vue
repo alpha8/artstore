@@ -8,7 +8,8 @@
         <div class="item-info">
           <h3>{{item.name}}</h3>
           <div class="price"><span class="num">{{item.price | currency}}</span><span class="salesCount">(已售:{{item.stock && item.stock.salesCount || 0}}件)</span></div>
-          <div class="icon" @click.stop.prevent="mark(item)"><i :class="favorited(item)"></i></div>
+          <div class="icon" @click.stop.prevent="mark(item)"><i :class="favorited(item)"></i>
+          </div>
         </div>
       </div>
     </div>
@@ -16,6 +17,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import Vue from 'vue';
   import api from '@/api/api';
   export default {
     props: {
@@ -53,14 +55,22 @@
       favorited(good) {
         let uid = this.$store.getters.getUserInfo.userId;
         let ids = good.collected || [];
+        let flag = false;
         for (let i = 0, len = ids.length; i < len; i++) {
           if (uid === ids[i]) {
-            good.marked = true;
-            return 'icon-favorite';
+            flag = true;
           }
         }
-        good.marked = false;
-        return 'icon-heart';
+        if (typeof good.marked === 'undefined') {
+          Vue.set(good, 'marked', false);
+        }
+        if (flag) {
+          good.marked = true;
+          return 'icon-heart';
+        } else {
+          good.marked = false;
+          return 'icon-favorite';
+        }
       },
       mark(good) {
         let uid = this.$store.getters.getUserInfo.userId;
@@ -85,9 +95,10 @@
           api.unmark(params).then(response => {
             if (response.result === 0) {
               good.collected = [];
+              good.marked = false;
+              this.favorited(good);
             }
           });
-          good.marked = false;
           return;
         }
         api.mark(params).then(response => {
@@ -98,9 +109,9 @@
               good.collected = [uid];
             }
             good.marked = true;
+            this.favorited(good);
           }
         });
-        this.favorited(good);
       }
     }
   };
@@ -166,7 +177,7 @@
             display: inline-block
             color: #999
             font-size: 11px
-            margin-left: 9px
+            margin-left: 7px
         .icon
           position: absolute
           top: 50%

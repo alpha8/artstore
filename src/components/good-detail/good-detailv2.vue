@@ -16,7 +16,7 @@
             <span class="tips">预计发货：{{good.deliveryDays}}天</span>
           </div>
           <div class="detail">
-            <span class="stock">商品库存: {{good.stock && good.stock.total || 0}}</span>
+            <span class="stock">商品库存：{{good.stock && good.stock.total || 0}}</span>
           </div>      
           <div class="cartcontrol-wrapper" v-if="good.count">
             <cartcontrol @add="addGood" :good="good"></cartcontrol>
@@ -34,6 +34,12 @@
           </div>
         </div> -->
         <split v-show="good.content"></split>
+        <div class="info" v-show="good.videoUrl">
+          <h1 class="title">商品视频</h1>
+          <div class="text">
+            <iframe class="video_iframe" width="100%" :height="getFrameHeight" frameborder="0" :src="getVideo" allowfullscreen="" scrolling="no"></iframe>
+          </div>
+        </div>
         <div class="info" v-show="good.content">
           <h1 class="title">商品介绍</h1>
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
@@ -91,7 +97,7 @@
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {mixUsername, formatDate} from '@/common/js/util';
+  import {mixUsername, formatDate, convertVideoUrl} from '@/common/js/util';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
   import modalTitle from '@/components/modal-title/modal-title';
@@ -159,6 +165,17 @@
       },
       getGoodPrice() {
         return this.good.price;
+      },
+      getFrameHeight() {
+        let width = document.documentElement.clientWidth || 375;
+        return width / 4 * 3;
+      },
+      getVideo() {
+        if (this.good.videoUrl) {
+          return `http://${convertVideoUrl(this.good.videoUrl)}`;
+        } else {
+          return 'about:blank';
+        }
       }
     },
     methods: {
@@ -393,7 +410,7 @@
         });
         let shareData = {
           title: this.good.name,
-          desc: '售价：¥' + this.good.price + '。「一虎一席商城」正品保证，微信专享。',
+          desc: '售价：¥' + this.good.price + '。「一虎一席茶席艺术平台」精品。新关注用户送百元现金券。',
           link: location.href,
           imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
         };
@@ -584,15 +601,20 @@
                 color: #ff463c
     .content
       position: relative
-      padding: 18px
+      padding: 16px 18px 15px 14px
       .title
-        line-height: 14px
-        margin-bottom: 8px
+        line-height: 15px
+        margin-bottom: 2px
         font-size: 14px
         font-weight: 700
         color: rgb(7, 17, 27)
+        overflow: hidden
+        text-overflow: ellipsis
+        display: -webkit-box
+        -webkit-line-clamp: 2
+        -webkit-box-orient: vertical
       .detail
-        margin: 10px 0 0
+        margin: 5px 0 0
         font-size: 0
         .stock, .rating, .follower
           font-size: 10px
@@ -602,7 +624,7 @@
           font-size: 12px
       .price
         font-weight: 700
-        line-height: 24px
+        line-height: 18px
         .now
           margin-right: 8px
           font-size: 14px
@@ -615,7 +637,7 @@
       .delivery-annouce
         font-size: 12px
         color: rgb(147, 153, 159)
-        margin: 10px 0 0
+        margin: 2px 0 0
       .cartcontrol-wrapper
         position: absolute
         right: 12px
@@ -660,30 +682,28 @@
           vertical-align: bottom
     .info
       position: relative
-      margin-bottom: 18px
+      margin-bottom: 10px
       .title
-        padding: 10px 18px
+        padding: 10px 18px 10px 14px
         line-height: 14px
         font-size: 14px
         color: rgb(7, 17, 27)
       .text
-        padding: 15px 0
         font-size: 12px
         color: rgb(77, 85, 93)
         line-height: 1.3
         box-sizing: border-box
         overflow-x: hidden
     .rating
-      padding-top: 18px
+      position: relative
       .title
-        margin-left: 18px
         line-height: 14px
-        margin-bottom: 6px
+        padding: 10px 14px
         font-size: 14px
         color: rgb(7, 17, 27)
       .rating-wrapper
         position: relative
-        padding: 0 10px
+        padding: 0 14px
         .rating-item
           position: relative
           padding: 16px 0
@@ -741,7 +761,7 @@
               &.p30
                 width: 30%
         .no-rating
-          padding: 16px 0
+          padding-bottom: 10px
           font-size: 12px
           color: rgb(147, 153, 159)
         .more-rating

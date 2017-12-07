@@ -7,7 +7,7 @@
           <li class="address-item border-1px" v-for="item in addressList">
             <span class="icon-check_circle" :class="{'on': item.default}" @click.stop.prevent="toggle(item)"></span>
             <div class="addr" @click.stop.prevent="toggle(item)">
-              <div class="addr-item">{{item.address}}</div>
+              <div class="addr-item">{{item.city ? item.city + item.address : item.address}}</div>
               <div class="addr-item">
                 <strong>{{item.name}}</strong>
                 <span class="mobile">{{item.mobile}}</span>
@@ -36,19 +36,12 @@
         showBack: true
       };
     },
-    mounted() {
-      this.getAddressList();
-      this._initScroll();
-    },
     activated() {
-      // this.getAddressList();
-      this._initScroll();
+      this.getAddressList();
       this.$store.commit('HIDE_FOOTER');
     },
     deactivated() {
       this.$store.commit('SHOW_FOOTER');
-    },
-    computed: {
     },
     methods: {
       _initScroll() {
@@ -63,13 +56,11 @@
         });
       },
       getAddressList() {
-        this.addressList = this.$store.getters.getAddressList;
-        if (this.addressList.length === 0 && this.$store.getters.checkLogined) {
-          api.getAddressList(this.$store.getters.getUserInfo.userId).then(response => {
-            this.addressList = response;
-            this.$store.dispatch('setDefaultAddress', this.addressList);
-          });
-        }
+        api.getAddressList(this.$store.getters.getUserInfo.userId || -1).then(response => {
+          this.addressList = response;
+          this.$store.dispatch('setDefaultAddress', this.addressList);
+          this._initScroll();
+        });
       },
       show() {
         this._initScroll();
@@ -92,7 +83,7 @@
         this.$router.push({name: 'address', params: {id: item.id}});
       },
       removeAddress(item) {
-        api.removeAddress(item.id).then(response => {
+        api.removeAddress({id: item.id}).then(response => {
           if (response.result === 0) {
             this.$store.dispatch('openToast', '收货地址删除成功！');
             let addressList = this.addressList;

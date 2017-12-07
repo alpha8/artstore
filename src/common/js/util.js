@@ -91,3 +91,36 @@ export const formatDate = (str) => {
       return parseInt(time / 31536000000) + '年前';
   }
 };
+
+export function fixFontSize() {
+  if (typeof WeixinJSBridge === 'undefined') {
+   if (document.addEventListener) {
+    document.addEventListener('WeixinJSBridgeReady', handleFontSize, false);
+   } else if (document.attachEvent) {
+    document.attachEvent('WeixinJSBridgeReady', handleFontSize);
+    document.attachEvent('onWeixinJSBridgeReady', handleFontSize);
+   }
+  } else {
+    handleFontSize();
+  }
+}
+
+function handleFontSize() {
+  // 设置网页字体为默认大小
+  WeixinJSBridge.invoke('setFontSizeCallback', {
+    'fontSize': 0
+  });
+  // 重写设置网页字体大小的事件
+  WeixinJSBridge.on('menu:setfont', function () {
+    WeixinJSBridge.invoke('setFontSizeCallback', {
+      'fontSize': 0
+    });
+  });
+}
+
+export function convertVideoUrl(url) {
+  return url.replace('https://', 'http://')
+    .replace('http://', '')
+    .replace(/v\.qq\.com\/x\/cover\/[\w]+\/([\w]+)\.html/i, 'v.qq.com/iframe/player.html?vid=$1&tiny=0&auto=0')
+    .replace(/v\.qq\.com\/x\/cover\/([\w]+)\.html/i, 'v.qq.com/iframe/player.html?vid=$1&tiny=0&auto=0');
+}

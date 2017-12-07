@@ -20,7 +20,7 @@
       }
     },
     mounted() {
-      // this._initScroll();  // top_item: width: 22.2vw, float: left
+      this._initScroll();  // top_item: width: 22.2vw, float: left
     },
     methods: {
       _initScroll() {
@@ -56,10 +56,10 @@
     .top_list
       position: relative
       height: 100%
-      display: flex
       .top_item
         display: inline-block
-        flex: 1
+        width: 21.2vw
+        float: left
         padding: 15px 0
         text-align: center
         box-sizing: border-box
@@ -74,8 +74,10 @@
             width: 40px
             height: 40px
             margin: 0 auto
-            font-size: 36px
+            font-size: 34px
             color: #00BB9C
+            &.big
+              font-size: 35px
           .top_name
             font-size: 12px
             color: #666

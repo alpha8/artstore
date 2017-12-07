@@ -3,7 +3,7 @@
     <div class="msgBox">
       <div class="msgBox-title">温馨提示<span class="closeIcon" @click.stop.prevent="closeLayer"><i class="icon-close2"></i></span></div>
       <div class="msgBox-content">
-        <p>公测版，仅供预览试用，欢迎您从【一虎一席茶席艺术平台】微信公众号的聊天窗口中反馈宝贵建议，建议一经采用将致谢您一份一虎一席精美礼品。</p>
+        <p>第二轮公测版，欢迎您从【一虎一席茶席艺术平台】微信公众号的聊天窗口中反馈宝贵建议，建议一经采用将致谢您一份一虎一席精美礼品。</p>
         <p><strong>正式版</strong>（界面外观美化、规模化商品库发布）将于 12月 10 号之前闪亮登场...</p>
       </div>
       <div class="msgBox-footer"><span class="btn" @click.stop.prevent="closeLayer">知道了!</span></div>
@@ -45,8 +45,8 @@
     top: 50%
     left: 50%
     width: 300px
-    height: 230px
-    margin-top: -115px
+    height: 217px
+    margin-top: -108.5px
     margin-left: -150px
     z-index: 100
     background-color: #fff
@@ -90,8 +90,8 @@
           font-size: 14px
     .msgBox-content
       line-height: 1.3
-      padding: 8px 10px 13px
-      height: 140px
+      padding: 8px 10px 7px 10px
+      height: 130px
       overflow: hidden
       box-sizing: border-box
       p

@@ -8,7 +8,7 @@
       <div class="address-default address-border" v-show="defaultAddress && defaultAddress.address" @click.stop.prevent="showAddressList">
         <h3>收货地址</h3>
         <ul>
-          <li>{{defaultAddress.address}}</li>
+          <li>{{(defaultAddress.city || '') + defaultAddress.address}}</li>
           <li><strong>{{defaultAddress.name}}</strong><span class="mobile">{{defaultAddress.mobile}}</span></li>
         </ul>
       </div>
@@ -268,7 +268,7 @@
           userId: userInfo.userId,
           totalPrice: this.totalFee,
           express: {
-            expressAddress: this.defaultAddress.address,
+            expressAddress: (this.defaultAddress.city || '') + this.defaultAddress.address,
             mobile: this.defaultAddress.mobile,
             receiver: this.defaultAddress.name
           },

@@ -123,21 +123,23 @@ html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6, a, span{
   color: #fff;
 }
 .btn-red {
-  background: #d05148;
+  background: #d05148;border-radius: 3px;
 }
 .btn-blue{
-  background: #3a77e7;
+  background: #3a77e7;border-radius: 3px;
 }
 .btn-lightblue{
   background: #bbebe9;
   color: #0f8783;
+  border-radius: 3px;
 }
 .btn-green{
-  background: #44b549;
+  background: #44b549;border-radius: 3px;
 }
 .btn-gray{
-  background: #ccc;
+  background: #ccc;border-radius: 3px;
 }
+.btn-orange { background: rgba(250,180,90,0.93); border-radius: 3px;}
 .btns span{flex: 1;}
 .text-blue{color: #3a77e7;}
 .text-red{color: #e4393c;}

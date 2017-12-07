@@ -5,7 +5,7 @@
         <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
       </div>
       <div class="title">奖金账户</div>
-      <!-- <div class="right" @click.stop.prevent="detail">奖金明细</div> -->
+      <div class="right"></div>
     </div>
     <div class="cashback" ref="cashback">
       <div class="cashback-wrapper">
@@ -14,10 +14,11 @@
           <p class="balance-num">{{balance | currency}}</p>
         </div>
         <div class="cashback-content">
-          <div class="btns"><span class="btn-green" @click.stop.prevent="detail">奖金明细</span></div>
+          <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">奖金明细</span></div>
           <p class="content-title">奖金余额是什么？</p>
           <p class="content-text">
-            &nbsp;&nbsp;&nbsp;&nbsp;好友通过您分享的商品链接，在平台上完成订单交易，系统将按照一定的额度返还给推荐人；<br/>&nbsp;&nbsp;&nbsp;&nbsp;您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 奖金余额」中查看账户余额和交易明细，账户余额可在「实物商品」下单结算时最大化使用。
+            <p>好友通过您分享的商品链接，在平台上完成订单交易，系统将按照一定的额度返还给推荐人；</p>
+            <p>您可前往「个人中心 — 奖金余额」中查看账户余额和交易明细，账户余额可在「实物商品」下单结算时最大化使用。</p>
           </p>
         </div>
       </div>
@@ -92,14 +93,14 @@
     overflow: hidden
     z-index: 20
     .left
-      flex: 30px 0 0
+      width: 30px
       i
         font-size: 18px
     .title
       flex: 1
       padding: 0 10px
     .right
-      flex: 0 0 80px
+      width: 30px
       font-size: 14px
       i
         font-size: 18px
@@ -142,6 +143,10 @@
         .content-text
           font-size: 12px
           line-height: 1.83em
+        p
+          font-size: 12px
+          line-height: 1.4
+          margin-bottom: 3px
         .btn-green
           letter-spacing: 3px
 </style>

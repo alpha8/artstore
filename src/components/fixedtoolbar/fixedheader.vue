@@ -4,6 +4,7 @@
       <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
     </div>
     <h2 class="title">{{title}}</h2>
+    <div class="right" v-show="!rightIcon"></div>
     <div class="right" v-show="rightIcon" @click.stop.prevent="toggle">
       <i :class="rightIcon" v-show="!toggleFlag"></i>
       <i class="icon-close" v-show="toggleFlag"></i>

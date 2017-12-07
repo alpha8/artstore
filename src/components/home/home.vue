@@ -42,6 +42,7 @@
   import search from '@/components/fixedtoolbar/search';
   import frame from '@/components/common/myiframe';
   import api from '@/api/api';
+  import wx from 'weixin-js-sdk';
 
   export default {
     data() {
@@ -54,22 +55,26 @@
         ya: [],
         channels: [{
           name: '茶席套装',
-          url: '/search?parentCat=teaart&key=茶席套装',
-          icon: 'icon-kettle'
+          url: '/search?parentCat=art&key=茶席套装',
+          icon: 'icon-teapot_kitchen'
+        }, {
+          name: '优质茶器',
+          url: '/search?parentCat=teaart&key=优质茶器',
+          icon: 'icon-kettle big'
         }, {
           name: '好茶',
           url: '/search?parentCat=welltea&key=好茶',
-          icon: 'icon-teapot_and_cup'
+          icon: 'icon-tea_drink big'
         }, {
-          name: '三折秒杀',
+          name: '四折秒杀',
           url: '/seckill',
           icon: 'icon-miaosha'
         }, {
-          name: '四折团购',
+          name: '五折团购',
           url: '/groupbuy',
           icon: 'icon-group_purchase'
         }, {
-          name: '四折抢拍',
+          name: '五折抢拍',
           url: '/auction',
           icon: 'icon-auction'
         }],
@@ -84,6 +89,7 @@
       };
     },
     created() {
+      this.wxReady();
       api.GetGoods({
         artworkTypeName: 'tea',
         categoryParentName: 'art',
@@ -174,6 +180,28 @@
       goTop() {
         let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
         this.scroll.scrollToElement(swipe, 300);
+      },
+      wxReady() {
+        api.wxsignature(encodeURIComponent(location.href.split('#')[0])).then(response => {
+          wx.config({
+            // debug: true, // 开启调试模式
+            appId: response.appId,      // 必填，公众号的唯一标识
+            timestamp: response.timestamp,  // 必填，生成签名的时间戳
+            nonceStr: response.nonceStr,   // 必填，生成签名的随机串
+            signature: response.signature,  // 必填，签名，见附录1
+            jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone']
+          });
+        });
+        let shareData = {
+          title: '一虎一席茶席艺术平台',
+          desc: '「一虎一席茶席艺术平台」精品。新关注用户送百元现金券。',
+          link: location.href,
+          imgUrl: 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
+        };
+        wx.ready(function() {
+          wx.onMenuShareTimeline(shareData);
+          wx.onMenuShareAppMessage(shareData);
+        });
       }
     },
     components: {

@@ -36,12 +36,12 @@
     position: relative
     display: flex
     width: 80%
-    margin: 22px auto 20px auto
+    margin: 14px auto 12px auto
     &:after
       position: absolute
       display: block
-      width: 10px
-      height: 10px
+      width: 8px
+      height: 8px
       content: ""
       border-top: 1px solid #666
       border-left: 1px solid #666

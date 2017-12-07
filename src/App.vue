@@ -17,6 +17,7 @@ import loading from '@/components/common/loading';
 import toast from '@/components/common/toast';
 import gohome from '@/components/fixedtoolbar/gohome';
 import messagebox from '@/components/common/messagebox';
+import {fixFontSize} from '@/common/js/util';
 
 export default {
   data () {
@@ -61,22 +62,7 @@ export default {
   created() {
     let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
     if (!ios) {
-      if (typeof (WeixinJSBridge) === 'undefined') {
-        if (document.addEventListener) {
-          document.addEventListener('WeixinJSBridgeReady', function (e) {
-            WeixinJSBridge.invoke('setFontSizeCallback', {'fontSize': 0});
-          });
-        } else if (document.attachEvent) {
-          document.attachEvent('WeixinJSBridgeReady', function (e) {
-            WeixinJSBridge.invoke('setFontSizeCallback', {'fontSize': 0});
-          });
-          document.attachEvent('onWeixinJSBridgeReady', function (e) {
-            WeixinJSBridge.invoke('setFontSizeCallback', {'fontSize': 0});
-          });
-        }
-      } else {
-        WeixinJSBridge.invoke('setFontSizeCallback', {'fontSize': 0});
-      }
+      fixFontSize();
     }
   },
   components: {

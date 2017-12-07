@@ -16,7 +16,7 @@
         <span v-show="showLogin"><a href="/wxservice/baseInfo">登录</a></span>
         <span v-show="showDiscard" @click.stop.prevent="hideDialog"><span class="button" :class="{'active': !showFixed}">取消</span></span>
         <span v-show="showSearchBtn"><span class="button" :class="{'active': !showFixed}" @click.stop.prevent="search">搜索</span></span>
-        <span v-show="hasLogin && !typing"><router-link to="/my"><i class="icon-user2"></i></router-link></span>
+        <span v-show="hasLogin && !typing"><router-link to="/my" class="userIcon"><i class="icon-user2"></i></router-link></span>
       </div>
     </div>
   </div>
@@ -137,12 +137,13 @@
           .icon-search
             position: relative
             display: inline-block
-            width: 12px
-            height: 12px
-            top: 6px
-            left: 6px
+            width: 10px
+            height: 10px
+            top: 9px
+            left: 12px
             float: left
             color: #d5d4d4
+            font-size: 13px
           .removeText
             position: absolute
             top: 50%
@@ -166,7 +167,7 @@
               width: 100%
               line-height: 16px
               height: 16px
-              margin-top: 6px
+              margin-top: 7px
               vertical-align: middle
               font-size: 12px
               color: #666
@@ -184,6 +185,10 @@
           width: 100%
           height: 33px
           line-height: 33px
+          .userIcon
+            text-align: left
+            text-indent: 10px
+            margin-top: 1px
           .button
             background: #442712
             color: #fff

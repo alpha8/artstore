@@ -1,6 +1,6 @@
 <template>
   <div>
-    <fixedheader title="专属优惠活动，推荐好友拿返现"></fixedheader>
+    <fixedheader title="专属优惠活动，推荐好友拿奖金"></fixedheader>
     <div class="myrecommend">
       <div class="myrecommend-wrap">
         <div class="myrecommend-container" ref="myrecommendlist" v-show="myrecommends.length">
@@ -233,11 +233,10 @@
                 -webkit-line-clamp: 1
                 -webkit-box-orient: vertical
                 font-weight: 700
-                height: 35px
-                line-height:35px
+                padding: 10px 0 8px
                 font-size: 14px
               .content
-                margin-top: 2px
+                font-size: 13px
       .no-myrecommend
         width: 100%
         padding: 40px 0

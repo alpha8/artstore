@@ -249,7 +249,8 @@
         &.twoline
           position: relative
           .text
-            height: 40px
+            max-height: 40px
+            min-height: 35px
           i
             height: 10px
             line-height: 10px
@@ -259,7 +260,6 @@
         .text
           display: block
           width: 100%
-          height: 100%
           vertical-align: middle
           font-size: 0
           box-sizing: border-box
@@ -277,7 +277,6 @@
           em
             font-size: 11px
             display: block
-            padding-top: 2px
     .goods-wrapper
       flex: 1
       .title

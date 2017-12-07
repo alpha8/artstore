@@ -78,7 +78,7 @@
           return;
         }
         this.user.userId = this.$store.getters.getUserInfo.userId;
-        // this.user.city = this.city;
+        this.user.city = this.city;
         api.addAddress(this.user).then(response => {
           if (response.result === RESPONSE_OK) {
             this.$store.dispatch('addAddress', this.user);

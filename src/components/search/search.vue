@@ -32,7 +32,7 @@
             </div>
             <div class="product-info">
               <div class="product-title"><router-link :to="{name: 'good', params: {id: product.id}}">{{product.name}}</router-link></div>
-              <div class="product-price">¥<span class="num">{{product.price}}</span></div>
+              <div class="product-price">¥<span class="num">{{product.price}}</span><span class="salesCount">(已售:{{product.stock && product.stock.salesCount || 0}}件)</span></div>
             </div>
           </mu-flexbox-item>
         </mu-flexbox>
@@ -430,10 +430,22 @@
           -webkit-line-clamp: 1
           -webkit-box-orient: vertical
         .product-price
+          position: relative
           margin-top: 2px
           font-size: 12px
           color: #e4393c
+          white-space: nowrap
+          overflow: hidden
+          text-overflow: ellipsis
+          vertical-align: bottom
+          .salesCount
+            display: inline-block
+            color: #999
+            font-size: 11px
+            margin-left: 7px
           .num
+            display: inline-block
             font-size: 14px
             font-weight: 400
+          
 </style>

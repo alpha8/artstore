@@ -47,7 +47,7 @@
           color: #00bb9c
         .icon
           display: block
-          padding-top: 3px
+          padding-top: 5px
           line-height: 1
           i
             display: inline-block

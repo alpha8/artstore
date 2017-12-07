@@ -44,9 +44,6 @@
         }
       }, 1000);
     }, */
-    deactivated() {
-      this.redirectUrl = '';
-    },
     computed: {
       getUrl() {
         if (this.redirectUrl) {

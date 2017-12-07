@@ -5,7 +5,7 @@
         <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
       </div>
       <div class="title">账户余额</div>
-      <div class="right" @click.stop.prevent="detail">交易明细</div>
+      <div class="right"></div>
     </div>
     <div class="wallet" ref="wallet">
       <div class="wallet-wrapper">
@@ -13,10 +13,11 @@
           <p class="balance-name">账户余额（元）</p>
           <p class="balance-num">{{0 | currency}}</p>
         </div>
+        <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">交易明细</span></div>
         <div class="wallet-content">
           <p class="content-title">账户余额是什么？</p>
           <p class="content-text">
-            &nbsp;&nbsp;&nbsp;&nbsp;当您出现退款失败等情况时会有账户余额，您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 账户余额」中查看账户余额交易明细，账户余额可在 「实物商品」下单结算时最大化使用。
+            当您出现退款失败等情况时会有账户余额，您可前往「个人中心 — 账户余额」中查看账户余额交易明细，账户余额可在 「实物商品」下单结算时最大化使用。
           </p>
         </div>
       </div>
@@ -85,14 +86,14 @@
     overflow: hidden
     z-index: 20
     .left
-      flex: 30px 0 0
+      width: 30px
       i
         font-size: 18px
     .title
       flex: 1
       padding: 0 10px
     .right
-      flex: 0 0 80px
+      width: 30px
       font-size: 14px
       i
         font-size: 18px
@@ -135,5 +136,8 @@
         .content-text
           font-size: 12px
           line-height: 1.83em
+    .btns
+      padding: 0 10px
+      box-sizing: border-box
 </style>
 

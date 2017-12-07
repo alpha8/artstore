@@ -11,7 +11,6 @@
           <div class="rule-title">————  活动规则 ———— </div>
           <div class="rule-content">
             <ol v-if="!qrcode.content">
-              <li>领取的优惠券将与填写的手机号码进行绑定</li>
               <li>优惠券可叠加使用，订单支付时系统将自动抵扣</li>
               <li>如有其它疑问，请咨询一虎一席艺术平台客服</li>
             </ol>
@@ -64,7 +63,7 @@
         }
       },
       getCouponTitle() {
-        return this.qrcode.provideTitle || '优惠券领取';
+        return '🌈' + (this.qrcode.provideTitle || '优惠券领取');
       }
     },
     activated() {
@@ -145,8 +144,8 @@
           openid: this.openid,
           provideId: publishid
         }).then(response => {
-          if (response.result === 0) {
-            this.layer.text = '领取成功，您可前往「一虎一席茶席艺术平台公众号 — 个人中心 — 优惠券余额」中查看明细!';
+          if (response.result !== 0) {
+            this.layer.text = '优惠券领取成功，您可前往一虎一席商城「个人中心 — 优惠券余额」中查看明细';
             this.$refs.layerWin.show();
           } else if (response.code === 1001) {
             this.layer.text = '您已领取过此优惠券';
