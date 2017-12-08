@@ -142,11 +142,23 @@
       this.stopTimer();
       this.hide();
       this.marked = false;
+      this.processing = false;
+    },
+    updated() {
+      if (this.good.content && !this.processing) {
+        this.processing = true;
+        this.lazyload();
+        this.bindPictureEvent();
+      }
+      this._initScroll();
     },
     data() {
       return {
         good: {},
         seckill: {},
+        lazyloaded: false,
+        processing: false,
+        previewImgList: [],
         selectType: ALL,
         guessGoods: [],
         onlyContent: true,
@@ -210,7 +222,7 @@
             Object.assign(this.good, this.seckill);
             this.wxReady();
             this.show();
-            this.lazyload();
+            this.processing = false;
             this.$store.dispatch('closeLoading');
             this.fetchComments();
             this.getLikeGoods();
@@ -231,6 +243,24 @@
             this.good.ratings = response.comments;
           }
         });
+      },
+      bindPictureEvent() {
+        if (this.lazyloaded) {
+          let imgs = this.$refs.goodContent.getElementsByTagName('img');
+          for (let j = 0; j < imgs.length; j++) {
+            imgs[j].addEventListener('click',
+              (e) => {
+                let pic = (e.target || e.srcElement).src;
+                if (pic) {
+                  pic = pic.substring(0, pic.lastIndexOf('?'));
+                  wx.previewImage({
+                    current: pic,
+                    urls: this.previewImgList
+                  });
+                }
+            }, false);
+          }
+        }
       },
       getLikeGoods() {
         let kw = '';
@@ -474,10 +504,15 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
           });
         });
+        let redirect = location.href.replace('?from=singlemessage&isappinstalled=0', '');
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (uid) {
+          redirect += '?userId=' + uid;
+        }
         let shareData = {
           title: this.good.name,
           desc: '秒杀价：¥' + this.good.killPrice + '。「一虎一席茶席艺术平台」精品。新关注用户送百元现金券。',
-          link: location.href,
+          link: redirect,
           imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
         };
         wx.ready(function() {
@@ -487,14 +522,14 @@
       },
       lazyload() {
         let w = window.innerWidth;
-        let timer = setTimeout(() => {
-          clearTimeout(timer);
-          let previewImgList = [];
-          let imgs = this.$refs.goodContent.getElementsByTagName('img');
-          let html = this.good.content;
-          for (let i = 0; i < imgs.length; i++) {
-            let img = imgs[i];
-            let src = img.getAttribute('data-original');
+        let picImgList = [];
+        let imgs = this.$refs.goodContent.getElementsByTagName('img');
+        let prefix = 'http://www.yihuyixi.com';
+        let html = this.good.content;
+        for (let i = 0; i < imgs.length; i++) {
+          let img = imgs[i];
+          let src = img.getAttribute('data-original');
+          if (src) {
             let width = img.getAttribute('width');
             let height = img.getAttribute('height');
             let key = '<img class="lazy" data-original="' + src + '" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"';
@@ -514,28 +549,20 @@
               src += '?1';
             }
             src = src + '&w=750';
-            html = html.replace(key, '<img src="' + src + '" width="' + w + '"').replace(key2, '<img src="' + src + '" width="' + w + '"');
+            html = html.replace(key, '<img src="' + src + '" width="' + w + '" style="margin-left: -14px"').replace(key2, '<img src="' + src + '" width="' + w + '" style="margin-left: -14px"');
             if (width && width > 100) {
-              previewImgList.push(src.substring(0, src.lastIndexOf('?')));
+              picImgList.push(src.substring(0, src.lastIndexOf('?')));
+            } else if (width === null) {
+              picImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
           }
-          this.good.content = html;
-          setTimeout(() => {
-            this._initScroll();
-            let newImgs = this.$refs.goodContent.getElementsByTagName('img');
-            for (let j = 0; j < newImgs.length; j++) {
-              newImgs[j].addEventListener('click',
-                (e) => {
-                  let pic = (e.target || e.srcElement).src;
-                  pic = pic.substring(0, pic.lastIndexOf('?'));
-                  wx.previewImage({
-                    current: pic,
-                    urls: previewImgList
-                  });
-              }, false);
-            }
-          }, 500);
-        }, 1000);
+        }
+        if (picImgList.length) {
+          this.previewImgList = picImgList;
+          this.lazyloaded = true;
+          this.processing = false;
+        }
+        this.good.content = html;
       }
     },
     filters: {
@@ -801,6 +828,8 @@
         font-size: 12px
         color: rgb(77, 85, 93)
         line-height: 1.3
+        padding-left: 14px
+        padding-right: 10px
         box-sizing: border-box
         overflow-x: hidden
     .rating

@@ -143,7 +143,16 @@
     },
     deactivated() {
       this.hide();
+      this.processing = false;
       this.disconnect();
+    },
+    updated() {
+      if (this.auction.content && !this.processing) {
+        this.processing = true;
+        this.lazyload();
+        this.bindPictureEvent();
+      }
+      this._initScroll();
     },
     data() {
       return {
@@ -152,6 +161,9 @@
         bidsTotal: 0,
         highPrice: 0,
         dealPrice: 0,
+        lazyloaded: false,
+        processing: false,
+        previewImgList: [],
         higher: false,
         selectType: ALL,
         onlyContent: true,
@@ -191,7 +203,7 @@
           this.auction = response;
           this.wxReady();
           this.show();
-          this.lazyload();
+          this.processing = false;
           this.$store.dispatch('closeLoading');
           this.connectSocket();
           // this.fetchBids();
@@ -212,6 +224,24 @@
             this.auction.ratings = response.comments;
           }
         });
+      },
+      bindPictureEvent() {
+        if (this.lazyloaded) {
+          let imgs = this.$refs.goodContent.getElementsByTagName('img');
+          for (let j = 0; j < imgs.length; j++) {
+            imgs[j].addEventListener('click',
+              (e) => {
+                let pic = (e.target || e.srcElement).src;
+                if (pic) {
+                  pic = pic.substring(0, pic.lastIndexOf('?'));
+                  wx.previewImage({
+                    current: pic,
+                    urls: this.previewImgList
+                  });
+                }
+            }, false);
+          }
+        }
       },
       fetchBids() {
         api.getBidPrices({
@@ -422,10 +452,15 @@
         if (this.auction.icon) {
           icon = api.CONFIG.psCtx + this.auction.icon + '?w=423&h=423';
         }
+        let redirect = location.href.replace('?from=singlemessage&isappinstalled=0', '');
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (uid) {
+          redirect += '?userId=' + uid;
+        }
         let shareData = {
           title: this.auction.name,
           desc: '起拍价：¥' + this.auction.startPrice + '。「一虎一席商城」正品保证，微信专享。',
-          link: location.href,
+          link: redirect,
           imgUrl: icon
         };
         wx.ready(function() {
@@ -435,14 +470,14 @@
       },
       lazyload() {
         let w = window.innerWidth;
-        let timer = setTimeout(() => {
-          clearTimeout(timer);
-          let previewImgList = [];
-          let imgs = this.$refs.goodContent.getElementsByTagName('img');
-          let html = this.auction.content;
-          for (let i = 0; i < imgs.length; i++) {
-            let img = imgs[i];
-            let src = img.getAttribute('data-original');
+        let picImgList = [];
+        let imgs = this.$refs.goodContent.getElementsByTagName('img');
+        let prefix = 'http://www.yihuyixi.com';
+        let html = this.auction.content;
+        for (let i = 0; i < imgs.length; i++) {
+          let img = imgs[i];
+          let src = img.getAttribute('data-original');
+          if (src) {
             let width = img.getAttribute('width');
             let height = img.getAttribute('height');
             let key = '<img class="lazy" data-original="' + src + '" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"';
@@ -462,28 +497,20 @@
               src += '?1';
             }
             src = src + '&w=750';
-            html = html.replace(key, '<img src="' + src + '" width="' + w + '"').replace(key2, '<img src="' + src + '" width="' + w + '"');
+            html = html.replace(key, '<img src="' + src + '" width="' + w + '" style="margin-left: -14px"').replace(key2, '<img src="' + src + '" width="' + w + '" style="margin-left: -14px"');
             if (width && width > 100) {
-              previewImgList.push(src.substring(0, src.lastIndexOf('?')));
+              picImgList.push(src.substring(0, src.lastIndexOf('?')));
+            } else if (width === null) {
+              picImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
           }
-          this.auction.content = html;
-          setTimeout(() => {
-            this._initScroll();
-            let newImgs = this.$refs.goodContent.getElementsByTagName('img');
-            for (let j = 0; j < newImgs.length; j++) {
-              newImgs[j].addEventListener('click',
-                (e) => {
-                  let pic = (e.target || e.srcElement).src;
-                  pic = pic.substring(0, pic.lastIndexOf('?'));
-                  wx.previewImage({
-                    current: pic,
-                    urls: previewImgList
-                  });
-              }, false);
-            }
-          }, 500);
-        }, 1000);
+        }
+        if (picImgList.length) {
+          this.previewImgList = picImgList;
+          this.lazyloaded = true;
+          this.processing = false;
+        }
+        this.auction.content = html;
       }
     },
     filters: {

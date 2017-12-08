@@ -144,7 +144,7 @@
           openid: this.openid,
           provideId: publishid
         }).then(response => {
-          if (response.result !== 0) {
+          if (response.result === 0) {
             this.layer.text = '优惠券领取成功，您可前往一虎一席商城「个人中心 — 优惠券余额」中查看明细';
             this.$refs.layerWin.show();
           } else if (response.code === 1001) {

@@ -9,30 +9,26 @@
   export default {
     data() {
       return {
-        redirectUrl: ''
+        redirectUrl: '',
+        isAutoLogin: window.sessionStorage.getItem('autologin') || false
       };
     },
     created() {
       if (!this.$store.getters.checkLogined) {
-        let timer = setInterval(() => {
-          if (this.$store.getters.checkLogined) {
-            clearInterval(timer);
-          }
-        }, 500);
-        /* let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
-        if (!ios && this.retryTimes > 0) {
+        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
+        if (!ios && !this.isAutoLogin) {
           let redirect = location.href;
-          // fixed wexin sharing url
           if (redirect) {
             redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
           }
-          this.retryTimes--;
+          this.isAutoLogin = true;
+          window.sessionStorage.setItem('autologin', true);
           this.$store.dispatch('openToast', '正在登录中...');
-          window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
-        } */
+          window.location.href = `${api.CONFIG.wxCtx}/wx/base?url=` + escape(redirect);
+        }
       }
     },
-    /* mounted() {
+    mounted() {
       setTimeout(() => {
         try {
           let ad = document.getElementById('_embed_v3_dc');
@@ -43,22 +39,27 @@
           console.log(e);
         }
       }, 1000);
-    }, */
+    },
     computed: {
       getUrl() {
         if (this.redirectUrl) {
           return 'about:blank';
         }
+        if (this.isAutoLogin) {
+          return 'about:blank';
+        }
         if (this.$store.getters.checkLogined) {
           return 'about:blank';
         }
+        this.isAutoLogin = true;
+        window.sessionStorage.setItem('autologin', true);
         let redirect = location.href;
         // fixed wexin sharing url
         if (redirect) {
           redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
         }
         this.redirectUrl = redirect;
-        return `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+        return `${api.CONFIG.wxCtx}/wx/base?url=` + escape(redirect);
       }
     }
   };

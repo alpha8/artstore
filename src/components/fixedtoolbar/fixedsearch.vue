@@ -3,7 +3,7 @@
     <div class="toolbar-wrapper">
       <div class="search-form">
         <div class="search-form-box">
-          <i class="icon-search"></i>
+          <i class="icon-search2"></i>
           <div class="search-form-input">
             <form action="" v-on:submit.stop.prevent="search">
               <input type="search" name="txtSearch" class="txtSearch" placeholder="优质茶生活、茶文化高端礼品" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" v-on:input="changeText">
@@ -134,12 +134,12 @@
           -webkit-border-radius: 15px
           border-radius: 15px
           margin-top: 5px
-          .icon-search
+          .icon-search2
             position: relative
             display: inline-block
             width: 10px
             height: 10px
-            top: 9px
+            top: 8px
             left: 12px
             float: left
             color: #d5d4d4

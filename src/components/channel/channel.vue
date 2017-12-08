@@ -7,6 +7,7 @@
         </div>
         <div class="item-info">
           <h3>{{item.name}}</h3>
+          <div class="sellpoint" v-if="item.sellPoint">{{item.sellPoint}}</div>
           <div class="price"><span class="num">{{item.price | currency}}</span><span class="salesCount">(已售:{{item.stock && item.stock.salesCount || 0}}件)</span></div>
           <div class="icon" @click.stop.prevent="mark(item)"><i :class="favorited(item)"></i>
           </div>
@@ -66,10 +67,10 @@
         }
         if (flag) {
           good.marked = true;
-          return 'icon-heart';
+          return 'icon-favorite';
         } else {
           good.marked = false;
-          return 'icon-favorite';
+          return 'icon-heart';
         }
       },
       mark(good) {
@@ -151,6 +152,7 @@
         position: relative
         width: 100%
         padding-right: 40px
+        padding-left: 2px
         box-sizing: border-box
         h3
           line-height: 1.5
@@ -161,9 +163,16 @@
           display: -webkit-box
           -webkit-line-clamp: 1
           -webkit-box-orient: vertical
+        .sellpoint
+          display: block
+          font-size: 12px
+          color: #7f7f7f
+          line-height: 18px
+          white-space: nowrap
+          text-overflow: ellipsis
+          overflow: hidden
         .price
           position: relative
-          margin-top: 2px
           color: #ff463c
           font-size: 14px
           font-weight: 700

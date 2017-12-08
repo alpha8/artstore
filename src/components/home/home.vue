@@ -192,10 +192,15 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone']
           });
         });
+        let redirect = location.href.replace('?from=singlemessage&isappinstalled=0', '');
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (uid) {
+          redirect += '?userId=' + uid;
+        }
         let shareData = {
           title: '一虎一席茶席艺术平台',
           desc: '「一虎一席茶席艺术平台」精品。新关注用户送百元现金券。',
-          link: location.href,
+          link: redirect,
           imgUrl: 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
         };
         wx.ready(function() {

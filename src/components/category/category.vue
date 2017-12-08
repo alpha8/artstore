@@ -26,7 +26,7 @@
               </li>
             </ul>
             <div v-if="innergood && innergood.childrens.length" v-for="innergood in good.childrens">
-              <h1 class="title border-1px">{{innergood.value}}：</h1>
+              <h1 class="title border-1px">{{innergood.value}}</h1>
               <ul class="itemList">
                 <li v-for="good in innergood.childrens" :class="typeStatus(good.status)" v-if="!good.hide">
                   <router-link :to="{path: '/search', query: {ck: innergood.propertyName, cv: good.propertyName, key: (good.value === 'thumbnail' ? '' : good.value)}}" class="good-item" :class="{'thumbnail': good.value === 'thumbnail'}">

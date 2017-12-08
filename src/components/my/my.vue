@@ -161,6 +161,9 @@
         return this.userExt.level || 'lv0';
       }
     },
+    updated() {
+      this._initScroll();
+    },
     methods: {
       ...mapGetters({
         hasLogin: 'checkLogined',
@@ -183,7 +186,7 @@
           }
           this._initScroll();
         }).catch(response => {
-          this._initScroll();
+          console.error(response);
         });
       },
       _initScroll() {
@@ -283,7 +286,7 @@
             margin-top: 10px
             .vip
               position: relative
-              padding: 0 6px 0 15px
+              padding: 2px 8px 2px 15px
               height: 16px
               line-height: 16px
               font-size: 10px
@@ -386,7 +389,7 @@
     .otherList, .item-list
       position: relative
       width: 100%
-      padding-bottom: 30px
+      padding-bottom: 10px
       .item
         display: block
         font-size: 14px
@@ -409,6 +412,6 @@
     .item-list
       padding-bottom: 2px
     .otherList
-      padding-bottom: 30px
+      padding-bottom: 20px
 </style>
 
