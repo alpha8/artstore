@@ -675,17 +675,16 @@
           color: #fff
     .content
       position: relative
-      padding: 18px
+      padding: 16px 18px 2px 14px
       .title
-        line-height: 14px
-        margin-bottom: 8px
+        line-height: 17px
         font-size: 14px
         font-weight: 700
         color: rgb(7, 17, 27)
         text-overflow: ellipsis
         word-wrap: break-word
         display: -webkit-box
-        -webkit-line-clamp: 1
+        -webkit-line-clamp: 2
         -webkit-box-orient: vertical
         overflow: hidden
       .red-text
@@ -707,7 +706,7 @@
         color: #999
         font-size: 14px
         .now
-          font-size: 20px
+          font-size: 18px
           color: rgb(240, 20, 20)
         .old
           text-decoration: line-through
@@ -766,9 +765,9 @@
           vertical-align: bottom
     .info
       position: relative
-      margin-bottom: 18px
+      margin-bottom: 10px
       .title
-        padding-left: 18px
+        padding-left: 14px
         height: 40px
         line-height: 40px
         font-size: 14px
@@ -796,12 +795,15 @@
             -webkit-transform: rotate(-45deg)
             transform: rotate(-45deg)
       .text
-        padding: 15px 0
         font-size: 12px
         color: rgb(77, 85, 93)
         line-height: 1.3
         box-sizing: border-box
         overflow-x: hidden
+        padding-left: 14px
+        padding-right: 10px
+      .zoompic
+        margin-left: -14px
       .auction-pricelist
         position: relative
         width: 100%
@@ -864,7 +866,7 @@
         display: flex
         flex-wrap: wrap
         line-height: 20px
-        padding: 0 18px
+        padding: 0 14px
         box-sizing: border-box
         li
           float: left
@@ -880,7 +882,7 @@
             width: 65px
     .auction-flow
       position: relative
-      padding: 18px
+      padding: 10px 14px
       .title
         font-size: 14px
         line-height: 14px
@@ -891,17 +893,17 @@
         vertical-align: bottom
         -ms-interpolation-mode: bicubic
         max-width: 100%
+        overflow: hidden
     .rating
-      padding-top: 18px
+      position: relative
       .title
-        margin-left: 18px
+        padding: 10px 14px
         line-height: 14px
-        margin-bottom: 6px
         font-size: 14px
         color: rgb(7, 17, 27)
       .rating-wrapper
         position: relative
-        padding: 0 10px
+        padding: 0 14px
         .rating-item
           position: relative
           padding: 16px 0
@@ -959,7 +961,7 @@
               &.p30
                 width: 30%
         .no-rating
-          padding: 16px 0
+          padding-bottom: 10px
           font-size: 12px
           color: rgb(147, 153, 159)
         .more-rating

@@ -17,7 +17,8 @@
               <div class="circle-tag circle-left"></div>
               <div class="circle-tag circle-right"></div>
               <div class="content">
-                <p class="line text">{{coupon.payValue}}元{{getCouponType(coupon.type)}}<span class="fastDeposit" v-if="coupon.status === 0" @click.stop.prevent="deposit(coupon)">快速充值</span></p>
+                <p class="line text" v-if="coupon.title">{{coupon.title}}</p>
+                <p class="line text" v-else>{{coupon.payValue}}元{{getCouponType(coupon.type)}}<!-- <span class="fastDeposit" v-if="coupon.status === 0" @click.stop.prevent="deposit(coupon)">快速充值</span> --></p>
                 <p class="line">优惠券码：<strong>{{coupon.cNo}}</strong></p>
                 <p class="line">使用期限：{{getCouponExpire(coupon.createAt)}} ~ {{getCouponExpire(coupon.termOfValidity)}}</p>
               </div>
@@ -329,7 +330,6 @@
                 strong
                   font-weight: 700
                 &.text
-                  padding-right: 80px
                   padding-bottom: 10px
                   color: #666
                   -webkit-box-orient: vertical

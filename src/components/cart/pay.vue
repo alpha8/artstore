@@ -52,15 +52,15 @@
         <div class="payArea">
           <p class="price">
             <span class="label">商品总额：</span>
-            <span class="totalPrice">{{totalPrice | currency}}</span>
+            <span class="totalPrice">{{totalFee | currency}}</span>
           </p>
           <p class="price">
             <span class="label">优惠券可抵扣：</span>
-            <span class="totalPrice">{{computeCouponValue | currency}}</span>
+            <span class="totalPrice">{{couponValue | currency}}</span>
           </p>
           <p class="price">
             <span class="label">应付金额：</span>
-            <span class="totalPrice"><strong>{{totalPrice - computeCouponValue | currency}}</strong></span>
+            <span class="totalPrice"><strong>{{totalFee - couponValue | currency}}</strong></span>
           </p>
           <div class="payBtnList">
             <div class="btns btn-green" @click.stop.prevent="weixinPay"><span>微信支付</span></div>
@@ -112,30 +112,9 @@
       defaultAddress() {
         return this.$store.getters.getDefaultAddress;
       },
-      totalPrice() {
-        let total = 0;
-        this.products.forEach((item) => {
-          total += item.count * item.price;
-        });
-        this.totalFee = total;
-        return total;
-      },
       payRemarks() {
         this.remarks = this.$store.getters.getPayRemark;
         return this.remarks;
-      },
-      computeCouponValue() {
-        let type = this.$route.query.orderType || 0;
-        if (type >= 3) {
-          return 0;
-        }
-        if (this.couponValue && this.couponValue <= this.totalFee / 2) {
-          return this.couponValue;
-        } else if (this.couponValue > this.totalFee / 2) {
-          return this.totalFee / 2;
-        } else {
-          return 0;
-        }
       }
     },
     activated() {
@@ -143,14 +122,16 @@
         this.$router.replace('/cart');
         return;
       }
-      this.loadCouponData();
       this.show();
+      this._totalPrice();
+      this.computeCouponValue();
       this._initScroll();
       this.countdown();
     },
     deactivated() {
       this.hide();
       this.paying = false;
+      this.couponValue = 0;
       this.seckill = {};
       if (this.timer) {
         clearInterval(this.timer);
@@ -178,6 +159,35 @@
           } else {
             this.scroll.refresh();
           }
+        });
+      },
+      _totalPrice() {
+        let total = 0;
+        this.products.forEach((item) => {
+          total += item.count * item.price;
+        });
+        this.totalFee = total;
+      },
+      computeCouponValue() {
+        let type = this.$route.query.orderType || 0;
+        if (type >= 3) {
+          return;
+        }
+        let user = this.$store.getters.getUserInfo;
+        let items = [];
+        this.products.forEach(product => {
+          items.push({'id': product.id, 'count': product.count});
+        });
+        api.getAvailCouponAmount({
+          userId: user.userId || 0,
+          products: items
+        }).then(response => {
+          this.couponValue = response.couponFee || 0;
+          if (response.oldTotalFee) {
+            this.totalFee = response.oldTotalFee;
+          }
+        }).catch(response => {
+          console.log(response);
         });
       },
       openRemarkBox() {

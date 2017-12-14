@@ -586,7 +586,7 @@
       position: relative
       padding: 16px 18px 15px 14px
       .title
-        line-height: 15px
+        line-height: 17px
         margin-bottom: 2px
         font-size: 14px
         font-weight: 700
@@ -630,7 +630,7 @@
           color: #666
       .duration
         display: block
-        padding: 5px 0
+        margin-top: 5px
         font-size: 12px
         color: #666
       .cartcontrol-wrapper

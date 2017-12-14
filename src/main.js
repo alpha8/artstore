@@ -14,6 +14,7 @@ Vue.use(VueLazyload);
 // Vue.use(AlloyFingerVue, {AlloyFinger});
 
 import App from './App';
+// import App from '@/components/xmas/App';
 import router from './router';
 import store from './store';
 import { currency } from '@/common/js/util';

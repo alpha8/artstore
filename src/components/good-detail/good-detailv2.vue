@@ -9,15 +9,29 @@
         </div>
         <div class="content">
           <h1 class="title">{{good.name}}</h1>
+          <div class="sellpoint" v-if="false">{{good.sellPoint}}</div>
           <div class="price">
             <span class="now">¥{{getGoodPrice}}</span><span class="old" v-show="good.oldPrice">¥{{good.oldPrice}}</span>
           </div>
-          <div class="delivery-annouce" v-if="good.deliveryDays">
+          <!-- <div class="delivery-annouce" v-if="good.deliveryDays">
             <span class="tips">预计发货：{{good.deliveryDays}}天</span>
           </div>
           <div class="detail">
             <span class="stock">商品库存：{{good.stock && good.stock.total || 0}}</span>
-          </div>      
+          </div> -->
+          <div class="row" v-if="good.deliveryDays">
+            <div class="label">预计发货</div>
+            <div class="desc">{{good.deliveryDays}}天</div>
+          </div>
+          <div class="row">
+            <div class="label">商品库存</div>
+            <div class="desc">{{good.stock && good.stock.total || 0}}</div>
+          </div>
+          <div class="row">
+            <div class="label">促销活动</div>
+            <div class="desc" v-if="good.useCoupon">支持优惠券抵扣</div>
+            <div class="desc" v-else>不支持优惠券抵扣</div>
+          </div>
           <div class="cartcontrol-wrapper" v-if="good.count">
             <cartcontrol @add="addGood" :good="good"></cartcontrol>
           </div>
@@ -34,10 +48,10 @@
           </div>
         </div> -->
         <split v-show="good.content"></split>
-        <div class="info" v-show="good.videoUrl">
+        <div class="info" v-if="good.videoUrl">
           <h1 class="title">商品视频</h1>
           <div class="player">
-            <iframe class="video_iframe" width="100%" :height="getFrameHeight" frameborder="0" :src="getVideo" allowfullscreen="" scrolling="no" id="videoPlayer"></iframe>
+            <div id="tencent_video_player"></div>
           </div>
         </div>
         <div class="info" v-show="good.content">
@@ -182,11 +196,12 @@
         let width = document.documentElement.clientWidth || 375;
         return width / 4 * 3;
       },
-      getVideo() {
-        if (this.good.videoUrl) {
-          return `http://${convertVideoUrl(this.good.videoUrl)}`;
+      getVideoUrl() {
+        let url = this.good.videoUrl;
+        if (url) {
+          return convertVideoUrl(`http://${url}`);
         } else {
-          return 'about:blank';
+          return 'about: blank';
         }
       }
     },
@@ -206,12 +221,30 @@
           this.wxReady();
           this.show();
           this.processing = false;
+          this.loadTencentPlayer();
           this.$store.dispatch('closeLoading');
           this.fetchComments();
           this.getLikeGoods();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });
+      },
+      loadTencentPlayer() {
+        if (!this.good.videoUrl) {
+          return;
+        }
+        let option = {
+          'auto_play': '0',
+          'file_id': this.good.videoUrl,
+          'app_id': '1252423336',
+          'width': 640,
+          'height': 368,
+          'https': 1,
+          'hide_h5_setting': true
+        };
+        setTimeout(() => {
+          new qcVideo.Player('tencent_video_player', option);
+        }, 500);
       },
       fetchComments() {
         api.getProductComments({
@@ -626,7 +659,7 @@
       position: relative
       padding: 16px 18px 15px 14px
       .title
-        line-height: 15px
+        line-height: 17px
         margin-bottom: 2px
         font-size: 14px
         font-weight: 700
@@ -636,6 +669,14 @@
         display: -webkit-box
         -webkit-line-clamp: 2
         -webkit-box-orient: vertical
+      .sellpoint
+        display: block
+        font-size: 12px
+        color: #7f7f7f
+        line-height: 18px
+        white-space: nowrap
+        text-overflow: ellipsis
+        overflow: hidden
       .detail
         margin: 5px 0 0
         font-size: 0
@@ -717,11 +758,28 @@
         line-height: 1.3
         box-sizing: border-box
         overflow-x: hidden
+      #tencent_video_player
+        width: 100%
+        height: auto
+        overflow: hidden
       .text
         padding-left: 14px
         padding-right: 10px
       .zoompic
         margin-left: -14px
+    .row
+      position: relative
+      display: flex
+      margin-top: 5px
+      .label
+        min-width: 65px
+        font-size: 12px
+        color: #999
+      .desc
+        flex: 1
+        font-size: 12px
+        color: #333
+        oveflow: hidden
     .rating
       position: relative
       .title

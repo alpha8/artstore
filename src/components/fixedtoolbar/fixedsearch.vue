@@ -1,12 +1,12 @@
 <template>
-  <div class="toolbar" :class="{'searchBox': showSearchBox, 'fixed': showFixed}">
+  <div class="toolbar" :class="{'searchBox': showSearchBox, 'fixed': showFixed || highlight}">
     <div class="toolbar-wrapper">
       <div class="search-form">
         <div class="search-form-box">
           <i class="icon-search2"></i>
           <div class="search-form-input">
             <form action="" v-on:submit.stop.prevent="search">
-              <input type="search" name="txtSearch" class="txtSearch" placeholder="优质茶生活、茶文化高端礼品" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" v-on:input="changeText">
+              <input type="search" name="txtSearch" class="txtSearch" placeholder="最大规模、最高专业等级" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" v-on:input="changeText">
             </form>
           </div>
           <!-- <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i> -->
@@ -14,8 +14,8 @@
       </div>
       <div class="ext-tools">
         <span v-show="showLogin"><a href="/wxservice/baseInfo">登录</a></span>
-        <span v-show="showDiscard" @click.stop.prevent="hideDialog"><span class="button" :class="{'active': !showFixed}">取消</span></span>
-        <span v-show="showSearchBtn"><span class="button" :class="{'active': !showFixed}" @click.stop.prevent="search">搜索</span></span>
+        <span v-show="showDiscard" @click.stop.prevent="hideDialog"><span class="button" :class="{'active': !highlight}">取消</span></span>
+        <span v-show="showSearchBtn"><span class="button" :class="{'active': !highlight}" @click.stop.prevent="search">搜索</span></span>
         <span v-show="hasLogin && !typing"><router-link to="/my" class="userIcon"><i class="icon-user2"></i></router-link></span>
       </div>
     </div>
@@ -36,7 +36,8 @@
         showSearch: false,
         keyword: '',
         isLogin: this.$store.getters.checkLogined,
-        typing: false
+        typing: false,
+        highlight: false
       };
     },
     computed: {
@@ -59,12 +60,13 @@
     },
     deactivated() {
       this.hideDialog();
-      this.keyword = '';
+        this.keyword = '';
     },
     methods: {
       search() {
-        this.$store.dispatch('addSearchHistory', this.keyword);
-        this.$router.push({path: '/search', query: {keyword: this.keyword || ''}});
+        let kw = this.keyword && this.keyword.trim() || '';
+        this.$store.dispatch('addSearchHistory', kw);
+        this.$router.push({path: '/search', query: {keyword: kw}});
       },
       showLoginForm() {
         this.showLogin = !this.isLogin;
@@ -81,12 +83,14 @@
         this.showDiscard = true;
         this.showLogin = this.showSearch = false;
         this.typing = true;
+        this.highlight = true;
       },
       hideDialog() {
         this.typing = false;
         this.$store.commit('HIDE_SEARCH');
         this.showLoginForm();
         this.showDiscard = this.showSearch = false;
+        this.highlight = false;
       },
       clearText() {
         this.typing = true;
@@ -169,10 +173,18 @@
               height: 16px
               margin-top: 7px
               vertical-align: middle
-              font-size: 12px
+              font-size: 13px
               color: #666
               padding: 0 28px
               box-sizing: border-box
+              &::-webkit-input-placeholder
+                color: #999!important
+              &:-moz-placeholder
+                color: #999!important
+              &::-moz-placeholder
+                color: #999!important
+              &:-ms-input-placeholder
+                color: #999!important
       .ext-tools
         width: 60px
         text-align: center

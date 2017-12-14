@@ -71,11 +71,11 @@
     display: inline-block
     font-size: 14px
     line-height: 40px
-    padding-right: 10px
+    padding: 0 5px
     color: #333
     &.active
       color: #ff463c
-      border-bottom: 1px solid #ff463c
+      border-bottom: 2px solid #ff463c
   .addList
     width: 100%
     padding-left: 10px

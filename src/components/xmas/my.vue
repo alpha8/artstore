@@ -5,11 +5,11 @@
         <div class="box">
           <div class="box-container">
             <div class="avatar">
-              <a v-show="!hasLogin()" :href="getLoginUrl()"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
+              <a v-show="!hasLogin()" href="/wxservice/baseInfo"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
               <img :src="user().icon" alt="" class="pic" v-show="hasLogin()">
             </div>
             <div class="line">
-              <div class="userName" v-show="!hasLogin()"><a :href="getLoginUrl()">点击登录</a></div>
+              <div class="userName" v-show="!hasLogin()"><a href="/wxservice/baseInfo">点击登录</a></div>
               <div class="userName" v-show="hasLogin()"><span class="svip" :class="getSVipIcon" v-if="userExt.spreadLevel"></span>{{user().nickName}}<span class="supplier" v-if="userExt.model === 2">(代理商)</span></div>
               <div class="info" v-show="hasLogin()"><span class="vip" :class="getVipIcon">{{getVipTitle}}</span></div>
             </div>
@@ -187,7 +187,7 @@
               let couponValue = response.wallet && response.wallet.totalValue || 0;
               this.wallet[1].amount = couponValue;
               this.$store.dispatch('updateCouponAmount', couponValue);
-              this.wallet[2].amount = response.wallet && response.wallet.rewardValue || 0;
+              this.wallet[2].amount = response.totalRebate || 0;
             }
             this.userExt = response.user || {};
             this.profile = response;
@@ -207,10 +207,6 @@
             this.scroll.refresh();
           }
         });
-      },
-      getLoginUrl() {
-        let redirect = 'http://' + location.host + location.pathname + '#/my';
-        return `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
       }
     },
     components: {
@@ -286,7 +282,7 @@
               text-align: center
               height: 40px
               line-height: 40px
-              background-color: #ed9393
+              background-color: #af3030
               border-radius: 5px
               color: #fff
               letter-spacing: 3px

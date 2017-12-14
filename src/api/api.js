@@ -246,6 +246,13 @@ export default {
     return doPost(this.CONFIG.cmsCtx + '/order/received', params);
   },
 
+  /**
+   * 用户可使用优惠券数额
+   */
+  getAvailCouponAmount(params) {
+    return doPost(this.CONFIG.cmsCtx + '/order/coupon/detail', params);
+  },
+
    /**
     * 获取用户收货地址列表
     */
@@ -317,10 +324,10 @@ export default {
   },
 
    /**
-    * 获取返现明细
+    * 获取奖金明细
     */
-  getRebates(params) {
-    return doGet(this.CONFIG.cmsCtx + '/user/rebate', params);
+  getRewards(params) {
+    return doGet(this.CONFIG.cmsCtx + '/user/reward/list', params);
   },
 
    /**

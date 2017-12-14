@@ -6,7 +6,7 @@
       </div>
       <div class="title">
         <div class="search-form-box">
-          <i class="icon-search"></i>
+          <i class="icon-search2"></i>
           <div class="search-form-input">
             <form action="" v-on:submit.stop.prevent="search">
               <input type="search" name="txtSearch" class="txtSearch" placeholder="搜索所有商品" autocomplete="off" v-model="keyword" @keyup.delete.stop.prevent="changeText">
@@ -268,25 +268,26 @@
     z-index: 20
     .left
       flex: 30px 0 0
+      margin-top: 4px
       i
         font-size: 18px
     .title
       flex: 1
-      padding: 0 5px 0 10px
       .search-form-box
         position: relative
         height: 44px
         overflow: hidden
         background: #fafafa
-        .icon-search
+        .icon-search2
           position: relative
           display: inline-block
-          width: 12px
-          height: 12px
-          top: 16px
-          left: 6px
+          width: 10px
+          height: 10px
+          top: 17px
+          left: 8px
           float: left
           color: #d5d4d4
+          font-size: 13px
         .search-form-input
           display: inline-block
           position: absolute
@@ -304,7 +305,7 @@
             vertical-align: middle
             font-size: 14px
             color: #666
-            padding: 0 28px
+            padding: 0 10px 0 25px
             box-sizing: border-box
         .removeText
           position: absolute

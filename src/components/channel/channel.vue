@@ -8,7 +8,7 @@
         <div class="item-info">
           <h3>{{item.name}}</h3>
           <div class="sellpoint" v-if="item.sellPoint">{{item.sellPoint}}</div>
-          <div class="price"><span class="num">{{item.price | currency}}</span><span class="salesCount">(已售:{{item.stock && item.stock.salesCount || 0}}件)</span></div>
+          <div class="price"><div class="num">{{item.price | currency}}</div><div class="salesCount">(已售:{{item.stock && item.stock.salesCount || 0}}件)</div></div>
           <div class="icon" @click.stop.prevent="mark(item)"><i :class="favorited(item)"></i>
           </div>
         </div>
@@ -152,7 +152,7 @@
         position: relative
         width: 100%
         padding-right: 40px
-        padding-left: 2px
+        padding-left: 3px
         box-sizing: border-box
         h3
           line-height: 1.5
@@ -167,7 +167,7 @@
           display: block
           font-size: 12px
           color: #7f7f7f
-          line-height: 18px
+          padding: 2px 0 3px
           white-space: nowrap
           text-overflow: ellipsis
           overflow: hidden
@@ -181,12 +181,16 @@
           text-overflow: ellipsis
           vertical-align: bottom
           .num
-            display: inline-block
+            display: block
+            float: left
+            bottom: 0
           .salesCount
-            display: inline-block
+            display: block
             color: #999
             font-size: 11px
-            margin-left: 7px
+            margin-left: 6px
+            float: left
+            margin-top: 1.5px
         .icon
           position: absolute
           top: 50%

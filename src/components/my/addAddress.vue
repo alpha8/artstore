@@ -79,15 +79,16 @@
         }
         this.user.userId = this.$store.getters.getUserInfo.userId;
         this.user.city = this.city;
+        if (!this.user.userId) {
+          this.$store.dispatch('addAddress', this.user);
+          this._reset();
+          this.$router.back();
+          return;
+        }
         api.addAddress(this.user).then(response => {
           if (response.result === RESPONSE_OK) {
             this.$store.dispatch('addAddress', this.user);
-            this.user = {
-              name: '',
-              mobile: '',
-              address: '',
-              default: false
-            };
+            this._reset();
             this.$router.back();
           }
         });
@@ -99,6 +100,14 @@
         if (city && city.city) {
           this.city = city.province + city.city + (city.district || '');
         }
+      },
+      _reset() {
+        this.user = {
+          name: '',
+          mobile: '',
+          address: '',
+          default: false
+        };
       },
       doClearAddr() {
         this.user.address = '';

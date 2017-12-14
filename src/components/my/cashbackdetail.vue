@@ -7,10 +7,10 @@
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="cashback-list">
             <mu-flexbox-item basis="100%" class="cashback-item border-1px" v-for="(item, index) in cashbacks" :key="index">
               <div class="content">
-                <p class="line text">{{item.name || item.userId}}领取了{{item.payValue}}优惠券</p>
-                <p class="time">{{item.createAt | formatDate}}</p>
+                <p class="line text">推荐{{item.userName}}成功下单，您获得了{{item.value}}元奖金</p>
+                <p class="time">{{item. createAt | formatDate}}</p>
               </div>
-              <div class="amount">+ {{item.rebateValue}}</div>
+              <div class="amount">{{statusDesc(item.status)}}</div>
             </mu-flexbox-item>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
@@ -69,18 +69,18 @@
           return;
         }
         let user = this.$store.getters.getUserInfo;
-        api.getRebates({
+        api.getRewards({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          agentId: user.userId || 0
+          rid: user.userId || 0
         }).then(response => {
           if (response.code === 0) {
-            if (response.rebates && response.rebates.length) {
-              response.rebates.forEach(item => {
-                if (item.name) {
-                  item.name = Base64.decode(item.name, 'base64');
+            if (response.rewards && response.rewards.length) {
+              response.rewards.forEach(item => {
+                if (item.userName) {
+                  item.userName = Base64.decode(item.userName);
                 } else {
-                  item.name = item.mobile;
+                  item.userName = item.userId;
                 }
                 this.cashbacks.push(item);
               });
@@ -102,6 +102,13 @@
         this.pageNumber = 1;
         this.totalPages = 0;
         this.loadEnd = false;
+      },
+      statusDesc(status) {
+        if (status === 1) {
+          return '已到账';
+        } else {
+          return '即将发放';
+        }
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -221,7 +228,7 @@
                   padding-bottom: 10px
                   -webkit-box-orient: vertical
                   -webkit-line-clamp: 1
-                  font-weight: 700
+                  font-weight: 400
                   font-size: 14px
                   line-height: 1.0625rem
               .time
@@ -231,7 +238,8 @@
               width: 80px
               height: 60px
               color: #44b549
-              font-size: 18px
+              font-size: 14px
+              font-weight: 700
               text-align: right
       .no-cashback
         width: 100%

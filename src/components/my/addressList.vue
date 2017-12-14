@@ -56,7 +56,13 @@
         });
       },
       getAddressList() {
-        api.getAddressList(this.$store.getters.getUserInfo.userId || -1).then(response => {
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (!uid) {
+          this.addressList = this.$store.getters.getAddressList;
+          this._initScroll();
+          return;
+        }
+        api.getAddressList(uid || -1).then(response => {
           this.addressList = response;
           this.$store.dispatch('setDefaultAddress', this.addressList);
           this._initScroll();

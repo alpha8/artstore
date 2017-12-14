@@ -42,7 +42,7 @@
     computed: {
       balance() {
         let profile = this.$store.getters.getUserProfile;
-        return profile && profile.totalRebate || 0;
+        return profile && profile.wallet && profile.wallet.rewardValue || 0;
       }
     },
     methods: {
