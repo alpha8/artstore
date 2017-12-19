@@ -8,17 +8,20 @@
       <span class="mini-favorite-item" @click.stop.prevent="mark">
         <span class="button-lg"><i :class="{'icon-favorite': marked, 'icon-heart': !marked}"></i></span>
       </span>
-      <div class="foot-item" v-if="good.stock && good.stock.total > 0" @click.stop.prevent="addGood">
+      <div class="foot-item" v-if="good.stock && (good.stock.total > 0 || good.stock.bookTotal > 0)" @click.stop.prevent="addGood">
         <span class="button-lg orange">加入购物车</span>
       </div>
-      <div class="foot-item" v-if="good.stock && good.stock.status === 1" @click.stop.prevent="bookBuy">
-        <span class="button-lg red">预定购买</span>
-      </div>
-      <div class="foot-item" v-else-if="good.stock && good.stock.total > 0" @click.stop.prevent="pay">
+      <div class="foot-item" v-if="good.stock && good.stock.total > 0" @click.stop.prevent="pay">
         <span class="button-lg red">立即购买</span>
       </div>
-      <div class="foot-item" v-else-if="good.stock && good.stock.total <= 0">
+      <div class="foot-item" v-else-if="good.stock && good.stock.status === 1" @click.stop.prevent="bookBuy">
+        <span class="button-lg red">预定购买</span>
+      </div>
+      <div class="foot-item" v-else-if="good.stock && good.stock.total <= 0 && good.stock.bookTotal <= 0">
         <span class="button-lg disable">已售磬</span>
+      </div>
+      <div class="foot-item" v-if="good.stock && good.stock.total <= 0 && good.stock.bookTotal <= 0" @click.stop.prevent="bookNotify">
+        <span class="button-lg orange">到货提醒</span>
       </div>
     </div>
     <div class="ball-container">
@@ -101,6 +104,21 @@
       },
       bookBuy() {
         this.pay();
+      },
+      bookNotify() {
+        let openid = this.$store.getters.getUserInfo.openid;
+        api.arrivalNotify({
+          id: this.good.id,
+          openid: openid
+        }).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('openToast', '设置成功, 请留意微信通知！');
+          } else {
+            this.$store.dispatch('openToast', '网络太忙了，请稍候再来吧！');
+          }
+        }).catch(response => {
+          this.$store.dispatch('openToast', '网络太忙了，请稍候再来吧！');
+        });
       },
       mark() {
         let uid = this.$store.getters.getUserInfo.userId;

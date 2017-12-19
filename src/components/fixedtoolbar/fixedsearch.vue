@@ -141,13 +141,14 @@
           .icon-search2
             position: relative
             display: inline-block
-            width: 10px
-            height: 10px
-            top: 8px
+            width: 13px
+            height: 13px
+            top: 50%
             left: 12px
             float: left
             color: #d5d4d4
             font-size: 13px
+            margin-top: -6.5px
           .removeText
             position: absolute
             top: 50%
@@ -164,18 +165,23 @@
             top: 0
             width: 100%
             height: 100%
+            form
+              position: relative
+              height: 100%
             .txtSearch
-              display: inline-block
+              position: relative
+              display: block
+              padding-left: 28px
               background: 0
               border: 0
+              outline: none
               width: 100%
-              line-height: 16px
               height: 16px
-              margin-top: 7px
-              vertical-align: middle
+              line-height: 16px
+              top: 50%
+              margin-top: -8px
               font-size: 13px
               color: #666
-              padding: 0 28px
               box-sizing: border-box
               &::-webkit-input-placeholder
                 color: #999!important

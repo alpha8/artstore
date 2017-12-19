@@ -83,11 +83,12 @@ router.get('/good/:id', function(req, res){
 });
 
 var categoryData = require('../src/data/category.json');
+var teaTotal = require('../src/data/teatotal.json');
 router.get('/category', function(req, res){
-  res.json({
-    errno: 0,
-    data: categoryData.categories
-  });
+  res.json(categoryData);
+});
+router.get('/teatotal', function(req, res){
+  res.json(teaTotal);
 });
 app.use('/api', router);
 

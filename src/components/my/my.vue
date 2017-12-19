@@ -280,27 +280,28 @@
             -webkit-box-orient: vertical
             -webkit-line-clamp: 1
             box-sizing: border-box
+            color: #e1e1e1
             a
               display: inline-block
-              width: 60%
+              width: 60px
               text-align: center
-              height: 40px
-              line-height: 40px
-              background-color: #ed9393
-              border-radius: 5px
-              color: #fff
-              letter-spacing: 3px
+              height: 22px
+              line-height: 22px
+              background-color: #9f3838
+              border-radius: 3px
+              color: #e0e0e0
+              font-size: 12px
               box-sizing: border-box
             .supplier
               font-size: 10px
-              color: #fafafa
             .svip
               position: relative
-              display: inline-block
-              width: 14px
-              height: 14px
+              display: block
+              float: left
+              width: 16px
+              height: 16px
               background: url(../../common/images/icons.png) no-repeat 0 0
-              margin-right: 3px
+              margin-right: 2px
               &.lv1
                 background-position: 0 0
               &.lv2
@@ -316,14 +317,14 @@
               &.lv7
                 background-position: 0 -150px
           .info
-            margin-top: 10px
+            margin-top: 5px
             .vip, .svip
               position: relative
               padding: 2px 8px 2px 15px
               height: 16px
               line-height: 16px
               font-size: 10px
-              color: #fff
+              color: #e1e1e1
               background: #9f3838
               border-radius: 12px
               &:before

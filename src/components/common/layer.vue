@@ -57,14 +57,13 @@
     top: 50%
     left: 50%
     width: 300px
-    max-height: 230px
-    margin-top: -115px
-    margin-left: -150px
+    max-height: 400px
     z-index: 100
     background-color: #fff
     box-sizing: border-box
     box-shadow: 1px 1px 50px rgba(0,0,0,.3)
     border-radius: 10px
+    transform: translate(-50%, -50%)
     overflow: hidden
     .layer-title
       position: relative

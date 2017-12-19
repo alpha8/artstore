@@ -94,6 +94,8 @@
     z-index: 20
     .left
       width: 30px
+      float: left
+      margin-top: 2px
       i
         font-size: 18px
     .title

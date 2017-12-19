@@ -137,6 +137,8 @@
           strDate: formatDate(new Date(item.startTime), 'yyyy-MM-dd hh:mm')
         }).then(response => {
           this.$store.dispatch('openToast', '设置成功, 请留意微信通知！');
+        }).catch(response => {
+          this.$store.dispatch('openToast', '网络太忙了，请稍候再来吧！');
         });
       },
       show() {

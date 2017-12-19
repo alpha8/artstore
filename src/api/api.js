@@ -155,7 +155,7 @@ export default {
   },
   /** 获取商品分类统计值 */
   getTeaTotal() {
-    return doGet(this.CONFIG.webCtx + '/service/tea/total');
+    return doGet(this.CONFIG.cmsCtx + '/service/tea/total?commodityStatesId=2');
   },
   /** 查询数据字典配置值 */
   GetConfigList(parent) {
@@ -392,6 +392,13 @@ export default {
     */
   reservedNotify(params) {
     return doPost(this.CONFIG.cmsCtx + '/artwork/attention', params);
+  },
+
+   /**
+    * 到货提醒
+    */
+  arrivalNotify(params) {
+    return doPost(this.CONFIG.cmsCtx + '/artwork/book', params);
   },
 
    /**

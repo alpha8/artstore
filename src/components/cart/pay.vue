@@ -1,7 +1,7 @@
 <template>
   <div class="wxpay">
     <fixedheader title="确认订单" ref="header"></fixedheader>
-    <div class="address-wrap">
+    <div class="address-wrap" v-if="!selfservice">
       <div class="addressNull" v-show="!defaultAddress || !defaultAddress.address">
         <h3 @click.stop.prevent="showAddressList">！请填写收货地址</h3>
       </div>
@@ -13,9 +13,9 @@
         </ul>
       </div>
     </div>
-    <div class="pay" ref="pay">
+    <div class="pay" ref="pay" :class="{'notop': selfservice}">
       <div class="order-wrap">
-        <split></split>
+        <split v-if="!selfservice"></split>
         <div class="order-shop border-1px">一虎一席艺术平台</div>
         <ul class="orderlist">
           <li class="product border-1px" v-for="product in products">
@@ -33,7 +33,11 @@
           </li>
         </ul>
         <ul class="shop-info">
-          <li class="shipping">
+          <li>
+            <strong>现场自提：</strong>
+            <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span>已自提</span>
+          </li>
+          <li class="shipping" v-show="!selfservice">
             <strong>配送方式：</strong>
             <span>快递</span>
           </li>
@@ -102,7 +106,8 @@
         countdownStats: {},
         timer: null,
         seckill: {},
-        couponValue: 0
+        couponValue: 0,
+        selfservice: false
       };
     },
     computed: {
@@ -133,6 +138,7 @@
       this.paying = false;
       this.couponValue = 0;
       this.seckill = {};
+      this.selfservice = false;
       if (this.timer) {
         clearInterval(this.timer);
       }
@@ -167,6 +173,9 @@
           total += item.count * item.price;
         });
         this.totalFee = total;
+      },
+      delivery() {
+        this.selfservice = !this.selfservice;
       },
       computeCouponValue() {
         let type = this.$route.query.orderType || 0;
@@ -252,7 +261,7 @@
         this.$router.back();
       },
       weixinPay() {
-        if (!this.defaultAddress.address) {
+        if (!this.selfservice && !this.defaultAddress.address) {
           this.$store.dispatch('openToast', '请选择收货人信息');
           return;
         }
@@ -277,14 +286,22 @@
           openid: userInfo.openid,
           userId: userInfo.userId,
           totalPrice: this.totalFee,
-          express: {
-            expressAddress: (this.defaultAddress.city || '') + this.defaultAddress.address,
-            mobile: this.defaultAddress.mobile,
-            receiver: this.defaultAddress.name
-          },
           remarks: this.remarks,
           type: this.$route.query.orderType || 0
         };
+        if (this.selfservice) {
+          params.express = {
+            expressAddress: '现场自提',
+            mobile: '',
+            receiver: ''
+          };
+        } else {
+          params.express = {
+            expressAddress: (this.defaultAddress.city || '') + this.defaultAddress.address,
+            mobile: this.defaultAddress.mobile,
+            receiver: this.defaultAddress.name
+          };
+        }
         let seckillId = 0;
         let items = [];
         this.products.forEach(product => {
@@ -442,6 +459,8 @@
       width: 100%
       background: #fff
       overflow: hidden
+      &.notop
+        top: 44px
       .order-wrap
         position: relative
         padding-bottom: 60px
@@ -508,9 +527,19 @@
             strong
               flex: 1
               font-weight: 400
+            .icon-check_circle
+              font-size: 20px
+              color: #d3d3d3
+              margin-right: 2px
+              text-align: center
+              &.on
+                color: #fb4741
+            .remark
+              margin-bottom: 3px
             span
               flex: 1
               text-align: right
+              vertical-align: middle
               &.nowrap-line
                 display: -webkit-box
                 word-wrap: break-word

@@ -32,7 +32,7 @@
             </div>
             <div class="product-info">
               <div class="product-title"><router-link :to="{name: 'good', params: {id: product.id}}">{{product.name}}</router-link></div>
-              <div class="product-price">¥<span class="num">{{product.price}}</span><span class="salesCount">(已售:{{product.stock && product.stock.salesCount || 0}}件)</span></div>
+              <div class="product-price"><div class="num">{{product.price | currency}}</div><div class="salesCount">(已售:{{product.stock && product.stock.salesCount || 0}}件)</div></div>
             </div>
           </mu-flexbox-item>
         </mu-flexbox>
@@ -67,7 +67,7 @@
           artworkTypeName: 'tea',
           categoryName: ''
         },
-        sort: 'saleSort',
+        sort: '',
         priceSort: ''
       };
     },
@@ -124,6 +124,11 @@
         this.loading = true;
         this.params.currentPage = this.pageNumber;
         this.params.pageSize = this.pageSize;
+        this.params.commodityStatesId = 2;
+        if (!this.sort) {
+          this.params.scoreSort = true;
+          this.sort = 'scoreSort';
+        }
         api.GetGoods(this.params).then((response) => {
           let goods = response.artworks;
           if (goods && goods.length) {
@@ -226,7 +231,10 @@
           }
         }
         this.params[sortKey] = this.priceSort || true;
-        this._reset();
+        this.products = [];
+        this.pageNumber = 1;
+        this.totalPages = -1;
+        this.loadEnd = false;
         this.fetchData(true);
       },
       clearText() {
@@ -268,11 +276,13 @@
     z-index: 20
     .left
       flex: 30px 0 0
-      margin-top: 4px
+      margin-top: 2px
       i
         font-size: 18px
     .title
       flex: 1
+      padding: 0 8px
+      box-sizing: border-box
       .search-form-box
         position: relative
         height: 44px
@@ -281,13 +291,14 @@
         .icon-search2
           position: relative
           display: inline-block
-          width: 10px
-          height: 10px
-          top: 17px
-          left: 8px
+          width: 13px
+          height: 13px
+          top: 50%
+          left: 5px
           float: left
           color: #d5d4d4
           font-size: 13px
+          margin-top: -6.5px
         .search-form-input
           display: inline-block
           position: absolute
@@ -295,17 +306,18 @@
           top: 0
           width: 100%
           height: 100%
+          form
+            position: relative
+            height: 100%
           .txtSearch
-            display: inline-block
+            display: block
             background: 0
-            border: 0
             width: 100%
-            line-height: 16px
-            height: 16px
+            height: auto
             vertical-align: middle
             font-size: 14px
             color: #666
-            padding: 0 10px 0 25px
+            padding: 14px 0 14px 22px
             box-sizing: border-box
         .removeText
           position: absolute
@@ -424,7 +436,7 @@
           color: #666
           font-size: 14px
           height: 20px
-          line-height: 20px
+          line-height: 1.5
           white-space: normal
           word-break: break-all
           text-overflow: ellipsis
@@ -432,21 +444,22 @@
           -webkit-box-orient: vertical
         .product-price
           position: relative
-          margin-top: 2px
-          font-size: 12px
-          color: #e4393c
+          font-size: 14px
+          font-weight: 700
+          color: #ff463c
           white-space: nowrap
           overflow: hidden
           text-overflow: ellipsis
           vertical-align: bottom
           .salesCount
-            display: inline-block
+            display: block
             color: #999
             font-size: 11px
-            margin-left: 7px
+            margin-left: 6px
+            float: left
+            margin-top: 1.5px
           .num
-            display: inline-block
-            font-size: 14px
-            font-weight: 400
-          
+            display: block
+            float: left
+            bottom: 0
 </style>

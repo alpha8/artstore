@@ -401,7 +401,7 @@
           if (src) {
             let width = img.getAttribute('width');
             let height = img.getAttribute('height');
-            let key = '<img class="lazy" data-original="' + src + '" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"';
+            let key = 'img class="lazy" data-original="' + src + '" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"';
             let suffix = '';
             if (width) {
               suffix += ' width="' + width + '"';
@@ -418,7 +418,7 @@
               src += '?1';
             }
             src = src + '&w=750';
-            html = html.replace(key, '<img src="' + src + '" width="' + w + '" style="margin-left: -14px"').replace(key2, '<img src="' + src + '" width="' + w + '" style="margin-left: -14px"');
+            html = html.replace(key, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px"').replace(key2, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px"');
             if (width && width > 100) {
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             } else if (width === null) {

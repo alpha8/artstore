@@ -4,8 +4,8 @@
     <div class="goods">
       <div class="menu-wrapper" ref="menuWrapper">
         <ul>
-          <li v-for="(item, index) in goods" class="menu-item border-1px" :class="{'current': item.id===good.id, 'twoline': item.desc}" @click.stop.prevent="selectMenu(index)">
-            <span class="text"><span>{{item.value}}</span><em>({{item.count || 0}})</em></span>
+          <li v-for="(item, index) in goods" class="menu-item border-1px" :class="{'active': item.id===good.id, 'twoline': item.desc}" @click.stop.prevent="selectMenu(index)">
+            <span class="text"><span :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css" :class="item.css"></i></span><em>({{item.count || 0}})</em></span>
             <i v-if="item.desc">{{item.desc}}</i>
           </li>
         </ul>
@@ -20,7 +20,7 @@
                     <img :src="good.desc" border="0" />
                   </div>
                   <div class="content" v-if="good.value!=='thumbnail'">
-                    <h2 class="name">{{good.value}}<em>({{good.count || 0}})</em></h2>
+                    <h2 class="name" :class="{'strong': good.css === 'strong'}">{{good.value}}<i v-if="good.css" :class="good.css"></i><em>({{good.count || 0}})</em></h2>
                   </div>
                 </router-link>
               </li>
@@ -34,7 +34,7 @@
                       <img :src="good.desc" border="0" />
                     </div>
                     <div class="content" v-if="good.value!=='thumbnail'">
-                      <h2 class="name">{{good.value}}<em>({{good.count || 0}})</em></h2>
+                      <h2 class="name" :class="{'strong': good.css === 'strong'}">{{good.value}}<i v-if="good.css" :class="good.css"></i><em>({{good.count || 0}})</em></h2>
                     </div>
                   </router-link>
                 </li>
@@ -223,10 +223,12 @@
     bottom: 50px
     width: 100%
     overflow: hidden
+    .strong
+      font-weight: 700
     .menu-wrapper
       position: relative
-      flex: 0 0 30vw
-      width: 30vw
+      width: 30%
+      float: left
       background: #f3f5f7
       overflow: hidden
       .menu-item
@@ -236,9 +238,7 @@
         border-left: 4px solid transparent
         box-sizing: border-box
         border-1px(rgba(7, 17, 27, 0.1))
-        &.current
-          position: relative
-          z-index: 10
+        &.active
           margin-top: -1px
           background: #fff
           font-weight: 700
@@ -258,6 +258,7 @@
             font-size: 11px
             color: #999
         .text
+          position: relative
           display: block
           width: 100%
           vertical-align: middle
@@ -265,7 +266,9 @@
           box-sizing: border-box
           overflow: hidden
           span
+            position: relative
             display: block
+            float: left
             font-size: 13px
             word-wrap: break-word
             text-overflow: ellipsis
@@ -274,9 +277,21 @@
             overflow: hidden
             line-height: 1.45
             max-height: 38px
+            padding-right: 7px
+            box-sizing: border-box
           em
-            font-size: 11px
             display: block
+            clear: both
+            font-size: 11px
+          .highlight
+            position: absolute
+            width: 5px
+            height: 5px
+            border-radius: 50%
+            background: #fb4741
+            right: 0
+            top: 2px
+            z-index: 10
     .goods-wrapper
       flex: 1
       .title
@@ -334,17 +349,34 @@
               display: block
               font-size: 40px
             .content
+              position: relative
               display: block
               .name
+                position: relative
+                display: block
+                float: left
                 line-height: 1.2
                 font-size: 13px
                 color: #505050
+                white-space: nowrap
                 word-wrap: break-word
                 word-break: break-all
                 text-overflow: ellipsis
                 -webkit-line-clamp: 1
                 -webkit-box-orient: vertical
+                padding-right: 7px
+                box-sizing: border-box
                 em
                   display: block
+                  clear: both
                   font-size: 11px
+                .highlight
+                  position: absolute
+                  width: 5px
+                  height: 5px
+                  border-radius: 50%
+                  background: #fb4741
+                  right: 0
+                  top: 0
+                  z-index: 10
 </style>

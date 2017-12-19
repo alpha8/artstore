@@ -85,13 +85,15 @@
   .header
     position: relative
     display: flex
-    background: #f2f2f2
+    background: #f2f2f2    
+    height: 44px
     line-height: 44px
     text-align: center
     color: #9B9B9B
     .left
       flex: 30px 0 0
       padding-left: 8px
+      margin-top: 2px
       i
         font-size: 18px
     .title

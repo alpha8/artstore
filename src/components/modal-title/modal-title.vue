@@ -1,5 +1,5 @@
 <template>
-  <div class="title" @click.stop.prevent="fetchMore">
+  <div class="title" :class="{'no-more': !moreText}" @click.stop.prevent="fetchMore">
     <div class="line left"></div>
     <div class="text">{{title}}</div>
     <div class="line right"></div>
@@ -52,6 +52,8 @@
       top: 50%
       right: -20px
       margin-top: -4px
+    &.no-more:after
+      display: none
     .line
       flex: 1
       position: relative
@@ -65,6 +67,7 @@
       padding: 0 12px
       font-size: 14px
       font-weight: 700
+      letter-spacing: 1px
     .more
       position: absolute
       display: block

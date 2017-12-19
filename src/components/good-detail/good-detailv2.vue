@@ -9,28 +9,33 @@
         </div>
         <div class="content">
           <h1 class="title">{{good.name}}</h1>
-          <div class="sellpoint" v-if="false">{{good.sellPoint}}</div>
           <div class="price">
-            <span class="now">¥{{getGoodPrice}}</span><span class="old" v-show="good.oldPrice">¥{{good.oldPrice}}</span>
+            <span class="now">¥{{getGoodPrice}}</span><span class="old" v-show="good.oldPrice && good.oldPrice !== good.price">¥{{good.oldPrice}}</span>
           </div>
-          <!-- <div class="delivery-annouce" v-if="good.deliveryDays">
-            <span class="tips">预计发货：{{good.deliveryDays}}天</span>
+          <div v-if="good.stock && (good.stock.total > 0 || good.stock.status !== 1)">
+            <div class="row">
+              <div class="label">商品库存：</div>
+              <div class="desc">{{good.stock && good.stock.total || 0}}</div>
+            </div>
+            <div class="row" v-if="good.deliveryDays">
+              <div class="label">预计发货：</div>
+              <div class="desc">{{good.deliveryDays}}天</div>
+            </div>
           </div>
-          <div class="detail">
-            <span class="stock">商品库存：{{good.stock && good.stock.total || 0}}</span>
-          </div> -->
-          <div class="row" v-if="good.deliveryDays">
-            <div class="label">预计发货</div>
-            <div class="desc">{{good.deliveryDays}}天</div>
+          <div v-if="good.stock && good.stock.total <= 0 && good.stock.status === 1">
+            <div class="row">
+              <div class="label">预订库存：</div>
+              <div class="desc">{{good.stock && good.stock.bookTotal || 0}}</div>
+            </div>
+            <div class="row">
+              <div class="label">预计到货：</div>
+              <div class="desc">{{good.stock && good.stock.bookDay || 0}}天</div>
+            </div>
           </div>
           <div class="row">
-            <div class="label">商品库存</div>
-            <div class="desc">{{good.stock && good.stock.total || 0}}</div>
-          </div>
-          <div class="row">
-            <div class="label">促销活动</div>
-            <div class="desc" v-if="good.useCoupon">支持优惠券抵扣</div>
-            <div class="desc" v-else>不支持优惠券抵扣</div>
+            <div class="label">优惠活动：</div>
+            <div class="desc" v-if="good.useCoupon">优惠券可抵<span v-if="good.couponPercent">{{good.couponPercent * 100}}%</span><span v-if="!good.couponPercent">30%</span></div>
+            <div class="desc" v-else>不支持优惠券</div>
           </div>
           <div class="cartcontrol-wrapper" v-if="good.count">
             <cartcontrol @add="addGood" :good="good"></cartcontrol>
@@ -55,7 +60,8 @@
           </div>
         </div>
         <div class="info" v-show="good.content">
-          <h1 class="title">商品介绍</h1>
+          <h1 class="title">商品介绍<span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span></h1>
+          <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
         </div>
         <split></split>
@@ -105,6 +111,7 @@
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
     <frame></frame>
+    <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
   </div>
 </template>
 
@@ -125,6 +132,7 @@
   import star from '@/components/star/star';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
+  import layer from '@/components/common/layer';
 
   const ALL = 3;
   // const ERR_OK = 0;
@@ -173,7 +181,13 @@
           negative: '差评'
         },
         psCtx: api.CONFIG.psCtx,
-        addedProducts: this.$store.getters.addedProducts
+        addedProducts: this.$store.getters.addedProducts,
+        layer: {
+          title: '快速检索，扫码定位商品',
+          button: {
+            text: '知道了!'
+          }
+        }
       };
     },
     computed: {
@@ -188,6 +202,12 @@
           }
         });
         return sliders;
+      },
+      getQrcode() {
+        if (this.good.id) {
+          return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+        }
+        return '';
       },
       getGoodPrice() {
         return this.good.price;
@@ -242,9 +262,21 @@
           'https': 1,
           'hide_h5_setting': true
         };
-        setTimeout(() => {
-          new qcVideo.Player('tencent_video_player', option);
-        }, 500);
+        document.addEventListener('DOMContentLoaded', () => {
+          if (window.qcVideo) {
+            new qcVideo.Player('tencent_video_player', option);
+          } else {
+            setTimeout(() => {
+              new qcVideo.Player('tencent_video_player', option);
+            }, 800);
+          }
+          setTimeout(() => {
+            let video = document.getElementsByTagName('video')[0];
+            if (video) {
+              video.setAttribute('x5-playsinline', 'true');
+            }
+          }, 2000);
+        });
       },
       fetchComments() {
         api.getProductComments({
@@ -304,7 +336,8 @@
           pageSize: 20,
           keyword: kw,
           categoryParentName: cat || '',
-          pid: this.good.id
+          pid: this.good.id,
+          commodityStatesId: 2
         }).then((response) => {
           this.guessGoods = response.artworks;
           setTimeout(() => {
@@ -321,6 +354,9 @@
       },
       back() {
         this.$router.back();
+      },
+      showQrcode() {
+        this.$refs.layerWin.show();
       },
       addFirst(event) {
         Vue.set(this.good, 'count', 1);
@@ -499,7 +535,7 @@
           if (src) {
             let width = img.getAttribute('width');
             let height = img.getAttribute('height');
-            let key = '<img class="lazy" data-original="' + src + '" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"';
+            let key = 'img class="lazy" data-original="' + src + '" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC"';
             let suffix = '';
             if (width) {
               suffix += ' width="' + width + '"';
@@ -516,7 +552,7 @@
               src += '?1';
             }
             src = src + '&w=750';
-            html = html.replace(key, '<img src="' + src + '" width="' + w + '" style="margin-left: -14px"').replace(key2, '<img src="' + src + '" width="' + w + '" style="margin-left: -14px"');
+            html = html.replace(key, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"').replace(key2, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"');
             if (width && width > 100) {
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             } else if (width === null) {
@@ -545,7 +581,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer
     }
   };
 </script>
@@ -669,14 +705,6 @@
         display: -webkit-box
         -webkit-line-clamp: 2
         -webkit-box-orient: vertical
-      .sellpoint
-        display: block
-        font-size: 12px
-        color: #7f7f7f
-        line-height: 18px
-        white-space: nowrap
-        text-overflow: ellipsis
-        overflow: hidden
       .detail
         margin: 5px 0 0
         font-size: 0
@@ -748,10 +776,25 @@
       position: relative
       margin-bottom: 10px
       .title
+        position: relative
         padding: 10px 18px 10px 14px
         line-height: 14px
         font-size: 14px
         color: rgb(7, 17, 27)
+        .toolbar
+          position: absolute
+          display: inline-block
+          right: 0
+          top: 0
+          width: auto
+          height: 34px
+          line-height: 34px
+          padding-right: 8px
+          box-sizing: border-box
+          i
+            font-size: 20px
+            vertical-align: middle
+            color: #666
       .text, .player
         font-size: 12px
         color: rgb(77, 85, 93)
@@ -765,6 +808,17 @@
       .text
         padding-left: 14px
         padding-right: 10px
+      .sellpoint
+        display: block
+        padding: 0 10px 3px 14px
+        font-size: 12px
+        line-height: 17px
+        color: #7f7f7f
+        overflow: hidden
+        text-overflow: ellipsis
+        display: -webkit-box
+        -webkit-line-clamp: 2
+        -webkit-box-orient: vertical
       .zoompic
         margin-left: -14px
     .row
@@ -772,7 +826,8 @@
       display: flex
       margin-top: 5px
       .label
-        min-width: 65px
+        display: block
+        float: left
         font-size: 12px
         color: #999
       .desc

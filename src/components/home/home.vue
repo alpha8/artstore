@@ -23,6 +23,12 @@
         <split></split>
         <modal-title title="茶室空间雅物" moreText="更多" catKey="graceful" catName="茶室空间雅物"></modal-title>
         <channel :items="ya" :cols="2"></channel>
+        <split></split>
+        <modal-title title='关于 "一虎一席"'></modal-title>
+        <div class="aboutus">
+          <div id="tencent_video_player" :style="getVideoWidth"></div>
+          <div class="slogan">一虎一席东方生活美学雅集.春风十里</div>
+        </div>
       </div>
     </div>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
@@ -90,11 +96,14 @@
     },
     created() {
       this.wxReady();
+      this.loadTencentPlayer();
       api.GetGoods({
         artworkTypeName: 'tea',
         categoryParentName: 'art',
         currentPage: 1,
-        pageSize: 20
+        pageSize: 20,
+        commodityStatesId: 2,
+        scoreSort: true
       }).then((response) => {
         this.arts = response.artworks;
       });
@@ -103,7 +112,9 @@
         artworkTypeName: 'tea',
         categoryParentName: 'teaart',
         currentPage: 1,
-        pageSize: 20
+        pageSize: 20,
+        commodityStatesId: 2,
+        scoreSort: true
       }).then((response) => {
         this.teaPots = response.artworks;
       });
@@ -112,7 +123,9 @@
         artworkTypeName: 'tea',
         categoryParentName: 'welltea',
         currentPage: 1,
-        pageSize: 20
+        pageSize: 20,
+        commodityStatesId: 2,
+        scoreSort: true
       }).then((response) => {
         this.goodTeas = response.artworks;
       });
@@ -121,7 +134,9 @@
         artworkTypeName: 'tea',
         categoryParentName: 'paint',
         currentPage: 1,
-        pageSize: 20
+        pageSize: 20,
+        commodityStatesId: 2,
+        scoreSort: true
       }).then((response) => {
         this.paints = response.artworks;
       });
@@ -130,7 +145,9 @@
         artworkTypeName: 'tea',
         categoryParentName: 'graceful',
         currentPage: 1,
-        pageSize: 20
+        pageSize: 20,
+        commodityStatesId: 2,
+        scoreSort: true
       }).then((response) => {
         this.ya = response.artworks;
       });
@@ -150,6 +167,9 @@
     computed: {
       showFixed() {
         return this.scrollY >= this.swipeHeight;
+      },
+      getVideoWidth() {
+        return { width: (document.documentElement.clientWidth - 5) + 'px' };
       }
     },
     methods: {
@@ -169,6 +189,32 @@
           } else {
             this.scroll.refresh();
           }
+        });
+      },
+      loadTencentPlayer() {
+        let option = {
+          'auto_play': '0',
+          'file_id': '4564972818673793787',
+          'app_id': '1252423336',
+          'width': 640,
+          'height': 368,
+          'https': 1,
+          'hide_h5_setting': true
+        };
+        document.addEventListener('DOMContentLoaded', () => {
+          if (window.qcVideo) {
+            new qcVideo.Player('tencent_video_player', option);
+          } else {
+            setTimeout(() => {
+              new qcVideo.Player('tencent_video_player', option);
+            }, 800);
+          }
+          setTimeout(() => {
+            let video = document.getElementsByTagName('video')[0];
+            if (video) {
+              video.setAttribute('x5-playsinline', 'true');
+            }
+          }, 2000);
         });
       },
       selectGood(good) {
@@ -233,7 +279,24 @@
     overflow: hidden
     .mainContent
       position: relative
-      padding-bottom: 60px
+      padding-bottom: 20px
+      #tencent_video_player
+        position: relative
+        width: 100%
+        height: auto
+        padding: 0 5px
+        box-sizing: border-box
+        overflow: hidden
+      .slogan
+        line-height: 1.5
+        font-size: 14px
+        padding: 3px 8px
+        white-space: normal
+        word-break: break-all
+        -webkit-line-clamp: 2
+        -webkit-box-orient: vertical
+        text-overflow: ellipsis
+        overflow: hidden
     .swipe-wrapper
       position: relative
       width: 100%

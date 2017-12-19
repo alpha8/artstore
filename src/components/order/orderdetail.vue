@@ -185,7 +185,7 @@
       },
       cancelOrder() {
         api.cancelOrder({
-          id: this.order.id
+          orderNo: this.order.orderNo
         }).then(response => {
           if (response.result === 0) {
             this.$store.dispatch('openToast', '订单已取消！');
@@ -426,7 +426,11 @@
     .btn-group
       position: relative
       font-size: 14px
-      padding-top: 5px
+      padding-top: 7.5px
+      display: block
+      width: 100%
+      height: 100%
+      box-sizing: border-box
       .button
         text-align: center
         float: right
@@ -439,6 +443,6 @@
           box-sizing: border-box
           display: inline-block
           width: 100%
-          height: 40px
-          line-height: 40px
+          height: 35px
+          line-height: 35px
 </style>
