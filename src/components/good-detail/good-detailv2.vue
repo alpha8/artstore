@@ -41,7 +41,7 @@
             <cartcontrol @add="addGood" :good="good"></cartcontrol>
           </div>
           <transition name="fade">
-            <div @click.stop.prevent="addFirst" class="buy" v-if="!good.count || good.count === 0">加入购物车</div>
+            <div @click.stop.prevent="addFirst" class="buy" v-if="good.stock && (good.stock.total > 0 || good.stock.bookTotal > 0) && !good.count">加入购物车</div>
           </transition>
         </div>
         <!--  <div class="sku-wrap">
@@ -270,12 +270,6 @@
               new qcVideo.Player('tencent_video_player', option);
             }, 800);
           }
-          setTimeout(() => {
-            let video = document.getElementsByTagName('video')[0];
-            if (video) {
-              video.setAttribute('x5-playsinline', 'true');
-            }
-          }, 2000);
         });
       },
       fetchComments() {
@@ -333,11 +327,12 @@
         api.GetGoods({
           artworkTypeName: 'tea',
           currentPage: 1,
-          pageSize: 20,
+          pageSize: 10,
           keyword: kw,
           categoryParentName: cat || '',
           pid: this.good.id,
-          commodityStatesId: 2
+          commodityStatesId: 2,
+          scoreSort: true
         }).then((response) => {
           this.guessGoods = response.artworks;
           setTimeout(() => {
@@ -368,14 +363,25 @@
         this._drop(target);
       },
       addToCart(target) {
+        let stockEmpty = false;
         if (!this.good.count) {
           Vue.set(this.good, 'count', 1);
         } else {
-          this.good.count++;
+          let stock = this.good.stock && this.good.stock.total || 0;
+          let bookStock = this.good.stock && this.good.stock.bookTotal || 0;
+          let total = stock + bookStock;
+          if (this.good.count >= total) {
+            this.$store.dispatch('openToast', '超过当前库存数了哦!');
+            stockEmpty = true;
+          } else {
+            this.good.count++;
+          }
         }
-        this._drop(target);
-        this.$store.commit('ADD_QUANTITY', this.good.id);
-        this.$store.dispatch('addToCart', this.good);
+        if (!stockEmpty) {
+          this._drop(target);
+          this.$store.commit('ADD_QUANTITY', this.good.id);
+          this.$store.dispatch('addToCart', this.good);
+        }
       },
       _drop(target) {
         // 优化体验，异步执行小球下落动画
@@ -507,14 +513,18 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone']
           });
         });
-        let redirect = location.href.replace('?from=singlemessage&isappinstalled=0', '');
+        let redirect = 'http://' + location.host + location.pathname + '#/good/' + this.good.id;
+        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
+        if (!ios) {
+          redirect = 'http://' + location.host + '/weixin/g/' + this.good.id;
+        }
         let uid = this.$store.getters.getUserInfo.userId;
         if (uid) {
           redirect += '?userId=' + uid;
         }
         let shareData = {
           title: this.good.name,
-          desc: '售价：¥' + this.good.price + '。「一虎一席茶席艺术平台」精品。新关注用户送百元现金券。',
+          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
         };
@@ -724,7 +734,7 @@
           color: rgb(240, 20, 20)
         .old
           text-decoration: line-through
-          font-size: 10px
+          font-size: 12px
           color: rgb(147, 153, 159)
       .delivery-annouce
         font-size: 12px
@@ -796,7 +806,7 @@
             vertical-align: middle
             color: #666
       .text, .player
-        font-size: 12px
+        font-size: 13px
         color: rgb(77, 85, 93)
         line-height: 1.3
         box-sizing: border-box
@@ -809,11 +819,10 @@
         padding-left: 14px
         padding-right: 10px
       .sellpoint
-        display: block
         padding: 0 10px 3px 14px
-        font-size: 12px
+        font-size: 13px
+        color: #07111b
         line-height: 17px
-        color: #7f7f7f
         overflow: hidden
         text-overflow: ellipsis
         display: -webkit-box
@@ -828,11 +837,11 @@
       .label
         display: block
         float: left
-        font-size: 12px
+        font-size: 13px
         color: #999
       .desc
         flex: 1
-        font-size: 12px
+        font-size: 13px
         color: #333
         oveflow: hidden
     .rating

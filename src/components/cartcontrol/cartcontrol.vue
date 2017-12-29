@@ -1,11 +1,11 @@
 <template>
   <div class="cartcontrol">
     <transition name="move">
-      <div class="cart-decrease" :class="{'disable': good.count <= 1}" @click.stop.prevent="decreaseCart">
+      <div class="cart-decrease" :class="{'disable': good.count < 1}" @click.stop.prevent="decreaseCart">
         <span class="inner icon-remove_circle_outline"></span>
       </div>
     </transition>
-    <div class="cart-count" v-show="good.count > 0">{{good.count}}</div>
+    <div class="cart-count" v-show="good.count >= 0">{{good.count}}</div>
     <div class="cart-add" @click.stop.prevent="addCart">
       <span class="inner icon-add_circle"></span>
     </div>
@@ -23,19 +23,36 @@
     },
     methods: {
       addCart() {
+        let stockEmpty = false;
         if (!this.good.count) {
           Vue.set(this.good, 'count', 1);
         } else {
-          this.good.count++;
+          let stock = this.good.stock && this.good.stock.total || 0;
+          let bookStock = this.good.stock && this.good.stock.bookTotal || 0;
+          let total = stock + bookStock;
+          if (this.good.count >= total) {
+            this.$store.dispatch('openToast', '超过当前库存数了哦!');
+            stockEmpty = true;
+          } else {
+            this.good.count++;
+          }
         }
-        this.$emit('add', event.target);
-        this.$store.commit('ADD_QUANTITY', this.good.id);
-        this.$store.dispatch('addToCart', this.good);
+        if (!stockEmpty) {
+          this.$emit('add', event.target);
+          this.$store.commit('ADD_QUANTITY', this.good.id);
+          this.$store.dispatch('addToCart', this.good);
+        }
       },
       decreaseCart() {
         if (this.good.count > 1) {
           this.good.count--;
           this.$store.commit('REDUCE_QUANTITY', this.good.id);
+        } else {
+          if (!this.good.fromCart) {
+            this.good.count = 0;
+          }
+          this.$store.commit('REDUCE_QUANTITY', this.good.id);
+          this.$emit('confirm', this.good);
         }
       }
     }

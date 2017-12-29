@@ -323,7 +323,7 @@
         padding: 10px 8px
         p
           line-height: 1.8
-          font-size: 12px
+          font-size: 13px
           label
             display: inline-block
             min-width: 75px
@@ -331,7 +331,8 @@
       .delivery-info, .goods-info
         padding-top: 0
       .price-summary
-        font-size: 12px
+        font-size: 13px
+        padding-bottom: 20px
         ul
           position: relative
           padding-bottom: 15px
@@ -348,13 +349,13 @@
         position: relative
         display: flex
         padding: 8px 0
-        font-size: 12px
+        font-size: 13px
         .item-img
           display: inline-block
           float: left
           img
-            width: 60px
-            height: 60px
+            width: 67px
+            height: 67px
             overflow: hidden
         .item-info
           flex: 1

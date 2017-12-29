@@ -6,8 +6,8 @@
         <ul>
           <li class="border-1px">
             <p>
-              <span class="title">收货备注</span>
-              <textarea v-model="remarks" placeholder="收货备注" rows="2" required></textarea>
+              <span class="title">备注:</span>
+              <textarea v-model="remarks" placeholder="收货备注" rows="3" required></textarea>
               <i class="icon-close" v-show="remarks.length" @click.stop.prevent="doClear"></i>
             </p>
           </li>
@@ -62,7 +62,7 @@
       ul
         position: relative
         li
-          padding: 12px 10px 12px 75px
+          padding: 12px 12px 12px 75px
           box-sizing: border-box
           border-1px(rgba(7, 17, 27, 0.1))
           p
@@ -75,18 +75,21 @@
               right: 0
               margin: auto 0
               padding-right: 20px
-              text-align: right
+              padding-left: 12px
+              text-align: left
               font-size: 14px
-              line-height: 1
+              line-height: 1.5
             input
               height: 20px
               line-height: normal
               border: 0 none
               font-size: 14px
               width: 100%
+              box-sizing: border-box
               vertical-align: top
             textarea
               width: 100%
+              box-sizing: border-box
               border: none
               resize: none
               font-size: 14px

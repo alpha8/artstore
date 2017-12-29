@@ -49,7 +49,7 @@
         <split></split>
         <ul class="shop-info">
           <li class="checkout-item change item-border" @click.stop.prevent="openRemarkBox">
-            <strong>备注</strong>
+            <strong>备注：</strong>
             <span class="nowrap-line remark">{{payRemarks}}</span>
           </li>
         </ul>
@@ -386,14 +386,14 @@
         padding: 0 10px
         h3
           position: relative
-          font-size: 16px
+          font-size: 14px
           padding: 24px 30px 24px 0
           font-weight: 400
           &:after
             content: ""
             display: block
-            width: 10px
-            height: 10px
+            width: 8px
+            height: 8px
             border-top: 1px solid #666
             border-left: 1px solid #666
             -webkit-transform-origin: 50%
@@ -421,14 +421,16 @@
           font-weight: 400
           font-size: 14px
           color: #999
+        strong
+          font-weight: 400
         ul
           position: relative
           padding-right: 30px
           &:after
             position: absolute
             display: block
-            width: 10px
-            height: 10px
+            width: 8px
+            height: 8px
             content: ""
             border-top: 1px solid #666
             border-left: 1px solid #666
@@ -478,7 +480,7 @@
           li
             display: flex
             margin-bottom: 10px
-            font-size: 12px
+            font-size: 13px
             min-height: 75px
             border-1px(rgba(7, 17, 27, 0.1))
             &:last-child
@@ -492,7 +494,7 @@
                 overflow: hidden
             .sku-info
               flex: 1
-              padding: 10px
+              padding: 10px 10px 10px 5px
               .sku-name
                 color: #333
                 height: 40px
@@ -512,7 +514,7 @@
               text-align: right
               box-sizing: border-box
               p
-                padding-bottom: 10px
+                padding-bottom: 8px
               .sku-price
                 color: #e4393c
                 font-weight: 700
@@ -536,6 +538,7 @@
                 color: #fb4741
             .remark
               margin-bottom: 3px
+              padding-right: 15px
             span
               flex: 1
               text-align: right
@@ -566,6 +569,8 @@
           .item-border
             background: #fff url(../../common/images/line.png) -7px bottom repeat-x
             background-size: 60px 4px
+        >.shop-info > li
+          padding-right: 0
         >.payArea
           position: relative
           text-align: left
@@ -573,10 +578,10 @@
           padding: 0 10px
           .price
             margin: 13px 0
-            font-size: 15px
+            font-size: 14px
             .label
               display: inline-block
-              width: 120px
+              width: 98px
             .totalPrice
               color: #e4393c
             strong

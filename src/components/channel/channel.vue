@@ -9,8 +9,7 @@
           <h3>{{item.name}}</h3>
           <div class="sellpoint" v-if="item.sellPoint">{{item.sellPoint}}</div>
           <div class="price"><div class="num">{{item.price | currency}}</div><div class="salesCount">(已售:{{item.stock && item.stock.salesCount || 0}}件)</div></div>
-          <div class="icon" @click.stop.prevent="mark(item)"><i :class="favorited(item)"></i>
-          </div>
+          <div class="icon" @click.stop.prevent="mark(item)"><i :class="favorited(item)"></i></div>
         </div>
       </div>
     </div>

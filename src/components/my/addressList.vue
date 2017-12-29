@@ -123,6 +123,8 @@
       .addressList
         position: relative
         width: 100%
+        strong
+          font-weight: 400
         .address-item
           position: relative
           display: flex

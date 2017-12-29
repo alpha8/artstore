@@ -6,7 +6,7 @@
           <i class="icon-search2"></i>
           <div class="search-form-input">
             <form action="" v-on:submit.stop.prevent="search">
-              <input type="search" name="txtSearch" class="txtSearch" placeholder="最大规模、最高专业等级" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" v-on:input="changeText">
+              <input type="search" name="txtSearch" class="txtSearch" placeholder="一站式优品商城、品味脱凡" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" v-on:input="changeText">
             </form>
           </div>
           <!-- <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i> -->

@@ -20,7 +20,7 @@
                 </div>
                 <div class="amountWrapper">
                   <div class="price">{{product.price | currency}}</div>
-                  <cartcontrol :good="product"></cartcontrol>
+                  <cartcontrol :good="product" @confirm="confirmRemove"></cartcontrol>
                 </div>
               </div>
             </div>
@@ -54,6 +54,7 @@
         </div>
       </div>
     </div>
+    <mydialog :text="dialog.text" :btns="dialog.btns" ref="dialogWin"></mydialog>
   </div>
 </template>
 
@@ -61,6 +62,7 @@
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
+  import mydialog from '@/components/common/mydialog';
 
   export default {
     data() {
@@ -68,7 +70,18 @@
         checkedAll: false,
         editMode: false,
         cartProducts: [],
-        total: 0
+        total: 0,
+        dialog: {
+          text: '是否确认删除此商品？',
+          btns: {
+            ok: {
+              text: '确定',
+              callback: function() {
+                console.log('ok');
+              }
+            }
+          }
+        }
       };
     },
     computed: {
@@ -104,7 +117,6 @@
     },
     activated() {
       this.reloadItems();
-      this._initScroll();
       this.$store.commit('HIDE_FOOTER');
     },
     updated() {
@@ -142,9 +154,12 @@
             price: product.price,
             oldPrice: product.oldPrice,
             count: product.count,
-            checked: product.checked || false
+            checked: product.checked || false,
+            stock: product.stock,
+            fromCart: true
           });
         });
+        this._initScroll();
       },
       removeCartItem() {
         let deleteItems = [];
@@ -194,10 +209,17 @@
           // this.$router.push('pay');
           window.location.href = window.location.href.replace('cart', 'pay');
         }
+      },
+      confirmRemove() {
+        let vm = this;
+        this.dialog.btns.ok.callback = function() {
+          vm.reloadItems();
+        };
+        this.$refs.dialogWin.show();
       }
     },
     components: {
-      fixedheader, cartcontrol
+      fixedheader, cartcontrol, mydialog
     }
   };
 </script>
@@ -265,7 +287,7 @@
             display: inline-block
             width: 35%
             float: left
-            padding: 10px 10px 10px 0
+            padding: 5px 0
             box-sizing: border-box
             img
               width: 95%
@@ -314,6 +336,8 @@
         font-size: 60px
         color: rgba(7, 17, 27, 0.1)
         padding-bottom: 5px
+      .empty-text
+        color: #ccc
   .fixed-foot
     position: fixed
     left: 0

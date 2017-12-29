@@ -7,7 +7,6 @@
     <loading :show="loading.show" :text="loading.text"></loading>
     <toast v-show="toast.show" :text="toast.text"></toast>
     <gohome></gohome>
-    <messagebox></messagebox>
   </div>
 </template>
 
@@ -16,7 +15,6 @@ import fixedfoot from '@/components/fixedtoolbar/fixedfoot';
 import loading from '@/components/common/loading';
 import toast from '@/components/common/toast';
 import gohome from '@/components/fixedtoolbar/gohome';
-import messagebox from '@/components/common/messagebox';
 import {fixFontSize} from '@/common/js/util';
 
 export default {
@@ -66,7 +64,7 @@ export default {
     }
   },
   components: {
-    fixedfoot, loading, toast, gohome, messagebox
+    fixedfoot, loading, toast, gohome
   }
 };
 </script>

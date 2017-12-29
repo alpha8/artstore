@@ -3,8 +3,7 @@
     <div class="msgBox">
       <div class="msgBox-title">温馨提示<span class="closeIcon" @click.stop.prevent="closeLayer"><i class="icon-close2"></i></span></div>
       <div class="msgBox-content">
-        <p>第二轮公测版，欢迎您从【一虎一席茶席艺术平台】微信公众号的聊天窗口中反馈宝贵建议，建议一经采用将致谢您一份一虎一席精美礼品。</p>
-        <p><strong>正式版</strong>（界面外观美化、规模化商品库发布）将于近日闪亮登场...</p>
+        <p>全国线下巡展广州站【广州国际艺术博览会】4天，在 23 - 28号期间，线上商城将陆续分批发布大规模精品库，届时敬请饱览美物...</p>
       </div>
       <div class="msgBox-footer"><span class="btn" @click.stop.prevent="closeLayer">知道了!</span></div>
     </div>
@@ -45,14 +44,13 @@
     top: 50%
     left: 50%
     width: 300px
-    height: 219px
-    margin-top: -109.5px
-    margin-left: -150px
+    max-height: 400px
     z-index: 100
     background-color: #fff
     box-sizing: border-box
     box-shadow: 1px 1px 50px rgba(0,0,0,.3)
     border-radius: 10px
+    transform: translate(-50%, -50%)
     overflow: hidden
     .msgBox-title
       position: relative
@@ -71,6 +69,7 @@
       text-overflow: ellipsis
       overflow: hidden
       white-space: nowrap
+      background-clip: padding-box
       .closeIcon
         position:absolute
         display: inline-block
@@ -91,7 +90,6 @@
     .msgBox-content
       line-height: 1.3
       padding: 8px 10px 8px 10px
-      height: 130px
       overflow: hidden
       box-sizing: border-box
       p
@@ -105,6 +103,7 @@
       height: 32px
       line-height: 32px
       text-align: center
+      padding-bottom: 15px
       span
         padding: 8px 25px
         background: #1ab394

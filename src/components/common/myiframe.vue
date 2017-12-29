@@ -28,18 +28,6 @@
         }
       }
     },
-    mounted() {
-      setTimeout(() => {
-        try {
-          let ad = document.getElementById('_embed_v3_dc');
-          if (ad) {
-            ad.style.display = 'none';
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      }, 1000);
-    },
     computed: {
       getUrl() {
         if (this.redirectUrl) {

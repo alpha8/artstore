@@ -428,7 +428,7 @@
       notify() {
         let openid = this.$store.getters.getUserInfo.openid;
         api.reservedNotify({
-          pid: this.auction.auctionId,
+          pid: this.auction.id,
           pname: this.auction.name,
           type: 0,
           openid: openid,
@@ -452,14 +452,18 @@
         if (this.auction.icon) {
           icon = api.CONFIG.psCtx + this.auction.icon + '?w=423&h=423';
         }
-        let redirect = location.href.replace('?from=singlemessage&isappinstalled=0', '');
+        let redirect = 'http://' + location.host + location.pathname + '#/auction/' + this.auction.id + '/detail';
+        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
+        if (!ios) {
+          redirect = 'http://' + location.host + '/weixin/a/' + this.auction.id;
+        }
         let uid = this.$store.getters.getUserInfo.userId;
         if (uid) {
           redirect += '?userId=' + uid;
         }
         let shareData = {
           title: this.auction.name,
-          desc: '起拍价：¥' + this.auction.startPrice + '。「一虎一席商城」正品保证，微信专享。',
+          desc: '起拍价：¥' + this.auction.startPrice + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: icon
         };

@@ -9,11 +9,14 @@
         </div>
         <topchanel :channels="channels"></topchanel>
         <split></split>
-        <modal-title title="茶席套装" moreText="更多" catKey="art" catName="茶席套装"></modal-title>
+        <modal-title title="茶席套装.三百席" moreText="更多" catKey="art" catName="茶席套装.三百席"></modal-title>
         <channel :items="arts" :cols="2"></channel>
         <split></split>
-        <modal-title title="优质茶器" moreText="更多" catKey="teaart" catName="优质茶器"></modal-title>
+        <modal-title title="优质茶器(1000元以内)" moreText="更多" catKey="teaart" catName="优质茶器"></modal-title>
         <channel :items="teaPots" :cols="2"></channel>
+        <split></split>
+        <modal-title title="贵重茶器(1000元以上)" moreText="更多" catKey="teaart" catName="贵重茶器"></modal-title>
+        <channel :items="dearTeapots" :cols="2"></channel>
         <split></split>
         <modal-title title="好茶" moreText="更多" catKey="welltea" catName="好茶"></modal-title>
         <channel :items="goodTeas" :cols="2"></channel>
@@ -32,7 +35,6 @@
       </div>
     </div>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
-    <frame></frame>
   </div>
 </template>
 
@@ -46,7 +48,6 @@
   import channel from '@/components/channel/channel';
   import gotop from '@/components/fixedtoolbar/gotop';
   import search from '@/components/fixedtoolbar/search';
-  import frame from '@/components/common/myiframe';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
 
@@ -56,6 +57,7 @@
         scrollY: 0,
         arts: [],
         teaPots: [],
+        dearTeapots: [],
         goodTeas: [],
         paints: [],
         ya: [],
@@ -91,7 +93,8 @@
         ],
         selectedGood: {},
         showTop: false,
-        swipeHeight: 0
+        swipeHeight: 0,
+        lastInitPlayer: +new Date()
       };
     },
     created() {
@@ -112,11 +115,24 @@
         artworkTypeName: 'tea',
         categoryParentName: 'teaart',
         currentPage: 1,
-        pageSize: 20,
+        pageSize: 30,
         commodityStatesId: 2,
+        price: '0-1000',
         scoreSort: true
       }).then((response) => {
         this.teaPots = response.artworks;
+      });
+
+      api.GetGoods({
+        artworkTypeName: 'tea',
+        categoryParentName: 'teaart',
+        currentPage: 1,
+        pageSize: 16,
+        commodityStatesId: 2,
+        price: '1000-',
+        scoreSort: true
+      }).then((response) => {
+        this.dearTeapots = response.artworks;
       });
 
       api.GetGoods({
@@ -159,10 +175,11 @@
       this._initScroll();
     },
     activated() {
+      this._initPlayer();
       this._initScroll();
     },
     deactivated() {
-      this.scrollY = 0;
+      // this.scrollY = 0;
     },
     computed: {
       showFixed() {
@@ -202,6 +219,7 @@
           'hide_h5_setting': true
         };
         document.addEventListener('DOMContentLoaded', () => {
+          this.lastInitPlayer = +new Date();
           if (window.qcVideo) {
             new qcVideo.Player('tencent_video_player', option);
           } else {
@@ -209,12 +227,6 @@
               new qcVideo.Player('tencent_video_player', option);
             }, 800);
           }
-          setTimeout(() => {
-            let video = document.getElementsByTagName('video')[0];
-            if (video) {
-              video.setAttribute('x5-playsinline', 'true');
-            }
-          }, 2000);
         });
       },
       selectGood(good) {
@@ -222,6 +234,26 @@
         this.$refs.goodDetail.show();
       },
       addFood(target) {
+      },
+      _initPlayer() {
+        let video = document.getElementsByTagName('video')[0];
+        if (window.qcVideo && !video) {
+          let now = +new Date();
+          if (now <= this.lastInitPlayer + 3000) {
+            return;
+          }
+          this.lastInitPlayer = now;
+          let option = {
+            'auto_play': '0',
+            'file_id': '4564972818673793787',
+            'app_id': '1252423336',
+            'width': 640,
+            'height': 368,
+            'https': 1,
+            'hide_h5_setting': true
+          };
+          new qcVideo.Player('tencent_video_player', option);
+        }
       },
       goTop() {
         let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
@@ -238,14 +270,14 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone']
           });
         });
-        let redirect = location.href.replace('?from=singlemessage&isappinstalled=0', '');
+        let redirect = 'http://' + location.host + location.pathname;
         let uid = this.$store.getters.getUserInfo.userId;
         if (uid) {
           redirect += '?userId=' + uid;
         }
         let shareData = {
-          title: '一虎一席茶席艺术平台',
-          desc: '「一虎一席茶席艺术平台」精品。新关注用户送百元现金券。',
+          title: '[一虎一席茶席艺术平台] 商城',
+          desc: '优质茶生活，茶文化高端礼品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
         };
@@ -263,8 +295,7 @@
       channel,
       fixedsearch,
       gotop,
-      search,
-      frame
+      search
     }
   };
 </script>

@@ -211,12 +211,22 @@ export const mutations = {
     let product = state.products[sid];
     if (product) {
       product--;
-      state.cart.added.forEach(p => {
-        if (p.id === id) {
-          p.count = product;
+      if (product <= 0) {
+        delete state.products[sid];
+        let arr = state.cart.added;
+        for (let i = 0; i < arr.length; i++) {
+          if (arr[i].id === id) {
+            state.cart.added.splice(i, 1);
+          }
         }
-      });
-      state.products[sid] = product;
+      } else {
+        state.cart.added.forEach(p => {
+          if (p.id === id) {
+            p.count = product;
+          }
+        });
+        state.products[sid] = product;
+      }
     }
     save('cartAdded', state.cart.added);
     save('products', state.products);

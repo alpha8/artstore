@@ -373,14 +373,18 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
           });
         });
-        let redirect = location.href.replace('?from=singlemessage&isappinstalled=0', '');
+        let redirect = 'http://' + location.host + location.pathname + '#/groupbuy/' + this.good.id + '/detail';
+        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
+        if (!ios) {
+          redirect = 'http://' + location.host + '/weixin/b/' + this.good.id;
+        }
         let uid = this.$store.getters.getUserInfo.userId;
         if (uid) {
           redirect += '?userId=' + uid;
         }
         let shareData = {
           title: this.good.name,
-          desc: '团购价：¥' + this.good.groupPrice + '。「一虎一席茶席艺术平台」精品。新关注用户送百元现金券。',
+          desc: '团购价：¥' + this.good.groupPrice + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
         };

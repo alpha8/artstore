@@ -368,7 +368,7 @@
               position: relative
               display: flex
               padding: 8px 0
-              font-size: 12px
+              font-size: 13px
               border-top-1px(rgba(7, 17, 27, 0.1))
               border-1px(rgba(7, 17, 27, 0.1))
               .summary
@@ -397,7 +397,7 @@
               position: relative
               display: flex
               padding: 8px 0
-              font-size: 12px
+              font-size: 13px
               .item-img
                 display: inline-block
                 float: left
@@ -407,7 +407,7 @@
                   overflow: hidden
               .item-info
                 flex: 1
-                padding: 20px 8px 0
+                padding: 20px 8px 0 5px
                 >.title
                   overflow: hidden
                   text-overflow: ellipsis
@@ -431,6 +431,7 @@
         padding: 40px 0
         text-align: center
         font-size: 14px
+        color: #ccc
   .address-list-wrap
     position: absolute
     left: 0

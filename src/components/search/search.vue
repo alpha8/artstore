@@ -31,8 +31,10 @@
               <router-link :to="{name: 'good', params: {id: product.id}}"><img :src="getThumbnail(product)" /></router-link>
             </div>
             <div class="product-info">
-              <div class="product-title"><router-link :to="{name: 'good', params: {id: product.id}}">{{product.name}}</router-link></div>
+              <div class="product-title" @click.stop.prevent="goGoodDetail(product)">{{product.name}}</div>
+              <div class="sellpoint" v-if="product.sellPoint">{{product.sellPoint}}</div>
               <div class="product-price"><div class="num">{{product.price | currency}}</div><div class="salesCount">(已售:{{product.stock && product.stock.salesCount || 0}}件)</div></div>
+              <div class="icon" @click.stop.prevent="mark(product)"><i :class="favorited(product)"></i></div>
             </div>
           </mu-flexbox-item>
         </mu-flexbox>
@@ -46,6 +48,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import Vue from 'vue';
   import sidebar from '@/components/search/sidebar';
   import gotop from '@/components/fixedtoolbar/gotop';
   import api from '@/api/api';
@@ -174,6 +177,9 @@
           return api.CONFIG.defaultImg;
         }
       },
+      goGoodDetail(item) {
+        this.$router.push({name: 'good', params: {id: item.id}});
+      },
       show() {
         this.$store.commit('HIDE_FOOTER');
       },
@@ -249,6 +255,67 @@
       goTop() {
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
+      },
+      favorited(good) {
+        let uid = this.$store.getters.getUserInfo.userId;
+        let ids = good.collected || [];
+        let flag = false;
+        for (let i = 0, len = ids.length; i < len; i++) {
+          if (uid === ids[i]) {
+            flag = true;
+          }
+        }
+        if (typeof good.marked === 'undefined') {
+          Vue.set(good, 'marked', false);
+        }
+        if (flag) {
+          good.marked = true;
+          return 'icon-favorite';
+        } else {
+          good.marked = false;
+          return 'icon-heart';
+        }
+      },
+      mark(good) {
+        let uid = this.$store.getters.getUserInfo.userId;
+        if (!uid) {
+          this.$store.dispatch('openToast', '请先登录！');
+          return;
+        }
+        let params = {
+          userId: uid,
+          type: 1,
+          artworkId: good.id,
+          price: good.price,
+          name: good.name,
+          icons: good.pictures,
+          fromCart: false
+        };
+        if (good.marked) {
+          delete params.name;
+          delete params.icons;
+          delete params.price;
+          // 已关注，再次点击取消关注
+          api.unmark(params).then(response => {
+            if (response.result === 0) {
+              good.collected = [];
+              good.marked = false;
+              this.favorited(good);
+            }
+          });
+          return;
+        }
+        api.mark(params).then(response => {
+          if (response.result === 0) {
+            if (good.collected) {
+              good.collected.push(uid);
+            } else {
+              good.collected = [uid];
+            }
+            good.marked = true;
+            this.favorited(good);
+          }
+        });
       }
     },
     components: {
@@ -430,6 +497,13 @@
               width: 100%
               vertical-align: top
               overflow: hidden
+        .product-info
+          position: relative
+          width: 100%
+          padding-right: 40px
+          padding-left: 3px
+          min-height: 51px
+          box-sizing: border-box
         .product-title
           overflow: hidden
           display: -webkit-box
@@ -437,11 +511,17 @@
           font-size: 14px
           height: 20px
           line-height: 1.5
-          white-space: normal
-          word-break: break-all
           text-overflow: ellipsis
           -webkit-line-clamp: 1
           -webkit-box-orient: vertical
+        .sellpoint
+          display: block
+          font-size: 12px
+          color: #7f7f7f
+          padding: 2px 0 3px
+          white-space: nowrap
+          text-overflow: ellipsis
+          overflow: hidden
         .product-price
           position: relative
           font-size: 14px
@@ -462,4 +542,17 @@
             display: block
             float: left
             bottom: 0
+        .icon
+          position: absolute
+          top: 50%
+          margin-top: -20px
+          right: 0
+          width: 40px
+          height: 40px
+          line-height: 40px
+          text-align: center
+          font-size: 20px
+          box-sizing: border-box
+          .icon-favorite
+            color: #ff463c
 </style>
