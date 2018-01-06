@@ -21,11 +21,21 @@
       },
       catKey: {
         type: String
+      },
+      price: {
+        type: String,
+        default() {
+          return '';
+        }
       }
     },
     methods: {
       fetchMore() {
-        this.$router.push({path: '/search', query: {parentCat: this.catKey, key: this.catName}});
+        if (this.price) {
+          this.$router.push({path: '/search', query: {parentCat: this.catKey, key: this.catName, price: this.price}});
+        } else {
+          this.$router.push({path: '/search', query: {parentCat: this.catKey, key: this.catName}});
+        }
       }
     }
   };
@@ -57,7 +67,7 @@
     .line
       flex: 1
       position: relative
-      top: -6px
+      top: -8px
       border-bottom: 1px solid #fafafa
       &.left
         margin-left: 30px
@@ -65,16 +75,24 @@
         margin-right: 30px
     .text
       padding: 0 12px
+      height: 16px
+      line-height: 16px
       font-size: 14px
       font-weight: 700
       letter-spacing: 1px
+      overflow: hidden
+      text-overflow: ellipsis
+      display: -webkit-box
+      -webkit-line-clamp: 1
+      -webkit-box-orient: vertical
     .more
       position: absolute
       display: block
-      height: 14px
+      height: 16px
+      line-height: 16px
       top: 50%
       right: -10px
-      margin-top: -6px
+      margin-top: -8px
       font-size: 14px
       color: #666
 </style>

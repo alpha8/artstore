@@ -28,13 +28,23 @@
             <div v-if="innergood && innergood.childrens.length" v-for="innergood in good.childrens">
               <h1 class="title border-1px">{{innergood.value}}</h1>
               <ul class="itemList">
-                <li v-for="good in innergood.childrens" :class="typeStatus(good.status)" v-if="!good.hide">
-                  <router-link :to="{path: '/search', query: {ck: innergood.propertyName, cv: good.propertyName, key: (good.value === 'thumbnail' ? '' : good.value)}}" class="good-item" :class="{'thumbnail': good.value === 'thumbnail'}">
-                    <div class="icon" v-if="good.value==='thumbnail'">
-                      <img :src="good.desc" border="0" />
+                <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName === 'art'">
+                  <router-link :to="{path: '/search', query: {ck: innergood.propertyName, cv: item.propertyName, parentCat: 'art', key: (item.value === 'thumbnail' ? '' : item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
+                    <div class="icon" v-if="item.value==='thumbnail'">
+                      <img :src="item.desc" border="0" />
                     </div>
-                    <div class="content" v-if="good.value!=='thumbnail'">
-                      <h2 class="name" :class="{'strong': good.css === 'strong'}">{{good.value}}<i v-if="good.css" :class="good.css"></i><em>({{good.count || 0}})</em></h2>
+                    <div class="content" v-if="item.value!=='thumbnail'">
+                      <h2 class="name" :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em></h2>
+                    </div>
+                  </router-link>
+                </li>
+                <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName !== 'art'">
+                  <router-link :to="{path: '/search', query: {sunCat: item.propertyName, lv1: good.propertyName, lv2: innergood.propertyName, key: (item.value === 'thumbnail' ? '' : item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
+                    <div class="icon" v-if="item.value==='thumbnail'">
+                      <img :src="item.desc" border="0" />
+                    </div>
+                    <div class="content" v-if="item.value!=='thumbnail'">
+                      <h2 class="name" :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em></h2>
                     </div>
                   </router-link>
                 </li>
@@ -90,18 +100,29 @@
               item.forEach(o => {
                 totalPivot[key][o.name] = o.count || 0;
                 total += o.count || 0;
+                let items = o.childrens;
+                if (items && items.length) {
+                  items.forEach(o1 => {
+                    totalPivot[key][o.name + o1.name] = o1.count || 0;
+                  });
+                }
               });
               totalPivot[key].total = total;
             }
           }
         });
+        totalPivot['artcount'] = res.artcount;
         this.teaTotal = totalPivot;
 
         api.GetCategories().then((response) => {
           this.goods = response.childrens;
           this.goods.forEach(good => {
             try {
-              good.count = this.teaTotal[good.propertyName] && this.teaTotal[good.propertyName].total;
+              if (good.propertyName === 'art') {
+                good.count = this.teaTotal['artcount'] || 0;
+              } else {
+                good.count = this.teaTotal[good.propertyName] && this.teaTotal[good.propertyName].total || 0;
+              }
             } catch (e) {
               console.log(e);
             }
@@ -111,6 +132,17 @@
                 try {
                   let count = this.teaTotal[good.propertyName] && this.teaTotal[good.propertyName][inner.propertyName];
                   inner.count = count || 0;
+                  let lv3 = inner.childrens;
+                  if (lv3.length) {
+                    lv3.forEach(node => {
+                      try {
+                        let qty = this.teaTotal[good.propertyName] && this.teaTotal[good.propertyName][inner.propertyName + node.propertyName];
+                        node.count = qty || 0;
+                      } catch (e1) {
+                        console.log(e1);
+                      }
+                    });
+                  }
                 } catch (e) {
                   console.log(e);
                 }

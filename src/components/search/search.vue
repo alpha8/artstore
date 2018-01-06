@@ -79,10 +79,23 @@
       this._reset();
       this.keyword = this.$route.query.key || '';
       let parentCategory = this.$route.query.parentCat;
+      let cat = this.$route.query.cat;
+      let sunCat = this.$route.query.sunCat;
+      let lv1 = this.$route.query.lv1;
+      let lv2 = this.$route.query.lv2;
       if (parentCategory) {
         this.params.categoryParentName = parentCategory || '';
-      } else {
+      } else if (cat) {
         this.params.categoryName = this.$route.query.cat || '';
+      } else if (lv1 !== 'brand' && sunCat) {
+        this.params.categorychildrenName = sunCat || '';
+      }
+      if (lv1 === 'brand') {
+        this.params.brandType = lv2 || '';
+        this.params.brandName = sunCat || '';
+      } else {
+        this.params.brandType = '';
+        this.params.brandName = '';
       }
       let searchKeyword = this.$route.query.keyword;
       if (searchKeyword) {
@@ -97,11 +110,11 @@
       let ck = this.$route.query.ck;
       let cv = this.$route.query.cv;
       if (ck && cv) {
-        if (ck === 'teabrand' || ck === 'tearoombrand') {
-          this.params.categoryParentName = ck;
-        } else {
-          this.params[ck] = cv;
-        }
+        this.params[ck] = cv;
+      }
+      let price = this.$route.query.price;
+      if (price) {
+        this.params.price = price;
       }
       this.fetchData(true);
     },
@@ -152,11 +165,14 @@
       },
       _reset() {
         this.products = [];
-        this.params.categoryName = '';
         this.params.yearName = '';
         this.params.cfName = '';
         this.params.qualityName = '';
+        this.params.categoryName = '';
         this.params.categoryParentName = '';
+        this.params.categorychildrenName = '';
+        this.params.brandType = '';
+        this.params.brandName = '';
         this.pageNumber = 1;
         this.totalPages = -1;
         this.loadEnd = false;
@@ -192,13 +208,16 @@
       },
       clearSearch() {
         this.keyword = '';
-        this.search();
+        this.search(true);
       },
-      search() {
+      search(clear) {
         this._reset();
         let form = this.$refs.sidebar.getFormValue();
         this.params.categoryName = form.categoryName || '';
         this.params.price = form.price || '';
+        if (form.minPrice || form.maxPrice) {
+          this.params.price = `${form.minPrice || 0}-${form.maxPrice || ''}`;
+        }
         this.params.shelfTime = form.shelfTime || '0';
         this.params.categoryParentName = form.categoryParentName || '';
         if (this.keyword) {
@@ -215,6 +234,19 @@
         }
         if (kw) {
           this.keyword = kw;
+          this.params.keyword = '';
+        }
+        if (!clear && !this.params.categoryName && !this.params.categoryParentName && !this.params.categorychildrenName) {
+          let parentCategory = this.$route.query.parentCat;
+          let cat = this.$route.query.cat;
+          let sunCat = this.$route.query.sunCat;
+          if (parentCategory) {
+            this.params.categoryParentName = parentCategory || '';
+          } else if (cat) {
+            this.params.categoryName = this.$route.query.cat || '';
+          } else if (sunCat) {
+            this.params.categorychildrenName = this.$route.query.sunCat || '';
+          }
           this.params.keyword = '';
         }
         this.fetchData(true);
@@ -466,7 +498,7 @@
       display: flex
       flex-wrap: wrap
       width: 100%
-      padding: 10px 0
+      padding: 10px 0 10px 5px
       overflow: auto
       box-sizing: border-box
       -webkit-overflow-scrolling: touch
@@ -481,11 +513,10 @@
       .product-item
         width: 50%
         float: left
-        padding: 0 5px 10px 5px
+        padding-bottom: 10px
         box-sizing: border-box
         .product-thumbnail
           position: relative
-          background: #f2f2f7
           width: 100%
           min-height: 102px
           overflow: hidden
@@ -494,7 +525,7 @@
             width: 100%
             overflow: hidden
             img
-              width: 100%
+              width: 48vw
               vertical-align: top
               overflow: hidden
         .product-info
@@ -507,7 +538,6 @@
         .product-title
           overflow: hidden
           display: -webkit-box
-          color: #666
           font-size: 14px
           height: 20px
           line-height: 1.5

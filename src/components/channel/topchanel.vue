@@ -12,7 +12,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import BScroll from 'better-scroll';
+  // import BScroll from 'better-scroll';
   export default {
     props: {
       channels: {
@@ -24,7 +24,7 @@
     },
     methods: {
       _initScroll() {
-        let len = this.channels.length;
+        /* let len = this.channels.length;
         if (len) {
           let topList = this.$refs.topList;
           let itemWidth = topList.getElementsByClassName('top_item')[0].offsetWidth;
@@ -40,6 +40,7 @@
             this.scroll.refresh();
           }
         });
+         */
       }
     }
   };
@@ -50,34 +51,38 @@
   .top_wrapper
     position: relative
     width: 100%
-    height: 90px
+    height: auto
     white-space: nowrap
     overflow: hidden
     .top_list
       position: relative
-      height: 100%
+      display: flex
+      flex-wrap: wrap
       .top_item
-        display: inline-block
-        width: 21.2vw
-        float: left
-        padding: 15px 0
+        display: block
+        width: 25%
+        padding: 7px 0
+        border-bottom: 1px solid rgba(7, 17, 27, 0.1)
+        border-right: 1px solid rgba(7, 17, 27, 0.1)
         text-align: center
         box-sizing: border-box
-        &:last-child
-          .top_url
-            border-right: none
+        &:nth-child(4n)
+          border-right: none
+        &:nth-child(n+5)
+          border-bottom: none
         .top_url
           display: block
-          border-right: 1px solid rgba(7, 17, 27, 0.1)
           .top_icon
             display: block
-            width: 40px
-            height: 40px
+            width: 35px
+            height: 35px
             margin: 0 auto
-            font-size: 34px
+            font-size: 28px
             color: #00BB9C
             &.big
-              font-size: 35px
+              font-size: 30px
+            &.icon-teapot_kitchen
+              font-size: 34px
           .top_name
             font-size: 12px
             color: #666

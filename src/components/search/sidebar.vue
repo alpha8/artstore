@@ -325,7 +325,7 @@
       },
       ok() {
         if (this.form.minPrice || this.form.maxPrice) {
-          this.price = (this.form.minPrice || 0) + '-' + this.maxPrice;
+          this.price = (this.form.minPrice || 0) + '-' + (this.maxPrice || '');
         }
         this.$emit('fireAction');
         this.$store.commit('HIDE_SIDEBAR');

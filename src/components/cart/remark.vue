@@ -4,10 +4,10 @@
     <div class="update-remark">
       <div class="add-address-wrap">
         <ul>
-          <li class="border-1px">
+          <li>
             <p>
               <span class="title">备注:</span>
-              <textarea v-model="remarks" placeholder="收货备注" rows="3" required></textarea>
+              <textarea v-model="remarks" placeholder="收货备注" rows="4" required></textarea>
               <i class="icon-close" v-show="remarks.length" @click.stop.prevent="doClear"></i>
             </p>
           </li>
@@ -62,23 +62,22 @@
       ul
         position: relative
         li
-          padding: 12px 12px 12px 75px
+          padding: 12px 12px 6px 55px
           box-sizing: border-box
-          border-1px(rgba(7, 17, 27, 0.1))
           p
             display: block
             .title
               position: absolute
-              width: 65px
+              width: 52px
               top: 15px
               left: 0
               right: 0
               margin: auto 0
-              padding-right: 20px
               padding-left: 12px
               text-align: left
               font-size: 14px
               line-height: 1.5
+              box-sizing: border-box
             input
               height: 20px
               line-height: normal

@@ -16,7 +16,7 @@
     <div class="pay" ref="pay" :class="{'notop': selfservice}">
       <div class="order-wrap">
         <split v-if="!selfservice"></split>
-        <div class="order-shop border-1px">一虎一席艺术平台</div>
+        <div class="order-shop border-1px">一虎一席茶席艺术平台</div>
         <ul class="orderlist">
           <li class="product border-1px" v-for="product in products">
             <div class="thumbnail">
@@ -49,7 +49,7 @@
         <split></split>
         <ul class="shop-info">
           <li class="checkout-item change item-border" @click.stop.prevent="openRemarkBox">
-            <strong>备注：</strong>
+            <strong>备注/重要留言：</strong>
             <span class="nowrap-line remark">{{payRemarks}}</span>
           </li>
         </ul>
@@ -577,8 +577,10 @@
           background: #fff
           padding: 0 10px
           .price
-            margin: 13px 0
+            padding: 6px 0
             font-size: 14px
+            &.last
+              padding-top: 2px
             .label
               display: inline-block
               width: 98px

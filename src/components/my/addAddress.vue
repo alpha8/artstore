@@ -6,26 +6,26 @@
         <ul>
           <li class="border-1px">
             <p>
-              <span class="title">收货人</span>
+              <span class="title">收货人:</span>
               <input type="text" v-model="user.name" placeholder="姓名" autofocus required>
             </p>
           </li>
           <li class="border-1px">
             <p>
-              <span class="title">联系方式</span>
+              <span class="title">联系方式:</span>
               <input type="text" v-model="user.mobile" placeholder="手机号码" maxlength="11" required>
             </p>
           </li>
           <li class="border-1px">
             <p class="more">
-              <span class="title">所在地区</span>
+              <span class="title">所在地区:</span>
               <div class="text-control" v-if="city" @click.stop.prevent="openCityChoose">{{city}}</div>
               <div class="text-control tips" v-else @click.stop.prevent="openCityChoose">选择所在地区</div>
             </p>
           </li>
-          <li class="border-1px">
-            <p>
-              <span class="title">详细地址</span>
+          <li>
+            <p class="pr">
+              <span class="title special">详细地址:</span>
               <textarea v-model="user.address" placeholder="详细地址需填写楼栋楼层或房间号" rows="3" required></textarea>
               <i class="icon-close" v-show="clearAddress" @click.stop.prevent="doClearAddr"></i>
             </p>
@@ -134,9 +134,12 @@
     ul
       position: relative
       li
-        padding: 12px 10px 12px 75px
-        border-1px(rgba(7, 17, 27, 0.1))
+        position: relative
+        padding: 12px 0 0 75px
         box-sizing: border-box
+        &.border-1px
+          padding: 12px 0 12px 75px
+          border-1px(rgba(7, 17, 27, 0.1))
         .text-control
           height: 20px
           line-height: normal
@@ -148,10 +151,12 @@
             color: #BBBBBB
         p
           display: block
-          padding-right: 5px
           box-sizing: border-box
+          &.pr
+            padding-right: 2px
           .title
             position: absolute
+            display: block
             width: 65px
             top: 15px
             left: 0
@@ -161,6 +166,8 @@
             text-align: right
             font-size: 14px
             line-height: 1
+            &.special
+              top: 20px
           input
             height: 20px
             line-height: normal
@@ -179,7 +186,7 @@
           .icon-close
             position: absolute
             top: 18px
-            right: 14px
+            right: 4px
             font-size: 18px
           &.more:after
             position: absolute

@@ -57,7 +57,7 @@
     left: 50%
     width: 270px
     max-height: 400px
-    padding: 20px 15px 15px
+    padding: 10px 15px 15px
     background-color: #fff
     color: #333
     z-index: 100

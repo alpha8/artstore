@@ -48,7 +48,8 @@
         this.$nextTick(() => {
           if (!this.scroll) {
             this.scroll = new BScroll(this.$refs.address, {
-              click: true
+              click: true,
+              bounce: false
             });
           } else {
             this.scroll.refresh();

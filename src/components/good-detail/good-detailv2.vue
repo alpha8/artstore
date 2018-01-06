@@ -56,9 +56,14 @@
         <div class="info" v-if="good.videoUrl">
           <h1 class="title">商品视频</h1>
           <div class="player">
-            <div id="tencent_video_player"></div>
+            <div id="tencent_video_player">
+              <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://www.yihuyixi.com/ps/download/5a4c7ceae4b065c96d6562dc">
+                <source :src="good.videoUrl" type="video/mp4">
+              </video>
+            </div>
           </div>
         </div>
+        <split v-if="good.videoUrl"></split>
         <div class="info" v-show="good.content">
           <h1 class="title">商品介绍<span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span></h1>
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
@@ -103,6 +108,9 @@
             <div class="more-rating" v-show="good.ratings && good.ratings.length" @click.stop.prevent="viewMore">———— 查看更多评论 ————</div>
           </div>
         </div>
+        <split v-show="good.relates && good.relates.length"></split>
+        <modal-title title="相关商品" moreText="更多" catKey="" catName="" v-show="good.relates && good.relates.length"></modal-title>
+        <channel v-show="good.relates && good.relates.length" :items="good.relates || []" :cols="2"></channel>
         <split v-show="guessGoods.length"></split>
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
@@ -142,6 +150,7 @@
       this.fetchData();
     },
     deactivated() {
+      this.good.videoUrl = '';
       this.hide();
       this.processing = false;
     },
@@ -149,6 +158,7 @@
       $route (to, from) {
         if (to.name === from.name && to.name === 'good') {
           if (to.params.id !== from.params.id) {
+            this.good.videoUrl = '';
             this.fetchData();
           }
           let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
@@ -241,7 +251,7 @@
           this.wxReady();
           this.show();
           this.processing = false;
-          this.loadTencentPlayer();
+          // this.loadTencentPlayer();
           this.$store.dispatch('closeLoading');
           this.fetchComments();
           this.getLikeGoods();
@@ -253,24 +263,6 @@
         if (!this.good.videoUrl) {
           return;
         }
-        let option = {
-          'auto_play': '0',
-          'file_id': this.good.videoUrl,
-          'app_id': '1252423336',
-          'width': 640,
-          'height': 368,
-          'https': 1,
-          'hide_h5_setting': true
-        };
-        document.addEventListener('DOMContentLoaded', () => {
-          if (window.qcVideo) {
-            new qcVideo.Player('tencent_video_player', option);
-          } else {
-            setTimeout(() => {
-              new qcVideo.Player('tencent_video_player', option);
-            }, 800);
-          }
-        });
       },
       fetchComments() {
         api.getProductComments({
@@ -294,7 +286,10 @@
             this.scroll.refresh();
           }
           this.scroll.on('scroll', (pos) => {
-            this.scrollY = Math.abs(Math.round(pos.y));
+            let offset = Math.abs(Math.round(pos.y));
+            if (this.scrollY !== offset) {
+              this.scrollY = offset;
+            }
           });
         });
       },
@@ -522,11 +517,17 @@
         if (uid) {
           redirect += '?userId=' + uid;
         }
+        let img = api.CONFIG.psCtx + '5959aca5e4b00faa50475a18?w=423&h=423';
+        if (this.good.wxicon) {
+          img = api.CONFIG.psCtx + this.good.wxicon;
+        } else if (this.good.pictures && this.good.pictures.length) {
+          img = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423';
+        }
         let shareData = {
           title: this.good.name,
           desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
-          imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
+          imgUrl: img
         };
         wx.ready(function() {
           wx.onMenuShareTimeline(shareData);
@@ -815,6 +816,8 @@
         width: 100%
         height: auto
         overflow: hidden
+        video
+          object-fit: cover
       .text
         padding-left: 14px
         padding-right: 10px

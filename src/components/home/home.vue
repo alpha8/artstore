@@ -12,14 +12,26 @@
         <modal-title title="茶席套装.三百席" moreText="更多" catKey="art" catName="茶席套装.三百席"></modal-title>
         <channel :items="arts" :cols="2"></channel>
         <split></split>
-        <modal-title title="优质茶器(1000元以内)" moreText="更多" catKey="teaart" catName="优质茶器"></modal-title>
+        <modal-title title="优质茶器(1000元以内)" moreText="更多" catKey="teaart" catName="优质茶器" price="0-1000"></modal-title>
         <channel :items="teaPots" :cols="2"></channel>
         <split></split>
-        <modal-title title="贵重茶器(1000元以上)" moreText="更多" catKey="teaart" catName="贵重茶器"></modal-title>
+        <modal-title title="贵重茶器(1000元以上)" moreText="更多" catKey="teaart" catName="贵重茶器" price="1000-"></modal-title>
         <channel :items="dearTeapots" :cols="2"></channel>
+         <split></split>
+        <modal-title title="一虎一席.200款老茶博物馆" moreText="更多" catKey="museum" catName="一虎一席.200款老茶博物馆"></modal-title>
+        <channel :items="oldTeas" :cols="2"></channel>
         <split></split>
-        <modal-title title="好茶" moreText="更多" catKey="welltea" catName="好茶"></modal-title>
+        <modal-title title="好茶 (百里挑一、更实惠)" moreText="更多" catKey="welltea" catName="好茶（精选汇聚、更实惠）"></modal-title>
         <channel :items="goodTeas" :cols="2"></channel>
+        <split></split>
+        <modal-title title="一虎一席茶室艺术空间"></modal-title>
+        <div class="vipmovie">
+          <div id="vip_video_player" :style="getVideoWidth">
+            <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5db404564972818869478317/snapshot/1514945837_2671344614.100_0.jpg" id="vipvideo" :src="videos.vip">
+            </video>
+          </div>
+          <div class="slogan">[深圳国际艺术博览会] VIP室：一虎一席茶室艺术</div>
+        </div>
         <split></split>
         <modal-title title="茶室专业配画" moreText="更多" catKey="paint" catName="茶室专业配画"></modal-title>
         <channel :items="paints" :cols="2"></channel>
@@ -29,8 +41,11 @@
         <split></split>
         <modal-title title='关于 "一虎一席"'></modal-title>
         <div class="aboutus">
-          <div id="tencent_video_player" :style="getVideoWidth"></div>
-          <div class="slogan">一虎一席东方生活美学雅集.春风十里</div>
+          <div id="tencent_video_player" :style="getVideoWidth">
+            <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5d37d4564972818869478170/snapshot/1514945818_4129077795.100_0.jpg" id="springvideo" :src="videos.spring">
+            </video>
+          </div>
+          <div class="slogan">一虎一席东方生活美学雅集《春风十里》</div>
         </div>
       </div>
     </div>
@@ -59,6 +74,7 @@
         teaPots: [],
         dearTeapots: [],
         goodTeas: [],
+        oldTeas: [],
         paints: [],
         ya: [],
         channels: [{
@@ -66,17 +82,25 @@
           url: '/search?parentCat=art&key=茶席套装',
           icon: 'icon-teapot_kitchen'
         }, {
-          name: '优质茶器',
-          url: '/search?parentCat=teaart&key=优质茶器',
+          name: '茶室配画',
+          url: '/search?parentCat=paint&key=茶室配画',
+          icon: 'icon-funds big'
+        }, {
+          name: '茶器优品',
+          url: '/search?parentCat=teaart&key=茶器优品',
           icon: 'icon-kettle big'
         }, {
-          name: '好茶',
-          url: '/search?parentCat=welltea&key=好茶',
+          name: '好茶惠聚',
+          url: '/search?parentCat=welltea&key=好茶惠聚',
           icon: 'icon-tea_drink big'
+        }, {
+          name: '老茶博物馆',
+          url: '/search?parentCat=museum&key=老茶博物馆',
+          icon: 'icon-museum big'
         }, {
           name: '四折秒杀',
           url: '/seckill',
-          icon: 'icon-miaosha'
+          icon: 'icon-miaosha big'
         }, {
           name: '五折团购',
           url: '/groupbuy',
@@ -94,17 +118,21 @@
         selectedGood: {},
         showTop: false,
         swipeHeight: 0,
-        lastInitPlayer: +new Date()
+        lastInitPlayer: +new Date(),
+        videos: {
+          'vip': 'http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5db404564972818869478317/v.f20.mp4',
+          'spring': 'http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5d37d4564972818869478170/v.f20.mp4'
+        }
       };
     },
     created() {
       this.wxReady();
-      this.loadTencentPlayer();
+      // this.loadTencentPlayer();
       api.GetGoods({
         artworkTypeName: 'tea',
         categoryParentName: 'art',
         currentPage: 1,
-        pageSize: 20,
+        pageSize: 16,
         commodityStatesId: 2,
         scoreSort: true
       }).then((response) => {
@@ -148,6 +176,17 @@
 
       api.GetGoods({
         artworkTypeName: 'tea',
+        categoryParentName: 'museum',
+        currentPage: 1,
+        pageSize: 8,
+        commodityStatesId: 2,
+        scoreSort: true
+      }).then((response) => {
+        this.oldTeas = response.artworks;
+      });
+
+      api.GetGoods({
+        artworkTypeName: 'tea',
         categoryParentName: 'paint',
         currentPage: 1,
         pageSize: 20,
@@ -175,18 +214,15 @@
       this._initScroll();
     },
     activated() {
-      this._initPlayer();
       this._initScroll();
-    },
-    deactivated() {
-      // this.scrollY = 0;
     },
     computed: {
       showFixed() {
         return this.scrollY >= this.swipeHeight;
       },
       getVideoWidth() {
-        return { width: (document.documentElement.clientWidth - 5) + 'px' };
+        let w = document.documentElement.clientWidth;
+        return { width: w + 'px', height: w * 0.575 + 'px' };
       }
     },
     methods: {
@@ -201,31 +237,13 @@
             let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
             this.swipeHeight = swipe.clientHeight;
             this.scroll.on('scroll', (pos) => {
-              this.scrollY = Math.abs(Math.round(pos.y));
+              let offset = Math.abs(Math.round(pos.y));
+              if (this.scrollY !== offset) {
+                this.scrollY = offset;
+              }
             });
           } else {
             this.scroll.refresh();
-          }
-        });
-      },
-      loadTencentPlayer() {
-        let option = {
-          'auto_play': '0',
-          'file_id': '4564972818673793787',
-          'app_id': '1252423336',
-          'width': 640,
-          'height': 368,
-          'https': 1,
-          'hide_h5_setting': true
-        };
-        document.addEventListener('DOMContentLoaded', () => {
-          this.lastInitPlayer = +new Date();
-          if (window.qcVideo) {
-            new qcVideo.Player('tencent_video_player', option);
-          } else {
-            setTimeout(() => {
-              new qcVideo.Player('tencent_video_player', option);
-            }, 800);
           }
         });
       },
@@ -236,24 +254,6 @@
       addFood(target) {
       },
       _initPlayer() {
-        let video = document.getElementsByTagName('video')[0];
-        if (window.qcVideo && !video) {
-          let now = +new Date();
-          if (now <= this.lastInitPlayer + 3000) {
-            return;
-          }
-          this.lastInitPlayer = now;
-          let option = {
-            'auto_play': '0',
-            'file_id': '4564972818673793787',
-            'app_id': '1252423336',
-            'width': 640,
-            'height': 368,
-            'https': 1,
-            'hide_h5_setting': true
-          };
-          new qcVideo.Player('tencent_video_player', option);
-        }
       },
       goTop() {
         let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
@@ -311,7 +311,7 @@
     .mainContent
       position: relative
       padding-bottom: 20px
-      #tencent_video_player
+      #tencent_video_player, #vip_video_player
         position: relative
         width: 100%
         height: auto
@@ -328,6 +328,8 @@
         -webkit-box-orient: vertical
         text-overflow: ellipsis
         overflow: hidden
+      .vipmovie
+        padding-bottom: 10px
     .swipe-wrapper
       position: relative
       width: 100%

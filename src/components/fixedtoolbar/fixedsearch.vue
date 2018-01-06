@@ -6,7 +6,7 @@
           <i class="icon-search2"></i>
           <div class="search-form-input">
             <form action="" v-on:submit.stop.prevent="search">
-              <input type="search" name="txtSearch" class="txtSearch" placeholder="一站式优品商城、品味脱凡" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" v-on:input="changeText">
+              <input type="search" name="txtSearch" class="txtSearch" :class="{'trans': trans}" :placeholder="rollingSlogan" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" v-on:input="changeText">
             </form>
           </div>
           <!-- <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i> -->
@@ -37,7 +37,9 @@
         keyword: '',
         isLogin: this.$store.getters.checkLogined,
         typing: false,
-        highlight: false
+        highlight: false,
+        trans: false,
+        slogan: '一站式优品商城、品味脱凡'
       };
     },
     computed: {
@@ -56,11 +58,28 @@
       hasLogin() {
         this.showLogin = !this.isLogin;
         return this.isLogin;
+      },
+      rollingSlogan() {
+        return this.slogan;
       }
     },
     deactivated() {
       this.hideDialog();
-        this.keyword = '';
+      this.keyword = '';
+    },
+    created() {
+      let ads = ['一站式优品商城、品味脱凡', '优质茶生活、茶文化高端礼品'];
+      let idx = 0;
+      setInterval(() => {
+        this.trans = !this.trans;
+        setTimeout(() => {
+          this.trans = false;
+        }, 800);
+        this.slogan = ads[idx];
+        if (++idx >= ads.length) {
+          idx = 0;
+        }
+      }, 8500);
     },
     methods: {
       search() {
@@ -183,6 +202,9 @@
               font-size: 13px
               color: #666
               box-sizing: border-box
+              transition: all 1s ease-in
+              &.trans
+                transform: translate3d(0, -30px, 0)
               &::-webkit-input-placeholder
                 color: #999!important
               &:-moz-placeholder
