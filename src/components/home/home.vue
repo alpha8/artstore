@@ -82,13 +82,17 @@
           url: '/search?parentCat=art&key=茶席套装',
           icon: 'icon-teapot_kitchen'
         }, {
-          name: '茶室配画',
-          url: '/search?parentCat=paint&key=茶室配画',
-          icon: 'icon-funds big'
-        }, {
           name: '茶器优品',
           url: '/search?parentCat=teaart&key=茶器优品',
-          icon: 'icon-kettle big'
+          icon: 'icon-blackteapot big'
+        }, {
+          name: '茶室配画',
+          url: '/search?parentCat=paint&key=茶室配画',
+          icon: 'icon-paint big'
+        }, {
+          name: '茶室雅物',
+          url: '/search?parentCat=graceful&key=茶室雅物',
+          icon: 'icon-snowlotus big'
         }, {
           name: '好茶惠聚',
           url: '/search?parentCat=welltea&key=好茶惠聚',
@@ -105,10 +109,6 @@
           name: '五折团购',
           url: '/groupbuy',
           icon: 'icon-group_purchase'
-        }, {
-          name: '五折抢拍',
-          url: '/auction',
-          icon: 'icon-auction'
         }],
         swiperSlides: [
           'http://www.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=500',

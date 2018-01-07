@@ -88,6 +88,6 @@
             color: #666
             text-align: center
             line-height: 1.2
-            margin-top: 6px
+            margin-top: 4px
             font-weight: 400
 </style>

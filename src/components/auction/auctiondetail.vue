@@ -9,7 +9,7 @@
         <div class="content">
           <h1 class="title">{{auction.name}}</h1>
           <div class="price" v-if="auction.auction_product_state_id === 0">当前价：<span class="now">{{0 | currency}}</span></div>
-          <div class="price" v-else-if="auction.auction_product_state_id === 4"><span class="now">流拍</span></div>
+          <div class="price" v-else-if="auction.auction_product_state_id === 4">成交价：<span class="now">流拍</span></div>
           <div class="price" v-else-if="auction.auction_product_state_id <= 2">当前价：<span class="now">{{dealPrice | currency}}</span></div>
           <div class="price" v-else>成交价：<span class="now">{{highPrice | currency}}</span></div>
         </div>
@@ -833,6 +833,7 @@
             color: #fff
             background-color: #747474
             border-radius: 1px
+            font-size: 11px
             &.highlight
               background-color: #3985ff
         .col-2
@@ -857,7 +858,7 @@
           width: 32px
           height: 32px
           border-radius: 50%
-          margin-right: 3px
+          margin-right: 4px
           vertical-align: middle
           overflow: hidden
           box-sizing: border-box
@@ -881,9 +882,10 @@
           overflow: hidden
           box-sizing: border-box
           label
+            display: block
+            float: left
             color: #999
-            display: inline-block
-            width: 65px
+            margin-right: 3px
     .auction-flow
       position: relative
       padding: 10px 14px
@@ -896,7 +898,7 @@
         border: 0 none
         vertical-align: bottom
         -ms-interpolation-mode: bicubic
-        max-width: 100%
+        max-width: 90%
         overflow: hidden
     .rating
       position: relative
