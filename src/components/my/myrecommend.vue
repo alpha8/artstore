@@ -15,7 +15,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-myrecommend" v-show="myrecommends.length === 0">啊哦，还没有相关记录哦</div>
+        <div class="no-myrecommend" v-show="myrecommends.length === 0">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -242,4 +242,5 @@
         padding: 40px 0
         text-align: center
         font-size: 14px
+        color: #ccc
 </style>

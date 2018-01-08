@@ -30,7 +30,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-if="!groupbuys.length">啊哦，还没有相关记录哦</div>
+        <div class="no-order" v-if="!groupbuys.length">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -326,4 +326,5 @@
         padding: 40px 0
         text-align: center
         font-size: 14px
+        color: #ccc
 </style>

@@ -10,13 +10,15 @@
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
-                  <div class="price-wrap" @click.stop.prevent="showDetail(item)">
-                    <span>{{stateDesc(item.auction_product_state_id)}}</span>
-                  </div>
-                  <div class="more-ops">
-                    <span class="pricing" v-if="item.auction_product_state_id === 1"><i>{{item.countAppr}}</i>次出价</span>
-                    <span class="btn-buy green" v-else-if="item.auction_product_state_id === 0" @click.stop.prevent="killNotify(item)">拍卖提醒</span>
-                    <span class="btn-buy disabled" v-else>已结束</span>
+                  <div class="extra-wrap">
+                    <div class="price-wrap" @click.stop.prevent="showDetail(item)">
+                      <span class="state">{{stateDesc(item.auction_product_state_id)}}</span>
+                    </div>
+                    <div class="more-ops">
+                      <span class="pricing" v-if="item.auction_product_state_id === 1"><i>{{item.countAppr}}</i>次出价</span>
+                      <span class="btn-buy blue" v-else-if="item.auction_product_state_id === 0" @click.stop.prevent="killNotify(item)">拍卖提醒</span>
+                      <span class="btn-buy disabled" v-else>已结束</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -25,7 +27,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-if="!auctions.length">啊哦，还没有相关记录哦</div>
+        <div class="no-order" v-if="!auctions.length">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -185,7 +187,7 @@
         background: #d05148
         color: #fff
       .btn-blue
-        background: #3a77e7
+        background: #00a0dc
         color: #fff
       .btn-green
         background: #44b549
@@ -246,40 +248,58 @@
               .item-info
                 flex: 1
                 position: relative
-                font-size: 14px
                 color: #333
-                margin-top: 2px
+                box-sizing: border-box
                 >.title
+                  position: relative
+                  padding-top: 5px
+                  font-size: 14px
+                  height: 32px
+                  line-height: 16px
                   overflow: hidden
                   text-overflow: ellipsis
-                  word-wrap: break-word
                   display: -webkit-box
                   -webkit-line-clamp: 2
                   -webkit-box-orient: vertical
-                .price-wrap
+                .extra-wrap
                   position: absolute
-                  left: 0
-                  bottom: 15px
-                  margin: 8px 0
-                  height: 25px
-                  font-family: arial
-                  span
-                    color: #f15353
-                    font-size: 12px
-                    font-weight: 700
-                .more-ops
-                  position: absolute
-                  right: 10px
+                  display: flex
+                  width: 100%
                   bottom: 10px
-                  .btn-buy
-                    position: absolute
-                    right: 0
-                    bottom: 15px
-                    width: 80px
-                    height: 30px
-                    line-height: 30px
+                .price-wrap
+                  position: relative
+                  flex: 1
+                  height: 25px
+                  .state
+                    display: inline-block
+                    height: 25px
+                    width: auto
+                    line-height: 25px
+                    vertical-align: middle
                     text-align: center
-                    font-size: 14px
+                    color: #fff
+                    border-radius: 4px
+                    font-size: 11px
+                    padding: 0 8px
+                    letter-spacing: 0.5px
+                    box-sizing: border-box
+                    background-color: #f15353
+                    &.orange
+                      background: rgba(250,180,90,0.93)
+                .more-ops
+                  position: relative
+                  display: block
+                  float: right
+                  width: 120px
+                  text-align: right
+                  .btn-buy
+                    position: relative
+                    display: inline-block
+                    padding: 0 10px
+                    height: 25px
+                    line-height: 25px
+                    text-align: center
+                    font-size: 11px
                     background: #e4393c
                     color: #fff
                     border-radius: 2px
@@ -291,13 +311,15 @@
                     &.green
                       background: #44b549
                       color: #fff
+                    &.blue
+                      background: #00a0dc
+                      color: #fff
                   .pricing
-                    position: absolute
-                    right: 0
-                    bottom: 15px
+                    position: relative
+                    display: inline-block
                     width: 80px
-                    height: 25px
-                    line-height: 25px
+                    height: 30px
+                    line-height: 30px
                     text-align: right
                     font-size: 12px
                     color: #a9a9a9
@@ -349,4 +371,5 @@
         padding: 40px 0
         text-align: center
         font-size: 14px
+        color: #ccc
 </style>

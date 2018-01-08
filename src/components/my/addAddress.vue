@@ -6,26 +6,26 @@
         <ul>
           <li class="border-1px">
             <p>
-              <span class="title">收货人:</span>
+              <span class="title">收货人：</span>
               <input type="text" v-model="user.name" placeholder="姓名" autofocus required>
             </p>
           </li>
           <li class="border-1px">
             <p>
-              <span class="title">联系方式:</span>
+              <span class="title">联系方式：</span>
               <input type="text" v-model="user.mobile" placeholder="手机号码" maxlength="11" required>
             </p>
           </li>
           <li class="border-1px">
             <p class="more">
-              <span class="title">所在地区:</span>
+              <span class="title">所在地区：</span>
               <div class="text-control" v-if="city" @click.stop.prevent="openCityChoose">{{city}}</div>
               <div class="text-control tips" v-else @click.stop.prevent="openCityChoose">选择所在地区</div>
             </p>
           </li>
           <li>
             <p class="pr">
-              <span class="title special">详细地址:</span>
+              <span class="title special">详细地址：</span>
               <textarea v-model="user.address" placeholder="详细地址需填写楼栋楼层或房间号" rows="3" required></textarea>
               <i class="icon-close" v-show="clearAddress" @click.stop.prevent="doClearAddr"></i>
             </p>
@@ -157,7 +157,7 @@
           .title
             position: absolute
             display: block
-            width: 65px
+            width: 70px
             top: 15px
             left: 0
             right: 0
@@ -185,8 +185,8 @@
             box-sizing: border-box
           .icon-close
             position: absolute
-            top: 18px
-            right: 4px
+            top: 17px
+            right: 7px
             font-size: 18px
           &.more:after
             position: absolute

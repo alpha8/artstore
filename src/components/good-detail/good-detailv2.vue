@@ -115,11 +115,12 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
       </div>
-      <fixedcart ref="shopcart" @add="addToCart" :good="good"></fixedcart>
+      <fixedcart ref="shopcart" @add="addToCart" :good="good" @share="wxshare"></fixedcart>
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
     <frame></frame>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
+    <share ref="weixinShare"></share>
   </div>
 </template>
 
@@ -141,6 +142,7 @@
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   import layer from '@/components/common/layer';
+  import share from '@/components/good-detail/share';
 
   const ALL = 3;
   // const ERR_OK = 0;
@@ -206,7 +208,11 @@
         let sliders = [];
         pics.forEach(pic => {
           if (pic) {
-            sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
+            if (pic.width < pic.height) {
+              sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500&v=v2', 'src': api.CONFIG.psCtx + pic.id});
+            } else {
+              sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
+            }
           } else {
             sliders.push({'thumbnail': api.CONFIG.defaultImg, 'src': api.CONFIG.defaultImg});
           }
@@ -263,6 +269,9 @@
         if (!this.good.videoUrl) {
           return;
         }
+      },
+      wxshare() {
+        this.$refs.weixinShare.show();
       },
       fetchComments() {
         api.getProductComments({
@@ -523,11 +532,15 @@
         } else if (this.good.pictures && this.good.pictures.length) {
           img = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423';
         }
+        let vm = this;
         let shareData = {
           title: this.good.name,
           desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
-          imgUrl: img
+          imgUrl: img,
+          success: function () {
+            vm.$refs.weixinShare.hideDialog();
+          }
         };
         wx.ready(function() {
           wx.onMenuShareTimeline(shareData);
@@ -592,7 +605,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share
     }
   };
 </script>

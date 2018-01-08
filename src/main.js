@@ -35,7 +35,7 @@ import wx from 'weixin-js-sdk';
 router.beforeEach((to, from, next) => {
   let shareData = {
     title: '[一虎一席茶席艺术平台] 商城',
-    desc: '优质茶生活，茶文化高端礼品.【一站式优品商城，品味脱凡】',
+    desc: '优质茶生活，茶文化高端礼品. “领略东方生活之美”.【一站式优品商城，品味脱凡】',
     link: 'http://' + location.host + location.pathname,
     imgUrl: 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
   };

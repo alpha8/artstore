@@ -19,7 +19,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-follow" v-show="follows.length === 0">啊哦，还没有相关记录哦</div>
+        <div class="no-follow" v-show="follows.length === 0">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -101,7 +101,7 @@
       getThumbnail(item) {
         let icons = item.icons;
         if (icons && icons.length) {
-          return api.CONFIG.psCtx + icons[0].id + '?w=750&h=500';
+          return api.CONFIG.psCtx + icons[0].id + '?w=750&h=500&v=v2';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -261,4 +261,5 @@
         padding: 40px 0
         text-align: center
         font-size: 14px
+        color: #ccc
 </style>

@@ -50,8 +50,8 @@
         } else {
           if (!this.good.fromCart) {
             this.good.count = 0;
+            this.$store.commit('REDUCE_QUANTITY', this.good.id);
           }
-          this.$store.commit('REDUCE_QUANTITY', this.good.id);
           this.$emit('confirm', this.good);
         }
       }

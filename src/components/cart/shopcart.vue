@@ -210,9 +210,10 @@
           window.location.href = window.location.href.replace('cart', 'pay');
         }
       },
-      confirmRemove() {
+      confirmRemove(good) {
         let vm = this;
         this.dialog.btns.ok.callback = function() {
+          vm.$store.commit('REDUCE_QUANTITY', good.id);
           vm.reloadItems();
         };
         this.$refs.dialogWin.show();
@@ -299,7 +300,7 @@
             padding: 0 15px 5px 5px
             .item-name
               height: 42px
-              margin-top: 15px
+              margin-top: 12px
               overflow: hidden
               font-size: 14px
               a
@@ -316,7 +317,7 @@
               position: absolute
               display: inline-block
               width: 100%
-              bottom: 15px
+              bottom: 6px
               .price
                 display: inline-block
                 margin-top: 10px

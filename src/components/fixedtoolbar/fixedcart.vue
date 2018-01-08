@@ -11,17 +11,20 @@
       <div class="foot-item" v-if="good.stock && (good.stock.total > 0 || good.stock.bookTotal > 0)" @click.stop.prevent="addGood">
         <span class="button-lg orange">加入购物车</span>
       </div>
-      <div class="foot-item" v-if="good.stock && good.stock.total > 0" @click.stop.prevent="pay">
+      <!-- <div class="foot-item" v-if="good.stock && good.stock.total > 0" @click.stop.prevent="pay">
         <span class="button-lg red">立即购买</span>
       </div>
       <div class="foot-item" v-else-if="good.stock && good.stock.status === 1" @click.stop.prevent="bookBuy">
         <span class="button-lg red">预定购买</span>
-      </div>
+      </div> -->
       <div class="foot-item" v-else-if="good.stock && good.stock.total <= 0 && good.stock.bookTotal <= 0">
         <span class="button-lg disable">已售磬</span>
       </div>
       <div class="foot-item" v-if="good.stock && good.stock.total <= 0 && good.stock.bookTotal <= 0" @click.stop.prevent="bookNotify">
         <span class="button-lg orange">到货提醒</span>
+      </div>
+      <div class="foot-item" v-else @click.stop.prevent="wxshare">
+        <span class="button-lg red">分享有礼</span>
       </div>
     </div>
     <div class="ball-container">
@@ -104,6 +107,9 @@
       },
       bookBuy() {
         this.pay();
+      },
+      wxshare() {
+        this.$emit('share');
       },
       bookNotify() {
         let openid = this.$store.getters.getUserInfo.openid;

@@ -132,9 +132,8 @@
           font-size: 14px
           border-1px(rgba(7, 17, 27, 0.1))
           .icon-check_circle
-            width: 15%
+            width: 35px
             color: #d3d3d3
-            text-align: center
             font-size: 22px
             line-height: 50px
             &.on
@@ -142,7 +141,9 @@
           .addr
             flex: 1
             padding-top: 5px
+            padding-right: 8px
             line-height: 1.5
+            box-sizing: border-box
             .addr-item
               display: -webkit-box
               word-wrap: break-word
@@ -152,12 +153,12 @@
               -webkit-box-orient: vertical
               overflow: hidden
           .ops
-            width: 25%
+            width: auto
             line-height: 50px
             text-align: right
             i
-              padding-left: 12px
-              font-size: 14px
+              padding-left: 15px
+              font-size: 16px
               &:first-child
                 padding-left: 0
       .addAddress

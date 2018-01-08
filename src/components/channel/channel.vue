@@ -44,6 +44,9 @@
       getThumbnail(item) {
         let pic = item.pictures;
         if (pic && pic.length) {
+          if (pic[0] && pic[0].width < pic[0].height) {
+            return api.CONFIG.psCtx + pic[0].id + '?w=750&h=500&v=v2';
+          }
           return api.CONFIG.psCtx + pic[0].id + '?w=750&h=500';
         } else {
           return api.CONFIG.defaultImg;

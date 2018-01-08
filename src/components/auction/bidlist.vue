@@ -232,14 +232,15 @@
           width: 100%
           font-size: 12px
           background-color: #fff
+          color: #666
           text-align: left
           tr
             height: 40px
             line-height: 40px
           >.head
-            background-color: #f3f2f8  
+            background-color: #f3f2f8
           .col-1
-            width: 20%
+            width: 15%
             padding-left: 10px
             box-sizing: border-box
             span
@@ -249,24 +250,24 @@
               line-height: 15px
               vertical-align: middle
               text-align: center
-              color: #fff
+              color: #f1f1f1
               background-color: #747474
               border-radius: 1px
               &.highlight
                 background-color: #3985ff
           .col-2
-            width: 25%
+            flex: 1
             padding-left: 10px
             overflow: hidden
             box-sizing: border-box
           .col-3
-            flex: 1
+            width: 15%
             padding-left: 10px
             word-break: break-all
             overflow: hidden
             box-sizing: border-box
           .col-4
-            width: 35%
+            flex: 1
             padding-left: 10px
             text-overflow: ellipsis
             white-space: nowrap

@@ -178,7 +178,7 @@
       getThumbnail(item) {
         let icon = item.icon;
         if (icon) {
-          return api.CONFIG.psCtx + icon + '?w=70&h=70';
+          return api.CONFIG.psCtx + icon + '?w=70&h=70&v=v2';
         } else {
           return api.CONFIG.defaultImg;
         }

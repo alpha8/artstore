@@ -106,9 +106,22 @@
           url: '/seckill',
           icon: 'icon-miaosha big'
         }, {
+          name: '全部栏目',
+          url: '',
+          icon: 'icon-down2 big',
+          tag: 'more',
+          replace: '收起栏目',
+          replaceIcon: 'icon-upward2 big'
+        }, {
           name: '五折团购',
           url: '/groupbuy',
-          icon: 'icon-group_purchase'
+          icon: 'icon-group_purchase',
+          css: 'nobottom'
+        }, {
+          name: '五折抢拍',
+          url: '/auction',
+          icon: 'icon-auction',
+          css: 'nobottom'
         }],
         swiperSlides: [
           'http://www.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=500',
@@ -277,7 +290,7 @@
         }
         let shareData = {
           title: '[一虎一席茶席艺术平台] 商城',
-          desc: '优质茶生活，茶文化高端礼品.【一站式优品商城，品味脱凡】',
+          desc: '优质茶生活，茶文化高端礼品. “领略东方生活之美”.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
         };

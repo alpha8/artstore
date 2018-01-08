@@ -22,6 +22,15 @@ const mutations = {
   [types.ADD_TO_CART] (state, { product }) {
     let record = state.added.find(p => p.id === product.id);
     if (!record) {
+      let img = api.CONFIG.defaultImg;
+      if (product.pictures && product.pictures.length) {
+        let pic = product.pictures[0];
+        if (pic && pic.width < pic.height) {
+          img = api.CONFIG.psCtx + pic.id + '?w=750&h=500&v=v2';
+        } else {
+          img = api.CONFIG.psCtx + pic.id + '?w=750&h=500';
+        }
+      }
       state.added.push({
         id: product.id,
         name: product.name,
@@ -31,7 +40,7 @@ const mutations = {
         price: product.price,
         oldPrice: product.oldPrice,
         count: product.count,
-        icon: (product.pictures && product.pictures.length) ? api.CONFIG.psCtx + product.pictures[0].id + '?w=750&h=500' : api.CONFIG.defaultImg,
+        icon: img,
         stock: product.stock,
         checked: true
       });

@@ -354,6 +354,7 @@
         padding: 40px 0
         text-align: center
         font-size: 14px
+        color: #ccc
         img
           width: 110px
           height: 110px

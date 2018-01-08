@@ -15,10 +15,10 @@
         </div>
         <div class="auction-detail">
           <ul>
-            <li><label>起拍价:</label><span>{{auction.startPrice | currency}}</span></li>
-            <!-- <li><label>保留价:</label><span v-if="auction.minPrice">{{auction.minPrice | currency}}</span><span v-else-if="!auction.minPrice">无</span></li> -->
-            <li><label>加价幅度:</label><span>{{auction.markup | currency}}</span></li>
-            <!-- <li><label>拍卖类型:</label><span>加价拍</span></li> -->
+            <li><label>起拍价：</label><span>{{auction.startPrice | currency}}</span></li>
+            <!-- <li><label>保留价：</label><span v-if="auction.minPrice">{{auction.minPrice | currency}}</span><span v-else-if="!auction.minPrice">无</span></li> -->
+            <li><label>加价幅度：</label><span>{{auction.markup | currency}}</span></li>
+            <!-- <li><label>拍卖类型：</label><span>加价拍</span></li> -->
           </ul>
         </div>
         <split></split>
@@ -94,7 +94,7 @@
     <div class="fixed-foot">
       <div class="foot-wrapper">
         <div class="foot-item" v-if="auction.auction_product_state_id === 0" @click.stop.prevent="notify">
-          <span class="button-lg green">拍卖提醒</span>
+          <span class="button-lg darkred">拍卖提醒</span>
         </div>
         <div class="foot-item" v-else-if="auction.auction_product_state_id === 2">
           <span class="button-lg gray">拍卖暂停</span>
@@ -110,8 +110,8 @@
           </div>
         </div>
         <div class="foot-item" v-if="auction.auction_product_state_id === 1">
-          <span class="button-lg orange" v-if="higher">您是最高出价者</span>
-          <span class="button-lg red" v-else @click.stop.prevent="bid">出价</span>
+          <span class="button-lg red" v-if="higher">您是最高出价者</span>
+          <span class="button-lg red" v-else @click.stop.prevent="bid">出 价</span>
         </div>
       </div>
     </div>
@@ -325,7 +325,7 @@
                 if (this.higher) {
                   this.highPrice = this.dealPrice;
                 } else {
-                  this.highPrice = this.dealPrice + this.markup;
+                  this.highPrice = this.dealPrice + (this.auction.markup || 0);
                 }
               } else {
                 this.highPrice = this.dealPrice = this.auction.startPrice;
@@ -707,8 +707,9 @@
       .price
         position: relative
         line-height: 24px
-        color: #999
+        color: #666
         font-size: 14px
+        margin-top: 3px
         .now
           font-size: 18px
           color: rgb(240, 20, 20)
@@ -814,13 +815,14 @@
         font-size: 12px
         background-color: #fff
         text-align: left
+        color:#666
         tr
-          height: 40px
-          line-height: 40px
+          height: 38px
+          line-height: 38px
         .header
-          background-color: #f3f2f8  
+          background-color: #f3f2f8
         .col-1
-          width: 20%
+          width: 15%
           padding-left: 10px
           box-sizing: border-box
           span
@@ -830,25 +832,25 @@
             line-height: 15px
             vertical-align: middle
             text-align: center
-            color: #fff
+            color: #f1f1f1
             background-color: #747474
             border-radius: 1px
             font-size: 11px
             &.highlight
               background-color: #3985ff
         .col-2
-          width: 25%
+          flex: 1
           padding-left: 10px
           overflow: hidden
           box-sizing: border-box
         .col-3
-          flex: 1
+          width: 15%
           padding-left: 10px
           word-break: break-all
           overflow: hidden
           box-sizing: border-box
         .col-4
-          width: 35%
+          flex: 1
           padding-left: 10px
           text-overflow: ellipsis
           white-space: nowrap
@@ -878,13 +880,13 @@
           width: 50%
           height: auto
           font-size: 14px
+          color: #666
           white-space: nowrap
           overflow: hidden
           box-sizing: border-box
           label
             display: block
             float: left
-            color: #999
             margin-right: 3px
     .auction-flow
       position: relative
@@ -892,13 +894,13 @@
       .title
         font-size: 14px
         line-height: 14px
-        margin-bottom: 6px
+        margin-bottom: 9px
         color: #07111b
       img
         border: 0 none
         vertical-align: bottom
         -ms-interpolation-mode: bicubic
-        max-width: 90%
+        max-width: 92%
         overflow: hidden
     .rating
       position: relative
@@ -1027,11 +1029,17 @@
           &.red
             background: #ff463c
             color: #fff
+          &.darkred
+            background: #d05148
+            color: #fff
+          &.blue
+            background: #00a0dc
+            color: #fff
           .icon-favorite
-            color: #ff463c  
+            color: #ff463c
         .input-group
           position: relative
-          display: inline-block
+          flex: 1
           box-sizing: border-box
           .input-group-btn
             display: block
@@ -1039,21 +1047,21 @@
             width: 20%
             height: 50px
             line-height: 50px
-            font-size: 30px
-            background-color: #a51616
+            font-size: 26px
+            background-color: rgba(250,180,90,0.93)
             color: #FFF
           .form-control
             float: left
             width: 60%
             height: 50px
             line-height: 50px
-            font-size: 20px
+            font-size: 16px
             color: #555
             text-align: center
             background-color: #fff
             background-image: none
-            border-top: 1px solid #a51616
-            border-bottom: 1px solid #a51616
+            border-top: 1px solid rgba(250,180,90,0.93)
+            border-bottom: 1px solid rgba(250,180,90,0.93)
             -webkit-appearance: none
             border-radius: 0
             outline: none

@@ -1,8 +1,12 @@
 <template>
   <div class="top_wrapper" ref="topchannel">
-    <div class="top_list" ref="topList">
-      <div class="top_item" v-for="channel in channels">
-        <router-link :to="channel.url" class="top_url">
+    <div class="top_list" ref="topList" :class="{'more': showMore}">
+      <div class="top_item" v-for="channel in channels" :class="channel.css">
+        <div v-if="!channel.url" class="top_url" @click.stop.prevent="doAction(channel)">
+          <i :class="channel.icon" class="top_icon"></i>
+          <h3 class="top_name">{{channel.name}}</h3>
+        </div>
+        <router-link v-else :to="channel.url" class="top_url">
           <i :class="channel.icon" class="top_icon"></i>
           <h3 class="top_name">{{channel.name}}</h3>
         </router-link>
@@ -18,6 +22,11 @@
       channels: {
         type: Array
       }
+    },
+    data() {
+      return {
+        showMore: false
+      };
     },
     mounted() {
       this._initScroll();  // top_item: width: 22.2vw, float: left
@@ -41,6 +50,24 @@
           }
         });
          */
+      },
+      showMoreItems(channel) {
+        this.showMore = !this.showMore;
+        let replace = channel.replace;
+        if (replace) {
+          channel.replace = channel.name;
+          channel.name = replace;
+        }
+        let replaceIcon = channel.replaceIcon;
+        if (replaceIcon) {
+          channel.replaceIcon = channel.icon;
+          channel.icon = replaceIcon;
+        }
+      },
+      doAction(channel) {
+        if (channel && channel.tag === 'more') {
+          this.showMoreItems(channel);
+        }
       }
     }
   };
@@ -58,6 +85,10 @@
       position: relative
       display: flex
       flex-wrap: wrap
+      height: 135px
+      overflow: hidden
+      &.more
+        height: auto
       .top_item
         display: block
         width: 25%
@@ -68,7 +99,7 @@
         box-sizing: border-box
         &:nth-child(4n)
           border-right: none
-        &:nth-child(n+5)
+        &.nobottom
           border-bottom: none
         .top_url
           display: block

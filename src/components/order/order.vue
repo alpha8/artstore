@@ -44,7 +44,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-show="showRecords === 0">啊哦，还没有相关记录哦</div>
+        <div class="no-order" v-show="showRecords === 0">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -154,7 +154,7 @@
       getThumbnail(item) {
         let icon = item.icon;
         if (icon) {
-          return api.CONFIG.psCtx + icon + '?w=750&h=500';
+          return api.CONFIG.psCtx + icon + '?w=750&h=500&v=v2';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -333,7 +333,6 @@
           width: 100%
           .order-item
             margin-bottom: 15px
-            padding: 0 8px
             border-1px(rgba(7, 17, 27, 0.1))
             .item-title
               position: relative
@@ -341,6 +340,9 @@
               height: 40px
               line-height: 40px
               font-size: 14px
+              background-color: rgba(7, 17, 27, 0.1)
+              padding: 0 8px
+              box-sizing: border-box
               &:after
                 position: absolute
                 display: block
@@ -367,10 +369,11 @@
             .item-summary
               position: relative
               display: flex
-              padding: 8px 0
+              padding: 8px 8px
               font-size: 13px
               border-top-1px(rgba(7, 17, 27, 0.1))
               border-1px(rgba(7, 17, 27, 0.1))
+              box-sizing: border-box
               .summary
                 flex: 1
                 p
@@ -396,8 +399,9 @@
             .item-content
               position: relative
               display: flex
-              padding: 8px 0
+              padding: 8px 8px
               font-size: 13px
+              box-sizing: border-box
               .item-img
                 display: inline-block
                 float: left
