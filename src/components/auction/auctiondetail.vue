@@ -16,8 +16,8 @@
         <div class="auction-detail">
           <ul>
             <li><label>起拍价：</label><span>{{auction.startPrice | currency}}</span></li>
-            <!-- <li><label>保留价：</label><span v-if="auction.minPrice">{{auction.minPrice | currency}}</span><span v-else-if="!auction.minPrice">无</span></li> -->
             <li><label>加价幅度：</label><span>{{auction.markup | currency}}</span></li>
+            <li><label>保证金：</label><span>{{0 | currency}}</span></li>
             <!-- <li><label>拍卖类型：</label><span>加价拍</span></li> -->
           </ul>
         </div>
@@ -116,6 +116,7 @@
       </div>
     </div>
     <frame></frame>
+    <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
 
@@ -130,6 +131,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import frame from '@/components/common/myiframe';
   import swipe from '@/components/swipe/quietswipe';
+  import gotop from '@/components/fixedtoolbar/gotop';
   import star from '@/components/star/star';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
@@ -156,6 +158,7 @@
     },
     data() {
       return {
+        scrollY: 0,
         auction: {},
         bidPrices: [],
         bidsTotal: 0,
@@ -327,6 +330,9 @@
                 } else {
                   this.highPrice = this.dealPrice + (this.auction.markup || 0);
                 }
+                if (this.auction.auction_product_state_id === 3 || this.auction.auction_product_state_id === 4) {
+                  this.highPrice = this.dealPrice;
+                }
               } else {
                 this.highPrice = this.dealPrice = this.auction.startPrice;
               }
@@ -356,11 +362,18 @@
           if (!this.scroll) {
             this.scroll = new BScroll(this.$refs.auctionRef, {
               click: true,
-              bounce: false
+              bounce: false,
+              probeType: 3
             });
           } else {
             this.scroll.refresh();
           }
+          this.scroll.on('scroll', (pos) => {
+            let offset = Math.abs(Math.round(pos.y));
+            if (this.scrollY !== offset) {
+              this.scrollY = offset;
+            }
+          });
         });
       },
       show() {
@@ -401,7 +414,7 @@
           this.$store.dispatch('openToast', '请先登录！');
           return;
         }
-        if (this.highPrice <= 0) {
+        if (this.highPrice <= 0 || this.highPrice < this.dealPrice + this.auction.markup) {
           this.$store.dispatch('openToast', '出价太低，请重新出价！');
           return;
         }
@@ -423,7 +436,11 @@
         }
       },
       add() {
-        this.highPrice += this.auction.markup;
+        if (this.highPrice) {
+          this.highPrice += this.auction.markup;
+        } else {
+          this.highPrice = this.auction.startPrice;
+        }
       },
       notify() {
         let openid = this.$store.getters.getUserInfo.openid;
@@ -501,7 +518,7 @@
               src += '?1';
             }
             src = src + '&w=750';
-            html = html.replace(key, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px"').replace(key2, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px"');
+            html = html.replace(key, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"').replace(key2, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"');
             if (width && width > 100) {
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             } else if (width === null) {
@@ -515,6 +532,10 @@
           this.processing = false;
         }
         this.auction.content = html;
+      },
+      goTop() {
+        let goodWrapper = this.$refs.auctionRef.getElementsByClassName('good-content')[0];
+        this.scroll.scrollToElement(goodWrapper, 300);
       }
     },
     filters: {
@@ -533,7 +554,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, gotop
     }
   };
 </script>
@@ -706,13 +727,13 @@
           margin-right: 12px
       .price
         position: relative
-        line-height: 24px
         color: #666
-        font-size: 14px
+        font-size: 13px
         margin-top: 3px
         .now
-          font-size: 18px
-          color: rgb(240, 20, 20)
+          font-size: 14px
+          font-weight: 700
+          color: #f01414
         .old
           text-decoration: line-through
           font-size: 10px
@@ -800,7 +821,7 @@
             -webkit-transform: rotate(-45deg)
             transform: rotate(-45deg)
       .text
-        font-size: 12px
+        font-size: 13px
         color: rgb(77, 85, 93)
         line-height: 1.3
         box-sizing: border-box
@@ -820,7 +841,7 @@
           height: 38px
           line-height: 38px
         .header
-          background-color: #f3f2f8
+          background-color: #fafafa
         .col-1
           width: 15%
           padding-left: 10px
@@ -837,7 +858,7 @@
             border-radius: 1px
             font-size: 11px
             &.highlight
-              background-color: #3985ff
+              background-color: #00a0dc
         .col-2
           flex: 1
           padding-left: 10px
@@ -872,14 +893,14 @@
         position: relative
         display: flex
         flex-wrap: wrap
-        line-height: 20px
         padding: 0 14px
         box-sizing: border-box
         li
           float: left
           width: 50%
-          height: auto
-          font-size: 14px
+          font-size: 13px
+          padding-top: 3px
+          padding-bottom: 2px
           color: #666
           white-space: nowrap
           overflow: hidden
@@ -1013,7 +1034,6 @@
         .button-lg
           display: block
           line-height: 50px
-          font-family: "黑体"
           font-size: 14px
           i
             font-size: 22px

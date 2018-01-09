@@ -238,7 +238,7 @@
             height: 40px
             line-height: 40px
           >.head
-            background-color: #f3f2f8
+            background-color: #fafafa
           .col-1
             width: 15%
             padding-left: 10px
@@ -254,7 +254,7 @@
               background-color: #747474
               border-radius: 1px
               &.highlight
-                background-color: #3985ff
+                background-color: #00a0dc
           .col-2
             flex: 1
             padding-left: 10px

@@ -328,6 +328,8 @@
             display: inline-block
             min-width: 75px
             color: #999
+          .text-blue
+            color: #00a0dc
       .delivery-info, .goods-info
         padding-top: 0
       .price-summary

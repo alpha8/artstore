@@ -9,17 +9,21 @@
               <div class="item-img" @click.stop.prevent="showProductDetail(footprint)"><img :src="getThumbnail(footprint)" alt=""></div>
               <div class="item-info" @click.stop.prevent="showProductDetail(footprint)">
                 <h3 class="title">{{footprint.name}}</h3>
-                <div class="price">{{footprint.price | currency}}</div>
-              </div>
-              <div class="item-ops">
-                <span class="btn" @click.stop.prevent="removeItem(footprint)">移除</span>
+                <div class="extra-wrap">
+                  <div class="state-wrap">
+                      <p class="line price">{{footprint.price | currency}}</p>
+                    </div>
+                  <div class="item-ops">
+                    <span class="btn" @click.stop.prevent="removeItem(footprint)">移除</span>
+                  </div>
+                </div>
               </div>
             </mu-flexbox-item>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-footprint" v-show="footprints.length === 0">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
+        <div class="no-footprint" v-show="footprints.length === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -171,15 +175,17 @@
     position: fixed
     bottom: 0
     width: 100%
-    height: 40px
+    height: 50px
     overflow: hidden
     z-index: 2
     .btns
       margin: 0 auto
+      height: 50px
+      line-height: 50px
   .footprint
     position: absolute
     top: 44px
-    bottom: 40px
+    bottom: 50px
     width: 100%
     .footprint-wrap
       position: relative
@@ -232,48 +238,71 @@
           width: 100%
           .footprint-item
             display: flex
-            margin-bottom: 5px
             padding: 8px
             border-1px(rgba(7, 17, 27, 0.1))
             box-sizing: border-box
             font-size: 12px
             .item-img
               display: inline-block
-              width: 20%
+              width: 35%
               float: left
               img
                 width: 95%
+                margin-right: 10px
                 overflow: hidden
             .item-info
+              position: relative
               flex: 1
-              padding: 0 50px 0 10px
+              box-sizing: border-box
+              overflow: hidden
               >.title
+                position: relative
+                font-size: 14px
+                padding-top: 5px
                 overflow: hidden
                 text-overflow: ellipsis
-                word-wrap: break-word
                 display: -webkit-box
                 -webkit-line-clamp: 2
                 -webkit-box-orient: vertical
-                line-height: 1.45
-              div
-                padding-top: 10px
-              .price
-                color: #e4393c
-                font-weight: 700
-            .item-ops
-              position: absolute
-              right: 8px
-              top: 0
-              width: 50px
-              bottom: 0
-              .btn
-                display: inline-block
-                height: 25px
-                line-height: 25px
-                padding: 0 10px
-                border: 1px solid rgba(7, 17, 27,0.1)
-                margin-top: 20px
-                letter-spacing: 1px
+                line-height: 1.2
+              .extra-wrap
+                position: absolute
+                display: flex
+                width: 100%
+                bottom: 10px
+                .state-wrap
+                  position: relative
+                  display: block
+                  flex: 1
+                  .line
+                    padding-bottom: 1px
+                    line-height: 15px
+                    font-size: 12px
+                    color: #666
+                    &:last-child
+                      padding-bottom: 0
+                    &.price
+                      color: #d05148
+                      font-size: 14px
+                      font-weight: 700
+              .item-ops
+                position: relative
+                display: block
+                float: right
+                width: 80px
+                .btn
+                  display: inline-block
+                  float: right
+                  height: 25px
+                  line-height: 25px
+                  padding: 0 10px
+                  background: #d05148
+                  color: #fff
+                  border-radius: 2px
+                  &.white
+                    color: #000
+                    background: #fff
+                    border: 1px solid rgba(7, 17, 27, 0.1)
       .no-footprint
         width: 100%
         padding: 40px 0

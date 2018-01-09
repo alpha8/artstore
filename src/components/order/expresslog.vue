@@ -12,7 +12,7 @@
             </div>
           </div>
         </div>
-        <div class="no-expressLog" v-show="expressLogs.length === 0">{{errorTips}}</div>
+        <div class="no-expressLog" v-show="expressLogs.length === 0 && !loading">{{errorTips}}</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>

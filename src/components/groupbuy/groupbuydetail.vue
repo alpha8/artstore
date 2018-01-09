@@ -5,9 +5,8 @@
       <div class="good-content">
         <div class="image-header">
           <swipe :swiperSlides="swiperSlides"></swipe>
-          <!-- <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div> -->
         </div>
-        <div class="detail bg_pink">
+       <!--  <div class="detail bg_pink">
           <div class="price">¥<em>{{good.groupPrice}}</em></div>
           <div class="msg">
             <div class="text"><del class="old_price" v-show="good.oldPrice">{{good.oldPrice | currency}}</del></div>
@@ -16,14 +15,15 @@
           <div class="countdown">
             <p class="countdown_text">已团{{good.bookmoq}}件·{{good.moq}}人团</p>
           </div>
-        </div>
+        </div> -->
         <div class="content">
           <h1 class="title">{{good.name}}</h1>
           <div class="price">
             <span class="now">¥{{good.groupPrice}}</span><span class="old" v-show="good.oldPrice">{{good.oldPrice | currency}}</span>
             <span class="stock"></span>          
           </div>
-          <div class="duration">团购时间： {{good.startDate | formatDate}} ~ {{good.endDate | formatDate}}</div>  
+          <div class="duration">团购时间：{{good.startDate | formatDate}} ~ {{good.endDate | formatDate}}</div>  
+          <div class="duration">团购人数：已团{{good.bookmoq}}件·{{good.moq}}人团</div>  
         </div>
         <split v-show="good.description"></split>
         <div class="info" v-show="good.description">
@@ -79,6 +79,9 @@
         <span class="mini-favorite-item" @click.stop.prevent="mark">
           <span class="button-lg"><i :class="favorited"></i></span>
         </span>
+        <div class="foot-item" @click.stop.prevent="wxshare">
+          <span class="button-lg orange">分享有礼</span>
+        </div>
         <div class="foot-item" v-if="good.status === 2">
           <span class="button-lg gray">已结束</span>
         </div>
@@ -91,6 +94,8 @@
       </div>
     </div>
     <frame></frame>
+    <share ref="weixinShare"></share>
+    <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
 
@@ -103,11 +108,13 @@
   import split from '@/components/split/split';
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import gotop from '@/components/fixedtoolbar/gotop';
   import frame from '@/components/common/myiframe';
   import swipe from '@/components/swipe/quietswipe';
   import star from '@/components/star/star';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
+  import share from '@/components/good-detail/share';
 
   const ALL = 2;
   // const ERR_OK = 0;
@@ -132,6 +139,7 @@
     },
     data() {
       return {
+        scrollY: 0,
         good: {},
         selectType: ALL,
         onlyContent: true,
@@ -203,11 +211,18 @@
           if (!this.scroll) {
             this.scroll = new BScroll(this.$refs.good, {
               click: true,
-              bounce: false
+              bounce: false,
+              probeType: 3
             });
           } else {
             this.scroll.refresh();
           }
+          this.scroll.on('scroll', (pos) => {
+            let offset = Math.abs(Math.round(pos.y));
+            if (this.scrollY !== offset) {
+              this.scrollY = offset;
+            }
+          });
         });
       },
       bindPictureEvent() {
@@ -254,6 +269,9 @@
         } else {
           return api.CONFIG.defaultImg;
         }
+      },
+      wxshare() {
+        this.$refs.weixinShare.show();
       },
       getPicCls(rating) {
         let plen = rating.pictures.length;
@@ -323,7 +341,7 @@
           price: this.good.groupPrice,
           oldPrice: this.good.oldPrice,
           count: 1,
-          icon: (this.good.icon) ? api.CONFIG.psCtx + this.good.icon + '?w=114&h=114' : api.CONFIG.defaultImg,
+          icon: (this.good.icon) ? api.CONFIG.psCtx + this.good.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
           checked: false
         };
         this.$store.dispatch('addPayGoods', [good]);
@@ -382,11 +400,15 @@
         if (uid) {
           redirect += '?userId=' + uid;
         }
+        let vm = this;
         let shareData = {
           title: this.good.name,
           desc: '团购价：¥' + this.good.groupPrice + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
-          imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
+          imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423',
+          success: function () {
+            vm.$refs.weixinShare.hideDialog();
+          }
         };
         wx.ready(function() {
           wx.onMenuShareTimeline(shareData);
@@ -422,7 +444,7 @@
               src += '?1';
             }
             src = src + '&w=750';
-            html = html.replace(key, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px"').replace(key2, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px"');
+            html = html.replace(key, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"').replace(key2, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"');
             if (width && width > 100) {
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             } else if (width === null) {
@@ -436,6 +458,10 @@
           this.processing = false;
         }
         this.good.description = html;
+      },
+      goTop() {
+        let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
+        this.scroll.scrollToElement(goodWrapper, 300);
       }
     },
     filters: {
@@ -455,7 +481,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, share, gotop
     }
   };
 </script>
@@ -624,7 +650,7 @@
           color: rgb(240, 20, 20)
         .old
           text-decoration: line-through
-          font-size: 10px
+          font-size: 12px
           color: rgb(147, 153, 159)
         .stock
           position: absolute
@@ -635,7 +661,7 @@
       .duration
         display: block
         margin-top: 5px
-        font-size: 12px
+        font-size: 13px
         color: #666
       .cartcontrol-wrapper
         position: absolute
@@ -686,7 +712,7 @@
         font-size: 14px
         color: rgb(7, 17, 27)
       .text
-        font-size: 12px
+        font-size: 13px
         color: rgb(77, 85, 93)
         line-height: 1.3
         padding-left: 14px

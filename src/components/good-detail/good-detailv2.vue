@@ -791,7 +791,7 @@
           height: 40px
           line-height: 40px
           min-width: 75px
-          color: #999
+          color: #666
         span
           position: relative
           display: inline-block
@@ -850,15 +850,14 @@
       position: relative
       display: flex
       margin-top: 5px
+      color: #666
       .label
         display: block
         float: left
         font-size: 13px
-        color: #999
       .desc
         flex: 1
         font-size: 13px
-        color: #333
         oveflow: hidden
     .rating
       position: relative

@@ -5,9 +5,8 @@
       <div class="good-content">
         <div class="image-header">
           <swipe :swiperSlides="swiperSlides"></swipe>
-          <!-- <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div> -->
         </div>
-        <div class="detail bg_pink" v-if="seckill.leftStartTimes <= 0">
+        <!-- <div class="detail bg_pink" v-if="seckill.leftStartTimes <= 0">
           <div class="price">¥<em>{{good.killPrice}}</em></div>
           <div class="msg">
             <div class="text"><del class="old_price" v-show="good.price">{{good.price | currency}}</del></div>
@@ -18,7 +17,7 @@
             <p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p>
           </div>
         </div>
-        <div class="detail bg_green" v-if="seckill.leftStartTimes > 0">
+        <div class="detail bg_green">
           <div class="price">¥<em>{{good.killPrice}}</em></div>
           <div class="msg">
             <div class="text"><del class="old_price" v-show="good.price">{{good.price | currency}}</del></div>
@@ -27,18 +26,16 @@
           <div class="countdown_start bg_green">
             <p v-html="countdownTips()"></p>
           </div>
-        </div>
+        </div> -->
         <div class="content">
           <h1 class="title">{{good.name}}</h1>
-          <!-- <div class="detail">
-            <span class="sell-count">月售{{good.sellCount}}份</span>
-          </div> -->
           <div class="price">
             <span class="now">¥{{good.killPrice}}</span><span class="old" v-show="good.price">¥{{good.price}}</span>
-            <span class="stock">库存： {{good.number}}</span>          
+            <span class="stock">库存：{{good.number}}</span>
           </div>
-          <div class="duration">秒杀时间： {{good.startTime | formatDate2}} ~ {{good.endTime | formatDate2}}</div>          
-          <!-- <div class="duration" v-if="countdownStats.milliseconds">结束倒计时：<span v-if="countdownStats.days"><span class="red-text">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="red-text">{{countdownStats.hours}}</span>小时</span><span v-if="countdownStats.mins"><span class="red-text">{{countdownStats.mins}}</span>分</span><span v-if="countdownStats.seconds"><span class="red-text">{{countdownStats.seconds}}</span>秒</span></div>  -->         
+          <div class="duration">秒杀时间：{{good.startTime | formatDate2}} ~ {{good.endTime | formatDate2}}</div>
+          <div class="duration" v-if="seckill.leftStartTimes > 0" v-html="countdownTips()"></div>
+          <div class="duration" v-else>距秒杀结束还剩：<p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p></div>
         </div>
         <split v-show="good.content"></split>
         <div class="info" v-show="good.content">
@@ -93,8 +90,11 @@
         <span class="mini-favorite-item" @click.stop.prevent="mark">
           <span class="button-lg"><i :class="favorited"></i></span>
         </span>
+        <div class="foot-item" @click.stop.prevent="wxshare">
+          <span class="button-lg orange">分享有礼</span>
+        </div>
         <div class="foot-item" v-show="seckill.leftStartTimes > 0" @click.stop.prevent="killNotify">
-          <span class="button-lg green">秒杀提醒</span>
+          <span class="button-lg darkred">秒杀提醒</span>
         </div>
         <div class="foot-item" v-if="seckill.leftEndTimes <= 0">
           <span class="button-lg gray">已结束</span>
@@ -103,7 +103,7 @@
           <span class="button-lg gray">已抢完</span>
         </div>
         <div class="foot-item" v-else-if="existKilled()">
-          <span class="button-lg orange">抢过了</span>
+          <span class="button-lg gray">抢过了</span>
         </div>
         <div class="foot-item" v-show="!existKilled() && seckill.leftStartTimes <= 0 && seckill.leftEndTimes > 0 && seckill.number > 0" @click.stop.prevent="pay">
           <span class="button-lg red">立即抢购</span>
@@ -111,6 +111,8 @@
       </div>
     </div>
     <frame></frame>
+    <share ref="weixinShare"></share>
+    <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
 
@@ -125,11 +127,13 @@
   import channel from '@/components/channel/channel';
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import gotop from '@/components/fixedtoolbar/gotop';
   import frame from '@/components/common/myiframe';
   import swipe from '@/components/swipe/quietswipe';
   import star from '@/components/star/star';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
+  import share from '@/components/good-detail/share';
 
   const ALL = 2;
   // const ERR_OK = 0;
@@ -154,6 +158,7 @@
     },
     data() {
       return {
+        scrollY: 0,
         good: {},
         seckill: {},
         lazyloaded: false,
@@ -299,6 +304,9 @@
           return api.CONFIG.defaultImg;
         }
       },
+      wxshare() {
+        this.$refs.weixinShare.show();
+      },
       getPicCls(rating) {
         let plen = rating.pictures.length;
         if (plen === 1 || plen === 2 || plen === 4) {
@@ -364,7 +372,7 @@
           text += this.countdownStats.seconds + '秒';
         }
         if (this.seckill.leftStartTimes) {
-          return `距开抢 ${text}`;
+          return `距开抢：${text}`;
         }
         return '';
       },
@@ -373,11 +381,18 @@
           if (!this.scroll) {
             this.scroll = new BScroll(this.$refs.seckillRef, {
               click: true,
-              bounce: false
+              bounce: false,
+              probeType: 3
             });
           } else {
             this.scroll.refresh();
           }
+          this.scroll.on('scroll', (pos) => {
+            let offset = Math.abs(Math.round(pos.y));
+            if (this.scrollY !== offset) {
+              this.scrollY = offset;
+            }
+          });
         });
       },
       show() {
@@ -435,7 +450,7 @@
                 price: this.good.killPrice,
                 oldPrice: this.good.price,
                 count: 1,
-                icon: (this.good.pictures && this.good.pictures.length) ? api.CONFIG.psCtx + this.good.pictures[0].id + '?w=114&h=114' : api.CONFIG.defaultImg,
+                icon: (this.good.pictures && this.good.pictures.length) ? api.CONFIG.psCtx + this.good.pictures[0].id + '?w=750&h=500' : api.CONFIG.defaultImg,
                 checked: false,
                 createTime: res.data.seccessKilled && res.data.seccessKilled.createTime
               };
@@ -514,11 +529,15 @@
         if (uid) {
           redirect += '?userId=' + uid;
         }
+        let vm = this;
         let shareData = {
           title: this.good.name,
           desc: '秒杀价：¥' + this.good.killPrice + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
-          imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
+          imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423',
+          success: function () {
+            vm.$refs.weixinShare.hideDialog();
+          }
         };
         wx.ready(function() {
           wx.onMenuShareTimeline(shareData);
@@ -554,7 +573,7 @@
               src += '?1';
             }
             src = src + '&w=750';
-            html = html.replace(key, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px"').replace(key2, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px"');
+            html = html.replace(key, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"').replace(key2, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"');
             if (width && width > 100) {
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             } else if (width === null) {
@@ -568,6 +587,10 @@
           this.processing = false;
         }
         this.good.content = html;
+      },
+      goTop() {
+        let goodWrapper = this.$refs.seckillRef.getElementsByClassName('good-content')[0];
+        this.scroll.scrollToElement(goodWrapper, 300);
       }
     },
     filters: {
@@ -586,7 +609,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, modalTitle, channel
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, modalTitle, channel, share, gotop
     }
   };
 </script>
@@ -705,7 +728,7 @@
           color: #666
         .countdown_nums
           color: #ef4747
-          font-size: 14px
+          font-size: 12px
           .box
             display:inline-block
             margin:0 1px
@@ -713,6 +736,8 @@
             height: 21px
             line-height: 21px
             font-weight:700
+            font-size: 14px
+            text-align: center
             color:#fff
             background:#fff url(../../common/images/countdown.png)
             background-size:13px
@@ -768,7 +793,7 @@
           color: rgb(240, 20, 20)
         .old
           text-decoration: line-through
-          font-size: 10px
+          font-size: 12px
           color: rgb(147, 153, 159)
         .stock
           position: absolute
@@ -778,9 +803,24 @@
           color: #666
       .duration
         display: block
-        padding: 5px 0
-        font-size: 12px
+        margin-top: 5px
+        font-size: 13px
         color: #666
+        .countdown_nums
+          position: relative
+          display: inline-block
+          font-size: 12px
+          .box
+            display:inline-block
+            margin:0 1px
+            width: 20px
+            height: 19px
+            line-height: 19px
+            font-weight:700
+            text-align: center
+            color:#fff
+            background:#fff url(../../common/images/countdown.png)
+            background-size:13px
       .cartcontrol-wrapper
         position: absolute
         right: 12px
@@ -830,7 +870,7 @@
         font-size: 14px
         color: rgb(7, 17, 27)
       .text
-        font-size: 12px
+        font-size: 13px
         color: rgb(77, 85, 93)
         line-height: 1.3
         padding-left: 14px
@@ -962,6 +1002,9 @@
             color: #fff
           &.red
             background: #ff463c
+            color: #fff
+          &.darkred
+            background: #d05148
             color: #fff
           .icon-favorite
             color: #ff463c  

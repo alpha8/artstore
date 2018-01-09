@@ -44,7 +44,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-show="showRecords === 0">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
+        <div class="no-order" v-show="showRecords === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -340,7 +340,7 @@
               height: 40px
               line-height: 40px
               font-size: 14px
-              background-color: rgba(7, 17, 27, 0.1)
+              background-color: #fafafa
               padding: 0 8px
               box-sizing: border-box
               &:after

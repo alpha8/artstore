@@ -12,12 +12,13 @@
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
                   <div class="extra-wrap">
                     <div class="price-wrap" @click.stop.prevent="showDetail(item)">
-                      <span class="state">{{stateDesc(item.auction_product_state_id)}}</span>
+                      <span class="state disabled" v-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{stateDesc(item.auction_product_state_id)}}</span>
+                      <span class="state" v-else>{{stateDesc(item.auction_product_state_id)}}</span>
                     </div>
                     <div class="more-ops">
-                      <span class="pricing" v-if="item.auction_product_state_id === 1"><i>{{item.countAppr}}</i>次出价</span>
-                      <span class="btn-buy blue" v-else-if="item.auction_product_state_id === 0" @click.stop.prevent="killNotify(item)">拍卖提醒</span>
-                      <span class="btn-buy disabled" v-else>已结束</span>
+                      <span class="btn-buy blue" v-if="item.auction_product_state_id === 0" @click.stop.prevent="killNotify(item)">拍卖提醒</span>
+                      <span class="pricing" v-else-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{item.countAppr}}次出价</span>
+                      <span class="pricing" v-else><i>{{item.countAppr}}</i>次出价</span>
                     </div>
                   </div>
                 </div>
@@ -27,7 +28,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-if="!auctions.length">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
+        <div class="no-order" v-if="!auctions.length && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -286,6 +287,8 @@
                     background-color: #f15353
                     &.orange
                       background: rgba(250,180,90,0.93)
+                    &.disabled
+                      background: #999
                 .more-ops
                   position: relative
                   display: block
@@ -314,12 +317,15 @@
                     &.blue
                       background: #00a0dc
                       color: #fff
+                    &.darkred
+                      background: #d05148
+                      color: #fff
                   .pricing
                     position: relative
                     display: inline-block
                     width: 80px
-                    height: 30px
-                    line-height: 30px
+                    height: 25px
+                    line-height: 25px
                     text-align: right
                     font-size: 12px
                     color: #a9a9a9

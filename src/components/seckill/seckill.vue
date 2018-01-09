@@ -10,20 +10,22 @@
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
-                  <div class="price-wrap">
-                    <span>{{item.killPrice | currency}}</span>
-                    <del>{{item.price | currency}}</del>
-                  </div>
-                  <div class="more-ops">
-                    <span class="btn-buy disabled" v-if="item.leftEndTimes <= 0">已结束</span>
-                    <span class="btn-buy disabled" v-else-if="item.number <= 0">已抢完</span>
-                    <span class="btn-buy orange" v-else-if="existKilled(item)">抢过了</span>
-                    <span class="btn-buy" v-else-if="!existKilled(item) && item.leftStartTimes <= 0 && item.leftEndTimes > 0" @click.stop.prevent="showDetail(item)">立即抢购</span>
-                    <span class="btn-buy green" v-else-if="item.leftStartTimes > 0" @click.stop.prevent="killNotify(item)">秒杀提醒</span>
-                    <span class="items-reserve">
-                      <strong>已售{{calcLeftPercent(item)}}%</strong>
-                      <span class="progress-bar"><em :style="transDeltaPercent(item)"></em></span>
-                    </span>
+                  <div class="extra-wrap">
+                    <div class="price-wrap">
+                      <span>{{item.killPrice | currency}}</span>
+                      <del>{{item.price | currency}}</del>
+                    </div>
+                    <div class="more-ops">
+                      <span class="btn-buy disabled" v-if="item.leftEndTimes <= 0">已结束</span>
+                      <span class="btn-buy disabled" v-else-if="item.number <= 0">已抢完</span>
+                      <span class="btn-buy disabled" v-else-if="existKilled(item)">抢过了</span>
+                      <span class="btn-buy darkred" v-else-if="!existKilled(item) && item.leftStartTimes <= 0 && item.leftEndTimes > 0" @click.stop.prevent="showDetail(item)">立即抢购</span>
+                      <span class="btn-buy blue" v-else-if="item.leftStartTimes > 0" @click.stop.prevent="killNotify(item)">秒杀提醒</span>
+                      <span class="items-reserve">
+                        <strong>已售{{calcLeftPercent(item)}}%</strong>
+                        <span class="progress-bar"><em :style="transDeltaPercent(item)"></em></span>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -32,7 +34,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-if="!seckills.length">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
+        <div class="no-order" v-if="!seckills.length && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -269,42 +271,49 @@
                 position: relative
                 font-size: 14px
                 color: #333
-                margin-top: 2px
                 >.title
+                  position: relative
+                  padding-top: 5px
                   overflow: hidden
                   text-overflow: ellipsis
-                  word-wrap: break-word
                   display: -webkit-box
                   -webkit-line-clamp: 2
                   -webkit-box-orient: vertical
-                .price-wrap
+                .extra-wrap
                   position: absolute
-                  left: 0
-                  bottom: 15px
-                  margin: 8px 0
-                  line-height: 16px
-                  height: 16px
-                  font-family: arial
+                  display: flex
+                  width: 100%
+                  bottom: 4px
+                .price-wrap
+                  position: relative
+                  display: block
+                  float: left
+                  width: 60px
+                  line-height: 1.3
                   span
+                    display: block
+                    padding-top: 3px
                     color: #e4393c
-                    font-size: 18px
+                    font-size: 14px
+                    font-weight: 700
                   del
                     display: block
+                    padding-top: 2px
                     color: #999
                     font-size: 12px
                 .more-ops
-                  position: absolute
-                  right: 10px
-                  bottom: 10px
+                  position: relative
+                  display: block
+                  flex: 1
+                  text-align: right
                   .btn-buy
-                    position: absolute
-                    right: 0
-                    bottom: 15px
-                    width: 80px
+                    position: relative
+                    display: inline-block
+                    padding: 0 10px
                     height: 25px
                     line-height: 25px
                     text-align: center
-                    font-size: 14px
+                    font-size: 11px
                     background: #e4393c
                     color: #fff
                     border-radius: 2px
@@ -313,50 +322,56 @@
                     &.orange
                       background: rgba(250,180,90,0.93)
                       color: #fff
+                    &.blue
+                      background: #00a0dc
+                      color: #fff
                     &.green
                       background: #44b549
                       color: #fff
+                    &.darkred
+                      background: #d05148
+                      color: #fff
                   .items-reserve
                     display: block
-                    position: absolute
-                    right: 0
-                    bottom: 0
-                    width: 150px
+                    position: relative
+                    padding-top: 2px
                     text-align: right
-                    margin-left: 5px
                     font-size: 12px
                     color: #999
+                    strong
+                      font-weight: 400
+                      font-size: 11px
                     .progress-bar
                       position: relative
                       display: inline-block
                       margin-top: -2px
                       margin-left: 5px
-                      width: 80px
+                      width: 64px
                       height: 6px
                       vertical-align: middle
-                      backgrouns-size: 2px 2px
+                      background-size: 2px 2px
                       border-radius: 12px
                       overflow: hidden
                       &::after
                         position: absolute
                         content: ''
                         z-index: 1
-                        background-color: #ec7476
+                        background-color: #b9b8b8
                         background: none
-                        border: 1px solid #ddd
+                        border: 1px solid #999
                         top: 0
                         left: 0
                         right: -100%
                         bottom: -100%
                         border-radius: 12px
-                        border-color: #ec7476
+                        border-color: #999
                         -webkit-transform: scale(.5)
                         -webkit-transform-origin: 0 0
                         pointer-events: none
                       em
                         display: block
                         height: 6px
-                        background-color: #ec7376
+                        background-color: #b9b8b8
       .no-order
         width: 100%
         padding: 40px 0

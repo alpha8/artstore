@@ -10,12 +10,16 @@
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
-                  <p class="line">状态：{{mapStatus[item.status]}}</p>
-                  <p class="line">时间：{{item.createTime | formatDate}}</p>
-                </div>
-                <div class="item-ops">
-                  <span class="btn" v-show="item.status === 0" @click.stop.prevent="pay(item)">去付款</span>
-                  <span class="btn white" v-show="item.status === 1" @click.stop.prevent="showOrders()">我的订单</span>
+                  <div class="extra-wrap">
+                    <div class="state-wrap">
+                      <p class="line">状态：{{mapStatus[item.status]}}</p>
+                      <p class="line">时间：{{item.createTime | formatDate}}</p>
+                    </div>
+                    <div class="item-ops">
+                      <span class="btn" v-show="item.status === 0" @click.stop.prevent="pay(item)">去付款</span>
+                      <span class="btn white" v-show="item.status === 1" @click.stop.prevent="showOrders()">我的订单</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </mu-flexbox-item>
@@ -23,7 +27,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-order" v-if="!seckills.length">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
+        <div class="no-order" v-if="!seckills.length && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -240,26 +244,39 @@
                   margin-right: 10px
                   overflow: hidden
               .item-info
+                position: relative
                 flex: 1
-                padding: 8px 10px 0 10px
+                box-sizing: border-box
+                overflow: hidden
                 >.title
+                  position: relative
+                  font-size: 14px
+                  padding-top: 5px
                   overflow: hidden
                   text-overflow: ellipsis
-                  word-wrap: break-word
                   display: -webkit-box
                   -webkit-line-clamp: 2
                   -webkit-box-orient: vertical
-                  line-height: 1.45
-                  height: 35px
-                .line
-                  line-height: 15px
-                  font-size: 12px
-                  color: #666
+                .extra-wrap
+                  position: absolute
+                  display: flex
+                  width: 100%
+                  bottom: 10px
+                  .state-wrap
+                    position: relative
+                    display: block
+                    flex: 1
+                    .line
+                      padding-bottom: 1px
+                      line-height: 15px
+                      font-size: 12px
+                      color: #666
+                      &:last-child
+                        padding-bottom: 0
               .item-ops
-                position: absolute
-                right: 0
-                top: 50%
-                margin-top: -12px
+                position: relative
+                display: block
+                float: right
                 width: 80px
                 .btn
                   display: inline-block
@@ -267,9 +284,9 @@
                   height: 25px
                   line-height: 25px
                   padding: 0 10px
-                  letter-spacing: 1px
-                  background: #eb3c3c
+                  background: #d05148
                   color: #fff
+                  border-radius: 2px
                   &.white
                     color: #000
                     background: #fff

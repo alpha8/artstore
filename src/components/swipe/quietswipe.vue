@@ -78,7 +78,7 @@
         background: #ccc
         opacity: .9
         &.swiper-pagination-bullet-active
-          background: #267fd4
+          background: #00a0dc
           width: 15px
           border-radius: 10px
 </style>
