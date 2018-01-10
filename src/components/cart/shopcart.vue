@@ -274,7 +274,7 @@
           border-top-1px(rgba(7, 17, 27, 0.1))
           .icon-check_circle
             display: inline-block
-            width: 15%
+            width: 40px
             float: left
             font-size: 24px
             color: #d3d3d3
@@ -286,7 +286,7 @@
           .pic
             vertical-align: top
             display: inline-block
-            width: 35%
+            width: 30%
             float: left
             padding: 5px 0
             box-sizing: border-box
@@ -297,22 +297,20 @@
             flex: 1
             position: relative
             vertical-align: top
-            padding: 0 15px 5px 5px
+            padding: 0 5px 5px 0
             .item-name
-              height: 42px
-              margin-top: 12px
+              position: relative
+              padding-top: 8px
               overflow: hidden
               font-size: 14px
               a
                 display: block
-                height: 100%
                 overflow: hidden
                 text-overflow: ellipsis
-                word-wrap: break-word
                 display: -webkit-box
                 -webkit-line-clamp: 2
                 -webkit-box-orient: vertical
-                line-height: 1.45
+                line-height: 1.2
             .amountWrapper
               position: absolute
               display: inline-block
@@ -322,10 +320,11 @@
                 display: inline-block
                 margin-top: 10px
                 color: #fb4741
+                font-size: 13px
               .cartcontrol
                 display: inline-block
                 float: right
-                padding-right: 15px
+                padding-right: 5px
             .num
               color: #666
     .no-product

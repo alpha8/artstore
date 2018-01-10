@@ -16,7 +16,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
         </div>
-        <div class="no-cashback" v-show="cashbacks.length === 0">啊哦，还没有交易记录哦</div>
+        <div class="no-cashback" v-show="cashbacks.length === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有交易记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
       </div>
     </div>
@@ -246,6 +246,7 @@
         padding: 40px 0
         text-align: center
         font-size: 14px
+        color: #ccc
         img
           width: 110px
           height: 110px

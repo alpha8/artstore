@@ -332,7 +332,7 @@
           position: relative
           width: 100%
           .order-item
-            margin-bottom: 15px
+            padding-bottom: 15px
             border-1px(rgba(7, 17, 27, 0.1))
             .item-title
               position: relative
@@ -340,14 +340,14 @@
               height: 40px
               line-height: 40px
               font-size: 14px
-              background-color: #fafafa
+              background-color: #e1e1e1
               padding: 0 8px
               box-sizing: border-box
               &:after
                 position: absolute
                 display: block
-                width: 10px
-                height: 10px
+                width: 8px
+                height: 8px
                 content: ""
                 border-top: 1px solid #666
                 border-left: 1px solid #666
@@ -356,7 +356,7 @@
                 -webkit-transform: rotate(135deg)
                 transform: rotate(135deg)
                 top: 50%
-                right: 5px
+                right: 10px
                 margin-top: -4px
               .op-btns
                 display: inline-block
@@ -369,8 +369,8 @@
             .item-summary
               position: relative
               display: flex
-              padding: 8px 8px
-              font-size: 13px
+              padding: 0 8px
+              font-size: 14px
               border-top-1px(rgba(7, 17, 27, 0.1))
               border-1px(rgba(7, 17, 27, 0.1))
               box-sizing: border-box
@@ -399,7 +399,7 @@
             .item-content
               position: relative
               display: flex
-              padding: 8px 8px
+              padding: 5px 8px
               font-size: 13px
               box-sizing: border-box
               .item-img
@@ -410,8 +410,10 @@
                   width: 95%
                   overflow: hidden
               .item-info
+                position: relative
                 flex: 1
-                padding: 20px 8px 0 5px
+                padding: 8px 3px 0 5px
+                box-sizing: border-box
                 >.title
                   overflow: hidden
                   text-overflow: ellipsis
@@ -423,11 +425,15 @@
                 div
                   padding-top: 10px
               .item-pay
-                flex: 0 0 15vw
+                position: relative
+                width: 50px
+                float: right
                 text-align: right
-                padding-top: 20px
+                padding-top: 8px
                 .price
                   padding-bottom: 8px
+                  color: #e4393c
+                  font-weight: 700
                 .nums
                   text-align: right
       .no-order

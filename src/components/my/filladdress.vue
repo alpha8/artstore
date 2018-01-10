@@ -20,12 +20,8 @@
             <strong>配送方式：</strong>
             <span>快递</span>
           </li>
-         <!--  <li class="checkout-item change">
-            <strong>发票信息</strong>
-            <span>明细</span>
-          </li> -->
-          <li class="checkout-item change" @click.stop.prevent="openRemarkBox">
-            <strong>备注</strong>
+          <li class="checkout-item change item-border" @click.stop.prevent="openRemarkBox">
+            <strong>备注/重要留言：</strong>
             <span class="nowrap-line remark">{{payRemarks}}</span>
           </li>
         </ul>
@@ -215,8 +211,8 @@
           &:after
             position: absolute
             display: block
-            width: 10px
-            height: 10px
+            width: 8px
+            height: 8px
             content: ""
             border-top: 1px solid #666
             border-left: 1px solid #666
@@ -229,8 +225,6 @@
             margin-top: -4px
           li
             display: -webkit-box
-            word-wrap: break-word
-            word-break: break-all
             text-overflow: ellipsis
             overflow: hidden
             -webkit-line-clamp: 1
@@ -239,6 +233,8 @@
             height: 21px
             >.mobile
               margin-left: 10px
+          strong
+            font-weight: 400
     >.pay
       position: absolute
       top: 114px
@@ -309,7 +305,7 @@
           li
             position: relative
             display: flex
-            padding: 10px 30px 10px 0
+            padding: 10px 0 10px 0
             strong
               flex: 1
               font-weight: 400
@@ -317,15 +313,15 @@
               flex: 1
               text-align: right
               &.nowrap-line
+                position: relative
                 display: -webkit-box
-                word-wrap: break-word
-                word-break: break-all
                 text-overflow: ellipsis
                 overflow: hidden
-                -webkit-line-clamp: 2
+                -webkit-line-clamp: 1
                 -webkit-box-orient: vertical
-              &.remark
-                font-size: 10px
+                &.remark
+                  margin-bottom: 3px
+                  padding-right: 15px
             &.change:after
               content: ""
               display: block
@@ -341,6 +337,9 @@
               right: 5px
               top: 50%
               margin-top: -5px
+          .item-border
+            background: #fff url(../../common/images/line.png) -7px bottom repeat-x
+            background-size: 60px 4px
         >.payArea
           position: relative
           text-align: center

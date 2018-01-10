@@ -126,10 +126,10 @@
       position: relative
       li
         position: relative
-        padding: 12px 0 0 75px
+        padding: 8px 0 0 75px
         box-sizing: border-box
         &.border-1px
-          padding: 12px 0 12px 75px
+          padding: 8px 0 8px 75px
           border-1px(rgba(7, 17, 27, 0.1))
         .text-control
           height: 20px
@@ -157,7 +157,7 @@
             font-size: 14px
             line-height: 1
             &.special
-              top: 20px
+              top: 18px
           input
             height: 20px
             line-height: normal

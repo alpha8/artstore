@@ -178,7 +178,7 @@
       getThumbnail(item) {
         let icon = item.icon;
         if (icon) {
-          return api.CONFIG.psCtx + icon + '?w=70&h=70&v=v2';
+          return api.CONFIG.psCtx + icon + '?w=750&h=500&v=v2';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -287,7 +287,7 @@
   @import '../../common/stylus/mixin';
   .btn-red
     background: #f15353
-    color: #fff
+    color: #e1e1e1
   .btn-blue
     background: #3a77e7
     color: #fff
@@ -299,7 +299,7 @@
     color: #fff
   .btn-white
     background: #fff
-    color: #333
+    color: #666
     border: 1px solid #ddd
   .orderdetail
     position: absolute
@@ -322,18 +322,20 @@
       .order-info, .delivery-info, .goods-info, .price-summary
         padding: 10px 8px
         p
-          line-height: 1.8
-          font-size: 13px
+          line-height: 1.6
+          font-size: 14px
           label
             display: inline-block
-            min-width: 75px
+            min-width: 66px
             color: #999
           .text-blue
             color: #00a0dc
       .delivery-info, .goods-info
         padding-top: 0
+      .goods-info p
+        line-height: 1
       .price-summary
-        font-size: 13px
+        font-size: 14px
         padding-bottom: 20px
         ul
           position: relative
@@ -350,34 +352,41 @@
       .good-item
         position: relative
         display: flex
-        padding: 8px 0
         font-size: 13px
+        box-sizing: border-box
         .item-img
           display: inline-block
           float: left
+          width: 35%
           img
-            width: 67px
-            height: 67px
+            width: 95%
             overflow: hidden
         .item-info
+          position: relative
           flex: 1
-          padding: 20px 8px 0
+          padding: 8px 3px 0 2px
+          box-sizing: border-box
           >.title
+            position: relative
+            font-size: 14px
             overflow: hidden
             text-overflow: ellipsis
-            word-wrap: break-word
             display: -webkit-box
             -webkit-line-clamp: 2
             -webkit-box-orient: vertical
-            line-height: 1.45
+            line-height: 1.3
           div
             padding-top: 10px
         .item-pay
-          flex: 0 0 15vw
+          position: relative
+          width: 50px
+          float: right
           text-align: right
-          padding-top: 20px
+          padding-top: 8px
           .price
             padding-bottom: 8px
+            color: #e4393c
+            font-weight: 700
           .nums
             text-align: right
   .order-refund-wrap
@@ -437,7 +446,6 @@
       .button
         text-align: center
         float: right
-        width: 25%
         padding-right: 8px
         box-sizing: border-box
         &:first-child
@@ -448,4 +456,5 @@
           width: 100%
           height: 35px
           line-height: 35px
+          padding: 0 8px
 </style>

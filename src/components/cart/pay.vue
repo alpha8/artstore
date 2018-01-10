@@ -443,8 +443,6 @@
             margin-top: -4px
           li
             display: -webkit-box
-            word-wrap: break-word
-            word-break: break-all
             text-overflow: ellipsis
             overflow: hidden
             -webkit-line-clamp: 1
@@ -479,7 +477,7 @@
           padding: 10px
           li
             display: flex
-            margin-bottom: 10px
+            padding: 5px 0
             font-size: 13px
             min-height: 75px
             border-1px(rgba(7, 17, 27, 0.1))
@@ -494,9 +492,8 @@
                 overflow: hidden
             .sku-info
               flex: 1
-              padding: 10px 10px 10px 5px
+              padding: 8px 5px 0 5px
               .sku-name
-                color: #333
                 height: 40px
                 line-height: 20px
                 margin-bottom: 5px
@@ -510,7 +507,7 @@
             .sku-ext
               width: 15%
               float: right
-              padding: 10px 0
+              padding: 8px 0 0
               text-align: right
               box-sizing: border-box
               p
@@ -544,9 +541,8 @@
               text-align: right
               vertical-align: middle
               &.nowrap-line
+                position: relative
                 display: -webkit-box
-                word-wrap: break-word
-                word-break: break-all
                 text-overflow: ellipsis
                 overflow: hidden
                 -webkit-line-clamp: 1

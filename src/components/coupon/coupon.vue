@@ -18,7 +18,8 @@
         <div class="wallet-content">
           <div class="content-title">优惠券充值</div>
           <div class="form-control">
-            <input type="number" name="amount" placeholder="请输入优惠券码" class="input-amount" v-model="amount">
+            <span class="title">优惠券码：</span>
+            <input type="number" name="amount" placeholder="优惠券码" class="input-amount" v-model="amount">
           </div>
           <div class="btns"><span class="btn-red" :class="{'btn-gray': amount.length === 0}" @click.stop.prevent="pay">充值</span></div>
           <div class="content-text">
@@ -78,7 +79,7 @@
             userId: user.userId || 0,
             cNo: this.amount
           }).then(response => {
-            if (response.result === 0) {
+            if (response.result === 0 && response.code === 0) {
               this.$store.dispatch('openToast', '充值成功！');
               this.$store.dispatch('updateCouponAmount', response.couponTotal);
               this.amount = '';
@@ -154,7 +155,7 @@
         padding: 5px 10px
         color: #666
       .wallet-heading
-        padding: 20px 10px
+        padding: 20px 13px
         color: #fff
         background: #e45050
         .balance-name
@@ -176,7 +177,7 @@
         color: #666
         background: #fff
         .content-title
-          margin-bottom: 7px
+          padding-bottom: 8px
           font-weight: 700
           font-size: 15px
           color: #333
@@ -189,16 +190,25 @@
         .form-control
           display: flex
           position: relative
+          padding-left: 80px
+          .title
+            position: absolute
+            width: 70px
+            top: 50%
+            left: 4px
+            font-size: 14px
+            line-height: 1
+            transform: translate(0, -50%)
           .input-amount
-            flex: 1
-            padding: 8px 0
+            padding: 5px 0
+            height: 20px
+            border: 0 none
+            font-size: 14px
+            width: 100%
+            vertical-align: top
             border-bottom: 1px solid #ccc
-            &::-webkit-input-placeholder
-              text-align: center
-            &::-moz-input-placeholder
-              text-align: center  
-            &::-ms-input-placeholder
-              text-align: center  
+            margin-right: 5px
+            box-sizing: border-box
         .btns span
           letter-spacing: 2px
 </style>

@@ -90,9 +90,6 @@
         <span class="mini-favorite-item" @click.stop.prevent="mark">
           <span class="button-lg"><i :class="favorited"></i></span>
         </span>
-        <div class="foot-item" @click.stop.prevent="wxshare">
-          <span class="button-lg orange">分享有礼</span>
-        </div>
         <div class="foot-item" v-show="seckill.leftStartTimes > 0" @click.stop.prevent="killNotify">
           <span class="button-lg darkred">秒杀提醒</span>
         </div>
@@ -107,6 +104,9 @@
         </div>
         <div class="foot-item" v-show="!existKilled() && seckill.leftStartTimes <= 0 && seckill.leftEndTimes > 0 && seckill.number > 0" @click.stop.prevent="pay">
           <span class="button-lg red">立即抢购</span>
+        </div>
+        <div class="foot-item" @click.stop.prevent="wxshare">
+          <span class="button-lg orange">分享有礼</span>
         </div>
       </div>
     </div>
@@ -819,7 +819,7 @@
             font-weight:700
             text-align: center
             color:#fff
-            background:#fff url(../../common/images/countdown.png)
+            background:#e4393c
             background-size:13px
       .cartcontrol-wrapper
         position: absolute

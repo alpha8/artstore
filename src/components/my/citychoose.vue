@@ -7,9 +7,9 @@
         <span @click.stop.prevent="closeAdd()"><i class="icon-close2"></i></span>
       </section>
       <section class="title selectline">
-        <div class="area" @click.stop.prevent="provinceSelected()">{{Province ? Province : ''}}</div>
-        <div class="area" @click.stop.prevent="citySelected()" :class="City ? '' : 'active'">{{City ? City: '请选择'}}</div>
-        <div class="area" @click.stop.prevent="districtSelected()" :class="District ? '' : 'active'" v-show="City">{{District ? District: '请选择'}}</div>
+        <div class="area" @click.stop.prevent="provinceSelected()" :class="Province ? '' : 'active'" >{{Province ? Province : '选择省份'}}</div>
+        <div class="area" @click.stop.prevent="citySelected()" :class="City ? '' : 'active'" v-show="Province">{{City ? City: '选择城市'}}</div>
+        <div class="area" @click.stop.prevent="districtSelected()" :class="District ? '' : 'active'" v-show="City">{{District ? District: '选择区县'}}</div>
       </section>
       <ul class="border-1px">
         <li class="addList" v-for="(v,k) in info" @click.stop.prevent="getProvinceId(v.id, v.name, k)" v-show="showProvince" :class="v.selected ? 'active' : ''">{{v.name}}</li>
@@ -44,7 +44,7 @@
     height: 40px
     line-height: 40px
     background: #f3f2f8
-    padding-left: 10px
+    display: flex
     &.selectline
       background: none
     h4
@@ -70,10 +70,12 @@
         color: #333
         font-size: 14px
   .area
-    display: inline-block
+    position: relative
+    width: 30%
     font-size: 14px
     line-height: 40px
-    padding: 0 5px
+    margin-right: 2%
+    text-align: center
     color: #333
     &.active
       color: #ff463c
@@ -13143,6 +13145,7 @@
         this.showCityList = false;
         this.showDistrictList = false;
         // 清除市级和区级选项
+        this.Province = false;
         this.City = false;
         this.District = false;
         // 选项页面的切换
@@ -13167,6 +13170,8 @@
         this.showProvince = false;
         this.showCity = true;
         this.showDistrict = false;
+        this.District = false;
+        this.showDistrictList = false;
       },
       getDistrictId(code, input, index) {
         this.district = code;

@@ -225,10 +225,24 @@
             .item-info
               flex: 1
               padding: 0 10px
+              &:after
+                position: absolute
+                display: block
+                width: 8px
+                height: 8px
+                content: ""
+                border-top: 1px solid #666
+                border-left: 1px solid #666
+                -webkit-transform-origin: 50%
+                transform-origin: 50%
+                -webkit-transform: rotate(135deg)
+                transform: rotate(135deg)
+                top: 50%
+                right: 10px
+                margin-top: -4px
               >.title
                 overflow: hidden
                 text-overflow: ellipsis
-                word-wrap: break-word
                 display: -webkit-box
                 -webkit-line-clamp: 1
                 -webkit-box-orient: vertical

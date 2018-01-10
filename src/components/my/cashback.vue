@@ -121,7 +121,7 @@
       box-sizing: border-box
       overflow: hidden
       .cashback-heading
-        padding: 20px 10px
+        padding: 20px 13px
         color: #fff
         background: #e45050
         .balance-name

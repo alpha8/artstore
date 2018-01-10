@@ -25,10 +25,10 @@
           <div class="duration">团购时间：{{good.startDate | formatDate}} ~ {{good.endDate | formatDate}}</div>  
           <div class="duration">团购人数：已团{{good.bookmoq}}件·{{good.moq}}人团</div>  
         </div>
-        <split v-show="good.description"></split>
-        <div class="info" v-show="good.description">
+        <split v-show="good.artwork.content"></split>
+        <div class="info" v-show="good.artwork.content">
           <h1 class="title">商品介绍</h1>
-          <div class="text" v-html="good.description" ref="goodContent" id="productIntro"></div>
+          <div class="text" v-html="good.artwork.content" ref="goodContent" id="productIntro"></div>
         </div>
         <div class="info" v-show="good.rule">
           <h1 class="title">使用规则</h1>
@@ -79,9 +79,6 @@
         <span class="mini-favorite-item" @click.stop.prevent="mark">
           <span class="button-lg"><i :class="favorited"></i></span>
         </span>
-        <div class="foot-item" @click.stop.prevent="wxshare">
-          <span class="button-lg orange">分享有礼</span>
-        </div>
         <div class="foot-item" v-if="good.status === 2">
           <span class="button-lg gray">已结束</span>
         </div>
@@ -90,6 +87,9 @@
         </div>
         <div class="foot-item" v-else-if="good.bookmoq != good.moq" @click.stop.prevent="pay">
           <span class="button-lg red">立即抢购</span>
+        </div>
+        <div class="foot-item" @click.stop.prevent="wxshare">
+          <span class="button-lg orange">分享有礼</span>
         </div>
       </div>
     </div>
@@ -130,7 +130,7 @@
       this.processing = false;
     },
     updated() {
-      if (this.good.description && !this.processing) {
+      if (this.good.artwork.content && !this.processing) {
         this.processing = true;
         this.lazyload();
         this.bindPictureEvent();
@@ -337,7 +337,7 @@
           name: this.good.name,
           pictures: this.good.artwork.pictures,
           src: this.good.icon,
-          content: this.good.content,
+          content: this.good.description,
           price: this.good.groupPrice,
           oldPrice: this.good.oldPrice,
           count: 1,
@@ -420,7 +420,7 @@
         let picImgList = [];
         let imgs = this.$refs.goodContent.getElementsByTagName('img');
         let prefix = 'http://www.yihuyixi.com';
-        let html = this.good.description;
+        let html = this.good.artwork.content;
         for (let i = 0; i < imgs.length; i++) {
           let img = imgs[i];
           let src = img.getAttribute('data-original');
@@ -457,7 +457,7 @@
           this.lazyloaded = true;
           this.processing = false;
         }
-        this.good.description = html;
+        this.good.artwork.content = html;
       },
       goTop() {
         let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];

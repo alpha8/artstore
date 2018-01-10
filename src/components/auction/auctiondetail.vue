@@ -908,7 +908,6 @@
           label
             display: block
             float: left
-            margin-right: 3px
     .auction-flow
       position: relative
       padding: 10px 14px

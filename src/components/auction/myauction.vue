@@ -11,13 +11,15 @@
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}<span class="resultFlag" v-if="item.auction_product_state_id > 2">({{resultDesc(item)}})</span></h3>
                   <div class="extra-wrap">
-                    <div class="state-wrap">
-                      <p class="line">出价次数：<span class="redtext">{{item.countAppr}}</span>次</p>
-                      <p class="line">拍卖状态：{{stateDesc(item.auction_product_state_id)}}</p>
+                    <div class="price-wrap">
+                      <span class="state disabled" v-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{stateDesc(item.auction_product_state_id)}}</span>
+                      <span class="state" v-else>{{stateDesc(item.auction_product_state_id)}}</span>
                     </div>
-                    <div class="item-ops">
-                      <span class="btn" v-show="item.status === 0" @click.stop.prevent="pay(item)">去付款</span>
-                      <span class="btn white" v-show="item.status === 1" @click.stop.prevent="showOrders()">我的订单</span>
+                    <div class="more-ops">
+                      <span class="btn-buy blue" v-if="item.status === 0" @click.stop.prevent="pay(item)">去付款</span>
+                      <span class="btn-buy white" v-if="item.status === 1" @click.stop.prevent="showOrders()">我的订单</span>
+                      <span class="pricing" v-else-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{item.countAppr}}次出价</span>
+                      <span class="pricing" v-else><i>{{item.countAppr}}</i>次出价</span>
                     </div>
                   </div>
                 </div>
@@ -250,8 +252,10 @@
                 overflow: hidden
                 >.title
                   position: relative
-                  font-size: 14px
                   padding-top: 5px
+                  font-size: 14px
+                  height: 32px
+                  line-height: 16px
                   overflow: hidden
                   text-overflow: ellipsis
                   display: -webkit-box
@@ -266,37 +270,70 @@
                   display: flex
                   width: 100%
                   bottom: 10px
-                  .state-wrap
-                    position: relative
-                    display: block
-                    flex: 1
-                    .line
-                      padding-bottom: 1px
-                      line-height: 15px
-                      font-size: 12px
-                      color: #666
-                      &:last-child
-                        padding-bottom: 0
-                      .redtext
-                        color: #f15353
-              .item-ops
-                position: relative
-                display: block
-                float: right
-                width: 80px
-                .btn
-                  display: inline-block
-                  float: right
+                .price-wrap
+                  position: relative
+                  flex: 1
                   height: 25px
-                  line-height: 25px
-                  padding: 0 10px
-                  letter-spacing: 1px
-                  background: #d05148
-                  color: #fff
-                  &.white
-                    color: #000
-                    background: #fff
-                    border: 1px solid rgba(7, 17, 27, 0.1)
+                  .state
+                    display: inline-block
+                    height: 25px
+                    width: auto
+                    line-height: 25px
+                    vertical-align: middle
+                    text-align: center
+                    color: #fff
+                    border-radius: 4px
+                    font-size: 11px
+                    padding: 0 8px
+                    letter-spacing: 0.5px
+                    box-sizing: border-box
+                    background-color: #f15353
+                    &.orange
+                      background: rgba(250,180,90,0.93)
+                    &.disabled
+                      background: #999
+                .more-ops
+                  position: relative
+                  display: block
+                  float: right
+                  width: 120px
+                  text-align: right
+                  .btn-buy
+                    position: relative
+                    display: inline-block
+                    padding: 0 10px
+                    height: 25px
+                    line-height: 25px
+                    text-align: center
+                    font-size: 11px
+                    background: #e4393c
+                    color: #fff
+                    border-radius: 2px
+                    &.disabled
+                      background: #999
+                    &.orange
+                      background: rgba(250,180,90,0.93)
+                      color: #fff
+                    &.green
+                      background: #44b549
+                      color: #fff
+                    &.blue
+                      background: #00a0dc
+                      color: #fff
+                    &.darkred
+                      background: #d05148
+                      color: #fff
+                  .pricing
+                    position: relative
+                    display: inline-block
+                    width: 80px
+                    height: 25px
+                    line-height: 25px
+                    text-align: right
+                    font-size: 12px
+                    color: #a9a9a9
+                    i
+                      color: #f15353
       .no-order
         width: 100%
         padding: 40px 0

@@ -182,6 +182,8 @@
       margin: 0 auto
       height: 50px
       line-height: 50px
+      .btn-red
+        color: #e1e1e1
   .footprint
     position: absolute
     top: 44px
@@ -221,7 +223,7 @@
             border-bottom: 2px solid #f15353
       .no-more
         width: 100%
-        padding: 10px 0
+        padding: 10px 0 70px
         color: #ccc
         text-align: center
         font-size: 12px
@@ -257,6 +259,7 @@
               overflow: hidden
               >.title
                 position: relative
+                color: #666
                 font-size: 14px
                 padding-top: 5px
                 overflow: hidden
@@ -297,7 +300,7 @@
                   line-height: 25px
                   padding: 0 10px
                   background: #d05148
-                  color: #fff
+                  color: #e1e1e1
                   border-radius: 2px
                   &.white
                     color: #000

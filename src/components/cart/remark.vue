@@ -62,7 +62,8 @@
       ul
         position: relative
         li
-          padding: 12px 12px 6px 55px
+          position: relative
+          padding: 12px 12px 0 55px
           box-sizing: border-box
           p
             display: block
@@ -88,16 +89,17 @@
               vertical-align: top
             textarea
               width: 100%
-              box-sizing: border-box
               border: none
               resize: none
               font-size: 14px
               line-height: 1.5
               border: 1px dashed #ccc
+              padding-right: 20px
+              box-sizing: border-box
             .icon-close
               position: absolute
-              top: 18px
-              right: 10px
+              top: 17px
+              right: 15px
               font-size: 18px
     .btns
       padding: 0 10px
