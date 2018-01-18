@@ -87,11 +87,11 @@
           return;
         }
         this.loading = true;
-        let uid = this.$store.getters.getUserInfo.userId;
+        let uid = this.$store.getters.getUserInfo.userId || -1;
         api.getAuctionsByUID({
           paging: this.pageNumber,
           pageSize: this.pageSize,
-          userNameId: uid || ''
+          userNameId: uid
         }).then(response => {
           if (response.info.apList && response.info.apList.length) {
             response.info.apList.forEach(item => {

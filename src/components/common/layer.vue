@@ -58,7 +58,7 @@
     left: 50%
     width: 300px
     max-height: 400px
-    z-index: 100
+    z-index: 10000
     background-color: #fff
     box-sizing: border-box
     box-shadow: 1px 1px 50px rgba(0,0,0,.3)

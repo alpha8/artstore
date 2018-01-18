@@ -15,7 +15,7 @@
 <style scoped lang="stylus" rel="stylesheet/stylus">
   .toast
     position: fixed
-    z-index: 100
+    z-index: 10000
     width: 210px
     top: 50%
     left: 50%

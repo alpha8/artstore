@@ -63,7 +63,7 @@
         position: relative
         li
           position: relative
-          padding: 12px 12px 0 55px
+          padding: 12px 12px 0 52px
           box-sizing: border-box
           p
             display: block

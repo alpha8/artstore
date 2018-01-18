@@ -23,12 +23,14 @@
             <span class="stock"></span>          
           </div>
           <div class="duration">团购时间：{{good.startDate | formatDate}} ~ {{good.endDate | formatDate}}</div>  
-          <div class="duration">团购人数：已团{{good.bookmoq}}件·{{good.moq}}人团</div>  
+          <div class="duration">团购人数：已团{{good.bookmoq}}件·{{good.moq}}人团</div> 
+          <div class="duration" v-if="good.leftStartTimes > 0" v-html="countdownTips()"></div>
+          <div class="duration" v-else>距团购结束还剩：<p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p></div> 
         </div>
-        <split v-show="good.artwork.content"></split>
-        <div class="info" v-show="good.artwork.content">
+        <split v-show="good.artwork && good.artwork.content"></split>
+        <div class="info" v-show="good.artwork && good.artwork.content">
           <h1 class="title">商品介绍</h1>
-          <div class="text" v-html="good.artwork.content" ref="goodContent" id="productIntro"></div>
+          <div class="text" v-html="good.artwork && good.artwork.content" ref="goodContent" id="productIntro"></div>
         </div>
         <div class="info" v-show="good.rule">
           <h1 class="title">使用规则</h1>
@@ -72,6 +74,9 @@
             <div class="more-rating" v-show="good.ratings && good.ratings.length" @click.stop.prevent="viewMore">———— 查看更多评论 ————</div>
           </div>
         </div>
+        <split v-show="guessGoods.length"></split>
+        <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
+        <channel :items="guessGoods" :cols="2"></channel>
       </div>
     </div>
     <div class="fixed-foot">
@@ -79,16 +84,19 @@
         <span class="mini-favorite-item" @click.stop.prevent="mark">
           <span class="button-lg"><i :class="favorited"></i></span>
         </span>
+        <div class="foot-item" v-show="good.leftStartTimes > 0" @click.stop.prevent="wxNotify">
+          <span class="button-lg darkred">团购提醒</span>
+        </div>
         <div class="foot-item" v-if="good.status === 2">
           <span class="button-lg gray">已结束</span>
         </div>
         <div class="foot-item" v-else-if="good.bookmoq === good.moq">
           <span class="button-lg gray">已抢完</span>
         </div>
-        <div class="foot-item" v-else-if="good.bookmoq != good.moq" @click.stop.prevent="pay">
+        <div class="foot-item" v-else-if="good.leftStartTimes <= 0 && good.leftEndTimes > 0 && good.bookmoq != good.moq" @click.stop.prevent="pay">
           <span class="button-lg red">立即抢购</span>
         </div>
-        <div class="foot-item" @click.stop.prevent="wxshare">
+        <div class="foot-item btn-share" @click.stop.prevent="wxshare">
           <span class="button-lg orange">分享有礼</span>
         </div>
       </div>
@@ -102,10 +110,12 @@
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {formatDate} from '@/common/js/date';
+  import {formatDate, countdown} from '@/common/js/date';
   import {mixUsername} from '@/common/js/util';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
+  import modalTitle from '@/components/modal-title/modal-title';
+  import channel from '@/components/channel/channel';
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
@@ -125,12 +135,13 @@
       this.show();
     },
     deactivated() {
+      this.stopTimer();
       this.hide();
       this.marked = false;
       this.processing = false;
     },
     updated() {
-      if (this.good.artwork.content && !this.processing) {
+      if (!this.processing && this.good.artwork && this.good.artwork.content) {
         this.processing = true;
         this.lazyload();
         this.bindPictureEvent();
@@ -146,6 +157,7 @@
         lazyloaded: false,
         processing: false,
         previewImgList: [],
+        guessGoods: [],
         desc: {
           all: '全部',
           positive: '好评',
@@ -167,7 +179,11 @@
         let sliders = [];
         pics.forEach(pic => {
           if (pic) {
-            sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
+            if (pic.width < pic.height || pic.height / pic.width <= 1) {
+              sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500&v=v2', 'src': api.CONFIG.psCtx + pic.id});
+            } else {
+              sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
+            }
           } else {
             sliders.push({'thumbnail': api.CONFIG.defaultImg, 'src': api.CONFIG.defaultImg});
           }
@@ -197,11 +213,13 @@
             return;
           }
           this.good = res;
+          this.timerLoop();
           this.wxReady();
           this.show();
           this.processing = false;
           this.$store.dispatch('closeLoading');
           this.fetchComments();
+          this.getLikeGoods();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });
@@ -256,6 +274,30 @@
           }
         });
       },
+      getLikeGoods() {
+        let kw = '';
+        let cat = '';
+        if (this.good.artwork.keyword && this.good.artwork.keyword.length) {
+          kw = this.good.artwork.keyword.join(',');
+        } else {
+          cat = this.good.artwork.artworkCategory && this.good.artwork.artworkCategory.parent && this.good.artwork.artworkCategory.parent.name;
+        }
+        api.GetGoods({
+          artworkTypeName: 'tea',
+          currentPage: 1,
+          pageSize: 12,
+          keyword: kw,
+          categoryParentName: cat || '',
+          pid: this.good.artwork.id,
+          commodityStatesId: 2,
+          scoreSort: true
+        }).then((response) => {
+          this.guessGoods = response.artworks;
+          setTimeout(() => {
+            this._initScroll();
+          }, 800);
+        });
+      },
       getThumbnail(id) {
         if (id) {
           return api.CONFIG.psCtx + id + '?w=90&h=90';
@@ -280,6 +322,66 @@
         } else {
           return 'p30';
         }
+      },
+      timerLoop() {
+        if (this.good.leftStartTimes) {
+          this.good.leftStartTimes--;
+        }
+        if (this.good.leftEndTimes) {
+          this.good.leftEndTimes--;
+        }
+        if (this.good.leftStartTimes) {
+          this.countdownStats = countdown(this.good.leftStartTimes);
+        } else {
+          this.countdownStats = countdown(this.good.leftEndTimes);
+        }
+        if (this.good.leftEndTimes <= 0) {
+          clearTimeout(this.timer);
+        }
+        this.timer = setTimeout(this.timerLoop, 1000);
+      },
+      stopTimer() {
+        if (this.timer) {
+          clearTimeout(this.timer);
+        }
+      },
+      countdownTips() {
+        let count = 0;
+        let maxcount = 2;
+        let text = '';
+        let stats = this.countdownStats;
+        if (stats.days) {
+          text += stats.days + '天';
+          count++;
+        }
+        if (count < maxcount && stats.hours && stats.hours !== '00') {
+          text += stats.hours + '小时';
+          count++;
+        }
+        if (count < maxcount && stats.mins) {
+          text += stats.mins + '分';
+          count++;
+        }
+        if (count < maxcount && stats.seconds) {
+          text += stats.seconds + '秒';
+          count++;
+        }
+        if (this.good.leftStartTimes) {
+          return `距开抢：${text}`;
+        }
+        return '';
+      },
+      wxNotify() {
+        let openid = this.$store.getters.getUserInfo.openid;
+        api.reservedNotify({
+          pid: this.good.id,
+          pname: this.good.name,
+          type: 2,
+          openid: openid,
+          strDate: formatDate(new Date(this.good.startDate), 'yyyy-MM-dd hh:mm')
+        }).then(response => {
+          this.$store.dispatch('openToast', '设置成功, 请留意微信通知！');
+        });
       },
       previewImg(pics, pic) {
         let imgs = [];
@@ -481,7 +583,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, share, gotop
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, share, gotop, modalTitle, channel
     }
   };
 </script>
@@ -663,6 +765,21 @@
         margin-top: 5px
         font-size: 13px
         color: #666
+        .countdown_nums
+          position: relative
+          display: inline-block
+          font-size: 12px
+          .box
+            display:inline-block
+            margin:0 1px
+            width: 20px
+            height: 19px
+            line-height: 19px
+            font-weight:700
+            text-align: center
+            color:#fff
+            background:#e4393c
+            background-size:13px
       .cartcontrol-wrapper
         position: absolute
         right: 12px
@@ -845,8 +962,16 @@
           &.red
             background: #ff463c
             color: #fff
+          &.darkred
+            background: #d05148
+            color: #fff
           .icon-favorite
-            color: #ff463c  
+            color: #ff463c
+      .btn-share
+        flex: none
+        float: left
+        width: 34%
+        display: block 
       .mini-favorite-item
         flex: 70px 0 0
         .button-lg

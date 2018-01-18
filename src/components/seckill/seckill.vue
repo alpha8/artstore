@@ -12,8 +12,13 @@
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
-                      <span>{{item.killPrice | currency}}</span>
-                      <del>{{item.price | currency}}</del>
+                      <div class="countdowntips" v-if="item.leftStartTimes" v-html="countdownTips(item.countdownStats, true)"></div>
+                      <div class="countdowntips" v-else-if="item.leftEndTimes" v-html="countdownTips(item.countdownStats)"></div>
+                      <div class="countdowntips" v-else>&nbsp;</div>
+                      <div class="price">
+                        <span>{{item.killPrice | currency}}</span>
+                        <del>{{item.price | currency}}</del>
+                      </div>
                     </div>
                     <div class="more-ops">
                       <span class="btn-buy disabled" v-if="item.leftEndTimes <= 0">已结束</span>
@@ -21,7 +26,7 @@
                       <span class="btn-buy disabled" v-else-if="existKilled(item)">抢过了</span>
                       <span class="btn-buy darkred" v-else-if="!existKilled(item) && item.leftStartTimes <= 0 && item.leftEndTimes > 0" @click.stop.prevent="showDetail(item)">立即抢购</span>
                       <span class="btn-buy blue" v-else-if="item.leftStartTimes > 0" @click.stop.prevent="killNotify(item)">秒杀提醒</span>
-                      <span class="items-reserve">
+                      <span class="items-reserve" v-if="!item.leftStartTimes">
                         <strong>已售{{calcLeftPercent(item)}}%</strong>
                         <span class="progress-bar"><em :style="transDeltaPercent(item)"></em></span>
                       </span>
@@ -44,7 +49,7 @@
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
-  import {formatDate} from '@/common/js/date';
+  import {formatDate, countdown} from '@/common/js/date';
   import api from '@/api/api';
 
   export default {
@@ -63,8 +68,8 @@
       };
     },
     activated() {
-      this.timerLoop();
       this.fetchData(true);
+      this.timerLoop();
       this.show();
     },
     deactivated() {
@@ -117,6 +122,11 @@
           if (seckill.leftEndTimes) {
             seckill.leftEndTimes--;
           }
+          if (seckill.leftStartTimes) {
+            seckill.countdownStats = countdown(seckill.leftStartTimes);
+          } else {
+            seckill.countdownStats = countdown(seckill.leftEndTimes);
+          }
         }
         this.timer = setTimeout(this.timerLoop, 1000);
       },
@@ -132,6 +142,34 @@
         let delta = Math.round((1 - item.number / item.stock) * 100);
         return `width: ${delta}%`;
       },
+      countdownTips(stats, start) {
+        if (!stats) {
+          return '&nbsp;';
+        }
+        let count = 0;
+        let maxcount = 2;
+        let text = '';
+        if (stats.days) {
+          text += stats.days + '天';
+          count++;
+        }
+        if (count < maxcount && stats.hours && stats.hours !== '00') {
+          text += stats.hours + '小时';
+          count++;
+        }
+        if (count < maxcount && stats.mins) {
+          text += stats.mins + '分';
+          count++;
+        }
+        if (count < maxcount && stats.seconds) {
+          text += stats.seconds + '秒';
+          count++;
+        }
+        if (text) {
+          return start ? `距开抢：${text}` : `距结束：${text}`;
+        }
+        return '&nbsp;';
+      },
       existKilled(item) {
         return !!this.$store.getters.getKilledProduct.find(id => id === item.seckillId);
       },
@@ -144,7 +182,7 @@
       getThumbnail(item) {
         let icon = item.icon;
         if (icon) {
-          return api.CONFIG.psCtx + icon + '?w=750&h=500';
+          return api.CONFIG.psCtx + icon + '?w=750&h=500&v=v2';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -283,22 +321,25 @@
                   position: absolute
                   display: flex
                   width: 100%
-                  bottom: 4px
+                  bottom: 2px
                 .price-wrap
                   position: relative
                   display: block
                   float: left
-                  width: 60px
+                  width: auto
                   line-height: 1.3
+                  .countdowntips
+                    margin-top: 5px
+                    font-size: 12px
+                    color: #999
                   span
-                    display: block
+                    display: inline-block
                     padding-top: 3px
                     color: #e4393c
                     font-size: 14px
                     font-weight: 700
                   del
-                    display: block
-                    padding-top: 2px
+                    display: inline-block
                     color: #999
                     font-size: 12px
                 .more-ops
@@ -309,7 +350,7 @@
                   .btn-buy
                     position: relative
                     display: inline-block
-                    padding: 0 10px
+                    padding: 0 6px
                     height: 25px
                     line-height: 25px
                     text-align: center
@@ -317,6 +358,8 @@
                     background: #e4393c
                     color: #fff
                     border-radius: 2px
+                    min-width: 56px
+                    box-sizing: border-box
                     &.disabled
                       background: #999
                     &.orange
@@ -334,7 +377,7 @@
                   .items-reserve
                     display: block
                     position: relative
-                    padding-top: 2px
+                    padding-top: 3px
                     text-align: right
                     font-size: 12px
                     color: #999
@@ -345,8 +388,8 @@
                       position: relative
                       display: inline-block
                       margin-top: -2px
-                      margin-left: 5px
-                      width: 64px
+                      margin-left: 1px
+                      width: 56px
                       height: 6px
                       vertical-align: middle
                       background-size: 2px 2px

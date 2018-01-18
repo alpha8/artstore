@@ -21,6 +21,9 @@
             <!-- <li><label>拍卖类型：</label><span>加价拍</span></li> -->
           </ul>
         </div>
+        <div class="duration">
+          拍卖时间：<span>{{auction.startTime | formatDate}} ~ {{auction.endTime | formatDate}}</span>
+        </div>
         <split></split>
         <div class="info">
           <h1 class="title" @click.stop.prevent="gotoBidPrices">出价记录<span class="num"></span></h1>
@@ -46,10 +49,14 @@
             <img src="../../common/images/auction-step.png" alt="">
           </div>
         </div>
-        <split v-show="auction.content"></split>
-        <div class="info" v-show="auction.content">
+        <split v-show="auction.artwork && auction.artwork.content"></split>
+        <div class="info" v-show="auction.artwork && auction.artwork.content">
           <h1 class="title">商品介绍</h1>
-          <div class="text" v-html="auction.content" ref="goodContent" id="productIntro"></div>
+          <div class="text" v-html="auction.artwork && auction.artwork.content" ref="goodContent" id="productIntro"></div>
+        </div>
+        <div class="info" v-show="auction.rule">
+          <h1 class="title">使用规则</h1>
+          <div class="text" v-html="auction.rule" ref="goodRule" id="rules"></div>
         </div>
         <split></split>
         <div class="rating">
@@ -89,6 +96,9 @@
             <div class="more-rating" v-show="auction.ratings && auction.ratings.length" @click.stop.prevent="viewMore">———— 查看更多评论 ————</div>
           </div>
         </div>
+        <split v-show="guessGoods.length"></split>
+        <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
+        <channel :items="guessGoods" :cols="2"></channel>
       </div>
     </div>
     <div class="fixed-foot">
@@ -127,6 +137,8 @@
   import {mixUsername} from '@/common/js/util';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
+  import modalTitle from '@/components/modal-title/modal-title';
+  import channel from '@/components/channel/channel';
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import frame from '@/components/common/myiframe';
@@ -146,10 +158,11 @@
     deactivated() {
       this.hide();
       this.processing = false;
+      this.higher = false;
       this.disconnect();
     },
     updated() {
-      if (this.auction.content && !this.processing) {
+      if (!this.processing && (this.auction.artwork && this.auction.artwork.content)) {
         this.processing = true;
         this.lazyload();
         this.bindPictureEvent();
@@ -167,6 +180,7 @@
         lazyloaded: false,
         processing: false,
         previewImgList: [],
+        guessGoods: [],
         higher: false,
         selectType: ALL,
         onlyContent: true,
@@ -188,7 +202,7 @@
       swiperSlides() {
         let sliders = [];
         if (this.auction.icon) {
-          sliders.push({'thumbnail': api.CONFIG.psCtx + this.auction.icon + '?w=750&h=500', 'src': api.CONFIG.psCtx + this.auction.icon});
+          sliders.push({'thumbnail': api.CONFIG.psCtx + this.auction.icon + '?w=750&h=500&v=v2', 'src': api.CONFIG.psCtx + this.auction.icon});
         } else {
           sliders.push({'thumbnail': api.CONFIG.defaultImg, 'src': api.CONFIG.defaultImg});
         }
@@ -211,6 +225,7 @@
           this.connectSocket();
           // this.fetchBids();
           this.fetchComments();
+          this.getLikeGoods();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });
@@ -262,6 +277,30 @@
           }
         }).catch(response => {
           this.bidPrices = [];
+        });
+      },
+      getLikeGoods() {
+        let kw = '';
+        let cat = '';
+        if (this.auction.artwork && this.auction.artwork.keyword && this.auction.artwork.keyword.length) {
+          kw = this.auction.artwork.keyword.join(',');
+        } else {
+          cat = this.auction.artwork.artworkCategory && this.auction.artwork.artworkCategory.parent && this.auction.artwork.artworkCategory.parent.name;
+        }
+        api.GetGoods({
+          artworkTypeName: 'tea',
+          currentPage: 1,
+          pageSize: 12,
+          keyword: kw,
+          categoryParentName: cat || '',
+          pid: this.auction.artwork.id,
+          commodityStatesId: 2,
+          scoreSort: true
+        }).then((response) => {
+          this.guessGoods = response.artworks;
+          setTimeout(() => {
+            this._initScroll();
+          }, 800);
         });
       },
       stateDesc(state) {
@@ -414,8 +453,14 @@
           this.$store.dispatch('openToast', '请先登录！');
           return;
         }
-        if (this.highPrice <= 0 || this.highPrice < this.dealPrice + this.auction.markup) {
-          this.$store.dispatch('openToast', '出价太低，请重新出价！');
+        if (this.highPrice <= 0) {
+          this.$store.dispatch('openToast', '出价需高于当前价，请重新出价！');
+          return;
+        } else if (this.dealPrice === this.auction.startPrice && this.highPrice < this.dealPrice) {
+          this.$store.dispatch('openToast', '出价需高于当前价，请重新出价！');
+          return;
+        } else if (this.dealPrice > this.auction.startPrice && this.highPrice < this.dealPrice + this.auction.markup) {
+          this.$store.dispatch('openToast', '出价需高于当前价，请重新出价！');
           return;
         }
         var data = {
@@ -494,7 +539,7 @@
         let picImgList = [];
         let imgs = this.$refs.goodContent.getElementsByTagName('img');
         let prefix = 'http://www.yihuyixi.com';
-        let html = this.auction.content;
+        let html = this.auction.artwork.content;
         for (let i = 0; i < imgs.length; i++) {
           let img = imgs[i];
           let src = img.getAttribute('data-original');
@@ -531,7 +576,7 @@
           this.lazyloaded = true;
           this.processing = false;
         }
-        this.auction.content = html;
+        this.auction.artwork.content = html;
       },
       goTop() {
         let goodWrapper = this.$refs.auctionRef.getElementsByClassName('good-content')[0];
@@ -554,7 +599,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, gotop
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, gotop, modalTitle, channel
     }
   };
 </script>
@@ -842,6 +887,7 @@
           line-height: 38px
         .header
           background-color: #fafafa
+          font-size: 13px
         .col-1
           width: 15%
           padding-left: 10px
@@ -887,7 +933,6 @@
           box-sizing: border-box
     .auction-detail
       position: relative
-      padding-bottom: 12px
       clear: both
       ul
         position: relative
@@ -908,6 +953,12 @@
           label
             display: block
             float: left
+    .duration
+      position: relative
+      padding: 3px 0 12px 14px
+      font-size: 13px
+      color: #666
+      overflow: hidden
     .auction-flow
       position: relative
       padding: 10px 14px

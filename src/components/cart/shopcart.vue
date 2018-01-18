@@ -274,7 +274,7 @@
           border-top-1px(rgba(7, 17, 27, 0.1))
           .icon-check_circle
             display: inline-block
-            width: 40px
+            width: 46px
             float: left
             font-size: 24px
             color: #d3d3d3

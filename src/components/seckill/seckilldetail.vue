@@ -105,7 +105,7 @@
         <div class="foot-item" v-show="!existKilled() && seckill.leftStartTimes <= 0 && seckill.leftEndTimes > 0 && seckill.number > 0" @click.stop.prevent="pay">
           <span class="button-lg red">立即抢购</span>
         </div>
-        <div class="foot-item" @click.stop.prevent="wxshare">
+        <div class="foot-item btn-share" @click.stop.prevent="wxshare">
           <span class="button-lg orange">分享有礼</span>
         </div>
       </div>
@@ -189,7 +189,11 @@
         let sliders = [];
         pics.forEach(pic => {
           if (pic) {
-            sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
+            if (pic.width < pic.height || pic.height / pic.width <= 1) {
+              sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500&v=v2', 'src': api.CONFIG.psCtx + pic.id});
+            } else {
+              sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
+            }
           } else {
             sliders.push({'thumbnail': api.CONFIG.defaultImg, 'src': api.CONFIG.defaultImg});
           }
@@ -278,7 +282,7 @@
         api.GetGoods({
           artworkTypeName: 'tea',
           currentPage: 1,
-          pageSize: 20,
+          pageSize: 12,
           keyword: kw,
           categoryParentName: cat || '',
           pid: this.good.id,
@@ -358,18 +362,25 @@
         }
       },
       countdownTips() {
+        let count = 0;
+        let maxcount = 2;
         let text = '';
-        if (this.countdownStats.days) {
-          text += this.countdownStats.days + '天';
+        let stats = this.countdownStats;
+        if (stats.days) {
+          text += stats.days + '天';
+          count++;
         }
-        if (this.countdownStats.hours) {
-          text += this.countdownStats.hours + '小时';
+        if (count < maxcount && stats.hours && stats.hours !== '00') {
+          text += stats.hours + '小时';
+          count++;
         }
-        if (this.countdownStats.mins) {
-          text += this.countdownStats.mins + '分';
+        if (count < maxcount && stats.mins) {
+          text += stats.mins + '分';
+          count++;
         }
-        if (this.countdownStats.seconds) {
-          text += this.countdownStats.seconds + '秒';
+        if (count < maxcount && stats.seconds) {
+          text += stats.seconds + '秒';
+          count++;
         }
         if (this.seckill.leftStartTimes) {
           return `距开抢：${text}`;
@@ -1007,7 +1018,12 @@
             background: #d05148
             color: #fff
           .icon-favorite
-            color: #ff463c  
+            color: #ff463c
+      .btn-share
+        flex: none
+        float: left
+        width: 34%
+        display: block
       .mini-favorite-item
         flex: 70px 0 0
         .button-lg

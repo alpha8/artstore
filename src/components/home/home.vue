@@ -12,6 +12,15 @@
         <modal-title title="茶席套装.三百席" moreText="更多" catKey="art" catName="茶席套装.三百席"></modal-title>
         <channel :items="arts" :cols="2"></channel>
         <split></split>
+        <modal-title title="一虎一席茶室艺术空间"></modal-title>
+        <div class="vipmovie">
+          <div id="vip_video_player" :style="getVideoWidth">
+            <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5db404564972818869478317/snapshot/1514945837_2671344614.100_0.jpg" id="vipvideo" :src="videos.vip">
+            </video>
+          </div>
+          <div class="slogan">[深圳国际艺术博览会] VIP室：一虎一席茶室艺术</div>
+        </div>
+        <split></split>
         <modal-title title="优质茶器(1000元以内)" moreText="更多" catKey="teaart" catName="优质茶器" price="0-1000"></modal-title>
         <channel :items="teaPots" :cols="2"></channel>
         <split></split>
@@ -24,16 +33,7 @@
         <modal-title title="好茶 (百里挑一、更实惠)" moreText="更多" catKey="welltea" catName="好茶（精选汇聚、更实惠）"></modal-title>
         <channel :items="goodTeas" :cols="2"></channel>
         <split></split>
-        <modal-title title="一虎一席茶室艺术空间"></modal-title>
-        <div class="vipmovie">
-          <div id="vip_video_player" :style="getVideoWidth">
-            <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5db404564972818869478317/snapshot/1514945837_2671344614.100_0.jpg" id="vipvideo" :src="videos.vip">
-            </video>
-          </div>
-          <div class="slogan">[深圳国际艺术博览会] VIP室：一虎一席茶室艺术</div>
-        </div>
-        <split></split>
-        <modal-title title="茶室专业配画" moreText="更多" catKey="paint" catName="茶室专业配画"></modal-title>
+        <modal-title title="茶室专业配画 (名家、新锐)" moreText="更多" catKey="paint" catName="茶室专业配画"></modal-title>
         <channel :items="paints" :cols="2"></channel>
         <split></split>
         <modal-title title="茶室空间雅物" moreText="更多" catKey="graceful" catName="茶室空间雅物"></modal-title>
@@ -156,7 +156,7 @@
         artworkTypeName: 'tea',
         categoryParentName: 'teaart',
         currentPage: 1,
-        pageSize: 30,
+        pageSize: 36,
         commodityStatesId: 2,
         price: '0-1000',
         scoreSort: true
@@ -191,7 +191,7 @@
         artworkTypeName: 'tea',
         categoryParentName: 'museum',
         currentPage: 1,
-        pageSize: 8,
+        pageSize: 16,
         commodityStatesId: 2,
         scoreSort: true
       }).then((response) => {
@@ -290,9 +290,9 @@
         }
         let shareData = {
           title: '[一虎一席茶席艺术平台] 商城',
-          desc: '优质茶生活，茶文化高端礼品. “领略东方生活之美”.【一站式优品商城，品味脱凡】',
+          desc: '1200款精美茶器、300套茶席佳作、好茶惠聚、老茶博物馆【一站式优品商城，品味脱凡】',
           link: redirect,
-          imgUrl: 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423'
+          imgUrl: 'http://www.yihuyixi.com/ps/download/5a60046ae4b0a5130574a5fc'
         };
         wx.ready(function() {
           wx.onMenuShareTimeline(shareData);

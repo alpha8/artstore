@@ -3,8 +3,9 @@
   <section class="showChose" v-show="showChose">
     <section class="address">
       <section class="title">
+        <span class="cancel" @click.stop.prevent="closeAdd()">取消</span>
         <h4>所在地区</h4>
-        <span @click.stop.prevent="closeAdd()"><i class="icon-close2"></i></span>
+        <span class="confirm" @click.stop.prevent="confirmAdd()">确定</span>
       </section>
       <section class="title selectline">
         <div class="area" @click.stop.prevent="provinceSelected()" :class="Province ? '' : 'active'" >{{Province ? Province : '选择省份'}}</div>
@@ -41,18 +42,32 @@
     width: 100%
   .title
     position: relative
-    height: 40px
-    line-height: 40px
+    height: 50px
+    line-height: 50px
     background: #f3f2f8
     display: flex
+    font-size: 15px
     &.selectline
       background: none
-    h4
-      display: inline-block
-      font-size: 14px
+      height: 40px
       line-height: 40px
+    h4
+      display: block
+      flex: 1
+      text-align: center
+      line-height: 50px
       font-weight: normal
-    span
+    .cancel, .confirm
+      width: 70px
+      height: 50px
+      line-height: 50px
+      float: left
+      text-align: center
+      color: #999
+    .confirm
+      float: right
+      color: #ff463c
+    .span2
       position: absolute
       display: inline-block
       top: 0
@@ -72,7 +87,7 @@
   .area
     position: relative
     width: 30%
-    font-size: 14px
+    font-size: 15px
     line-height: 40px
     margin-right: 2%
     text-align: center
@@ -90,14 +105,13 @@
       color: #ff463c
       &:after
         content: '\20'
-        display: block
+        display: inline-block
         width: 20px
         height: 20px
-        position: absolute
-        right: 0
-        top: 50%
-        margin-top: -10px
-        background: url(../../common/images/sprite_address_slide.png) no-repeat;
+        margin-left: 5px
+        position: relative
+        vertical-align: middle
+        background: url(../../common/images/sprite_address_slide.png) no-repeat
         background-size: 20px 80px
         background-position: 0 -20px
   .address ul
@@ -13118,6 +13132,24 @@
       closeAdd() {
         this.showChose = false;
       },
+      confirmAdd() {
+        if (!this.Province) {
+          this.$store.dispatch('openToast', '请选择省份!');
+          return;
+        } else if (!this.City) {
+          this.$store.dispatch('openToast', '请选择城市!');
+          return;
+        } else if (!this.District) {
+          this.$store.dispatch('openToast', '请选择区县!');
+          return;
+        }
+        this.$emit('selectCity', {
+          province: this.Province,
+          city: this.City,
+          district: this.District
+        });
+        this.showChose = false;
+      },
       _filter(add, name, code) {
         let result = [];
         for (let i = 0; i < add.length; i++) {
@@ -13170,6 +13202,7 @@
         this.showProvince = false;
         this.showCity = true;
         this.showDistrict = false;
+        this.City = false;
         this.District = false;
         this.showDistrictList = false;
       },
@@ -13182,12 +13215,7 @@
         });
         this.showDistrictList[index].selected = true;
         // 选取市区选项之后关闭弹层
-        this.showChose = false;
-        this.$emit('selectCity', {
-          province: this.Province,
-          city: this.City,
-          district: this.District
-        });
+        // this.showChose = false;
       },
       districtSelected() {
         this.showProvince = false;

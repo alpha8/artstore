@@ -12,14 +12,20 @@
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
-                      <span>{{item.groupPrice | currency}}</span>
-                      <del>{{item.oldPrice | currency}}</del>
+                      <div class="countdowntips" v-if="item.leftStartTimes" v-html="countdownTips(item.countdownStats, true)"></div>
+                      <div class="countdowntips" v-else-if="item.leftEndTimes" v-html="countdownTips(item.countdownStats)"></div>
+                      <div class="countdowntips" v-else>&nbsp;</div>
+                      <div class="price">
+                        <span>{{item.groupPrice | currency}}</span>
+                        <del>{{item.oldPrice | currency}}</del>
+                      </div>
                     </div>
                     <div class="more-ops">
                       <span class="btn-buy disabled" v-if="item.status === 2">已结束</span>
                       <span class="btn-buy disabled" v-else-if="item.bookmoq === item.moq">抢完了</span>
                       <span class="btn-buy" v-else-if="item.status === 1" @click.stop.prevent="showDetail(item)">去拼单</span>
-                      <span class="items-reserve">
+                      <span class="btn-buy blue" v-else @click.stop.prevent="wxNotify(item)">团购提醒</span>
+                      <span class="items-reserve" v-if="!item.leftStartTimes">
                         <strong>已售{{calcLeftPercent(item)}}%</strong>
                         <span class="progress-bar"><em :style="transDeltaPercent(item)"></em></span>
                       </span>
@@ -42,6 +48,7 @@
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
+  import {formatDate, countdown} from '@/common/js/date';
   import api from '@/api/api';
 
   export default {
@@ -61,9 +68,11 @@
     },
     activated() {
       this.fetchData(true);
+      this.timerLoop();
       this.show();
     },
     deactivated() {
+      this.stopTimer();
       this._reset();
       this.hide();
     },
@@ -117,16 +126,78 @@
         this.totalPages = -1;
         this.loadEnd = false;
       },
+      timerLoop() {
+        for (let i = 0; i < this.groupbuys.length; i++) {
+          let item = this.groupbuys[i];
+          if (item.leftStartTimes) {
+            item.leftStartTimes--;
+          }
+          if (item.leftEndTimes) {
+            item.leftEndTimes--;
+          }
+          if (item.leftStartTimes) {
+            item.countdownStats = countdown(item.leftStartTimes);
+          } else {
+            item.countdownStats = countdown(item.leftEndTimes);
+          }
+        }
+        this.timer = setTimeout(this.timerLoop, 1000);
+      },
+      stopTimer() {
+        if (this.timer) {
+          clearTimeout(this.timer);
+        }
+      },
+      countdownTips(stats, start) {
+        if (!stats) {
+          return '&nbsp;';
+        }
+        let count = 0;
+        let maxcount = 2;
+        let text = '';
+        if (stats.days) {
+          text += stats.days + '天';
+          count++;
+        }
+        if (count < maxcount && stats.hours && stats.hours !== '00') {
+          text += stats.hours + '小时';
+          count++;
+        }
+        if (count < maxcount && stats.mins) {
+          text += stats.mins + '分';
+          count++;
+        }
+        if (count < maxcount && stats.seconds) {
+          text += stats.seconds + '秒';
+          count++;
+        }
+        if (text) {
+          return start ? `距开抢：${text}` : `距结束：${text}`;
+        }
+        return '&nbsp;';
+      },
       getThumbnail(item) {
         let icon = item.icon;
         if (icon) {
-          return api.CONFIG.psCtx + icon + '?w=750&h=500';
+          return api.CONFIG.psCtx + icon + '?w=750&h=500&v=v2';
         } else {
           return api.CONFIG.defaultImg;
         }
       },
       showDetail(item) {
         this.$router.push({name: 'groupbuyDetail', params: {id: item.id}});
+      },
+      wxNotify(item) {
+        let openid = this.$store.getters.getUserInfo.openid;
+        api.reservedNotify({
+          pid: item.id,
+          pname: item.name,
+          type: 2,
+          openid: openid,
+          strDate: formatDate(new Date(item.startDate), 'yyyy-MM-dd hh:mm')
+        }).then(response => {
+          this.$store.dispatch('openToast', '设置成功, 请留意微信通知！');
+        });
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -238,6 +309,7 @@
                 >.title
                   position: relative
                   padding-top: 5px
+                  line-height: 1.2
                   overflow: hidden
                   text-overflow: ellipsis
                   display: -webkit-box
@@ -247,22 +319,25 @@
                   position: absolute
                   display: flex
                   width: 100%
-                  bottom: 4px
+                  bottom: 2px
                 .price-wrap
                   position: relative
                   display: block
                   float: left
-                  width: 60px
+                  width: auto
                   line-height: 1.3
+                  .countdowntips
+                    margin-top: 5px
+                    font-size: 12px
+                    color: #999
                   span
-                    display: block
+                    display: inline-block
                     padding-top: 3px
                     color: #e4393c
                     font-size: 14px
                     font-weight: 700
                   del
-                    display: block
-                    padding-top: 2px
+                    display: inline-block
                     color: #999
                     font-size: 12px
                 .more-ops
@@ -273,7 +348,7 @@
                   .btn-buy
                     position: relative
                     display: inline-block
-                    padding: 0 10px
+                    padding: 0 6px
                     height: 25px
                     line-height: 25px
                     text-align: center
@@ -281,6 +356,8 @@
                     background: #e4393c
                     color: #fff
                     border-radius: 2px
+                    min-width: 56px
+                    box-sizing: border-box
                     &.disabled
                       background: #999
                     &.orange
@@ -292,10 +369,13 @@
                     &.darkred
                       background: #d05148
                       color: #fff
+                    &.blue
+                      background: #00a0dc
+                      color: #fff
                   .items-reserve
                     display: block
                     position: relative
-                    padding-top: 2px
+                    padding-top: 3px
                     text-align: right
                     font-size: 12px
                     color: #999
@@ -306,8 +386,8 @@
                       position: relative
                       display: inline-block
                       margin-top: -2px
-                      margin-left: 5px
-                      width: 64px
+                      margin-left: 1px
+                      width: 56px
                       height: 6px
                       vertical-align: middle
                       backgrouns-size: 2px 2px
@@ -317,22 +397,22 @@
                         position: absolute
                         content: ''
                         z-index: 1
-                        background-color: rgba(250,180,90,0.93)
+                        background-color: #b9b8b8
                         background: none
-                        border: 1px solid #ddd
+                        border: 1px solid #999
                         top: 0
                         left: 0
                         right: -100%
                         bottom: -100%
                         border-radius: 12px
-                        border-color: rgba(250,180,90,0.93)
+                        border-color: #999
                         -webkit-transform: scale(.5)
                         -webkit-transform-origin: 0 0
                         pointer-events: none
                       em
                         display: block
                         height: 6px
-                        background-color: rgba(250,180,90,0.93)
+                        background-color: #b9b8b8
       .no-order
         width: 100%
         padding: 40px 0

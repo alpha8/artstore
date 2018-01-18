@@ -79,11 +79,11 @@
           return;
         }
         this.loading = true;
-        let uid = this.$store.getters.getUserInfo.userId;
+        let uid = this.$store.getters.getUserInfo.userId || -1;
         api.getGroupbuys({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          userId: uid || ''
+          userId: uid
         }).then(response => {
           if (response.groupBuies && response.groupBuies.length) {
             response.groupBuies.forEach(item => {
@@ -238,6 +238,7 @@
                   position: relative
                   font-size: 14px
                   padding-top: 5px
+                  line-height: 1.2
                   overflow: hidden
                   text-overflow: ellipsis
                   display: -webkit-box

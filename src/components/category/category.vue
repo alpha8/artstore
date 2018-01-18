@@ -5,7 +5,7 @@
       <div class="menu-wrapper" ref="menuWrapper">
         <ul>
           <li v-for="(item, index) in goods" class="menu-item border-1px" :class="{'active': item.id===good.id, 'twoline': item.desc}" @click.stop.prevent="selectMenu(index)">
-            <span class="text"><span :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css" :class="item.css"></i></span><em>({{item.count || 0}})</em></span>
+            <span class="text"><span :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css && !item.desc" :class="item.css"></i></span><em>({{item.count || 0}})</em></span>
             <i v-if="item.desc">{{item.desc}}</i>
           </li>
         </ul>
@@ -15,9 +15,9 @@
           <li class="good-list good-list-hook">
             <ul class="itemList" v-if="good.childrens && good.childrens[0].childrens && !good.childrens[0].childrens.length">
               <li v-for="good in good.childrens" :class="typeStatus(good.status)" v-if="!good.hide">
-                <router-link :to="{path: '/search', query: {cat: good.propertyName, key: (good.value === 'thumbnail' ? '' : good.value)}}" class="good-item" :class="{'thumbnail': good.value === 'thumbnail'}">
+                <router-link :to="{path: '/search', query: {cat: dummyKey(good.propertyName), key: (good.value === 'thumbnail' ? good.desc : good.value)}}" class="good-item" :class="{'thumbnail': good.value === 'thumbnail'}">
                   <div class="icon" v-if="good.value==='thumbnail'">
-                    <img :src="good.desc" border="0" />
+                    <img :src="good.css" border="0" />
                   </div>
                   <div class="content" v-if="good.value!=='thumbnail'">
                     <h2 class="name" :class="{'strong': good.css === 'strong'}">{{good.value}}<i v-if="good.css" :class="good.css"></i><em>({{good.count || 0}})</em></h2>
@@ -29,9 +29,9 @@
               <h1 class="title border-1px">{{innergood.value}}</h1>
               <ul class="itemList">
                 <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName === 'art'">
-                  <router-link :to="{path: '/search', query: {ck: innergood.propertyName, cv: item.propertyName, parentCat: 'art', key: (item.value === 'thumbnail' ? '' : item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
+                  <router-link :to="{path: '/search', query: {ck: innergood.propertyName, cv: dummyKey(item.propertyName), parentCat: 'art', key: (item.value === 'thumbnail' ? item.desc: item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
                     <div class="icon" v-if="item.value==='thumbnail'">
-                      <img :src="item.desc" border="0" />
+                      <img :src="item.css" border="0" />
                     </div>
                     <div class="content" v-if="item.value!=='thumbnail'">
                       <h2 class="name" :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em></h2>
@@ -39,9 +39,9 @@
                   </router-link>
                 </li>
                 <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName !== 'art'">
-                  <router-link :to="{path: '/search', query: {sunCat: item.propertyName, lv1: good.propertyName, lv2: innergood.propertyName, key: (item.value === 'thumbnail' ? '' : item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
+                  <router-link :to="{path: '/search', query: {sunCat: dummyKey(item.propertyName), lv1: good.propertyName, lv2: innergood.propertyName, key: (item.value === 'thumbnail' ? item.desc : item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
                     <div class="icon" v-if="item.value==='thumbnail'">
-                      <img :src="item.desc" border="0" />
+                      <img :src="item.css" border="0" />
                     </div>
                     <div class="content" v-if="item.value!=='thumbnail'">
                       <h2 class="name" :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em></h2>
@@ -170,6 +170,14 @@
     methods: {
       typeStatus(status) {
         let last = this.lastCol;
+        /** 特殊处理，有缩略图的一行显示2个的分类，第一个分类占66%， 第二个33% */
+        if (last === 22 && status === last) {
+          this.lastCol = 0;
+          return 'type2';
+        } else if (status === 22) {
+          this.lastCol = status;
+          return 'type2delta';
+        }
         if (last === 2 && status === last) {
           this.lastCol = 0;
           return 'type' + status + 'delta';
@@ -194,6 +202,12 @@
       selectGood(good) {
         this.selectedGood = good;
         this.$refs.goodDetail.show();
+      },
+      dummyKey(key) {
+        if (key && key.indexOf('DUM_') > -1) {
+          return key.substring(4);
+        }
+        return key;
       },
       addFood(target) {
         this._drop(target);
@@ -377,6 +391,8 @@
                 overflow: hidden
               img
                 height: 100%
+                padding: 2px 0 3px 10px
+                box-sizing: border-box
             .icon
               display: block
               font-size: 40px

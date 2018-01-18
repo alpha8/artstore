@@ -39,7 +39,7 @@
           </mu-flexbox-item>
         </mu-flexbox>
         <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
-        <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
+        <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;千款精品库每周上新，敬请饱览美物&nbsp;&nbsp;———</div>
       </div>
     </div>
     <sidebar ref="sidebar" @fireAction="search" @fireReset="clearSearch"></sidebar>
@@ -188,10 +188,11 @@
       getThumbnail(item) {
         let pic = item.pictures;
         if (pic && pic.length) {
-          if (pic[0] && pic[0].width < pic[0].height) {
-            return api.CONFIG.psCtx + pic[0].id + '?w=750&h=500&v=v2';
+          let icon = pic[0];
+          if (icon && icon.width < icon.height || icon.height / icon.width <= 1) {
+            return api.CONFIG.psCtx + icon.id + '?w=750&h=500&v=v2';
           }
-          return api.CONFIG.psCtx + pic[0].id + '?w=750&h=500';
+          return api.CONFIG.psCtx + icon.id + '?w=750&h=500';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -510,7 +511,7 @@
       .no-more
         width: 100%
         padding: 10px 0
-        color: #ccc
+        color: #999
         text-align: center
         font-size: 12px
       .product-item

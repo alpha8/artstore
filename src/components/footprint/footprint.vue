@@ -175,19 +175,21 @@
     position: fixed
     bottom: 0
     width: 100%
-    height: 50px
+    height: 47px
     overflow: hidden
     z-index: 2
     .btns
       margin: 0 auto
-      height: 50px
-      line-height: 50px
+      height: 47px
+      line-height: 47px
+      font-size: 14px
       .btn-red
         color: #e1e1e1
+        border-radius: 0
   .footprint
     position: absolute
     top: 44px
-    bottom: 50px
+    bottom: 47px
     width: 100%
     .footprint-wrap
       position: relative
@@ -287,7 +289,8 @@
                     &.price
                       color: #d05148
                       font-size: 14px
-                      font-weight: 700
+                      font-weight: 400
+                      padding-top: 7px
               .item-ops
                 position: relative
                 display: block
@@ -302,6 +305,7 @@
                   background: #d05148
                   color: #e1e1e1
                   border-radius: 2px
+                  font-size: 11px
                   &.white
                     color: #000
                     background: #fff

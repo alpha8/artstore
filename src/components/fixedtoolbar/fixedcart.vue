@@ -21,9 +21,9 @@
         <span class="button-lg disable">已售磬</span>
       </div>
       <div class="foot-item" v-if="good.stock && good.stock.total <= 0 && good.stock.bookTotal <= 0" @click.stop.prevent="bookNotify">
-        <span class="button-lg darkred">到货提醒</span>
+        <span class="button-lg red">到货提醒</span>
       </div>
-      <div class="foot-item" v-else @click.stop.prevent="wxshare">
+      <div class="foot-item btn-share" v-else @click.stop.prevent="wxshare">
         <span class="button-lg orange">分享有礼</span>
       </div>
     </div>
@@ -278,6 +278,11 @@
             color: #fff
           .icon-favorite
             color: #ff463c  
+      .btn-share
+        flex: none
+        float: left
+        width: 28%
+        display: block
       .mini-favorite-item
         flex: 70px 0 0
         .button-lg

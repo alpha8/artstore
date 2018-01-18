@@ -79,11 +79,11 @@
           return;
         }
         this.loading = true;
-        let uid = this.$store.getters.getUserInfo.userId;
+        let uid = this.$store.getters.getUserInfo.userId || -1;
         api.getSuccessSeckills({
           offset: this.pageNumber,
           limit: this.pageSize,
-          userId: uid || ''
+          userId: uid
         }).then(response => {
           if (response.list && response.list.length) {
             response.list.forEach(item => {
@@ -253,6 +253,7 @@
                   font-size: 14px
                   padding-top: 5px
                   overflow: hidden
+                  line-height: 1.2
                   text-overflow: ellipsis
                   display: -webkit-box
                   -webkit-line-clamp: 2

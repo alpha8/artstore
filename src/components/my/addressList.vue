@@ -21,19 +21,32 @@
         </div>
       </div>
     </div>
+    <mydialog :text="dialog.text" :btns="dialog.btns" ref="dialogWin"></mydialog>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import mydialog from '@/components/common/mydialog';
   import api from '@/api/api';
 
   export default {
     data() {
       return {
         addressList: [],
-        showBack: true
+        showBack: true,
+        dialog: {
+          text: '确定要删除此收货地址吗？',
+          btns: {
+            ok: {
+              text: '确定',
+              callback: function() {
+                console.log('ok');
+              }
+            }
+          }
+        }
       };
     },
     activated() {
@@ -90,25 +103,29 @@
         this.$router.push({name: 'address', params: {id: item.id}});
       },
       removeAddress(item) {
-        api.removeAddress({id: item.id}).then(response => {
-          if (response.result === 0) {
-            this.$store.dispatch('openToast', '收货地址删除成功！');
-            let addressList = this.addressList;
-            for (let i = 0; i < addressList.length; i++) {
-              let addr = addressList[i];
-              if (item.id === addr.id) {
-                addressList.splice(i, 1);
-              }
-            };
-            this.$store.dispatch('setDefaultAddress', this.addressList);
-          } else {
-            this.$store.dispatch('openToast', '网络太忙，删除失败！');
-          }
-        });
+        let vm = this;
+        this.dialog.btns.ok.callback = function() {
+          api.removeAddress({id: item.id}).then(response => {
+            if (response.result === 0) {
+              vm.$store.dispatch('openToast', '收货地址删除成功！');
+              let addressList = vm.addressList;
+              for (let i = 0; i < addressList.length; i++) {
+                let addr = addressList[i];
+                if (item.id === addr.id) {
+                  addressList.splice(i, 1);
+                }
+              };
+              vm.$store.dispatch('setDefaultAddress', vm.addressList);
+            } else {
+              vm.$store.dispatch('openToast', '网络太忙，删除失败！');
+            }
+          });
+        };
+        this.$refs.dialogWin.show();
       }
     },
     components: {
-      fixedheader
+      fixedheader, mydialog
     }
   };
 </script>

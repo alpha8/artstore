@@ -1,7 +1,7 @@
 <template>
   <div>
     <fixedheader title="订单详情页"></fixedheader>
-    <div class="orderdetail" ref="orderdetail">
+    <div class="orderdetail" ref="orderdetail" :class="{'nofooter': !canShowFooter}">
       <div class="detail-wrap">
         <div class="order-info">
           <div class="order-state">
@@ -59,7 +59,7 @@
         </div>
       </div>
     </div>
-    <div class="footer border-top-1px">
+    <div class="footer border-top-1px" v-if="canShowFooter">
       <div class="btn-group" v-if="loginUser && loginUser.userId === order.userId">
        <div class="button" v-if="order.status === 0 && !order.express" @click.stop.prevent="goFillAddress"><span class="btn-red">填写收货地址</span></div>
         <div class="button" v-else-if="order.status === 0" @click.stop.prevent="weixinPay"><span class="btn-red">支付</span></div>
@@ -131,6 +131,11 @@
           return '拍卖';
         }
         return '';
+      },
+      canShowFooter() {
+        let status = this.order.status;
+        let canShowStatus = [0, 1, 2, 5];
+        return canShowStatus.filter(o => o === status).length;
       }
     },
     filters: {
@@ -300,13 +305,15 @@
   .btn-white
     background: #fff
     color: #666
-    border: 1px solid #ddd
+    border: 1px solid #ccc
   .orderdetail
     position: absolute
     top: 44px
     bottom: 50px
     width: 100%
     overflow: hidden
+    &.nofooter
+      bottom: 0
     .detail-wrap
       position: relative
       width: 100%
@@ -447,6 +454,7 @@
         text-align: center
         float: right
         padding-right: 8px
+        min-width: 74px
         box-sizing: border-box
         &:first-child
           padding-right: 0
@@ -457,4 +465,5 @@
           height: 35px
           line-height: 35px
           padding: 0 8px
+          border-radius: 3px
 </style>

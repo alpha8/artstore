@@ -41,6 +41,10 @@
             <strong>配送方式：</strong>
             <span>快递</span>
           </li>
+          <li class="shipping" v-show="defaultAddress && defaultAddress.address && !selfservice">
+            <strong>快递费：</strong>
+            <span>{{0 | currency}} (包邮)</span>
+          </li>
          <!--  <li class="checkout-item change">
             <strong>发票信息</strong>
             <span>明细</span>
@@ -59,7 +63,7 @@
             <span class="totalPrice">{{totalFee | currency}}</span>
           </p>
           <p class="price">
-            <span class="label">优惠券可抵扣：</span>
+            <span class="label">优惠券抵扣：</span>
             <span class="totalPrice">{{couponValue | currency}}</span>
           </p>
           <p class="price">
@@ -579,7 +583,7 @@
               padding-top: 2px
             .label
               display: inline-block
-              width: 98px
+              width: 85px
             .totalPrice
               color: #e4393c
             strong

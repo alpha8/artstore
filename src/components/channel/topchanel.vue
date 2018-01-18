@@ -114,8 +114,6 @@
               font-size: 30px
             &.icon-teapot_kitchen
               font-size: 34px
-            &.icon-down2, &.icon-upward2
-              color: #04d7b4
           .top_name
             font-size: 12px
             color: #666

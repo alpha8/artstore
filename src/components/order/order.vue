@@ -124,7 +124,7 @@
         api.getOrders({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          userId: this.$store.getters.getUserInfo.userId || -1,
+          userId: this.$store.getters.getUserInfo.userId || 0,
           status: this.activeItem
         }).then(response => {
           if (response.code === 0) {
@@ -287,7 +287,7 @@
       width: 100%
       .btn-red
         background: #d05148
-        color: #fff
+        color: #e1e1e1
       .btn-blue
         background: #3a77e7
         color: #fff
@@ -295,8 +295,8 @@
         background: #44b549
         color: #fff
       .btn-orange
-        background: #f19325
-        color: #fff
+        background: rgba(250,180,90,0.93)
+        color: #f1f1f1
       .btn-white
         background: #fff
         color: #333
@@ -364,7 +364,7 @@
                 padding-right: 20px
               .orderflag
                 margin-left: 5px
-                font-size: 10px
+                font-size: 12px
                 color: #999
             .item-summary
               position: relative
@@ -375,10 +375,18 @@
               border-1px(rgba(7, 17, 27, 0.1))
               box-sizing: border-box
               .summary
+                position: relative
                 flex: 1
                 p
-                  height: 25px
-                  line-height: 25px
+                  height: auto
+                  line-height: 1
+                  &.status
+                    padding-top: 13px
+                    padding-bottom: 5px
+                  &.price
+                    height: auto
+                    line-height: 1
+                    padding-bottom: 5px
                   .text
                     color: #f15353
               .ops
@@ -399,7 +407,7 @@
             .item-content
               position: relative
               display: flex
-              padding: 5px 8px
+              padding: 4px 8px 5px
               font-size: 13px
               box-sizing: border-box
               .item-img
@@ -415,6 +423,8 @@
                 padding: 8px 3px 0 5px
                 box-sizing: border-box
                 >.title
+                  position: relative
+                  color: #666
                   overflow: hidden
                   text-overflow: ellipsis
                   word-wrap: break-word
@@ -430,10 +440,11 @@
                 float: right
                 text-align: right
                 padding-top: 8px
+                color: #666
                 .price
                   padding-bottom: 8px
                   color: #e4393c
-                  font-weight: 700
+                  font-weight: 400
                 .nums
                   text-align: right
       .no-order

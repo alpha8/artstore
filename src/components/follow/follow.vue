@@ -265,7 +265,8 @@
                     &.price
                       color: #d05148
                       font-size: 14px
-                      font-weight: 700
+                      font-weight: 400
+                      padding-top: 7px
               .item-ops
                 position: relative
                 display: block
@@ -280,6 +281,7 @@
                   background: #d05148
                   color: #e1e1e1
                   border-radius: 2px
+                  font-size: 11px
                   &.white
                     color: #000
                     background: #fff

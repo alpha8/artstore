@@ -68,7 +68,7 @@
       this.keyword = '';
     },
     created() {
-      let ads = ['一站式优品商城、品味脱凡', '优质茶生活、茶文化高端礼品'];
+      let ads = ['优质茶生活、茶文化高端礼品', '领略东方生活之美...', '一站式优品商城、品味脱凡'];
       let idx = 0;
       setInterval(() => {
         this.trans = !this.trans;

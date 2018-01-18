@@ -70,6 +70,18 @@
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
         </div>
         <split></split>
+        <div class="info" v-if="good.parameter">
+          <h1 class="title">商品参数</h1>
+          <div class="text">
+            <table class="table">
+              <tr v-for="p in good.parameter" v-if="p.value">
+                <td>{{p.text}}</td>
+                <td>{{p.value}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <split></split>
         <div class="rating">
           <h1 class="title">商品评价</h1>
           <!--<ratingselect @select="selectRating" @toggle="toggleContent" :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="good.ratings"></ratingselect> -->
@@ -208,7 +220,7 @@
         let sliders = [];
         pics.forEach(pic => {
           if (pic) {
-            if (pic.width < pic.height) {
+            if (pic.width < pic.height || pic.height / pic.width <= 1) {
               sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500&v=v2', 'src': api.CONFIG.psCtx + pic.id});
             } else {
               sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
@@ -259,6 +271,7 @@
           this.processing = false;
           // this.loadTencentPlayer();
           this.$store.dispatch('closeLoading');
+          this.getRelatedGoods();
           this.fetchComments();
           this.getLikeGoods();
         }).catch(response => {
@@ -331,17 +344,50 @@
         api.GetGoods({
           artworkTypeName: 'tea',
           currentPage: 1,
-          pageSize: 10,
+          pageSize: 12,
           keyword: kw,
           categoryParentName: cat || '',
           pid: this.good.id,
           commodityStatesId: 2,
           scoreSort: true
         }).then((response) => {
-          this.guessGoods = response.artworks;
+          let list = response.artworks;
+          this.removeDups(list, this.good.relates || []);
+          this.guessGoods = list;
           setTimeout(() => {
             this._initScroll();
           }, 800);
+        });
+      },
+      getRelatedGoods() {
+        let ids = [];
+        if (this.good.relates && this.good.relates.length) {
+          this.good.relates.forEach((item) => {
+            ids.push(item.id);
+          });
+        }
+        if (!ids.length) {
+          return;
+        }
+        api.GetRelatedGoods({
+          relatedid: ids.join(',')
+        }).then((response) => {
+          this.good.relates = response || [];
+          setTimeout(() => {
+            this._initScroll();
+          }, 800);
+        });
+      },
+      removeDups(goods, relates) {
+        if (!goods.length || !relates.length) {
+          return;
+        }
+        goods.forEach((good, key) => {
+          relates.forEach((item) => {
+            if (good.id === item.id) {
+              goods.splice(key, 1);
+            }
+          });
         });
       },
       show() {
@@ -846,6 +892,25 @@
         -webkit-box-orient: vertical
       .zoompic
         margin-left: -14px
+      .table
+        width: 100%
+        max-width: 100%
+        order-spacing: 0
+        border-collapse: collapse
+        border-bottom: solid 1px #e7e7e7
+        border-left: solid 1px #e7e7e7
+        word-wrap: break-word
+        word-break: break-all
+        td, th
+          padding: 8px
+          border-top: solid 1px #e7e7e7
+          border-right: solid 1px #e7e7e7
+          padding: 10px
+          color: #848689
+          font-size: 12px
+          &:first-child
+            padding-left: 5%
+            width: 66px
     .row
       position: relative
       display: flex

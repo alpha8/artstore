@@ -119,7 +119,7 @@
       getThumbnail(item) {
         let icon = item.icon;
         if (icon) {
-          return api.CONFIG.psCtx + icon + '?w=750&h=500';
+          return api.CONFIG.psCtx + icon + '?w=750&h=500&v=v2';
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -271,6 +271,8 @@
                   position: relative
                   flex: 1
                   height: 25px
+                  padding-right: 3px
+                  box-sizing: border-box
                   .state
                     display: inline-block
                     height: 25px
@@ -293,7 +295,7 @@
                   position: relative
                   display: block
                   float: right
-                  width: 120px
+                  width: auto
                   text-align: right
                   .btn-buy
                     position: relative

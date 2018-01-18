@@ -191,6 +191,7 @@
           display: flex
           position: relative
           padding-left: 80px
+          margin-top: 3px
           .title
             position: absolute
             width: 70px
@@ -211,4 +212,6 @@
             box-sizing: border-box
         .btns span
           letter-spacing: 2px
+          &.btn-red
+            background-color: #e45050
 </style>
