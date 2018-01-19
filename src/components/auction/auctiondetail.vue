@@ -52,6 +52,7 @@
         <split v-show="auction.artwork && auction.artwork.content"></split>
         <div class="info" v-show="auction.artwork && auction.artwork.content">
           <h1 class="title">商品介绍</h1>
+          <div class="sellpoint" v-if="auction.artwork && auction.artwork.sellPoint">{{auction.artwork.sellPoint}}</div>
           <div class="text" v-html="auction.artwork && auction.artwork.content" ref="goodContent" id="productIntro"></div>
         </div>
         <div class="info" v-show="auction.rule">
@@ -115,7 +116,7 @@
         <div class="foot-item" v-if="auction.auction_product_state_id === 1">
           <div class="input-group">
             <span class="input-group-btn" @click.stop.prevent="reduce">-</span>
-            <input type="number" class="form-control" v-model="highPrice" />
+            <input type="number" class="form-control" v-model="highPrice" readonly="readonly" />
             <span class="input-group-btn" @click.stop.prevent="add">+</span>
           </div>
         </div>
@@ -476,7 +477,7 @@
         socket.emit('bid', data);
       },
       reduce() {
-        if (this.highPrice > this.auction.markup) {
+        if (this.highPrice > this.dealPrice) {
           this.highPrice -= this.auction.markup;
         }
       },
@@ -865,6 +866,16 @@
             border-bottom: 1px solid #9c9c9c
             -webkit-transform: rotate(-45deg)
             transform: rotate(-45deg)
+      .sellpoint
+        padding: 0 10px 3px 14px
+        font-size: 13px
+        color: #07111b
+        line-height: 17px
+        overflow: hidden
+        text-overflow: ellipsis
+        display: -webkit-box
+        -webkit-line-clamp: 2
+        -webkit-box-orient: vertical
       .text
         font-size: 13px
         color: rgb(77, 85, 93)

@@ -42,7 +42,7 @@
             </mu-flexbox-item>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
-          <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
+          <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
         <div class="no-order" v-show="showRecords === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
@@ -399,9 +399,10 @@
                 overflow: hidden
                 .button
                   display: inline-block
-                  padding: 8px 12px
+                  padding: 6px 10px
                   text-align: center
                   margin-left: 5px
+                  font-size: 12px
                   &:first-child
                     margin-left: 0
             .item-content
@@ -420,9 +421,10 @@
               .item-info
                 position: relative
                 flex: 1
-                padding: 8px 3px 0 5px
+                padding: 0 5px 5px 0
                 box-sizing: border-box
                 >.title
+                  padding-top: 8px
                   position: relative
                   color: #666
                   overflow: hidden
@@ -431,9 +433,7 @@
                   display: -webkit-box
                   -webkit-line-clamp: 2
                   -webkit-box-orient: vertical
-                  line-height: 1.45
-                div
-                  padding-top: 10px
+                  line-height: 1.3
               .item-pay
                 position: relative
                 width: 50px

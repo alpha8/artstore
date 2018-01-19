@@ -399,11 +399,12 @@
             height: 20px
             line-height: 20px
             padding: 10px 0
-            font-size: 12px
+            font-size: 14px
             text-align: center
             margin-top: 5px
             margin-left: 10px
             color: #fff
+            letter-spacing: 2px
             &.remove
               background: rgba(250,180,90,0.93)
             &.favorite

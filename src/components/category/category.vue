@@ -11,21 +11,24 @@
         </ul>
       </div>
       <div class="goods-wrapper" ref="goodsWrapper">
+        <div class="banner" v-if="sliders.length">
+          <swipe :swiperSlides="sliders"></swipe>
+        </div>
         <ul>
           <li class="good-list good-list-hook">
             <ul class="itemList" v-if="good.childrens && good.childrens[0].childrens && !good.childrens[0].childrens.length">
-              <li v-for="good in good.childrens" :class="typeStatus(good.status)" v-if="!good.hide">
-                <router-link :to="{path: '/search', query: {cat: dummyKey(good.propertyName), key: (good.value === 'thumbnail' ? good.desc : good.value)}}" class="good-item" :class="{'thumbnail': good.value === 'thumbnail'}">
-                  <div class="icon" v-if="good.value==='thumbnail'">
-                    <img :src="good.css" border="0" />
+              <li v-for="innergood in good.childrens" :class="typeStatus(innergood.status)" v-if="!innergood.hide">
+                <router-link :to="{path: '/search', query: {cat: dummyKey(innergood.propertyName), key: (innergood.value === 'thumbnail' ? innergood.desc : innergood.value)}}" class="good-item" :class="{'thumbnail': innergood.value === 'thumbnail'}">
+                  <div class="icon" v-if="innergood.value==='thumbnail'">
+                    <img :src="innergood.css" border="0" />
                   </div>
-                  <div class="content" v-if="good.value!=='thumbnail'">
-                    <h2 class="name" :class="{'strong': good.css === 'strong'}">{{good.value}}<i v-if="good.css" :class="good.css"></i><em>({{good.count || 0}})</em></h2>
+                  <div class="content" v-if="innergood.value!=='thumbnail'">
+                    <h2 class="name" :class="{'strong': innergood.css === 'strong'}">{{innergood.value}}<i v-if="innergood.css" :class="innergood.css"></i><em>({{innergood.count || 0}})</em></h2>
                   </div>
                 </router-link>
               </li>
             </ul>
-            <div v-if="innergood && innergood.childrens.length" v-for="innergood in good.childrens">
+            <div v-if="innergood && innergood.childrens.length && innergood.propertyName !== 'banner'" v-for="innergood in good.childrens">
               <h1 class="title border-1px">{{innergood.value}}</h1>
               <ul class="itemList">
                 <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName === 'art'">
@@ -61,6 +64,7 @@
   import Vue from 'vue';
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import swipe from '@/components/swipe/minisliders';
   import api from '@/api/api';
 
   export default {
@@ -70,7 +74,8 @@
         good: {},
         heightArr: [],
         scrollY: 0,
-        teaTotal: {}
+        teaTotal: {},
+        sliders: []
       };
     },
     computed: {
@@ -187,12 +192,28 @@
       },
       selectMenu(index) {
         this.good = this.goods[index];
+        this.sliders.splice(0, this.sliders.length);
         this.$nextTick(() => {
           if (this.good.propertyName === 'ticket') {
             this.good.childrens.forEach(item => {
               Vue.set(item, 'hide', false);
-              if (!this.show4Months(item.propertyName)) {
+              if (item.propertyName === 'banner') {
                 item.hide = true;
+              } else if (!this.show4Months(item.propertyName)) {
+                item.hide = true;
+              }
+            });
+          }
+          let list = this.good.childrens;
+          if (list && list.length) {
+            list.forEach(item => {
+              if (item.propertyName === 'banner') {
+                let nodes = item.childrens;
+                let sliders = [];
+                nodes.forEach(node => {
+                  sliders.push({'thumbnail': node.value, 'src': node.value});
+                });
+                this.sliders = sliders;
               }
             });
           }
@@ -254,7 +275,7 @@
       }
     },
     components: {
-      fixedheader
+      fixedheader, swipe
     }
   };
 </script>
@@ -280,7 +301,7 @@
       .menu-item
         flex: 1
         height: 65px
-        padding: 6px 10px
+        padding: 6px 5px 6px 10px
         border-left: 4px solid transparent
         box-sizing: border-box
         border-1px(rgba(7, 17, 27, 0.1))
@@ -340,6 +361,10 @@
             z-index: 10
     .goods-wrapper
       flex: 1
+      .banner
+        position: relative
+        padding: 0 3px 10px
+        box-sizing: border-box
       .title
         padding-left: 10px
         height: 40px

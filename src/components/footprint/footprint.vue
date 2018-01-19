@@ -21,12 +21,13 @@
             </mu-flexbox-item>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
-          <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
+          <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
         <div class="no-footprint" v-show="footprints.length === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
+    <mydialog :text="dialog.text" :btns="dialog.btns" ref="dialogWin"></mydialog>
     <div class="footer" v-show="footprints.length">
       <div class="btns"><span class="btn-red" @click.stop.prevent="clearAll()">清空所有足迹</span></div>
     </div>
@@ -36,6 +37,7 @@
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
+  import mydialog from '@/components/common/mydialog';
   import api from '@/api/api';
 
   export default {
@@ -49,7 +51,18 @@
         scroller: null,
         loading: false,
         lastExec: +new Date(),
-        scrollY: 0
+        scrollY: 0,
+        dialog: {
+          text: '是否清空所有足迹？',
+          btns: {
+            ok: {
+              text: '确定',
+              callback: function() {
+                console.log('ok');
+              }
+            }
+          }
+        }
       };
     },
     activated() {
@@ -132,12 +145,16 @@
       },
       clearAll() {
         let user = this.$store.getters.getUserInfo;
-        api.clearFootprint(user.userId).then(response => {
-          if (response.result === 0) {
-            this.$store.dispatch('openToast', '用户所有足迹已清空！');
-            this.footprints = [];
-          }
-        });
+        let vm = this;
+        this.dialog.btns.ok.callback = function() {
+          api.clearFootprint(user.userId).then(response => {
+            if (response.result === 0) {
+              vm.$store.dispatch('openToast', '用户所有足迹已清空！');
+              vm.footprints = [];
+            }
+          });
+        };
+        this.$refs.dialogWin.show();
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -157,7 +174,7 @@
       }
     },
     components: {
-      fixedheader, gotop
+      fixedheader, gotop, mydialog
     }
   };
 </script>
@@ -263,7 +280,7 @@
                 position: relative
                 color: #666
                 font-size: 14px
-                padding-top: 5px
+                padding-top: 8px
                 overflow: hidden
                 text-overflow: ellipsis
                 display: -webkit-box

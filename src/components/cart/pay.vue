@@ -496,10 +496,10 @@
                 overflow: hidden
             .sku-info
               flex: 1
-              padding: 8px 5px 0 5px
+              padding: 0 5px 5px 0
               .sku-name
-                height: 40px
-                line-height: 20px
+                padding-top: 8px
+                line-height: 1.3
                 margin-bottom: 5px
                 overflow: hidden
                 text-overflow: ellipsis

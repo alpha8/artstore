@@ -21,7 +21,7 @@
     left: 50%
     margin-left: -105px
     margin-top: -60px
-    background: rgba(18, 18, 18, 0.48)
+    background: rgba(35,35,38,.7)
     text-align: center
     border-radius: 5px
     color: #fff

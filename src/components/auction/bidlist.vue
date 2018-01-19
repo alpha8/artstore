@@ -21,7 +21,7 @@
             </table>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
-          <div class="no-more" v-show="loadEnd">————&nbsp;&nbsp;没有更多了&nbsp;&nbsp;————</div>
+          <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
         <div class="no-bid" v-show="bids.length === 0">啊哦，还没有相关记录哦</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
@@ -239,6 +239,7 @@
             line-height: 40px
           >.head
             background-color: #fafafa
+            font-size: 13px
           .col-1
             width: 15%
             padding-left: 10px

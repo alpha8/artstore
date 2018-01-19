@@ -145,7 +145,7 @@
         artworkTypeName: 'tea',
         categoryParentName: 'art',
         currentPage: 1,
-        pageSize: 16,
+        pageSize: 24,
         commodityStatesId: 2,
         scoreSort: true
       }).then((response) => {

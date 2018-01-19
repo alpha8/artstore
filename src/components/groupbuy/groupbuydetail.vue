@@ -30,6 +30,7 @@
         <split v-show="good.artwork && good.artwork.content"></split>
         <div class="info" v-show="good.artwork && good.artwork.content">
           <h1 class="title">商品介绍</h1>
+          <div class="sellpoint" v-if="good.artwork && good.artwork.sellPoint">{{good.artwork.sellPoint}}</div>
           <div class="text" v-html="good.artwork && good.artwork.content" ref="goodContent" id="productIntro"></div>
         </div>
         <div class="info" v-show="good.rule">
@@ -828,6 +829,16 @@
         line-height: 14px
         font-size: 14px
         color: rgb(7, 17, 27)
+      .sellpoint
+        padding: 0 10px 3px 14px
+        font-size: 13px
+        color: #07111b
+        line-height: 17px
+        overflow: hidden
+        text-overflow: ellipsis
+        display: -webkit-box
+        -webkit-line-clamp: 2
+        -webkit-box-orient: vertical
       .text
         font-size: 13px
         color: rgb(77, 85, 93)

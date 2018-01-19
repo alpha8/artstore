@@ -158,7 +158,7 @@
             position: absolute
             display: block
             width: 70px
-            top: 15px
+            top: 11px
             left: 0
             right: 0
             margin: auto 0
@@ -185,7 +185,7 @@
             box-sizing: border-box
           .icon-close
             position: absolute
-            top: 17px
+            top: 13px
             right: 7px
             font-size: 18px
           &.more:after
