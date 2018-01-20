@@ -217,6 +217,7 @@
         color: #ccc
         text-align: center
         font-size: 12px
+        margin-bottom: 10px
       .coupon-container
         position: relative
         width: 100%
@@ -228,7 +229,7 @@
         .coupon-list
           position: relative
           width: 100%
-          padding: 10px
+          padding: 10px 10px 0 10px
           box-sizing: border-box
           .coupon-item
             position: relative
@@ -236,6 +237,8 @@
             height: 100px
             margin-bottom: 15px
             border-1px(rgba(7, 17, 27, 0.1))
+            &:last-child
+              margin-bottom: 0
             >.title
               position: relative
               flex: 30vw 0 0
@@ -316,7 +319,7 @@
               flex: 1
               background: #fff
               height: 100%
-              padding: 1.34375rem 1rem
+              padding: 8px
               box-sizing: border-box
               overflow: hidden
               .line
@@ -325,18 +328,21 @@
                 font-size: 12px
                 line-height: 1.8
                 text-overflow: ellipsis
-                white-space: nowrap
                 overflow: hidden
                 strong
                   font-weight: 700
                 &.text
-                  padding-bottom: 10px
+                  margin-bottom: 10px
                   color: #666
-                  -webkit-box-orient: vertical
-                  -webkit-line-clamp: 2
                   font-weight: 700
-                  font-size: .875rem
-                  line-height: 1.0625rem
+                  font-size: 14px
+                  overflow: hidden
+                  text-overflow: ellipsis
+                  word-wrap: break-word
+                  display: -webkit-box
+                  -webkit-line-clamp: 2
+                  -webkit-box-orient: vertical
+                  line-height: 1.3
                 .fastDeposit
                   position: absolute
                   display: inline-block

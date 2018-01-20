@@ -294,7 +294,7 @@
       font-weight: 700
     .menu-wrapper
       position: relative
-      width: 30%
+      width: 32%
       float: left
       background: #f3f5f7
       overflow: hidden
@@ -363,7 +363,7 @@
       flex: 1
       .banner
         position: relative
-        padding: 0 3px 10px
+        padding: 0 2px 10px
         box-sizing: border-box
       .title
         padding-left: 10px

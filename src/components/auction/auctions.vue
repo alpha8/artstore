@@ -3,7 +3,7 @@
     <fixedheader title="商品拍卖"></fixedheader>
     <div class="order">
       <div class="order-wrap">
-        <div class="order-container" ref="auctionList" v-if="auctions.length">
+        <div class="order-container" ref="auctionList" v-show="auctions.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in auctions" :key="index">
               <div class="item-content">
@@ -219,6 +219,7 @@
         color: #ccc
         text-align: center
         font-size: 12px
+        margin-bottom: 10px
       .order-container
         position: relative
         width: 100%

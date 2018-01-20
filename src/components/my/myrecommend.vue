@@ -197,6 +197,7 @@
         color: #ccc
         text-align: center
         font-size: 12px
+        margin-bottom: 10px
       .myrecommend-container
         position: relative
         width: 100%
@@ -210,8 +211,7 @@
           width: 100%
           .myrecommend-item
             display: flex
-            margin-bottom: 5px
-            padding: 8px
+            padding: 6px 8px 8px
             border-1px(rgba(7, 17, 27, 0.1))
             box-sizing: border-box
             font-size: 12px
@@ -247,7 +247,7 @@
                 -webkit-line-clamp: 1
                 -webkit-box-orient: vertical
                 font-weight: 700
-                padding: 10px 0 8px
+                padding: 5px 0 8px
                 font-size: 14px
               .content
                 font-size: 13px

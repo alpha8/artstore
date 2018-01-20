@@ -135,7 +135,7 @@
         document.documentElement.scrollTop = 0;
       },
       showOrders() {
-        this.$router.push({path: '/order', query: {type: 2}});
+        window.location.href = 'http://' + location.host + location.pathname + '#/order?type=0';
       },
       pay(item) {
         let good = {
@@ -144,12 +144,12 @@
           price: item.killPrice,
           oldPrice: item.price,
           count: 1,
-          icon: (item.icon) ? api.CONFIG.psCtx + item.icon + '?w=114&h=114' : api.CONFIG.defaultImg,
+          icon: (item.icon) ? api.CONFIG.psCtx + item.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
           checked: false,
           createTime: item.createTime
         };
         this.$store.dispatch('addPayGoods', [good]);
-        this.$router.push({name: 'pay', query: {orderType: 3}});
+        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=3';
       }
     },
     components: {
@@ -216,6 +216,7 @@
         color: #ccc
         text-align: center
         font-size: 12px
+        margin-bottom: 10px
       .order-container
         position: relative
         width: 100%

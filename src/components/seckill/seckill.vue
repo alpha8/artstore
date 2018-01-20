@@ -3,7 +3,7 @@
     <fixedheader title="商品秒杀"></fixedheader>
     <div class="order">
       <div class="order-wrap">
-        <div class="order-container" ref="seckList" v-if="seckills.length">
+        <div class="order-container" ref="seckList" v-show="seckills.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in seckills" :key="index">
               <div class="item-content">
@@ -85,6 +85,7 @@
     },
     methods: {
       fetchData(force) {
+        console.log('force');
         if (this.totalPages > -1 && this.pageNumber > this.totalPages) {
           return;
         }
@@ -102,11 +103,12 @@
               this.seckills.push(item);
             });
           }
-          this.totalPages = response.pages;
           this.pageNumber++;
+          this.totalPages = response.pages;
           this.lastExec = +new Date();
           this.loading = false;
           this.loadEnd = this.pageNumber > this.totalPages;
+          console.log('pageindex=' + this.pageNumber + ', total=' + this.totalPages + ', loadend=' + this.loadEnd);
         }).catch(response => {
           this.loadEnd = false;
           this.loading = false;
@@ -212,6 +214,7 @@
         this.$router.back();
       },
       loadMore() {
+        console.log('loadmore');
         this.fetchData();
       },
       goTop() {
@@ -277,6 +280,7 @@
         color: #ccc
         text-align: center
         font-size: 12px
+        margin-bottom: 10px
       .order-container
         position: relative
         width: 100%

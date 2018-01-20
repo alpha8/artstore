@@ -13,7 +13,7 @@
         <div class="invitation-content">
           <div class="table-responsive">
             <table class="table">
-              <caption>-----已邀请用户列表<span v-if="coupons.length">({{coupons.length}}人)</span>----</caption>
+              <caption>---已邀请用户列表<span v-if="coupons.length">({{coupons.length}}人)</span>---</caption>
               <tr>
                 <th>用户</th>
                 <th>领取金额</th>

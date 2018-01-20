@@ -38,6 +38,8 @@
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
+  .swiper-container-horizontal > .swiper-pagination-bullets
+    bottom: 7px
   .swiper-container
     height: 45vw
     .slide

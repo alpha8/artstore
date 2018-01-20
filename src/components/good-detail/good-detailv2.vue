@@ -909,7 +909,6 @@
           color: #848689
           font-size: 12px
           &:first-child
-            padding-left: 5%
             width: 66px
     .row
       position: relative

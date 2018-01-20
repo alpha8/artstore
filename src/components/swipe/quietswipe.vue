@@ -60,7 +60,9 @@
   };
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus">
+<style scoped lang="stylus" rel="stylesheet/stylus">
+  .swiper-container-horizontal > .swiper-pagination-bullets
+    bottom: 9px
   .swiper-container
     position: relative
     .slide2

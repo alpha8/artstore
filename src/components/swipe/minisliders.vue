@@ -25,8 +25,8 @@
           observeParents: true
         },
         screen: {
-          width: (document.documentElement.clientWidth * 0.7),
-          height: (document.documentElement.clientWidth * 0.7) * 0.33 || 175
+          width: (document.documentElement.clientWidth * 0.68),
+          height: (document.documentElement.clientWidth * 0.68) * 0.33 || 175
         }
       };
     },
@@ -60,7 +60,7 @@
   };
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus">
+<style scoped lang="stylus" rel="stylesheet/stylus">
   .swiper-container-horizontal > .swiper-pagination-bullets
     bottom: 3px
   .swiper-container

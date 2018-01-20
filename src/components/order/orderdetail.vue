@@ -393,7 +393,7 @@
           .price
             padding-bottom: 8px
             color: #e4393c
-            font-weight: 700
+            font-weight: 400
           .nums
             text-align: right
   .order-refund-wrap

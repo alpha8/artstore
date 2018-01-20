@@ -219,6 +219,7 @@
         color: #ccc
         text-align: center
         font-size: 12px
+        margin-bottom: 10px
       .bid-container
         position: relative
         width: 100%

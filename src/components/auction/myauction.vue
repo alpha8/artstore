@@ -12,13 +12,14 @@
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}<span class="resultFlag" v-if="item.auction_product_state_id > 2">({{resultDesc(item)}})</span></h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
+                      <p class="line" v-if="isOwner(item)">&nbsp;</p>
                       <span class="state disabled" v-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{stateDesc(item.auction_product_state_id)}}</span>
                       <span class="state" v-else>{{stateDesc(item.auction_product_state_id)}}</span>
                     </div>
                     <div class="more-ops">
-                      <span class="btn-buy blue" v-if="item.status === 0" @click.stop.prevent="pay(item)">去付款</span>
-                      <span class="btn-buy white" v-if="item.status === 1" @click.stop.prevent="showOrders()">我的订单</span>
-                      <span class="pricing" v-else-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{item.countAppr}}次出价</span>
+                      <!-- <span class="btn-buy blue" v-if="item.status === 0" @click.stop.prevent="pay(item)">去付款</span> -->
+                      <span class="btn-buy white" v-if="isOwner(item)" @click.stop.prevent="showOrders()">我的订单</span>
+                      <span class="pricing" v-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{item.countAppr}}次出价</span>
                       <span class="pricing" v-else><i>{{item.countAppr}}</i>次出价</span>
                     </div>
                   </div>
@@ -134,6 +135,10 @@
           return '未中标';
         }
       },
+      isOwner(item) {
+        let uid = this.$store.getters.getUserInfo.userId;
+        return item.apUserNameId === uid;
+      },
       showDetail(item) {
         this.$router.push({name: 'auctiondetail', params: {id: item.id}});
       },
@@ -152,6 +157,22 @@
       goTop() {
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
+      },
+      pay(item) {
+        let good = {
+          id: item.id,
+          name: item.name,
+          price: item.maxPrice,
+          oldPrice: item.maxPrice,
+          count: 1,
+          icon: (item.icon) ? api.CONFIG.psCtx + item.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
+          checked: false
+        };
+        this.$store.dispatch('addPayGoods', [good]);
+        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=5';
+      },
+      showOrders() {
+        window.location.href = 'http://' + location.host + location.pathname + '#/order?type=0';
       }
     },
     components: {
@@ -218,6 +239,7 @@
         color: #ccc
         text-align: center
         font-size: 12px
+        margin-bottom: 10px
       .order-container
         position: relative
         width: 100%
@@ -274,6 +296,10 @@
                   position: relative
                   flex: 1
                   height: 25px
+                  .line
+                    height: 25px
+                    line-height: 25px
+                    padding: 1px 0
                   .state
                     display: inline-block
                     height: 25px
@@ -323,6 +349,10 @@
                     &.darkred
                       background: #d05148
                       color: #fff
+                    &.white
+                      color: #000
+                      background: #fff
+                      border: 1px solid rgba(7,17,27,0.1)
                   .pricing
                     position: relative
                     display: inline-block

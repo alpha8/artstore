@@ -201,12 +201,19 @@
     },
     computed: {
       swiperSlides() {
+        let pics = this.auction.artwork && this.auction.artwork.pictures || [];
         let sliders = [];
-        if (this.auction.icon) {
-          sliders.push({'thumbnail': api.CONFIG.psCtx + this.auction.icon + '?w=750&h=500&v=v2', 'src': api.CONFIG.psCtx + this.auction.icon});
-        } else {
-          sliders.push({'thumbnail': api.CONFIG.defaultImg, 'src': api.CONFIG.defaultImg});
-        }
+        pics.forEach(pic => {
+          if (pic) {
+            if (pic.width < pic.height || pic.height / pic.width <= 1) {
+              sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500&v=v2', 'src': api.CONFIG.psCtx + pic.id});
+            } else {
+              sliders.push({'thumbnail': api.CONFIG.psCtx + pic.id + '?w=750&h=500', 'src': api.CONFIG.psCtx + pic.id});
+            }
+          } else {
+            sliders.push({'thumbnail': api.CONFIG.defaultImg, 'src': api.CONFIG.defaultImg});
+          }
+        });
         return sliders;
       }
     },
@@ -511,7 +518,7 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
           });
         });
-        let icon = 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423';
+        let icon = 'http://www.yihuyixi.com/ps/download/5a60046ae4b0a5130574a5fc';
         if (this.auction.icon) {
           icon = api.CONFIG.psCtx + this.auction.icon + '?w=423&h=423';
         }

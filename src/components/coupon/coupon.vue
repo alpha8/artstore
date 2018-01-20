@@ -84,7 +84,7 @@
               this.$store.dispatch('updateCouponAmount', response.couponTotal);
               this.amount = '';
             } else {
-              this.$store.dispatch('openToast', '请确认优惠券码未被使用或输入错误！');
+              this.$store.dispatch('openToast', '无效的优惠券码！');
             }
           }).catch(response => {
             console.log(response);
@@ -215,4 +215,7 @@
           &.btn-red
             background-color: #e45050
             color: #e1e1e1
+          &.btn-gray
+            background: #ccc
+            border-radius: 3px
 </style>

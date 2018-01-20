@@ -503,12 +503,16 @@
         if (uid) {
           redirect += '?userId=' + uid;
         }
+        let icon = 'http://www.yihuyixi.com/ps/download/5a60046ae4b0a5130574a5fc';
+        if (this.good.icon) {
+          icon = api.CONFIG.psCtx + this.good.icon + '?w=423&h=423';
+        }
         let vm = this;
         let shareData = {
           title: this.good.name,
-          desc: '团购价：¥' + this.good.groupPrice + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
+          desc: '团购：¥' + this.good.groupPrice + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
-          imgUrl: (this.good.pictures && (api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423')) || 'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?w=423&h=423',
+          imgUrl: icon,
           success: function () {
             vm.$refs.weixinShare.hideDialog();
           }

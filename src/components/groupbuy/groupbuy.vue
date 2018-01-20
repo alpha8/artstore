@@ -3,7 +3,7 @@
     <fixedheader title="商品团购"></fixedheader>
     <div class="order">
       <div class="order-wrap">
-        <div class="order-container" ref="groupbuy" v-if="groupbuys.length">
+        <div class="order-container" ref="groupbuy" v-show="groupbuys.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in groupbuys" :key="index">
               <div class="item-content">
@@ -274,6 +274,7 @@
         color: #ccc
         text-align: center
         font-size: 12px
+        margin-bottom: 10px
       .order-container
         position: relative
         width: 100%

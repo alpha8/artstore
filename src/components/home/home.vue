@@ -156,7 +156,7 @@
         artworkTypeName: 'tea',
         categoryParentName: 'teaart',
         currentPage: 1,
-        pageSize: 36,
+        pageSize: 40,
         commodityStatesId: 2,
         price: '0-1000',
         scoreSort: true
@@ -168,7 +168,7 @@
         artworkTypeName: 'tea',
         categoryParentName: 'teaart',
         currentPage: 1,
-        pageSize: 16,
+        pageSize: 20,
         commodityStatesId: 2,
         price: '1000-',
         scoreSort: true
@@ -180,7 +180,7 @@
         artworkTypeName: 'tea',
         categoryParentName: 'welltea',
         currentPage: 1,
-        pageSize: 20,
+        pageSize: 24,
         commodityStatesId: 2,
         scoreSort: true
       }).then((response) => {
@@ -191,7 +191,7 @@
         artworkTypeName: 'tea',
         categoryParentName: 'museum',
         currentPage: 1,
-        pageSize: 16,
+        pageSize: 20,
         commodityStatesId: 2,
         scoreSort: true
       }).then((response) => {
@@ -202,7 +202,7 @@
         artworkTypeName: 'tea',
         categoryParentName: 'paint',
         currentPage: 1,
-        pageSize: 20,
+        pageSize: 24,
         commodityStatesId: 2,
         scoreSort: true
       }).then((response) => {
@@ -213,7 +213,7 @@
         artworkTypeName: 'tea',
         categoryParentName: 'graceful',
         currentPage: 1,
-        pageSize: 20,
+        pageSize: 16,
         commodityStatesId: 2,
         scoreSort: true
       }).then((response) => {
@@ -289,8 +289,8 @@
           redirect += '?userId=' + uid;
         }
         let shareData = {
-          title: '[一虎一席茶席艺术平台] 商城',
-          desc: '1200款精美茶器、300套茶席佳作、好茶惠聚、老茶博物馆【一站式优品商城，品味脱凡】',
+          title: '[一虎一席茶席艺术平台] 一站式优品商城，品味脱凡',
+          desc: '1200款精美茶器、300套茶席佳作、茶室专业配画、200款好茶老茶.【每年扩增100%】',
           link: redirect,
           imgUrl: 'http://www.yihuyixi.com/ps/download/5a60046ae4b0a5130574a5fc'
         };
