@@ -5,7 +5,7 @@
       <div class="menu-wrapper" ref="menuWrapper">
         <ul>
           <li v-for="(item, index) in goods" class="menu-item border-1px" :class="{'active': item.id===good.id, 'twoline': item.desc}" @click.stop.prevent="selectMenu(index)">
-            <span class="text"><span :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css && !item.desc" :class="item.css"></i></span><em>({{item.count || 0}})</em></span>
+            <span class="text"><span :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css && item.css !== 'strong'" :class="item.css"></i></span><em>({{item.count || 0}})</em></span>
             <i v-if="item.desc">{{item.desc}}</i>
           </li>
         </ul>
@@ -23,7 +23,10 @@
                     <img :src="innergood.css" border="0" />
                   </div>
                   <div class="content" v-if="innergood.value!=='thumbnail'">
-                    <h2 class="name" :class="{'strong': innergood.css === 'strong'}">{{innergood.value}}<i v-if="innergood.css" :class="innergood.css"></i><em>({{innergood.count || 0}})</em></h2>
+                    <h2 class="name" :class="{'strong': innergood.css === 'strong'}">
+                    <span v-if="containsDot(innergood.value)">{{beforeDot(innergood.value)}}<span class="dot">{{afterDot(innergood.value)}}</span></span>
+                    <span v-if="!containsDot(innergood.value)">{{innergood.value}}</span>
+                    <i v-if="innergood.css" :class="innergood.css"></i><em>({{innergood.count || 0}})</em></h2>
                   </div>
                 </router-link>
               </li>
@@ -47,7 +50,11 @@
                       <img :src="item.css" border="0" />
                     </div>
                     <div class="content" v-if="item.value!=='thumbnail'">
-                      <h2 class="name" :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em></h2>
+                      <h2 class="name" :class="{'strong': item.css === 'strong'}">
+                        <span v-if="containsDot(item.value)">{{beforeDot(item.value)}}<span class="dot">{{afterDot(item.value)}}</span></span>
+                        <span v-if="!containsDot(item.value)">{{item.value}}</span>
+                        <i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em>
+                      </h2>
                     </div>
                   </router-link>
                 </li>
@@ -272,6 +279,15 @@
           now.setMonth(m);
         }
         return months.find(item => item === Number(month));
+      },
+      containsDot(name) {
+        return name && name.indexOf('.') !== -1;
+      },
+      beforeDot(name) {
+        return name && name.substring(0, name.indexOf('.'));
+      },
+      afterDot(name) {
+        return name && name.substring(name.indexOf('.'));
       }
     },
     components: {
@@ -439,6 +455,9 @@
                 -webkit-box-orient: vertical
                 padding-right: 7px
                 box-sizing: border-box
+                .dot
+                  font-size: 11px
+                  color: #999
                 em
                   display: block
                   clear: both

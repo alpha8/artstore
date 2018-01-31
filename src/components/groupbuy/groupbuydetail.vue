@@ -39,7 +39,7 @@
         </div>
         <split></split>
         <div class="rating">
-          <h1 class="title">商品评价</h1>
+          <h1 class="title">商品评论</h1>
           <div class="rating-wrapper">
             <ul v-if="good.ratings && good.ratings.length">
               <li class="rating-item" v-for="rating in good.ratings" v-show="needShow(rating.score, rating.content)">

@@ -5,7 +5,6 @@
       <div class="good-content">
         <div class="image-header">
           <swipe :swiperSlides="swiperSlides"></swipe>
-          <!-- <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div> -->
         </div>
         <div class="content">
           <h1 class="title">{{good.name}}</h1>
@@ -44,19 +43,16 @@
             <div @click.stop.prevent="addFirst" class="buy" v-if="good.stock && (good.stock.total > 0 || good.stock.bookTotal > 0) && !good.count">加入购物车</div>
           </transition>
         </div>
-        <!--  <div class="sku-wrap">
-          <div class="sku">
-            <label>数量</label>
-            <span class="num-wrap">
-              <cartcontrol @add="addGood" :good="good"></cartcontrol>
-            </span>
-          </div>
-        </div> -->
         <split v-show="good.content"></split>
-        <div class="info" v-if="good.videoUrl">
+        <div class="info" v-if="good.videoUrl || (good.videos && good.videos.length)">
           <h1 class="title">商品视频</h1>
           <div class="player">
-            <div id="tencent_video_player">
+            <div id="tencent_video_player" v-if="good.videos && good.videos.length">
+              <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://www.yihuyixi.com/ps/download/5a4c7ceae4b065c96d6562dc" v-for="v in good.videos">
+                <source :src="v.url" type="video/mp4">
+              </video>
+            </div>
+            <div id="tencent_video_player" v-else-if="good.videoUrl">
               <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://www.yihuyixi.com/ps/download/5a4c7ceae4b065c96d6562dc">
                 <source :src="good.videoUrl" type="video/mp4">
               </video>
@@ -83,7 +79,7 @@
         </div>
         <split></split>
         <div class="rating">
-          <h1 class="title">商品评价</h1>
+          <h1 class="title">商品评论</h1>
           <!--<ratingselect @select="selectRating" @toggle="toggleContent" :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="good.ratings"></ratingselect> -->
           <div class="rating-wrapper">
             <ul v-if="good.ratings && good.ratings.length">
@@ -126,6 +122,11 @@
         <split v-show="guessGoods.length"></split>
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
+        <split v-if="showFollow"></split>
+        <modal-title title="公众号关注入口" catKey="" catName="" v-show="showFollow"></modal-title>
+        <div v-if="showFollow" class="wx_follow">
+          <img src="http://www.yihuyixi.com/ps/download/5a7146efe4b0a5130574acac" border="0" />
+        </div>
       </div>
       <fixedcart ref="shopcart" @add="addToCart" :good="good" @share="wxshare"></fixedcart>
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
@@ -165,6 +166,7 @@
     },
     deactivated() {
       this.good.videoUrl = '';
+      this.good.videos = [];
       this.hide();
       this.processing = false;
     },
@@ -173,6 +175,7 @@
         if (to.name === from.name && to.name === 'good') {
           if (to.params.id !== from.params.id) {
             this.good.videoUrl = '';
+            this.good.videos = [];
             this.fetchData();
           }
           let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
@@ -211,7 +214,8 @@
           button: {
             text: '知道了!'
           }
-        }
+        },
+        showFollow: false
       };
     },
     computed: {
@@ -274,6 +278,7 @@
           this.getRelatedGoods();
           this.fetchComments();
           this.getLikeGoods();
+          this.getWXFollow();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });
@@ -388,6 +393,16 @@
               goods.splice(key, 1);
             }
           });
+        });
+      },
+      getWXFollow() {
+        let user = this.$store.getters.getUserInfo;
+        api.getUserProfile(user.userId || 0).then(response => {
+          if (response.result === 0 && response.user) {
+            this.showFollow = (response.user.follow === 0);
+          }
+        }).catch(response => {
+          console.error(response);
         });
       },
       show() {
@@ -902,14 +917,13 @@
         word-wrap: break-word
         word-break: break-all
         td, th
-          padding: 8px
           border-top: solid 1px #e7e7e7
           border-right: solid 1px #e7e7e7
-          padding: 10px
+          padding: 10px 5px 10px 8px
           color: #848689
           font-size: 12px
           &:first-child
-            width: 66px
+            width: 80px
     .row
       position: relative
       display: flex
@@ -998,4 +1012,13 @@
           font-size: 12px
           color: rgb(147, 153, 159)
           text-align: center
+    .wx_follow
+      position: relative
+      width: 100%
+      height: auto
+      overflow: hidden
+      img
+        position: relative
+        width: 100%
+        height: auto
 </style>

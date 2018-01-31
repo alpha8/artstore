@@ -12,7 +12,6 @@
               <input type="search" name="txtSearch" class="txtSearch" placeholder="搜索所有商品" autocomplete="off" v-model="keyword" @keyup.delete.stop.prevent="changeText">
             </form>
           </div>
-          <!-- <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i> -->
         </div>
       </div>
       <div class="right"><span @click.stop.prevent="search">搜索</span><span @click.stop.prevent="showSidebar">筛选</span></div>
@@ -545,6 +544,8 @@
           font-size: 14px
           height: 20px
           line-height: 1.5
+          word-wrap: break-word
+          word-break: break-all
           text-overflow: ellipsis
           -webkit-line-clamp: 1
           -webkit-box-orient: vertical

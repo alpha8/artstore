@@ -68,16 +68,18 @@
       this.keyword = '';
     },
     created() {
-      let ads = ['1200款，300套，年增100%', '优质茶生活、茶文化高端礼品', '领略东方生活之美...', '一站式优品商城、品味脱凡'];
+      let ads = ['1200款，300席，年增100%', '优质茶生活、茶文化高端礼品', '领略东方生活之美...', '一站式优品商城、品味脱凡'];
       let idx = 0;
       setInterval(() => {
-        this.trans = !this.trans;
-        setTimeout(() => {
-          this.trans = false;
-        }, 800);
-        this.slogan = ads[idx];
-        if (++idx >= ads.length) {
-          idx = 0;
+        if (!this.typing) {
+          this.trans = !this.trans;
+          setTimeout(() => {
+            this.trans = false;
+          }, 800);
+          this.slogan = ads[idx];
+          if (++idx >= ads.length) {
+            idx = 0;
+          }
         }
       }, 8500);
     },
@@ -95,6 +97,8 @@
           this.typing = false;
           this.showDiscard = true;
           this.keyword = '';
+        } else {
+          this.typing = true;
         }
       },
       openSmartSearch() {

@@ -12,13 +12,12 @@
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}<span class="resultFlag" v-if="item.auction_product_state_id > 2">({{resultDesc(item)}})</span></h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
-                      <p class="line" v-if="isOwner(item)">&nbsp;</p>
                       <span class="state disabled" v-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{stateDesc(item.auction_product_state_id)}}</span>
                       <span class="state" v-else>{{stateDesc(item.auction_product_state_id)}}</span>
+                      <span class="state white" v-if="isOwner(item)" @click.stop.prevent="showOrders()">我的订单</span>
                     </div>
                     <div class="more-ops">
                       <!-- <span class="btn-buy blue" v-if="item.status === 0" @click.stop.prevent="pay(item)">去付款</span> -->
-                      <span class="btn-buy white" v-if="isOwner(item)" @click.stop.prevent="showOrders()">我的订单</span>
                       <span class="pricing" v-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{item.countAppr}}次出价</span>
                       <span class="pricing" v-else><i>{{item.countAppr}}</i>次出价</span>
                     </div>
@@ -285,7 +284,7 @@
                   -webkit-box-orient: vertical
                   .resultFlag
                     margin-left: 5px
-                    font-size: 10px
+                    font-size: 12px
                     color: #999
                 .extra-wrap
                   position: absolute
@@ -318,11 +317,16 @@
                       background: rgba(250,180,90,0.93)
                     &.disabled
                       background: #999
+                    &.white
+                      color: #000
+                      background: #fff
+                      border: 1px solid rgba(7,17,27,0.1)
+                      margin-left: 2px
                 .more-ops
                   position: relative
                   display: block
                   float: right
-                  width: 120px
+                  width: auto
                   text-align: right
                   .btn-buy
                     position: relative
@@ -356,7 +360,7 @@
                   .pricing
                     position: relative
                     display: inline-block
-                    width: 80px
+                    width: auto
                     height: 25px
                     line-height: 25px
                     text-align: right

@@ -85,7 +85,6 @@
     },
     methods: {
       fetchData(force) {
-        console.log('force');
         if (this.totalPages > -1 && this.pageNumber > this.totalPages) {
           return;
         }
@@ -108,7 +107,6 @@
           this.lastExec = +new Date();
           this.loading = false;
           this.loadEnd = this.pageNumber > this.totalPages;
-          console.log('pageindex=' + this.pageNumber + ', total=' + this.totalPages + ', loadend=' + this.loadEnd);
         }).catch(response => {
           this.loadEnd = false;
           this.loading = false;
@@ -214,7 +212,6 @@
         this.$router.back();
       },
       loadMore() {
-        console.log('loadmore');
         this.fetchData();
       },
       goTop() {

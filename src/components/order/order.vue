@@ -287,7 +287,7 @@
       width: 100%
       .btn-red
         background: #d05148
-        color: #e1e1e1
+        color: #f1f1f1
       .btn-blue
         background: #3a77e7
         color: #fff

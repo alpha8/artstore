@@ -145,7 +145,7 @@
         artworkTypeName: 'tea',
         categoryParentName: 'art',
         currentPage: 1,
-        pageSize: 24,
+        pageSize: 30,
         commodityStatesId: 2,
         scoreSort: true
       }).then((response) => {
@@ -290,7 +290,7 @@
         }
         let shareData = {
           title: '[一虎一席茶席艺术平台] 一站式优品商城，品味脱凡',
-          desc: '1200款精美茶器、300套茶席佳作、茶室专业配画、200款好茶老茶.【每年扩增100%】',
+          desc: '1200款精美茶器、300套茶席佳作、茶室专业配画、200款好茶老茶.【每年递增100%】',
           link: redirect,
           imgUrl: 'http://www.yihuyixi.com/ps/download/5a60046ae4b0a5130574a5fc'
         };

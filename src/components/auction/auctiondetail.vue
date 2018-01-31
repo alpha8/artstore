@@ -26,7 +26,7 @@
         </div>
         <split></split>
         <div class="info">
-          <h1 class="title" @click.stop.prevent="gotoBidPrices">出价记录<span class="num"></span></h1>
+          <h1 class="title" @click.stop.prevent="gotoBidPrices">出价记录 <em v-if="auction.countAppr">({{auction.countAppr}}次)</em><i class="num"></i></h1>
           <table class="auction-pricelist">
             <tr class="header">
               <td class="col-2" nowrap>出价用户</td>
@@ -61,7 +61,7 @@
         </div>
         <split></split>
         <div class="rating">
-          <h1 class="title">商品评价</h1>
+          <h1 class="title">商品评论</h1>
           <div class="rating-wrapper">
             <ul v-if="auction.ratings && auction.ratings.length">
               <li class="rating-item" v-for="rating in auction.ratings" v-show="needShow(rating.score, rating.content)">
@@ -484,8 +484,14 @@
         socket.emit('bid', data);
       },
       reduce() {
-        if (this.highPrice > this.dealPrice) {
-          this.highPrice -= this.auction.markup;
+        if (this.higher) {
+          if (this.highPrice > this.dealPrice) {
+            this.highPrice -= this.auction.markup;
+          }
+        } else {
+          if (this.highPrice > (this.dealPrice + this.auction.markup)) {
+            this.highPrice -= this.auction.markup;
+          }
         }
       },
       add() {
