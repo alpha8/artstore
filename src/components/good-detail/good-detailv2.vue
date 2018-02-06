@@ -123,9 +123,9 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="公众号关注入口" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关注公众号，便捷进入商城" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
-          <img src="http://www.yihuyixi.com/ps/download/5a7146efe4b0a5130574acac" border="0" />
+          <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
       </div>
       <fixedcart ref="shopcart" @add="addToCart" :good="good" @share="wxshare"></fixedcart>
@@ -215,7 +215,8 @@
             text: '知道了!'
           }
         },
-        showFollow: false
+        showFollow: false,
+        wxqrcode: api.CONFIG.wxqrcode
       };
     },
     computed: {
@@ -397,9 +398,13 @@
       },
       getWXFollow() {
         let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
+          this.showFollow = true;
+          return;
+        }
         api.getUserProfile(user.userId || 0).then(response => {
           if (response.result === 0 && response.user) {
-            this.showFollow = (response.user.follow === 0);
+            this.showFollow = (response.user.follow === 0 || response.user.follow === 2);
           }
         }).catch(response => {
           console.error(response);
@@ -502,6 +507,12 @@
         wx.previewImage({
           current: this.getPicture(pic.pid),
           urls: imgs
+        });
+      },
+      previewQrcode() {
+        wx.previewImage({
+          current: this.wxqrcode,
+          urls: [this.wxqrcode]
         });
       },
       viewMore() {

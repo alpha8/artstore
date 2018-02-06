@@ -11,8 +11,9 @@
       <div class="wallet-wrapper">
         <div class="wallet-heading">
           <p class="balance-name">账户余额（元）</p>
-          <p class="balance-num">{{0 | currency}}</p>
+          <p class="balance-num">{{balance | currency}}</p>
         </div>
+        <div class="btns"><span class="btn-green" @click.stop.prevent="deposit">充值</span></div>
         <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">交易明细</span></div>
         <div class="wallet-content">
           <p class="content-title">账户余额是什么？</p>
@@ -28,17 +29,35 @@
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
+  import api from '@/api/api';
   import split from '@/components/split/split';
 
   export default {
     activated() {
-      this._initScroll();
+      this.refreshData();
       this.show();
     },
     deactivated() {
       this.hide();
     },
+    computed: {
+      balance() {
+        let profile = this.$store.getters.getUserProfile;
+        return profile && profile.wallet && profile.wallet.accountValue || 0;
+      }
+    },
     methods: {
+      refreshData() {
+        let user = this.$store.getters.getUserInfo;
+        api.getUserProfile(user.userId || 0).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('updateUserProfile', response);
+          }
+          this._initScroll();
+        }).catch(response => {
+          console.error(response);
+        });
+      },
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -52,6 +71,9 @@
       },
       detail() {
         this.$router.push('/cashdetail');
+      },
+      deposit() {
+        window.location.href = 'http://' + location.host + location.pathname + '#/pay/deposit';
       },
       back() {
         this.$router.back();

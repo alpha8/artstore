@@ -50,9 +50,9 @@
                       <img :src="item.css" border="0" />
                     </div>
                     <div class="content" v-if="item.value!=='thumbnail'">
-                      <h2 class="name" :class="{'strong': item.css === 'strong'}">
-                        <span v-if="containsDot(item.value)">{{beforeDot(item.value)}}<span class="dot">{{afterDot(item.value)}}</span></span>
-                        <span v-if="!containsDot(item.value)">{{item.value}}</span>
+                      <h2 class="name">
+                        <span v-if="containsDot(item.value)" :class="{'strong': item.css === 'strong'}">{{beforeDot(item.value)}}<span class="dot">{{afterDot(item.value)}}</span></span>
+                        <span v-if="!containsDot(item.value)" :class="{'strong': item.css === 'strong'}">{{item.value}}</span>
                         <i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em>
                       </h2>
                     </div>

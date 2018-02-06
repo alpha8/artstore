@@ -26,6 +26,9 @@ const getters = {
 const actions = {
   openLoading (context, payload) {
     context.commit(types.SHOW_LOADING, payload);
+    setTimeout(() => {
+      context.commit(types.HIDE_LOADING);
+    }, 4000);
   },
   closeLoading (context) {
     context.commit(types.HIDE_LOADING);

@@ -157,11 +157,6 @@
           return agentLevel[level];
         }
       },
-      getSVipTitle() {
-        let lv = this.userExt.spreadLevel || 'lv1';
-        let sLevel = {'lv1': '传播小兵', 'lv2': '传播少校', 'lv3': '传播中校', 'lv4': '传播上校', 'lv5': '传播少将'};
-        return sLevel[lv];
-      },
       getVipIcon() {
         return this.userExt.level || 'lv0';
       },

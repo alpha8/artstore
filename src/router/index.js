@@ -42,6 +42,8 @@ import recommend from '@/components/my/recommend';
 import myrecommend from '@/components/my/myrecommend';
 import cashback from '@/components/my/cashback';
 import cashbackdetail from '@/components/my/cashbackdetail';
+import bindphone from '@/components/my/bindphone';
+import deposit from '@/components/cart/deposit';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -59,6 +61,7 @@ export default new Router({
     {path: '/good/:id/comments', component: goodComment, name: 'goodComment'},
     {path: '/cart', component: shopcart},
     {path: '/pay', component: pay, name: 'pay'},
+    {path: '/pay/deposit', component: deposit, name: 'deposit'},
     {path: '/pay/remark', component: remark},
     {path: '/address', component: addressList, name: 'addresslist'},
     {path: '/address/add', component: addAddress, name: 'addaddress'},
@@ -92,6 +95,7 @@ export default new Router({
     // {path: '/address/citychoose', component: citychoose, name: 'citychoose'},
     {path: '/cashback', component: cashback},
     {path: '/cashbackdetail', component: cashbackdetail},
+    {path: '/bindphone', component: bindphone, name: 'bindphone'},
     {path: '/my', component: my}
   ]
   // ,scrollBehavior (to, from, savedPosition) {

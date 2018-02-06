@@ -4,28 +4,21 @@
       <div class="left">
         <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
       </div>
-      <div class="title">优惠券账户</div>
+      <div class="title">账户充值</div>
       <div class="right"></div>
     </div>
     <div class="wallet" ref="wallet">
       <div class="wallet-wrapper">
-        <div class="wallet-heading">
-          <p class="balance-name">优惠券余额（元）</p>
-          <p class="balance-num">{{balance | currency}}</p>
-        </div>
-        <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">优惠券明细</span></div>
-        <split></split>
         <div class="wallet-content">
-          <div class="content-title">优惠券充值</div>
           <div class="form-control">
-            <span class="title">优惠券码：</span>
-            <input type="number" name="amount" placeholder="优惠券码" class="input-amount" v-model="amount">
+            <span class="title">充值金额：</span>
+            <input type="number" name="amount" placeholder="充值金额" class="input-amount" v-model="amount">
           </div>
-          <div class="btns"><span class="btn-red" :class="{'btn-gray': amount.length === 0}" @click.stop.prevent="pay">充值</span></div>
-          <div class="content-text">
-            <strong>充值说明：</strong>
-            <p>优惠券是由「一虎一席茶席艺术平台」派发给用户的，充值成功后系统将自动用于抵扣订单交易金额。</p>
-            <p>您可前往「个人中心 — 优惠券余额」中查看优惠券明细，明细中包含了您名下所有的优惠券信息。状态为「未使用」的优惠券可用于充值。</p>
+          <div class="btn-list">
+            <span class="btn-green" @click.stop.prevent="fillAmount(btn.value)" :class="{'on': btn.value === amount}"  v-for="btn in buttons">{{btn.text}}</span>
+          </div>
+          <div class="btns">
+            <span class="btn-green" :class="{'btn-gray': amount.length === 0}" @click.stop.prevent="deposit">立即充值</span>
           </div>
         </div>
       </div>
@@ -36,13 +29,23 @@
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
-  import split from '@/components/split/split';
   import api from '@/api/api';
+  import {pay} from '@/common/js/pay';
 
   export default {
     data() {
       return {
-        amount: ''
+        amount: '',
+        buttons: [{
+          text: '50元', value: 50
+        }, {
+          text: '100元', value: 100
+        }, {
+          text: '200元', value: 200
+        }, {
+          text: '500元', value: 500
+        }],
+        paying: false
       };
     },
     activated() {
@@ -51,11 +54,6 @@
     },
     deactivated() {
       this.hide();
-    },
-    computed: {
-      balance() {
-        return this.$store.getters.getCouponAmount;
-      }
     },
     methods: {
       _initScroll() {
@@ -69,28 +67,67 @@
           }
         });
       },
-      detail() {
-        this.$router.push('/coupon/history');
-      },
-      pay() {
-        if (this.amount.length) {
-          let user = this.$store.getters.getUserInfo;
-          api.depositCoupon({
-            userId: user.userId || 0,
-            cNo: this.amount
-          }).then(response => {
-            if (response.result === 0 && response.code === 0) {
-              this.$store.dispatch('openToast', '充值成功！');
-              this.$store.dispatch('updateCouponAmount', response.couponTotal);
-              this.amount = '';
-            } else {
-              this.$store.dispatch('openToast', '无效的优惠券码！');
-            }
-          }).catch(response => {
-            console.log(response);
-            this.$store.dispatch('openToast', '网络故障，请稍候再充值！');
-          });
+      deposit() {
+        if (this.paying) {
+          this.$store.dispatch('openToast', '正在充值中...');
+          return;
         }
+        this.paying = true;
+        let userInfo = this.$store.getters.getUserInfo;
+        let params = {
+          openid: userInfo.openid,
+          userId: userInfo.userId,
+          totalFee: this.amount,
+          type: 6,
+          title: `充值${this.amount}元`,
+          body: `充值${this.amount}元`
+        };
+        api.createOrder(params).then(response => {
+          if (response.result !== 0) {
+            this.$store.dispatch('openToast', '生成充值订单失败！');
+            this.paying = false;
+            return;
+          }
+          let order = response.order;
+          let payParams = {
+            totalFee: order.totalFee,
+            openid: userInfo.openid,
+            orderNo: order.orderNo,
+            body: order.body
+          };
+          api.wxpay(payParams).then((response) => {
+            this.paying = false;
+            let that = this;
+            WeixinJSBridge.invoke(
+              'getBrandWCPayRequest', {
+                'appId': response.appId,
+                'timeStamp': response.timeStamp || +new Date(),
+                'nonceStr': response.nonceStr,
+                'package': response.packageValue,
+                'signType': response.signType || 'MD5',
+                'paySign': response.paySign
+              }, function(res) {
+                // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+                if (res.err_msg === 'get_brand_wcpay_request:ok') {
+                  that.$store.dispatch('openToast', '充值成功！');
+                } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
+                  that.$store.dispatch('openToast', '取消充值！');
+                } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
+                  that.$store.dispatch('openToast', '充值失败！');
+                }
+                that.$router.push('/wallet');
+              }
+            );
+            pay();
+          }).catch(response => {
+            this.paying = false;
+          });
+        }).catch(response => {
+          this.paying = false;
+        });
+      },
+      fillAmount(amount) {
+        this.amount = amount;
       },
       back() {
         this.$router.back();
@@ -103,7 +140,7 @@
       }
     },
     components: {
-      fixedheader, split
+      fixedheader
     }
   };
 </script>
@@ -172,6 +209,28 @@
         box-sizing: border-box
         .btn-green
           letter-spacing: 3px
+      .btn-list
+        position: relative
+        display: flex
+        margin-top: 7px
+        box-sizing: border-box
+        span
+          flex: 1
+          height: 34px
+          line-height: 34px
+          margin-right: 10px
+          text-align: center
+          font-size: 16px
+          color: #fff
+          &:last-child
+            margin-right: 0
+          &.btn-green
+            background: #fff
+            color: #44b549
+            border: 1px solid #44b549
+          &.on
+            background: #44b549
+            color: #fff
       .wallet-content
         padding: 13px 10px
         color: #666
@@ -191,7 +250,6 @@
           display: flex
           position: relative
           padding-left: 80px
-          margin-top: 7px
           .title
             position: absolute
             width: 70px
@@ -205,6 +263,7 @@
             height: 20px
             border: 0 none
             font-size: 14px
+            text-indent: 5px
             width: 100%
             vertical-align: top
             border-bottom: 1px solid #ccc

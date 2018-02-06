@@ -165,6 +165,8 @@
           display: -webkit-box
           -webkit-line-clamp: 1
           -webkit-box-orient: vertical
+          word-wrap: break-word
+          word-break: break-all
         .sellpoint
           display: block
           font-size: 12px

@@ -20,7 +20,7 @@
                   <p class="price"><label>总&nbsp;&nbsp;&nbsp;&nbsp;价：</label><span class="text">{{order.totalFee | currency}}</span></p>
                 </div>
                 <div class="ops">
-                  <span class="button btn-orange" v-if="order.status === 0 && !order.express" @click.stop.prevent="goFillAddress(order)">填写收货地址</span>
+                  <span class="button btn-orange" v-if="order.status === 0 && !order.express && order.type !== 6" @click.stop.prevent="goFillAddress(order)">填写收货地址</span>
                   <span class="button btn-red" v-else-if="order.status === 0" @click.stop.prevent="weixinPay(order)">去支付</span>
                   <!-- <span class="button btn-green" v-if="order.status === 10">催单</span>
                   <span class="button btn-blue" v-if="order.status === 10">去评价</span>
@@ -169,6 +169,8 @@
           return '团购';
         } else if (item.type === 5) {
           return '拍卖';
+        } else if (item.type === 6) {
+          return '充值订单';
         } else {
           return '';
         }

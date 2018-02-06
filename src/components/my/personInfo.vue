@@ -14,10 +14,14 @@
         </ul>
       </div>
     </div>
+    <div class="footer">
+      <div class="btns"><span class="btn-red" @click.stop.prevent="sync">同步微信昵称</span></div>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  import api from '@/api/api';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
 
   export default {
@@ -27,11 +31,19 @@
           { key: 'icon', text: '头像', type: 'image', link: '' },
           { key: 'nickName', text: '微信名称', link: '' },
           { key: 'sex', text: '性别', link: '' },
-          { key: 'model', text: '用户类型', link: '' }
+          { key: 'model', text: '用户类型', link: '' },
+          { key: 'phone', text: '绑定手机号码', link: '/bindphone' }
         ],
         user: this.$store.getters.getUserInfo,
         userProfile: this.$store.getters.getUserProfile
       };
+    },
+    activated() {
+      this.show();
+      this.userProfile = this.$store.getters.getUserProfile;
+    },
+    deactivated() {
+      this.hide();
     },
     methods: {
       getValue(key) {
@@ -64,11 +76,20 @@
         }
         if (key === 'model') {
           return this.userProfile.user && this.userProfile.user.model === SUPPLIER ? '代理商' : '会员';
+        } else if (key === 'phone') {
+          return this.userProfile.user && this.userProfile.user.mobileNumber || '';
         }
         return this.user[key] || '';
       },
-      back() {
-        this.$router.back();
+      sync() {
+        let redirect = 'http://' + location.host + location.pathname + '#/personInfo';
+        window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+      },
+      show() {
+        this.$store.commit('HIDE_FOOTER');
+      },
+      hide() {
+        this.$store.commit('SHOW_FOOTER');
       }
     },
     components: {
@@ -89,7 +110,7 @@
   .person
     position: absolute
     top: 44px
-    bottom: 50px
+    bottom: 47px
     width: 100%
     overflow: hidden
     .person-wrap
@@ -135,4 +156,19 @@
             color: #999
             img
               border-radius: 5px
+  .footer
+    position: fixed
+    bottom: 0
+    width: 100%
+    height: 47px
+    overflow: hidden
+    z-index: 2
+    .btns
+      margin: 0 auto
+      height: 47px
+      line-height: 47px
+      font-size: 14px
+      .btn-red
+        color: #e1e1e1
+        border-radius: 0
 </style>

@@ -5,7 +5,7 @@
       <div class="detail-wrap">
         <div class="order-info">
           <div class="order-state">
-            <p><label>订单状态：</label><span class="text-blue">{{statusDesc}}</span></p>
+            <p><label>订单状态：</label><span class="text-red">{{statusDesc}}</span></p>
             <p v-if="order.type"><label>订单类型：</label><span>{{orderTypeDesc}}</span></p>
             <p><label>订单编号：</label><span>{{order.orderNo}}</span></p>
             <p><label>下单时间：</label><span>{{order.createAt | formatDate}}</span></p>
@@ -31,10 +31,10 @@
           <p><label>支付方式：</label><span>在线支付</span></p>
           <!-- <p><label>发票信息：</label><span>普通发票</span></p> -->
         </div>
-        <split></split>
-        <div class="title">商品列表</div>
-        <ul class="goods-info">
-          <li class="good-item" v-for="product in order.products">
+        <split v-if="order.type !== 6"></split>
+        <div class="title" v-if="order.type !== 6">商品列表</div>
+        <ul class="goods-info" v-if="order.type !== 6">
+          <li class="good-item" v-for="product in order.products" @click.stop.prevent="showProductDetail(product)">
             <div class="item-img"><img :src="getThumbnail(product)" alt=""></div>
             <div class="item-info">
               <h3 class="title">{{product.name}}</h3>
@@ -61,7 +61,7 @@
     </div>
     <div class="footer border-top-1px" v-if="canShowFooter">
       <div class="btn-group" v-if="loginUser && loginUser.userId === order.userId">
-       <div class="button" v-if="order.status === 0 && !order.express" @click.stop.prevent="goFillAddress"><span class="btn-red">填写收货地址</span></div>
+       <div class="button" v-if="order.status === 0 && !order.express && order.type !== 6" @click.stop.prevent="goFillAddress"><span class="btn-red">填写收货地址</span></div>
         <div class="button" v-else-if="order.status === 0" @click.stop.prevent="weixinPay"><span class="btn-red">支付</span></div>
         <div class="button" v-if="order.status === 0" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
         <div class="button" v-if="order.status === 1 || order.status === 8" @click.stop.prevent="showRefund"><span class="btn-red">申请退款</span></div>
@@ -129,6 +129,8 @@
           return '团购';
         } else if (this.order.type === 5) {
           return '拍卖';
+        } else if (this.order.type === 6) {
+          return '充值订单';
         }
         return '';
       },
@@ -170,6 +172,17 @@
             this.scroll.refresh();
           }
         });
+      },
+      showProductDetail(product) {
+        if (this.order.type === 3) { // 秒杀
+          this.$router.push({name: 'seckillDetail', params: {id: product.id}});
+        } else if (this.order.type === 4) {  // 团购
+          this.$router.push({name: 'groupbuyDetail', params: {id: product.id}});
+        } else if (this.order.type === 5) {  // 拍卖
+          this.$router.push({name: 'auctiondetail', params: {id: product.id}});
+        } else {
+          this.$router.push({name: 'good', params: {id: product.id}});
+        }
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -333,10 +346,12 @@
           font-size: 14px
           label
             display: inline-block
-            min-width: 66px
+            min-width: 70px
             color: #999
           .text-blue
             color: #00a0dc
+          .text-red
+            color: #e4393c
       .delivery-info, .goods-info
         padding-top: 0
       .goods-info p

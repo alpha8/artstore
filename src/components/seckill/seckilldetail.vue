@@ -84,6 +84,11 @@
         <split v-show="guessGoods.length"></split>
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
+        <split v-if="showFollow"></split>
+        <modal-title title="关注公众号，便捷进入商城" catKey="" catName="" v-show="showFollow"></modal-title>
+        <div v-if="showFollow" class="wx_follow">
+          <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
+        </div>
       </div>
     </div>
     <div class="fixed-foot">
@@ -181,7 +186,9 @@
         timer: null,
         nowTimes: +new Date(),
         md5: '',
-        countdownStats: {}
+        countdownStats: {},
+        showFollow: false,
+        wxqrcode: api.CONFIG.wxqrcode
       };
     },
     computed: {
@@ -236,6 +243,7 @@
             this.$store.dispatch('closeLoading');
             this.fetchComments();
             this.getLikeGoods();
+            this.getWXFollow();
           }).catch(response => {
             this.$store.dispatch('closeLoading');
           });
@@ -330,6 +338,12 @@
           urls: imgs
         });
       },
+      previewQrcode() {
+        wx.previewImage({
+          current: this.wxqrcode,
+          urls: [this.wxqrcode]
+        });
+      },
       viewMore() {
         this.$router.push({name: 'goodComment', params: {id: this.good.id}});
       },
@@ -405,6 +419,20 @@
               this.scrollY = offset;
             }
           });
+        });
+      },
+      getWXFollow() {
+        let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
+          this.showFollow = true;
+          return;
+        }
+        api.getUserProfile(user.userId || 0).then(response => {
+          if (response.result === 0 && response.user) {
+            this.showFollow = (response.user.follow === 0 || response.user.follow === 2);
+          }
+        }).catch(response => {
+          console.error(response);
         });
       },
       show() {
@@ -978,6 +1006,15 @@
           font-size: 12px
           color: rgb(147, 153, 159)
           text-align: center
+    .wx_follow
+      position: relative
+      width: 100%
+      height: auto
+      overflow: hidden
+      img
+        position: relative
+        width: 100%
+        height: auto
   .fixed-foot
     position: fixed
     left: 0
