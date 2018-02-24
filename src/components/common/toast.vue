@@ -16,11 +16,11 @@
   .toast
     position: fixed
     z-index: 10000
-    width: 210px
+    min-width: 100px
+    max-width: 210px
     top: 50%
     left: 50%
-    margin-left: -105px
-    margin-top: -60px
+    transform: translate(-50%, -50%)
     background: rgba(35,35,38,.7)
     text-align: center
     border-radius: 5px

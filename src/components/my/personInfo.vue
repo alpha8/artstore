@@ -82,6 +82,7 @@
         return this.user[key] || '';
       },
       sync() {
+        this.$store.dispatch('openToast', '同步昵称');
         let redirect = 'http://' + location.host + location.pathname + '#/personInfo';
         window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
       },

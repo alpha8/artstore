@@ -20,7 +20,7 @@
                   </div>
                 </li>
                 <ul class="list" v-show="filter.level === 1 && filter.children.length" :class="{'mini': !filter.checked}">
-                  <li v-for="item in filter.children" :class="{'on': item.checked}">
+                  <li v-for="item in filter.children" :class="{'on': item.checked}" v-if="item.name !== 'thumbnail'">
                     <span v-show="!item.val" @click.stop.prevent="checkAll(item, filter)">{{item.name}}</span>
                     <span v-if="filter.multiple && item.val" @click.stop.prevent="checkItem(item, filter)">{{item.name}}</span>
                     <span v-else-if="!filter.multiple && item.val" @click.stop.prevent="checkCategoryItem(item, filter)">{{item.name}}</span>
@@ -413,27 +413,27 @@
           width: 100%
           height: auto
           max-height: none
-          font-size: 14px
-          padding: 10px
+          font-size: 13px
+          padding: 8px 0 10px 10px
           box-sizing: border-box
           overflow: hidden
           &.mini
-            max-height: 110px
+            max-height: 102px
             height: auto
           li
             display: block
             width: 33.3333%
-            padding-right: 10px
-            padding-bottom: 12px
+            padding-right: 9px
+            padding-bottom: 9px
             box-sizing: border-box
             &.half
               width: 50%
             span
               display: block
-              border-radius: 5px
-              text-align: center
-              background: #f5f5f5
-              color: #323232
+              border-radius: 0
+              text-align: left
+              background: #F1F2F6
+              color: #666
               height: 36px
               line-height: 36px
               padding: 0 8px
@@ -443,9 +443,6 @@
               text-overflow: ellipsis
               border-sizing: border-box
             &.on span
-              border: 1px solid #ff463c
-              background: url(../../common/images/box-checked.png) transparent right bottom no-repeat
-              background-size: 15px
               color: #ff463c
         .min-price, .max-price
           height: 100%

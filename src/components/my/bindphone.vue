@@ -7,19 +7,19 @@
           <li class="border-1px">
             <p>
               <span class="title">手机号：</span>
-              <input type="text" class="phone" v-model="phone" placeholder="请输入手机号" maxlength="11" autofocus required>
-              <span class="btn-code" v-if="phone.length && !processing" @click.stop.prevent="getCode">{{codeTips}}</span>
+              <input type="text" class="phone" v-model="phone" placeholder="请输入手机号" maxlength="20" autofocus required>
+              <span class="btn-code" v-if="phone.length && getcode && !processing" @click.stop.prevent="getCode">{{codeTips}}</span>
               <span class="btn-code disabled" v-if="processing">{{codeTips}}</span>
             </p>
           </li>
-          <li class="border-1px">
+          <li class="border-1px" v-if="getcode">
             <p>
               <span class="title">验证码：</span>
               <input type="text" v-model="code" placeholder="请输入验证码" maxlength="6" required>
             </p>
           </li>
         </ul>
-        <div class="btns" :class="{'btn-gray': invalid, 'btn-green': !invalid}" @click.stop.prevent="doBind"><span>绑 定</span></div>
+        <div class="btns" :class="{'btn-gray': invalid, 'btn-green': !invalid}" @click.stop.prevent="doBind"><span>绑定</span></div>
       </div>
     </div>
   </div>
@@ -38,7 +38,8 @@
         countdown: 60,
         processing: false,
         codeTips: '获取验证码',
-        timer: null
+        timer: null,
+        getcode: false
       };
     },
     activated() {
@@ -58,9 +59,16 @@
     computed: {
       invalid() {
         let error = false;
-        if (!/^1[\d]{10}$/.test(this.phone)) {
+        this.getcode = false;
+        if (/^1[\d]{10}$/.test(this.phone)) {
+          this.getcode = true;
+          return false;
+        } else if (this.phone.length <= 8) {
           error = true;
-        } else if (!this.code || this.code.length !== 6) {
+        } else {
+          error = false;
+        }
+        if (this.getcode && this.code.length !== 6) {
           error = true;
         }
         return error;
@@ -68,28 +76,44 @@
     },
     methods: {
       doBind() {
-        api.verifyCode(this.phone, this.code).then(response => {
-          if (response.result === 0) {
-            let user = this.$store.getters.getUserInfo;
-            api.bindPhone({
-              mobileNumber: this.phone,
-              userId: user.userId || -1
-            }).then(res => {
-              if (res.result === 0) {
-                this.$store.dispatch('openToast', '手机绑定成功!');
-                this.$router.push('my');
-              } else {
-                this.$store.dispatch('openToast', '网络太忙了，请稍候再试!');
-              }
-            }).catch(response => {
-              console.error(response);
-            });
-          } else {
-            this.$store.dispatch('openToast', '验证码不正确哦!');
-          }
-        }).catch(response => {
-          this.$store.dispatch('openToast', '网络太忙了，请稍候再试!');
-        });
+        let user = this.$store.getters.getUserInfo;
+        if (this.getcode) {
+          api.verifyCode(this.phone, this.code).then(response => {
+            if (response.result === 0) {
+              api.bindPhone({
+                mobileNumber: this.phone,
+                userId: user.userId || -1
+              }).then(res => {
+                if (res.result === 0) {
+                  this.$store.dispatch('openToast', '手机绑定成功!');
+                  this.$router.push('my');
+                } else {
+                  this.$store.dispatch('openToast', '网络太忙了，请稍候再试!');
+                }
+              }).catch(response => {
+                console.error(response);
+              });
+            } else {
+              this.$store.dispatch('openToast', '验证码不正确哦!');
+            }
+          }).catch(response => {
+            this.$store.dispatch('openToast', '网络太忙了，请稍候再试!');
+          });
+        } else {
+          api.bindPhone({
+            mobileNumber: this.phone,
+            userId: user.userId || -1
+          }).then(res => {
+            if (res.result === 0) {
+              this.$store.dispatch('openToast', '手机绑定成功!');
+              this.$router.push('my');
+            } else {
+              this.$store.dispatch('openToast', '网络太忙了，请稍候再试!');
+            }
+          }).catch(response => {
+            console.error(response);
+          });
+        }
       },
       getCode() {
         if (!/^1[\d]{10}$/.test(this.phone)) {
@@ -140,7 +164,7 @@
   .add-address-wrap
     position: relative
     background: #fff
-    padding: 0 10px 40px
+    padding: 3px 10px 40px
     ul
       position: relative
       li
@@ -148,7 +172,7 @@
         padding: 8px 0 0 72px
         box-sizing: border-box
         &.border-1px
-          padding: 8px 0 8px 72px
+          padding: 8px 0 8px 65px
           border-1px(rgba(7, 17, 27, 0.1))
         .text-control
           height: 20px
@@ -167,13 +191,14 @@
           .title
             position: absolute
             display: block
-            width: 70px
-            top: 11px
+            width: 68px
+            top: 50%
             left: 0
             right: 0
             margin: auto 0
-            padding-right: 20px
-            text-align: right
+            transform: translate(0, -50%)
+            text-align: left
+            text-indent: 7px
             font-size: 14px
             line-height: 1
             &.special
@@ -187,17 +212,17 @@
             vertical-align: top
             box-sizing: border-box
             &.phone
-              padding-right: 80px
+              padding-right: 85px
           .btn-code
             position: absolute
-            right: 0
+            right: 6px
             top: 5px
             height: 26px
             line-height: 26px
             font-size: 12px
             padding: 0 8px
             background-color: #44b549
-            color: #fff
+            color: #ebeceb
             border-radius: 2px
             &.disabled
               color: #999
@@ -231,4 +256,8 @@
             top: 50%
             right: 5px
             margin-top: -4px
+    .btns
+      margin-top: 10px
+      margin-left: 0
+      font-size: 15px
 </style>

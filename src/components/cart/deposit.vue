@@ -11,7 +11,7 @@
       <div class="wallet-wrapper">
         <div class="wallet-content">
           <div class="form-control">
-            <span class="title">充值金额：</span>
+            <span class="title">充值金额(元)：</span>
             <input type="number" name="amount" placeholder="充值金额" class="input-amount" v-model="amount">
           </div>
           <div class="btn-list">
@@ -213,26 +213,29 @@
         position: relative
         display: flex
         margin-top: 7px
+        padding-left: 4px
         box-sizing: border-box
         span
           flex: 1
-          height: 34px
-          line-height: 34px
+          height: 26px
+          line-height: 26px
           margin-right: 10px
           text-align: center
-          font-size: 16px
+          font-size: 13px
           color: #fff
+          border-radius: 2px
           &:last-child
             margin-right: 0
           &.btn-green
             background: #fff
-            color: #44b549
-            border: 1px solid #44b549
+            color: #4bb336
+            border: 1px solid #4bb336
           &.on
-            background: #44b549
+            background: #b3e2b5
             color: #fff
+            border: none
       .wallet-content
-        padding: 13px 10px
+        padding: 10px
         color: #666
         background: #fff
         .content-title
@@ -249,32 +252,35 @@
         .form-control
           display: flex
           position: relative
-          padding-left: 80px
+          padding-left: 98px
           .title
             position: absolute
-            width: 70px
+            width: 98px
             top: 50%
             left: 4px
             font-size: 14px
             line-height: 1
             transform: translate(0, -50%)
+            color: #828282
           .input-amount
-            padding: 5px 0
-            height: 20px
+            padding: 5px 0 2px
             border: 0 none
             font-size: 14px
-            text-indent: 5px
             width: 100%
             vertical-align: top
-            border-bottom: 1px solid #ccc
-            margin-right: 5px
+            border-bottom: 1px solid #b5b5b5
+            color: #828282
             box-sizing: border-box
-        .btns span
-          letter-spacing: 2px
-          &.btn-red
-            background-color: #e45050
-            color: #f1f1f1
-          &.btn-gray
-            background: #ccc
-            border-radius: 3px
+        .btns
+          font-size: 14px
+          span
+            letter-spacing: 0
+            &.btn-red
+              background-color: #e45050
+              color: #f1f1f1
+            &.btn-gray
+              background: #ccc
+              border-radius: 3px
+            &.btn-green
+              color: #ebeceb
 </style>

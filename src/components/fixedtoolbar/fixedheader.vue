@@ -48,13 +48,13 @@
         items: [{
           link: '/home', icon: 'icon-home', text: '首页'
         }, {
-          link: '/search', icon: 'icon-search', text: '搜索'
+          link: '/search', icon: 'icon-search min', text: '搜索'
         }, {
           link: '/category', icon: 'icon-classify', text: '分类'
         }, {
           link: '/cart', icon: 'icon-cart', text: '购物车'
         }, {
-          link: '/my', icon: 'icon-user2', text: '个人中心'
+          link: '/my', icon: 'icon-user2 min', text: '个人中心'
         }]
       };
     },
@@ -106,8 +106,12 @@
         font-size: 18px
         color: #666
       .icon-close
+        position: absolute
+        top: 50%
+        right: 0
+        transform: translate(-50%, -50%)
         color: #fb4741
-        font-size: 20px
+        font-size: 22px
         font-weight: 700
     .nav
       position: absolute
@@ -129,6 +133,9 @@
             line-height: 1
             padding-bottom: 3px
             font-size: 20px
+            &.min
+              margin-top: 2px
+              font-size: 18px
           .text
             display: block
             line-height: 1

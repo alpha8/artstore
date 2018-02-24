@@ -79,7 +79,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关注公众号，便捷进入商城" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关于「一虎一席茶席艺术平台」商城" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>

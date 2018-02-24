@@ -282,7 +282,7 @@
                     vertical-align: middle
                     text-align: center
                     color: #fff
-                    border-radius: 4px
+                    border-radius: 2px
                     font-size: 11px
                     padding: 0 8px
                     letter-spacing: 0.5px

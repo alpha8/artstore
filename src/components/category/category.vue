@@ -11,57 +11,60 @@
         </ul>
       </div>
       <div class="goods-wrapper" ref="goodsWrapper">
-        <div class="banner" v-if="sliders.length">
-          <swipe :swiperSlides="sliders"></swipe>
-        </div>
-        <ul>
-          <li class="good-list good-list-hook">
-            <ul class="itemList" v-if="good.childrens && good.childrens[0].childrens && !good.childrens[0].childrens.length">
-              <li v-for="innergood in good.childrens" :class="typeStatus(innergood.status)" v-if="!innergood.hide">
-                <router-link :to="{path: '/search', query: {cat: dummyKey(innergood.propertyName), key: (innergood.value === 'thumbnail' ? innergood.desc : innergood.value)}}" class="good-item" :class="{'thumbnail': innergood.value === 'thumbnail'}">
-                  <div class="icon" v-if="innergood.value==='thumbnail'">
-                    <img :src="innergood.css" border="0" />
-                  </div>
-                  <div class="content" v-if="innergood.value!=='thumbnail'">
-                    <h2 class="name" :class="{'strong': innergood.css === 'strong'}">
-                    <span v-if="containsDot(innergood.value)">{{beforeDot(innergood.value)}}<span class="dot">{{afterDot(innergood.value)}}</span></span>
-                    <span v-if="!containsDot(innergood.value)">{{innergood.value}}</span>
-                    <i v-if="innergood.css" :class="innergood.css"></i><em>({{innergood.count || 0}})</em></h2>
-                  </div>
-                </router-link>
-              </li>
-            </ul>
-            <div v-if="innergood && innergood.childrens.length && innergood.propertyName !== 'banner'" v-for="innergood in good.childrens">
-              <h1 class="title border-1px">{{innergood.value}}</h1>
-              <ul class="itemList">
-                <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName === 'art'">
-                  <router-link :to="{path: '/search', query: {ck: innergood.propertyName, cv: dummyKey(item.propertyName), parentCat: 'art', key: (item.value === 'thumbnail' ? item.desc: item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
-                    <div class="icon" v-if="item.value==='thumbnail'">
-                      <img :src="item.css" border="0" />
+        <div>
+          <div class="banner" v-if="sliders.length">
+            <swipe :swiperSlides="sliders"></swipe>
+          </div>
+          <ul>
+            <li class="good-list good-list-hook">
+              <ul class="itemList" v-if="good.childrens && good.childrens[0].childrens && !good.childrens[0].childrens.length">
+                <li v-for="innergood in good.childrens" :class="typeStatus(innergood.status)" v-if="!innergood.hide">
+                  <router-link :to="{path: '/search', query: {cat: dummyKey(innergood.propertyName), key: (innergood.value === 'thumbnail' ? innergood.desc : innergood.value)}}" class="good-item" :class="{'thumbnail': innergood.value === 'thumbnail'}">
+                    <div class="icon" v-if="innergood.value==='thumbnail'">
+                      <img :src="innergood.css" border="0" />
                     </div>
-                    <div class="content" v-if="item.value!=='thumbnail'">
-                      <h2 class="name" :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em></h2>
-                    </div>
-                  </router-link>
-                </li>
-                <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName !== 'art'">
-                  <router-link :to="{path: '/search', query: {sunCat: dummyKey(item.propertyName), lv1: good.propertyName, lv2: innergood.propertyName, key: (item.value === 'thumbnail' ? item.desc : item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
-                    <div class="icon" v-if="item.value==='thumbnail'">
-                      <img :src="item.css" border="0" />
-                    </div>
-                    <div class="content" v-if="item.value!=='thumbnail'">
+                    <div class="content" v-if="innergood.value!=='thumbnail'">
                       <h2 class="name">
-                        <span v-if="containsDot(item.value)" :class="{'strong': item.css === 'strong'}">{{beforeDot(item.value)}}<span class="dot">{{afterDot(item.value)}}</span></span>
-                        <span v-if="!containsDot(item.value)" :class="{'strong': item.css === 'strong'}">{{item.value}}</span>
-                        <i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em>
-                      </h2>
+                      <span v-if="containsDot(innergood.value)" :class="{'strong': innergood.css === 'strong'}">{{beforeDot(innergood.value)}}<span class="dot">{{afterDot(innergood.value)}}</span></span>
+                      <span v-if="!containsDot(innergood.value)" :class="{'strong': innergood.css === 'strong'}">{{innergood.value}}</span>
+                      <i v-if="innergood.css" :class="innergood.css"></i><em>({{innergood.count || 0}})</em></h2>
                     </div>
                   </router-link>
                 </li>
               </ul>
-            </div>
-          </li>
-        </ul>
+              <div v-if="innergood && innergood.childrens.length && innergood.propertyName !== 'banner'" v-for="innergood in good.childrens">
+                <h1 class="title border-1px">{{innergood.value}}</h1>
+                <ul class="itemList">
+                  <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName === 'art'">
+                    <router-link :to="{path: '/search', query: {ck: innergood.propertyName, cv: dummyKey(item.propertyName), parentCat: 'art', key: (item.value === 'thumbnail' ? item.desc: item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
+                      <div class="icon" v-if="item.value==='thumbnail'">
+                        <img :src="item.css" border="0" />
+                      </div>
+                      <div class="content" v-if="item.value!=='thumbnail'">
+                        <h2 class="name" :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em></h2>
+                      </div>
+                    </router-link>
+                  </li>
+                  <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName !== 'art'">
+                    <router-link :to="{path: '/search', query: {sunCat: dummyKey(item.propertyName), lv1: good.propertyName, lv2: innergood.propertyName, key: (item.value === 'thumbnail' ? item.desc : item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
+                      <div class="icon" v-if="item.value==='thumbnail'">
+                        <img :src="item.css" border="0" />
+                      </div>
+                      <div class="content" v-if="item.value!=='thumbnail'">
+                        <h2 class="name">
+                          <span v-if="containsDot(item.value)" :class="{'strong': item.css === 'strong'}">{{beforeDot(item.value)}}<span class="dot">{{afterDot(item.value)}}</span></span>
+                          <span v-if="!containsDot(item.value)" :class="{'strong': item.css === 'strong'}">{{item.value}}</span>
+                          <i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em>
+                        </h2>
+                      </div>
+                    </router-link>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+          <div class="item-footer" v-show="good.propertyName === 'ticket' || good.propertyName === 'freetrade'">(本版块内部公测中，近期开放)</div>
+        </div>
       </div>
     </div>
   </div>
@@ -389,6 +392,14 @@
         color: #333
         background: #f2f2f2
         border-1px(rgba(7, 17, 27, 0.1))
+      .item-footer
+        position: relative
+        width: 100%
+        padding: 14px 0 10px 0
+        text-align: center
+        color: #999
+        font-size: 12px
+        box-sizing: border-box
       .itemList
         display: flex
         flex-wrap: wrap

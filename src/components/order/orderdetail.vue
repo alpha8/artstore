@@ -397,6 +397,7 @@
             -webkit-line-clamp: 2
             -webkit-box-orient: vertical
             line-height: 1.3
+            color: #666
           div
             padding-top: 10px
         .item-pay
@@ -411,6 +412,7 @@
             font-weight: 400
           .nums
             text-align: right
+            color: #666
   .order-refund-wrap
     position: absolute
     left: 0

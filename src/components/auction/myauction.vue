@@ -307,7 +307,7 @@
                     vertical-align: middle
                     text-align: center
                     color: #fff
-                    border-radius: 4px
+                    border-radius: 2px
                     font-size: 11px
                     padding: 0 8px
                     letter-spacing: 0.5px
@@ -318,9 +318,9 @@
                     &.disabled
                       background: #999
                     &.white
-                      color: #000
-                      background: #fff
-                      border: 1px solid rgba(7,17,27,0.1)
+                      color: #fff
+                      background: #00a0dc
+                      border: 1px solid #00a0dc
                       margin-left: 2px
                 .more-ops
                   position: relative

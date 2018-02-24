@@ -45,7 +45,7 @@
   .title
     position: relative
     display: flex
-    width: 80%
+    width: 90%
     margin: 14px auto 12px auto
     &:after
       position: absolute
@@ -60,7 +60,7 @@
       -webkit-transform: rotate(135deg)
       transform: rotate(135deg)
       top: 50%
-      right: -20px
+      right: -6px
       margin-top: -4px
     &.no-more:after
       display: none
@@ -91,7 +91,7 @@
       height: 16px
       line-height: 16px
       top: 50%
-      right: -10px
+      right: 3px
       margin-top: -8px
       font-size: 14px
       color: #666

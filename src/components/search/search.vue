@@ -30,7 +30,7 @@
               <router-link :to="{name: 'good', params: {id: product.id}}"><img :src="getThumbnail(product)" /></router-link>
             </div>
             <div class="product-info">
-              <div class="product-title" @click.stop.prevent="goGoodDetail(product)">{{product.name}}</div>
+              <div class="product-title" @click.stop.prevent="goGoodDetail(product)">{{fillName(product.name)}}</div>
               <div class="sellpoint" v-if="product.sellPoint">{{product.sellPoint}}</div>
               <div class="product-price"><div class="num">{{product.price | currency}}</div><div class="salesCount">(已售:{{product.stock && product.stock.salesCount || 0}}件)</div></div>
               <div class="icon" @click.stop.prevent="mark(product)"><i :class="favorited(product)"></i></div>
@@ -183,6 +183,10 @@
         if (!this.keyword.length) {
           this.$refs.sidebar.clearForm();
         }
+      },
+      fillName(name) {
+        name = name || '';
+        return name.replace('[一虎一席]', '');
       },
       getThumbnail(item) {
         let pic = item.pictures;
