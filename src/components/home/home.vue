@@ -38,6 +38,9 @@
         <split></split>
         <modal-title title="茶室空间雅物" moreText="更多" catKey="graceful" catName="茶室空间雅物"></modal-title>
         <channel :items="ya" :cols="2"></channel>
+        <split v-show="articles && articles.length"></split>
+        <section-title title='博览集萃' v-show="articles && articles.length" moreText="更多" :getMore="getMoreArticles"></section-title>
+        <articlelist :articles="articles" v-show="articles && articles.length"></articlelist>
         <split></split>
         <modal-title title='关于 "一虎一席"'></modal-title>
         <div class="aboutus">
@@ -60,9 +63,11 @@
   import topchanel from '@/components/channel/topchanel';
   import split from '@/components/split/split';
   import modalTitle from '@/components/modal-title/modal-title';
+  import sectionTitle from '@/components/common/section-title';
   import channel from '@/components/channel/channel';
   import gotop from '@/components/fixedtoolbar/gotop';
   import search from '@/components/fixedtoolbar/search';
+  import articlelist from '@/components/article/articlelist';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
 
@@ -70,6 +75,7 @@
     data() {
       return {
         scrollY: 0,
+        articles: [],
         arts: [],
         teaPots: [],
         dearTeapots: [],
@@ -219,6 +225,15 @@
       }).then((response) => {
         this.ya = response.artworks;
       });
+
+      api.getArticles({
+        currentPage: 1,
+        pageSize: 4,
+        type: 1,
+        status: 1
+      }).then(response => {
+        this.articles = response.articles;
+      });
     },
     mounted() {
       this._initScroll();
@@ -268,6 +283,9 @@
       },
       _initPlayer() {
       },
+      getMoreArticles() {
+        this.$router.push({name: 'articles'});
+      },
       goTop() {
         let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
         this.scroll.scrollToElement(swipe, 300);
@@ -289,7 +307,7 @@
           redirect += '?userId=' + uid;
         }
         let shareData = {
-          title: '[一虎一席茶席艺术平台] 一站式优品商城，品味脱凡',
+          title: '[一虎一席茶席艺术商城] 一站式优品商城，品味脱凡',
           desc: '1200款精美茶器、300套茶席佳作、茶室专业配画、200款好茶老茶.【每年递增100%】',
           link: redirect,
           imgUrl: 'http://www.yihuyixi.com/ps/download/5a60046ae4b0a5130574a5fc'
@@ -308,7 +326,9 @@
       channel,
       fixedsearch,
       gotop,
-      search
+      search,
+      articlelist,
+      sectionTitle
     }
   };
 </script>

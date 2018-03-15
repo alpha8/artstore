@@ -382,7 +382,7 @@
       flex: 1
       .banner
         position: relative
-        padding: 0 2px 10px
+        padding: 0 2px 5px
         box-sizing: border-box
       .title
         padding-left: 10px

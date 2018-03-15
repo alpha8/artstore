@@ -44,6 +44,8 @@ import cashback from '@/components/my/cashback';
 import cashbackdetail from '@/components/my/cashbackdetail';
 import bindphone from '@/components/my/bindphone';
 import deposit from '@/components/cart/deposit';
+import articles from '@/components/article/articles';
+import articledetail from '@/components/article/articledetail';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -96,6 +98,8 @@ export default new Router({
     {path: '/cashback', component: cashback},
     {path: '/cashbackdetail', component: cashbackdetail},
     {path: '/bindphone', component: bindphone, name: 'bindphone'},
+    {path: '/articles', component: articles, name: 'articles'},
+    {path: '/article/:id', component: articledetail, name: 'articledetail'},
     {path: '/my', component: my}
   ]
   // ,scrollBehavior (to, from, savedPosition) {

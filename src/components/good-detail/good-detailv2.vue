@@ -72,7 +72,7 @@
             <table class="table">
               <tr v-for="p in good.parameter" v-if="p.value">
                 <td>{{p.text}}</td>
-                <td>{{p.value}}</td>
+                <td v-html="p.value"></td>
               </tr>
             </table>
           </div>
@@ -123,7 +123,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶席艺术平台」商城" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -271,11 +271,11 @@
           var qty = this.addedProducts && this.addedProducts[sid];
           good.count = qty || 0;
           this.good = good;
-          this.wxReady();
           this.show();
           this.processing = false;
           // this.loadTencentPlayer();
           this.$store.dispatch('closeLoading');
+          this.wxReady();
           this.getRelatedGoods();
           this.fetchComments();
           this.getLikeGoods();
@@ -388,13 +388,15 @@
         if (!goods.length || !relates.length) {
           return;
         }
-        goods.forEach((good, key) => {
+        for (let i = 0; i < goods.length; i++) {
+          let good = goods[i];
           relates.forEach((item) => {
             if (good.id === item.id) {
-              goods.splice(key, 1);
+              goods.splice(i, 1);
+              i--;
             }
           });
-        });
+        }
       },
       getWXFollow() {
         let user = this.$store.getters.getUserInfo;
@@ -607,7 +609,7 @@
         let vm = this;
         let shareData = {
           title: this.good.name,
-          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
+          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: img,
           success: function () {

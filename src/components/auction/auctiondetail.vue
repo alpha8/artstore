@@ -24,6 +24,8 @@
         <div class="duration">
           拍卖时间：<span>{{auction.startTime | formatDate}} ~ {{auction.endTime | formatDate}}</span>
         </div>
+        <div class="duration spacer" v-if="auction.leftStartTimes > 0" v-html="countdownTips()"></div>
+        <div class="duration spacer" v-else>距秒杀结束还剩：<p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p></div>
         <split></split>
         <div class="info">
           <h1 class="title" @click.stop.prevent="gotoBidPrices">出价记录 <em v-if="auction.countAppr">({{auction.countAppr}}次)</em><i class="num"></i></h1>
@@ -101,7 +103,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶席艺术平台」商城" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -115,8 +117,8 @@
         <div class="foot-item" v-else-if="auction.auction_product_state_id === 2">
           <span class="button-lg gray">拍卖暂停</span>
         </div>
-        <div class="foot-item" v-else-if="auction.auction_product_state_id > 2">
-          <span class="button-lg gray">已结束</span>
+        <div class="foot-item" v-else-if="auction.leftEndTimes <= 0 || auction.auction_product_state_id > 2">
+          <span class="button-lg gray">拍卖结束</span>
         </div>
         <div class="foot-item" v-if="auction.auction_product_state_id === 1">
           <div class="input-group">
@@ -129,9 +131,13 @@
           <span class="button-lg red" v-if="higher">您是最高出价者</span>
           <span class="button-lg red" v-else @click.stop.prevent="bid">出 价</span>
         </div>
+        <div class="foot-item btn-share" @click.stop.prevent="wxshare" v-if="auction.auction_product_state_id !== 1">
+          <span class="button-lg orange">分享有礼</span>
+        </div>
       </div>
     </div>
     <frame></frame>
+    <share ref="weixinShare"></share>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
@@ -139,7 +145,7 @@
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {formatDate} from '@/common/js/date';
+  import {formatDate, countdown} from '@/common/js/date';
   import {mixUsername} from '@/common/js/util';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
@@ -153,6 +159,7 @@
   import star from '@/components/star/star';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
+  import share from '@/components/good-detail/share';
 
   const ALL = 2;
   // const ERR_OK = 0;
@@ -162,6 +169,7 @@
       this.fetchAuction();
     },
     deactivated() {
+      this.stopTimer();
       this.hide();
       this.processing = false;
       this.higher = false;
@@ -202,6 +210,7 @@
         marked: false,
         timer: null,
         nowTimes: +new Date(),
+        countdownStats: {},
         showFollow: false,
         wxqrcode: api.CONFIG.wxqrcode
       };
@@ -233,10 +242,11 @@
         this.$store.dispatch('openLoading');
         api.getAuction(id).then(response => {
           this.auction = response;
-          this.wxReady();
+          this.timerLoop();
           this.show();
           this.processing = false;
           this.$store.dispatch('closeLoading');
+          this.wxReady();
           this.connectSocket();
           // this.fetchBids();
           this.fetchComments();
@@ -369,6 +379,57 @@
       },
       viewMore() {
         this.$router.push({name: 'goodComment', params: {id: this.auction.productId}});
+      },
+      wxshare() {
+        this.$refs.weixinShare.show();
+      },
+      timerLoop() {
+        if (this.auction.leftStartTimes) {
+          this.auction.leftStartTimes--;
+        }
+        if (this.auction.leftEndTimes) {
+          this.auction.leftEndTimes--;
+        }
+        if (this.auction.leftStartTimes) {
+          this.countdownStats = countdown(this.auction.leftStartTimes);
+        } else {
+          this.countdownStats = countdown(this.auction.leftEndTimes);
+        }
+        if (this.auction.leftEndTimes <= 0) {
+          clearTimeout(this.timer);
+        }
+        this.timer = setTimeout(this.timerLoop, 1000);
+      },
+      stopTimer() {
+        if (this.timer) {
+          clearTimeout(this.timer);
+        }
+      },
+      countdownTips() {
+        let count = 0;
+        let maxcount = 2;
+        let text = '';
+        let stats = this.countdownStats;
+        if (stats.days) {
+          text += stats.days + '天';
+          count++;
+        }
+        if (count < maxcount && stats.hours && stats.hours !== '00') {
+          text += stats.hours + '小时';
+          count++;
+        }
+        if (count < maxcount && stats.mins) {
+          text += stats.mins + '分';
+          count++;
+        }
+        if (count < maxcount && stats.seconds) {
+          text += stats.seconds + '秒';
+          count++;
+        }
+        if (this.auction.leftStartTimes) {
+          return `距开抢：${text}`;
+        }
+        return '';
       },
       gotoBidPrices() {
         this.$router.push({name: 'bidlist', params: {id: this.auction.id}});
@@ -567,7 +628,7 @@
         }
         let shareData = {
           title: this.auction.name,
-          desc: '起拍价：¥' + this.auction.startPrice + '.「一虎一席茶席艺术平台」精品.【一站式优品商城，品味脱凡】',
+          desc: '起拍价：¥' + this.auction.startPrice + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: icon
         };
@@ -641,7 +702,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, gotop, modalTitle, channel
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, gotop, modalTitle, channel, share
     }
   };
 </script>
@@ -831,11 +892,6 @@
           top: 0
           font-size: 12px
           color: #666
-      .duration
-        display: block
-        padding: 5px 0
-        font-size: 12px
-        color: #666
       .cartcontrol-wrapper
         position: absolute
         right: 12px
@@ -1006,11 +1062,28 @@
             display: block
             float: left
     .duration
-      position: relative
-      padding: 3px 0 12px 14px
+      display: block
+      margin-top: 5px
+      padding-left: 14px
       font-size: 13px
       color: #666
-      overflow: hidden
+      &.spacer
+        padding-bottom: 15px
+      .countdown_nums
+        position: relative
+        display: inline-block
+        font-size: 12px
+        .box
+          display:inline-block
+          margin:0 1px
+          width: 20px
+          height: 19px
+          line-height: 19px
+          font-weight:700
+          text-align: center
+          color:#fff
+          background:#e4393c
+          background-size:13px
     .auction-flow
       position: relative
       padding: 10px 14px
@@ -1197,6 +1270,11 @@
             border-radius: 0
             outline: none
             box-sizing: border-box
+      .btn-share
+        flex: none
+        float: left
+        width: 45%
+        display: block
       .mini-favorite-item
         flex: 70px 0 0
         .button-lg

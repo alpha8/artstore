@@ -92,7 +92,7 @@ export default {
    seckillCtx: 'http://www.yihuyixi.com/goodsKill',
    psCtx: 'http://www.yihuyixi.com/ps/download/',
    defaultImg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAAMFBMVEX///+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpufk+pAAAAD3RSTlMAESIzRFVmd4iZqrvM3e5GKvWZAAABv0lEQVRoge2YP1ICMRSH2R0UYZiRwlI5glfAylZP4G5twxGwt0BPgKVDs44XAFsbqW32CFTCiEAkhF3235DJyxud0d9XZRLyTXjJe9ndUgkAAAAAAAAAAADgx3DfhI5nI2Fd6xNfRsJDvVAYCt/7uwlNhQ+aXwQQ/hmhc/14xiq8EmLWYBTuyYx4yoydN+jCphRO0kNl8UIXelI4Tw+dqLJAE3alcJkOYqCCwCasrHpmZGE7/5dbsuvOalOmyQEnlF2fVOG+nD1MDlRVcb2hHuzOqtSnQugp4ZQqdG9fL5P97nhT/32m4hBfXh89HmE3Ei557pSyxa1XKGwmfEsO4YBFeBSfm4rNRR8LnXAYNVsswnpcEFXaWQsDsdi0aikfNYYyeX3VbAuOFa6yWYzWrTjtrITra0oFMfvMSBOuN1YFscchdNXG+tFarYXHaq4M4imLMFBzZRAHHMKDzdxFNu2owvjk+aULDuG2/I0yaUcUbvdhUsv5CEJn+zo173AIC1ZlJyxYlZWwvNtnLsylhq1Q94ZrKqxqfMZCj1l4P2YW9nU+U6F2gaZCPb8rZP8qwv7dBgAAAAAAAAAAAP+Lb4Qtq0R4e5WOAAAAAElFTkSuQmCC',
-   wxqrcode: 'http://www.yihuyixi.com/ps/download/5a86d60ae4b0a5130574ae48'
+   wxqrcode: 'http://www.yihuyixi.com/ps/download/5aa5d15ae4b05712686a0e3b'
   },
 
   /**
@@ -148,7 +148,7 @@ export default {
   },
   /** 查询单个商品详情 */
   GetGood(id) {
-    return doGet(this.CONFIG.webCtx + '/artwork/' + id);
+    return doGet(this.CONFIG.webCtx + '/artwork/' + id + '?type=productdetail&stat=1');
   },
   /** 查询产品的关联产品列表 */
   GetRelatedGoods(params) {
@@ -353,7 +353,7 @@ export default {
     * 秒杀单品详情
     */
   getSeckillDetail(id) {
-    return doGet(this.CONFIG.seckillCtx + '/seckill/' + id + '/detail');
+    return doGet(this.CONFIG.seckillCtx + '/seckill/' + id + '/detail' + '?type=seckilldetail&stat=1');
   },
 
    /**
@@ -459,7 +459,7 @@ export default {
     * 团购单品详情
     */
   getGroupbuyDetail(id) {
-    return doGet(this.CONFIG.cmsCtx + '/groupBuy/' + id);
+    return doGet(this.CONFIG.cmsCtx + '/groupBuy/' + id + '?type=groupbuydetail&stat=1');
   },
 
    /**
@@ -487,7 +487,7 @@ export default {
     * 获取单个拍品
     */
   getAuction(id) {
-    return doGet(this.CONFIG.auctionCtx + '/auction/' + id);
+    return doGet(this.CONFIG.auctionCtx + '/auction/' + id + '?type=auctiondetail&stat=1');
   },
 
    /**
@@ -502,5 +502,19 @@ export default {
     */
   getBidPrices(params) {
     return doGet(this.CONFIG.auctionCtx + '/auctionProductPriceRecordList', params);
+  },
+
+  /**
+   * 查询文章详情
+   */
+  getArticleDetail(id) {
+    return doGet(this.CONFIG.cmsCtx + '/article/' + id);
+  },
+
+  /**
+   * 获取文章列表
+   */
+  getArticles(params) {
+    return doGet(this.CONFIG.cmsCtx + '/article/list', params);
   }
 };

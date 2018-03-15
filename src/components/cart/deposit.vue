@@ -212,8 +212,9 @@
       .btn-list
         position: relative
         display: flex
-        margin-top: 7px
+        margin-top: 5px
         padding-left: 4px
+        padding-right: 3px
         box-sizing: border-box
         span
           flex: 1
@@ -221,19 +222,19 @@
           line-height: 26px
           margin-right: 10px
           text-align: center
-          font-size: 13px
+          font-size: 12px
           color: #fff
           border-radius: 2px
           &:last-child
             margin-right: 0
           &.btn-green
             background: #fff
-            color: #4bb336
+            color: #66c153
             border: 1px solid #4bb336
           &.on
             background: #b3e2b5
             color: #fff
-            border: none
+            border: 1px solid #b3e2b5
       .wallet-content
         padding: 10px
         color: #666
@@ -263,13 +264,14 @@
             transform: translate(0, -50%)
             color: #828282
           .input-amount
-            padding: 5px 0 2px
+            padding: 4px 0 0
             border: 0 none
             font-size: 14px
             width: 100%
             vertical-align: top
-            border-bottom: 1px solid #b5b5b5
+            border-bottom: 1px solid #ccc
             color: #828282
+            margin-right: 3px
             box-sizing: border-box
         .btns
           font-size: 14px

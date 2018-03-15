@@ -135,7 +135,18 @@
             font-size: 20px
             &.min
               margin-top: 2px
-              font-size: 18px
+            &.icon-home
+              margin-top: 2px
+            &.icon-classify
+              margin-top: 3px
+              padding-bottom: 2px
+            &.icon-cart
+              margin-top: 2px
+              font-size: 22px
+              padding-bottom: 1px
+            &.icon-user2
+              margin-top: 1px
+              padding-bottom: 4px
           .text
             display: block
             line-height: 1

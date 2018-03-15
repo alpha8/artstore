@@ -1,9 +1,9 @@
 <template>
-  <div class="title" :class="{'no-more': !moreText}">
+  <div class="title" :class="{'no-more': !moreText}" @click.stop.prevent="getMore">
     <div class="line left"></div>
     <div class="text">{{title}}</div>
     <div class="line right"></div>
-    <div class="more" @click.stop.prevent="fetchMore">{{moreText}}</div>
+    <div class="more">{{moreText}}</div>
   </div>
 </template>
 
@@ -16,25 +16,12 @@
       moreText: {
         type: String
       },
-      catName: {
-        type: String
-      },
-      catKey: {
-        type: String
-      },
-      price: {
-        type: String,
+      getMore: {
+        type: Function,
         default() {
-          return '';
-        }
-      }
-    },
-    methods: {
-      fetchMore() {
-        if (this.price) {
-          this.$router.push({path: '/search', query: {parentCat: this.catKey, key: this.catName, price: this.price}});
-        } else {
-          this.$router.push({path: '/search', query: {parentCat: this.catKey, key: this.catName}});
+          return function() {
+            console.log('no-action');
+          };
         }
       }
     }

@@ -11,14 +11,22 @@
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
                   <div class="extra-wrap">
-                    <div class="price-wrap" @click.stop.prevent="showDetail(item)">
-                      <span class="state disabled" v-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{stateDesc(item.auction_product_state_id)}}</span>
-                      <span class="state" v-else>{{stateDesc(item.auction_product_state_id)}}</span>
+                    <div class="price-wrap">
+                      <div class="countdowntips" v-if="item.leftStartTimes" v-html="countdownTips(item.countdownStats, true)"></div>
+                      <div class="countdowntips" v-else-if="item.leftEndTimes" v-html="countdownTips(item.countdownStats)"></div>
+                      <div class="countdowntips" v-else>&nbsp;</div>
+                      <div class="price">
+                        <span>&nbsp;</span>
+                      </div>
                     </div>
                     <div class="more-ops">
+                      <span class="btn-buy disabled" v-if="item.leftEndTimes <= 0 || item.auction_product_state_id === 3 || item.auction_product_state_id === 4" @click.stop.prevent="showDetail(item)">{{stateDesc(item.auction_product_state_id)}}</span>
+                      <span class="btn-buy darkred" v-else @click.stop.prevent="showDetail(item)">{{stateDesc(item.auction_product_state_id)}}</span>
                       <span class="btn-buy blue" v-if="item.auction_product_state_id === 0" @click.stop.prevent="killNotify(item)">拍卖提醒</span>
-                      <span class="pricing" v-else-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{item.countAppr}}次出价</span>
-                      <span class="pricing" v-else><i>{{item.countAppr}}</i>次出价</span>
+                      <span class="items-reserve">
+                        <span class="pricing" v-if="item.auction_product_state_id === 3 || item.auction_product_state_id === 4">{{item.countAppr}}次出价</span>
+                        <span class="pricing" v-else-if="item.auction_product_state_id !== 0"><i>{{item.countAppr}}</i>次出价</span>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -38,7 +46,7 @@
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
-  import {formatDate} from '@/common/js/date';
+  import {formatDate, countdown} from '@/common/js/date';
   import api from '@/api/api';
 
   export default {
@@ -65,9 +73,11 @@
     },
     activated() {
       this.fetchData(true);
+      this.timerLoop();
       this.show();
     },
     deactivated() {
+      this.stopTimer();
       this._reset();
       this.hide();
     },
@@ -143,6 +153,56 @@
         }).catch(response => {
           this.$store.dispatch('openToast', '网络太忙了，请稍候再来吧！');
         });
+      },
+      timerLoop() {
+        for (let i = 0; i < this.auctions.length; i++) {
+          let auction = this.auctions[i];
+          if (auction.leftStartTimes) {
+            auction.leftStartTimes--;
+          }
+          if (auction.leftEndTimes) {
+            auction.leftEndTimes--;
+          }
+          if (auction.leftStartTimes) {
+            auction.countdownStats = countdown(auction.leftStartTimes);
+          } else {
+            auction.countdownStats = countdown(auction.leftEndTimes);
+          }
+        }
+        this.timer = setTimeout(this.timerLoop, 1000);
+      },
+      stopTimer() {
+        if (this.timer) {
+          clearTimeout(this.timer);
+        }
+      },
+      countdownTips(stats, start) {
+        if (!stats) {
+          return '&nbsp;';
+        }
+        let count = 0;
+        let maxcount = 2;
+        let text = '';
+        if (stats.days) {
+          text += stats.days + '天';
+          count++;
+        }
+        if (count < maxcount && stats.hours && stats.hours !== '00') {
+          text += stats.hours + '小时';
+          count++;
+        }
+        if (count < maxcount && stats.mins) {
+          text += stats.mins + '分';
+          count++;
+        }
+        if (count < maxcount && stats.seconds) {
+          text += stats.seconds + '秒';
+          count++;
+        }
+        if (text) {
+          return start ? `距开抢：${text}` : `距结束：${text}`;
+        }
+        return '&nbsp;';
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -251,13 +311,10 @@
                 flex: 1
                 position: relative
                 color: #333
-                box-sizing: border-box
+                font-size: 14px
                 >.title
                   position: relative
                   padding-top: 5px
-                  font-size: 14px
-                  height: 32px
-                  line-height: 16px
                   overflow: hidden
                   text-overflow: ellipsis
                   display: -webkit-box
@@ -267,41 +324,36 @@
                   position: absolute
                   display: flex
                   width: 100%
-                  bottom: 10px
+                  bottom: 2px
                 .price-wrap
                   position: relative
-                  flex: 1
-                  height: 25px
-                  padding-right: 3px
-                  box-sizing: border-box
-                  .state
+                  display: block
+                  float: left
+                  width: auto
+                  line-height: 1.3
+                  .countdowntips
+                    margin-top: 5px
+                    font-size: 12px
+                    color: #999
+                  span
                     display: inline-block
-                    height: 25px
-                    width: auto
-                    line-height: 25px
-                    vertical-align: middle
-                    text-align: center
-                    color: #fff
-                    border-radius: 2px
-                    font-size: 11px
-                    padding: 0 8px
-                    letter-spacing: 0.5px
-                    box-sizing: border-box
-                    background-color: #f15353
-                    &.orange
-                      background: rgba(250,180,90,0.93)
-                    &.disabled
-                      background: #999
+                    padding-top: 3px
+                    color: #e4393c
+                    font-size: 14px
+                    font-weight: 700
+                  del
+                    display: inline-block
+                    color: #999
+                    font-size: 12px
                 .more-ops
                   position: relative
                   display: block
-                  float: right
-                  width: auto
+                  flex: 1
                   text-align: right
                   .btn-buy
                     position: relative
                     display: inline-block
-                    padding: 0 10px
+                    padding: 0 6px
                     height: 25px
                     line-height: 25px
                     text-align: center
@@ -309,72 +361,72 @@
                     background: #e4393c
                     color: #fff
                     border-radius: 2px
+                    min-width: 56px
+                    box-sizing: border-box
                     &.disabled
                       background: #999
                     &.orange
                       background: rgba(250,180,90,0.93)
                       color: #fff
-                    &.green
-                      background: #44b549
-                      color: #fff
                     &.blue
                       background: #00a0dc
+                      color: #fff
+                    &.green
+                      background: #44b549
                       color: #fff
                     &.darkred
                       background: #d05148
                       color: #fff
-                  .pricing
-                    position: relative
-                    display: inline-block
-                    width: 80px
-                    height: 25px
-                    line-height: 25px
-                    text-align: right
-                    font-size: 12px
-                    color: #a9a9a9
-                    i
-                      color: #f15353                      
                   .items-reserve
                     display: block
-                    position: absolute
-                    right: 0
-                    bottom: 0
-                    width: 150px
+                    position: relative
+                    padding-top: 3px
                     text-align: right
-                    margin-left: 5px
                     font-size: 12px
                     color: #999
+                    strong
+                      font-weight: 400
+                      font-size: 11px
                     .progress-bar
                       position: relative
                       display: inline-block
                       margin-top: -2px
-                      margin-left: 5px
-                      width: 80px
+                      margin-left: 1px
+                      width: 56px
                       height: 6px
                       vertical-align: middle
-                      backgrouns-size: 2px 2px
+                      background-size: 2px 2px
                       border-radius: 12px
                       overflow: hidden
                       &::after
                         position: absolute
                         content: ''
                         z-index: 1
-                        background-color: #ec7476
+                        background-color: #b9b8b8
                         background: none
-                        border: 1px solid #ddd
+                        border: 1px solid #999
                         top: 0
                         left: 0
                         right: -100%
                         bottom: -100%
                         border-radius: 12px
-                        border-color: #ec7476
+                        border-color: #999
                         -webkit-transform: scale(.5)
                         -webkit-transform-origin: 0 0
                         pointer-events: none
                       em
                         display: block
                         height: 6px
-                        background-color: #ec7376
+                        background-color: #b9b8b8
+                  .pricing
+                    position: relative
+                    display: inline-block
+                    width: auto
+                    text-align: right
+                    font-size: 11px
+                    color: #a9a9a9
+                    i
+                      color: #f15353
       .no-order
         width: 100%
         padding: 40px 0
