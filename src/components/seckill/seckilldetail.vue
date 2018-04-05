@@ -907,7 +907,7 @@
           vertical-align: bottom
     .info
       position: relative
-      margin-bottom: 10px
+      margin-bottom: 5px
       .title
         padding: 10px 18px 10px 14px
         line-height: 14px

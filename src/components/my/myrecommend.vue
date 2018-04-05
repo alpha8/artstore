@@ -77,6 +77,7 @@
         } else {
           params.publishId = user.userId || -1;
         }
+        params.model = model;
         api.getCouponList(params).then(response => {
           if (response.result === 0) {
             if (response.qrCodes && response.qrCodes.length) {

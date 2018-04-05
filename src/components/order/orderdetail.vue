@@ -48,9 +48,10 @@
         <split></split>
         <div class="price-summary">
           <ul>
-            <li>商品总额<span class="text-red">{{order.totalFee + (order.couponFee || 0) + (order.discount || 0) | currency}}</span></li>
+            <li>商品总额<span class="text-red">{{totalPrice | currency}}</span></li>
             <li>运费<span class="text-red">+ {{order.shipFee || 0 | currency}}</span></li>
             <li>优惠券<span class="text-red">- {{order.couponFee || 0 | currency}}</span></li>
+            <li>折扣券<span class="text-red">- {{discountFee | currency}}</span></li>
             <li>商家折扣<span class="text-red">- {{order.discount || 0 | currency}}</span></li>
           </ul>
           <p class="total">
@@ -138,6 +139,25 @@
         let status = this.order.status;
         let canShowStatus = [0, 1, 2, 5];
         return canShowStatus.filter(o => o === status).length;
+      },
+      totalPrice() {
+        if (this.order && this.order.type === 6) {
+          return this.order.totalFee;
+        }
+        let products = (this.order && this.order.products) || [];
+        let total = 0;
+        products.forEach(o => {
+          total += (o.price * o.count);
+        });
+        return total;
+      },
+      discountFee() {
+        let coupons = this.order && this.order.coupons || [];
+        let total = 0;
+        coupons.forEach(o => {
+          total += (o.percentFee || 0);
+        });
+        return total;
       }
     },
     filters: {
@@ -234,7 +254,8 @@
           totalFee: this.order.totalFee || 0,
           openid: userInfo.openid,
           orderNo: this.order.orderNo,
-          body: this.order.title || this.order.products[0].name
+          body: this.order.title || this.order.products[0].name,
+          orderId: this.order.id
         };
         api.wxpay(payParams).then((response) => {
           this.paying = false;

@@ -177,6 +177,7 @@
       },
       changeTab(item) {
         this.activeItem = item.val;
+        this.$router.replace({name: 'order', query: {type: item.val}});
         this._reset();
         this.fetchData(true);
       },
@@ -231,7 +232,8 @@
           totalFee: order.totalFee || 0,
           openid: userInfo.openid,
           orderNo: order.orderNo,
-          body: order.title || order.products[0].name
+          body: order.title || order.products[0].name,
+          orderId: order.id
         };
         api.wxpay(payParams).then((response) => {
           this.paying = false;

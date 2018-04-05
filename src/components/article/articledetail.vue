@@ -5,16 +5,15 @@
       <div class="article article-hook">
         <h1 class="article-title">{{article.title}}</h1>
         <div class="article-meta">
-          <span class="time">{{article.postTime | formatDate}}</span>
+          <span class="time">{{article.postTime}}</span>
           <span class="catname" @click.stop.prevent="showCategory(article)">{{article.categoryName}}</span>
           <span class="author">{{article.author}}</span>
         </div>
         <div class="article-content" v-html="article.content" ref="articleContent"></div>
         <div class="article-footer">
-          <div class="source" v-html="article.source"></div>
-          <span class="pv" v-if="false">阅读 {{article.pv}}</span>
+          <span class="pv">[ 阅读: {{article.pv}} ]</span>
         </div>
-        <split></split>
+        <split v-show="article.relates && article.relates.length"></split>
         <modal-title :title="article.relateTile || '猜你喜欢'" moreText="更多" catKey="" catName="" v-show="article.relates && article.relates.length"></modal-title>
         <channel :items="article.relates" :cols="2" v-show="article.relates && article.relates.length"></channel>
         <split v-if="showFollow"></split>
@@ -35,7 +34,7 @@
   import channel from '@/components/channel/channel';
   import gotop from '@/components/fixedtoolbar/gotop';
   import split from '@/components/split/split';
-  import {formatDate} from '@/common/js/date';
+  // import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   export default {
@@ -145,7 +144,7 @@
           icon = api.CONFIG.psCtx + this.article.wxSharePic + '?w=423&h=423';
         }
         let shareData = {
-          title: this.article.title,
+          title: '[一虎一席] ' + this.article.title,
           desc: this.article.summary,
           link: redirect,
           imgUrl: icon,
@@ -186,7 +185,7 @@
               src += '?1';
             }
             src = src + '&w=750';
-            html = html.replace(key, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"').replace(key2, 'img src="' + src + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"');
+            html = html.replace(key, 'img src="' + src + '" width="' + w + '" style="margin-left: -8px; margin-bottom: 3px;"').replace(key2, 'img src="' + src + '" width="' + w + '" style="margin-left: -8px; margin-bottom: 3px;"');
             if (width && width > 100) {
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             } else if (width === null) {
@@ -216,7 +215,7 @@
         });
       },
       showCategory(article) {
-        this.$router.push({name: 'articles', query: {cid: article.categoryId}});
+        this.$router.push({name: 'articles'});
       },
       goTop() {
         let hook = this.$refs.article.getElementsByClassName('article-hook')[0];
@@ -228,6 +227,12 @@
       },
       hide() {
         this.$store.commit('SHOW_FOOTER');
+      },
+      previewQrcode() {
+        wx.previewImage({
+          current: this.wxqrcode,
+          urls: [this.wxqrcode]
+        });
       }
     },
     components: {
@@ -235,8 +240,10 @@
     },
     filters: {
       formatDate(time) {
-        let date = new Date(time);
-        return formatDate(date, 'yyyy-MM-dd');
+        if (time && time.length > 11) {
+          time = time.substring(0, 10);
+        }
+        return time;
       }
     }
   };
@@ -257,9 +264,9 @@
     padding: 10px 0
     box-sizing: border-box
     .article-title
-      padding: 0 8px 5px
-      line-height: 1.4
-      font-size: 24px
+      padding: 0 8px 2px
+      line-height: 1.3
+      font-size: 20px
       font-weight: 700
       color: #07111b
       overflow: hidden
@@ -271,29 +278,27 @@
       padding: 0 8px 10px
       height: 24px
       line-height: 24px
-      font-size: 14px
+      font-size: 15px
       color: #999
       span
         display: inline-block
         vertical-align: middle
-        padding-right: 15px
+        padding-right: 8px
         &:last-child
           padding-right: 0
         &.catname
-          color: #4395F5
+          color: #4f7eaa
     .article-footer
-      padding: 0 8px
+      padding: 0 8px 8px
       font-size: 14px
-      color: #4d555d
-      margin-bottom: 10px
+      color: #999
       .source
         line-height: 1.3
     .article-content
       padding: 0 8px
-      font-size: 14px
+      font-size: 16px
       color: #4d555d
-      line-height: 1.3
-      padding-bottom: 15px
+      line-height: 1.45
       box-sizing: border-box
       overflow-x: hidden
     .wx_follow

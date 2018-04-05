@@ -10,7 +10,7 @@
             </div>
             <div class="line">
               <div class="userName" v-show="!hasLogin()"><a :href="getLoginUrl()">点击登录</a></div>
-              <div class="userName" v-show="hasLogin()"><span class="svip" :class="getSVipIcon" v-if="userExt.spreadLevel"></span>{{user().nickName}}<span class="supplier" v-if="userExt.model === 2">(代理商)</span></div>
+              <div class="userName" v-show="hasLogin()"><span class="svip" :class="getSVipIcon" v-if="userExt.spreadLevel"></span>{{user().nickName}}<span class="supplier" v-if="userExt.model === 2">(代理商)</span><span class="supplier" v-else-if="userExt.model === 0">(系统用户)</span></div>
               <div class="info" v-show="hasLogin()"><span class="vip" :class="getVipIcon">{{getVipTitle}}</span></div>
             </div>
             <span class="setting" v-show="hasLogin()"><router-link to="/personInfo"><img src="../../common/images/settings.png"/><span>账号管理</span></router-link></span>
@@ -64,6 +64,11 @@
       <div class="other-wrapper">
         <div class="title border-1px">其他</div>
         <div class="otherList">
+          <router-link to="/coupon/new" class="item border-1px" v-show="userExt.model === 0">
+            <i class="icon-coupon"></i>
+            <span class="text">创建优惠券</span>
+            <span class="more"><i class="icon-keyboard_arrow_right"></i></span>
+          </router-link>
           <router-link :to="item.link" class="item border-1px" v-for="(item, index) in others" key="index" :class="{'highlight': item.highlight}">
             <i :class="item.icon"></i>
             <span class="text" v-show="!item.callable">{{item.text}}</span>
@@ -174,7 +179,11 @@
       }),
       refreshData() {
         let user = this.$store.getters.getUserInfo;
-        api.getUserProfile(user.userId || 0).then(response => {
+        api.getProfile({
+          userId: user.userId || 0,
+          type: 'usercenter',
+          stat: 1
+        }).then(response => {
           if (response.result === 0) {
             this.$store.dispatch('updateUserProfile', response);
             if (this.wallet.length >= 3) {

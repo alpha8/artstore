@@ -1,6 +1,6 @@
 <template>
   <div>
-    <fixedheader title="博览集萃" right-icon="icon-more"></fixedheader>
+    <fixedheader title="博览集萃 (茶.书画.美学)" right-icon="icon-more"></fixedheader>
     <div class="article-wrap" ref="articleList" v-show="articles.length">
       <ul class="article-list">
         <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="article-list">
@@ -30,7 +30,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
   import articlelist from '@/components/article/articlelist';
-  import {formatDate} from '@/common/js/util';
+  // import {formatDate} from '@/common/js/util';
   export default {
     data() {
       return {
@@ -128,7 +128,10 @@
     filters: {
       formatDate(time) {
         if (time) {
-          return formatDate(time);
+          if (time.length > 11) {
+            time = time.substring(0, 10);
+          }
+          return time;
         }
         return '';
       }
@@ -185,7 +188,7 @@
         flex: 1
         .title
           position: relative
-          padding-top: 3px
+          padding-top: 5px
           font-size: 14px
           height: 48px
           line-height: 16px

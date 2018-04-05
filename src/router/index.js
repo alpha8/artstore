@@ -27,6 +27,8 @@ import bidlist from '@/components/auction/bidlist';
 import coupon from '@/components/coupon/coupon';
 import getcoupon from '@/components/coupon/getcoupon2';
 import couponhistory from '@/components/coupon/coupon-history';
+import newcoupon from '@/components/coupon/newcoupon';
+import usecoupon from '@/components/coupon/usecoupon';
 import footprint from '@/components/footprint/footprint';
 import follow from '@/components/follow/follow';
 import personInfo from '@/components/my/personInfo';
@@ -46,6 +48,8 @@ import bindphone from '@/components/my/bindphone';
 import deposit from '@/components/cart/deposit';
 import articles from '@/components/article/articles';
 import articledetail from '@/components/article/articledetail';
+import stat from '@/components/stats/stat';
+import uvdetail from '@/components/stats/uv_detail';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -68,7 +72,7 @@ export default new Router({
     {path: '/address', component: addressList, name: 'addresslist'},
     {path: '/address/add', component: addAddress, name: 'addaddress'},
     {path: '/address/:id/edit', component: editAddress, name: 'address'},
-    {path: '/order', component: order},
+    {path: '/order', component: order, name: 'order'},
     {path: '/order/:id', component: orderdetail, name: 'orderdetail'},
     {path: '/order/refund/:id', component: refund, name: 'refund'},
     {path: '/order/express/:expressCode/:expressNo', component: expresslog, name: 'expresslog'},
@@ -81,6 +85,8 @@ export default new Router({
     {path: '/coupon', component: coupon, name: 'coupon'},
     {path: '/getcoupon', component: getcoupon, name: 'getcoupon'},
     {path: '/coupon/history', component: couponhistory, name: 'couponHistory'},
+    {path: '/coupon/new', component: newcoupon, name: 'newcoupon'},
+    {path: '/discount/ticket', component: usecoupon, name: 'usecoupon'},
     {path: '/footprint', component: footprint, name: 'footprint'},
     {path: '/follow', component: follow, name: 'follow'},
     {path: '/seckill', component: seckill, name: 'seckill'},
@@ -100,6 +106,8 @@ export default new Router({
     {path: '/bindphone', component: bindphone, name: 'bindphone'},
     {path: '/articles', component: articles, name: 'articles'},
     {path: '/article/:id', component: articledetail, name: 'articledetail'},
+    {path: '/stat', component: stat, name: 'stat'},
+    {path: '/uvdetail', component: uvdetail, name: 'uvdetail'},
     {path: '/my', component: my}
   ]
   // ,scrollBehavior (to, from, savedPosition) {

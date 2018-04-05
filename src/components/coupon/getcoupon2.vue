@@ -72,20 +72,20 @@
     },
     deactivated() {
       this.hide();
-      let msgDom = document.getElementsByClassName('msgBox');
-      let maskDom = document.getElementsByClassName('msgBox-mask');
-      if (msgDom && maskDom) {
-        msgDom[0].style.display = 'block';
-        maskDom[0].style.display = 'block';
-      }
+      // let msgDom = document.getElementsByClassName('msgBox');
+      // let maskDom = document.getElementsByClassName('msgBox-mask');
+      // if (msgDom && maskDom) {
+      //   msgDom[0].style.display = 'block';
+      //   maskDom[0].style.display = 'block';
+      // }
     },
     mounted() {
-      let msgDom = document.getElementsByClassName('msgBox');
-      let maskDom = document.getElementsByClassName('msgBox-mask');
-      if (msgDom && maskDom) {
-        msgDom[0].style.display = 'none';
-        maskDom[0].style.display = 'none';
-      }
+      // let msgDom = document.getElementsByClassName('msgBox');
+      // let maskDom = document.getElementsByClassName('msgBox-mask');
+      // if (msgDom && maskDom) {
+      //   msgDom[0].style.display = 'none';
+      //   maskDom[0].style.display = 'none';
+      // }
     },
     methods: {
       _initScroll() {
@@ -142,7 +142,8 @@
         api.receiveQrcode({
           qrid: this.qrcode.id,
           openid: this.openid,
-          provideId: publishid
+          provideId: publishid,
+          type: this.qrcode.type
         }).then(response => {
           if (response.result === 0) {
             this.layer.text = '优惠券领取成功，您可前往一虎一席商城「个人中心 — 优惠券余额」中查看明细';

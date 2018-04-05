@@ -60,7 +60,7 @@
           </div>
         </div>
         <split v-if="good.videoUrl"></split>
-        <div class="info" v-show="good.content">
+        <div class="intro" v-show="good.content">
           <h1 class="title">商品介绍<span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span></h1>
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
@@ -870,7 +870,7 @@
           position: relative
           display: inline-block
           vertical-align: bottom
-    .info
+    .info, .intro
       position: relative
       margin-bottom: 10px
       .title
@@ -936,6 +936,8 @@
           font-size: 12px
           &:first-child
             width: 80px
+    .intro
+      margin-bottom: 5px
     .row
       position: relative
       display: flex

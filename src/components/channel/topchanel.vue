@@ -85,7 +85,7 @@
       position: relative
       display: flex
       flex-wrap: wrap
-      height: 135px
+      height: 129px
       overflow: hidden
       &.more
         height: auto
@@ -119,6 +119,6 @@
             color: #666
             text-align: center
             line-height: 1.2
-            margin-top: 4px
+            margin-top: 1px
             font-weight: 400
 </style>

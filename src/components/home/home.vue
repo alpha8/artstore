@@ -39,7 +39,7 @@
         <modal-title title="茶室空间雅物" moreText="更多" catKey="graceful" catName="茶室空间雅物"></modal-title>
         <channel :items="ya" :cols="2"></channel>
         <split v-show="articles && articles.length"></split>
-        <section-title title='博览集萃' v-show="articles && articles.length" moreText="更多" :getMore="getMoreArticles"></section-title>
+        <section-title title='博览集萃 (茶.书画.美学)' v-show="articles && articles.length" moreText="更多" :getMore="getMoreArticles"></section-title>
         <articlelist :articles="articles" v-show="articles && articles.length"></articlelist>
         <split></split>
         <modal-title title='关于 "一虎一席"'></modal-title>
@@ -49,6 +49,11 @@
             </video>
           </div>
           <div class="slogan">一虎一席东方生活美学雅集《春风十里》</div>
+        </div>
+        <split v-if="showFollow"></split>
+        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <div v-if="showFollow" class="wx_follow">
+          <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
       </div>
     </div>
@@ -128,6 +133,10 @@
           url: '/auction',
           icon: 'icon-auction',
           css: 'nobottom'
+        }, {
+          name: '文 章',
+          url: '/articles',
+          icon: 'icon-file'
         }],
         swiperSlides: [
           'http://www.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=500',
@@ -141,7 +150,9 @@
         videos: {
           'vip': 'http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5db404564972818869478317/v.f20.mp4',
           'spring': 'http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5d37d4564972818869478170/v.f20.mp4'
-        }
+        },
+        showFollow: false,
+        wxqrcode: api.CONFIG.wxqrcode
       };
     },
     created() {
@@ -153,7 +164,9 @@
         currentPage: 1,
         pageSize: 30,
         commodityStatesId: 2,
-        scoreSort: true
+        scoreSort: true,
+        type: 'home',
+        stat: 1
       }).then((response) => {
         this.arts = response.artworks;
       });
@@ -234,6 +247,7 @@
       }).then(response => {
         this.articles = response.articles;
       });
+      this.getWXFollow();
     },
     mounted() {
       this._initScroll();
@@ -316,6 +330,26 @@
           wx.onMenuShareTimeline(shareData);
           wx.onMenuShareAppMessage(shareData);
         });
+      },
+      getWXFollow() {
+        let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
+          this.showFollow = true;
+          return;
+        }
+        api.getUserProfile(user.userId || 0).then(response => {
+          if (response.result === 0 && response.user) {
+            this.showFollow = (response.user.follow === 0 || response.user.follow === 2);
+          }
+        }).catch(response => {
+          console.error(response);
+        });
+      },
+      previewQrcode() {
+        wx.previewImage({
+          current: this.wxqrcode,
+          urls: [this.wxqrcode]
+        });
       }
     },
     components: {
@@ -361,11 +395,20 @@
         -webkit-box-orient: vertical
         text-overflow: ellipsis
         overflow: hidden
-      .vipmovie
-        padding-bottom: 10px
+      .vipmovie, .aboutus
+        padding-bottom: 8px
     .swipe-wrapper
       position: relative
       width: 100%
       height: auto
       margin: 0 auto
+  .wx_follow
+    position: relative
+    width: 100%
+    height: auto
+    overflow: hidden
+    img
+      position: relative
+      width: 100%
+      height: auto
 </style>

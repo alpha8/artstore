@@ -6,7 +6,7 @@
         <div class="invitation-heading" v-if="qrcode.gridfsids">
           <p class="balance-name">分享二维码</p>
           <p class="balance-num">
-            <img v-show="icon" :src="getQrcodeSrc" width="260" height="260" border="0" class="qrcodeIcon" />
+            <img v-show="icon" :src="getQrcodeSrc" width="260" height="260" border="0" class="qrcodeIcon" @click.stop.prevent="previewQrcode" />
           </p>
           <div class="tips" v-if="qrcode.provideTotal - qrcode.receiveTotal <= 10">优惠券可领张数不足，仅有{{qrcode.provideTotal - qrcode.receiveTotal}}张，请联系管理员充值</div>
         </div>
@@ -21,7 +21,8 @@
               </tr>
               <tr v-for="(coupon, index) in coupons" :key="index">
                 <td>{{coupon.userId}}</td>
-                <td>{{coupon.payValue | currency}}</td>
+                <td v-if="coupon.type === 0">{{coupon.payValue | currency}}</td>
+                <td v-else>{{coupon.payValue * 10}}折</td>
                 <td>{{coupon.createAt | formatDate}}</td>
               </tr>
             </table>
@@ -62,6 +63,7 @@
   import split from '@/components/split/split';
   import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
+  import wx from 'weixin-js-sdk';
 
   export default {
     data() {
@@ -175,6 +177,12 @@
           }
         });
       },
+      previewQrcode() {
+        wx.previewImage({
+          current: this.icon,
+          urls: [this.icon]
+        });
+      },
       _reset() {
         this.coupons = [];
         this.pageNumber = 1;
@@ -252,12 +260,14 @@
           font-size: 14px
           font-weight: 700
           color: hsla(0,0%,100%,.7)
+          text-align: center
           vertical-align: baseline
         .balance-num
           line-height:1
           padding-top: 15px
           text-align: center
         .tips
+          padding-top: 5px
           font-weight: 700
           color: hsla(0,0%,100%,.7)
           text-align: center

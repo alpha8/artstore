@@ -8,7 +8,8 @@
             <mu-flexbox-item basis="100%" class="coupon-item border-1px" v-for="(coupon, index) in coupons" :key="index">
               <div class="title" :class="{'expired': coupon.status !== 0}">
                 <div class="box">
-                  <p class="money">¥<span class="num">{{coupon.payValue}}</span></p>
+                  <p class="money" v-if="coupon.type === 0">¥<span class="num">{{coupon.payValue}}</span></p>
+                  <p class="money" v-else>{{coupon.payValue * 10}}折</span></p>
                   <p class="message">{{getCouponType(coupon.type)}}</p>
                 </div>
                 <i class="tag"><span class="text">{{getCouponStatus(coupon.status)}}</span></i>
@@ -47,7 +48,7 @@
     data() {
       return {
         coupons: [],
-        couponTypes: ['现金券', '满额减'],
+        couponTypes: ['现金券', '折扣券'],
         couponStates: ['未使用', '已使用', '已过期'],
         pageNumber: 1,
         pageSize: 50,

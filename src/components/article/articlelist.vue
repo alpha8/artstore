@@ -18,7 +18,7 @@
 
 <script type="text/ecmascript-6">
   import api from '@/api/api';
-  import {formatDate} from '@/common/js/util';
+  // import {formatDate} from '@/common/js/util';
   export default {
     props: {
       articles: {
@@ -40,7 +40,13 @@
     },
     filters: {
       formatDate(time) {
-        return formatDate(time);
+        if (time) {
+          if (time.length > 11) {
+            time = time.substring(0, 10);
+          }
+          return time;
+        }
+        return '';
       }
     }
   };
@@ -71,7 +77,7 @@
         flex: 1
         .title
           position: relative
-          padding-top: 3px
+          padding-top: 5px
           font-size: 14px
           height: 48px
           line-height: 16px

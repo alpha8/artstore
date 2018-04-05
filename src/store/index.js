@@ -14,8 +14,9 @@ const USER_PROFILE = 'userProfile';
 const PAY_REMARK = 'remark';
 const KILL_PRODUCT = 'killProducts';
 const SEARCH_HISTORY = 'searchhistory';
+const USED_DISCOUNT = 'USED_DISCOUNT';
 const HISTORY_SIZE = 10;
-const DEFAULT_USER = '{}';
+const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
 
 // states
 export const state = {
@@ -34,7 +35,8 @@ export const state = {
   userAmount: load(USER_AMOUNT, 0),     // 用户账户余额
   payRemark: load(PAY_REMARK, '工作日收货'),
   killProducts: load(KILL_PRODUCT, []),  // 已参与的秒杀列表
-  searchHistory: load(SEARCH_HISTORY, [])
+  searchHistory: load(SEARCH_HISTORY, []),
+  usedDiscount: load(USED_DISCOUNT, [])   // 已使用的折扣券
 };
 
 // getters
@@ -66,7 +68,8 @@ export const getters = {
   getUserProfile: state => state.userProfile,
   getPayRemark: state => state.payRemark,
   getKilledProduct: state => state.killProducts,
-  loadSearchHistory: state => state.searchHistory
+  loadSearchHistory: state => state.searchHistory,
+  loadUsedDiscount: state => state.usedDiscount
 };
 
 // actions
@@ -161,6 +164,12 @@ export const actions = {
   },
   clearSearchHistory(context) {
     context.commit(types.CLEAN_SEARCH_HISTORY);
+  },
+  addUsedDiscount(context, discount) {
+    context.commit(types.ADD_USED_DISCOUNT, discount);
+  },
+  cleanUsedDiscount(context) {
+    context.commit(types.CLEAN_USED_DISCOUNT);
   }
 };
 
@@ -350,6 +359,14 @@ export const mutations = {
     }
     state.killProducts = killList;
     save(KILL_PRODUCT, killList);
+  },
+  [types.ADD_USED_DISCOUNT] (state, list) {
+    state.usedDiscount = list;
+    save(USED_DISCOUNT, state.usedDiscount);
+  },
+  [types.CLEAN_USED_DISCOUNT] (state) {
+    state.usedDiscount = [];
+    save(USED_DISCOUNT, state.usedDiscount);
   }
 };
 

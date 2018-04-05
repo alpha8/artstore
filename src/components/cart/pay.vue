@@ -33,6 +33,11 @@
           </li>
         </ul>
         <ul class="shop-info">
+          <li class="discount change" @click.stop.prevent="selectCoupon">
+            <strong>折扣券：</strong>
+            <span v-if="availCoupons.length">{{usedDiscount}}</span>
+            <span v-else class="disabled">无可用</span>
+          </li>
           <li>
             <strong>现场自提：</strong>
             <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span>已自提</span>
@@ -66,9 +71,13 @@
             <span class="label">优惠券抵扣：</span>
             <span class="totalPrice">{{couponValue | currency}}</span>
           </p>
+          <p class="price" v-show="discount">
+            <span class="label">折扣券抵扣：</span>
+            <span class="totalPrice">{{discount | currency}}</span>
+          </p>
           <p class="price">
             <span class="label">应付金额：</span>
-            <span class="totalPrice"><strong>{{totalFee - couponValue | currency}}</strong></span>
+            <span class="totalPrice"><strong>{{totalFee - couponValue - discount | currency}}</strong></span>
           </p>
           <div class="payBtnList">
             <div class="btns btn-green" @click.stop.prevent="weixinPay"><span>微信支付</span></div>
@@ -96,6 +105,7 @@
   import split from '@/components/split/split';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import addressList from '@/components/my/addressList';
+  import usecoupon from '@/components/coupon/usecoupon';
   import api from '@/api/api';
   import {pay} from '@/common/js/pay';
   import {countdown} from '@/common/js/date';
@@ -111,7 +121,10 @@
         timer: null,
         seckill: {},
         couponValue: 0,
-        selfservice: false
+        selfservice: false,
+        coupons: [],
+        discount: 0,
+        discountTickets: []
       };
     },
     computed: {
@@ -124,6 +137,21 @@
       payRemarks() {
         this.remarks = this.$store.getters.getPayRemark;
         return this.remarks;
+      },
+      usedDiscount() {
+        let discounts = this.$store.getters.loadUsedDiscount;
+        if (discounts && discounts.length) {
+          this.discountTickets = discounts;
+          return `已使用${discounts.length}张折扣券`;
+        } else {
+          this.discountTickets = [];
+          return `您有${this.availCoupons.length}张可用折扣券`;
+        }
+      },
+      availCoupons() {
+        return this.coupons && this.coupons.filter(o => {
+          return o.status === 0;
+        });
       }
     },
     activated() {
@@ -146,6 +174,7 @@
       if (this.timer) {
         clearInterval(this.timer);
       }
+      this.discount = 0;
     },
     mounted() {
       this._initScroll();
@@ -199,12 +228,28 @@
           if (response.oldTotalFee) {
             this.totalFee = response.oldTotalFee;
           }
+          this.coupons = response.otherCoupons || [];
+          this._calcDiscount();
         }).catch(response => {
           console.log(response);
         });
       },
+      _calcDiscount() {
+        let user = this.$store.getters.getUserInfo;
+        let coupons = this.$store.getters.loadUsedDiscount;
+        if (coupons && coupons.length) {
+          coupons.forEach(o => {
+            if (o.type === 1 && user.userId === o.userId) {
+              this.discount = (this.totalFee - this.couponValue) * (1 - o.payValue);
+            }
+          });
+        }
+      },
       openRemarkBox() {
         this.$router.push('/pay/remark');
+      },
+      selectCoupon() {
+        this.$router.push('/discount/ticket');
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -251,6 +296,7 @@
               if (response.success) {
                 this.$store.dispatch('openToast', '支付超时，订单已取消');
                 this.$store.dispatch('removeKillProduct', this.seckill.id);
+                this.$store.dispatch('cleanUsedDiscount');
                 setTimeout(() => {
                   this.$router.push('/my');
                 }, 1500);
@@ -286,6 +332,7 @@
           this.$store.dispatch('openToast', '正在支付中...');
           return;
         }
+        this.$store.dispatch('cleanUsedDiscount');
         let params = {
           openid: userInfo.openid,
           userId: userInfo.userId,
@@ -313,6 +360,9 @@
           items.push({'id': product.id, 'count': product.count});
         });
         params.products = items;
+        if (this.discount) {
+          params.coupons = this.discountTickets;
+        }
         this.paying = true;
         api.createOrder(params).then(response => {
           if (response.result !== 0) {
@@ -328,7 +378,8 @@
             totalFee: order.totalFee,
             openid: userInfo.openid,
             orderNo: order.orderNo,
-            body: order.body
+            body: order.body,
+            orderId: order.orderId
           };
           api.wxpay(payParams).then((response) => {
             this.paying = false;
@@ -364,7 +415,7 @@
       }
     },
     components: {
-      split, fixedheader, addressList
+      split, fixedheader, addressList, usecoupon
     }
   };
 </script>
@@ -571,6 +622,11 @@
             background-size: 60px 4px
         >.shop-info > li
           padding-right: 0
+          &.discount > span
+            padding-right: 15px
+            color: #e4393c
+            &.disabled
+              color: #999
         >.payArea
           position: relative
           text-align: left
@@ -613,6 +669,22 @@
        .address-wrap
           max-height: 385px
           overflow: hidden
+      &.move-enter-active, &.move-leave-active
+        transform: translate3d(0, 0, 0)
+        transition: all 0.5s
+      &.move-enter, &.move-leave-active
+        transform: translate3d(0, 100%, 0)
+    .coupon-list-wrap
+      position: absolute
+      left: 0
+      top: auto
+      bottom: 0
+      z-index: 42
+      width: 100%
+      max-height: 395px
+      background: #fff
+      transform: translate3d(0, 0, 0)
+      overflow: hidden
       &.move-enter-active, &.move-leave-active
         transform: translate3d(0, 0, 0)
         transition: all 0.5s
