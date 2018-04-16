@@ -225,7 +225,16 @@
       fetchData() {
         let id = this.$route.params.id;
         this.$store.dispatch('openLoading');
-        api.getSeckillDetail(id).then(res => {
+        let user = this.$store.getters.getUserInfo;
+        let anon = '';
+        if (!user.userId) {
+          anon = this.$store.getters.getAnonymous;
+        }
+        api.getSeckillDetail(id, {
+          type: 'seckilldetail',
+          stat: 1,
+          unlogin: anon
+        }).then(res => {
           if (!res.success) {
             this.$store.dispatch('closeLoading');
             return;

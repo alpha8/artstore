@@ -89,6 +89,7 @@
           return;
         }
         let user = this.$store.getters.getUserInfo;
+        this.loading = true;
         api.getFootprint({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,

@@ -15,6 +15,7 @@
     },
     created() {
       if (!this.$store.getters.checkLogined) {
+        this.$store.dispatch('setAnonymous');
         let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
         if (!ios && !this.isAutoLogin) {
           let redirect = location.href;

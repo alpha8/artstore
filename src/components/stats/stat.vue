@@ -43,14 +43,16 @@
         <h1 class="title" v-if="users.length">访问详情</h1>
         <table class="detail_list" v-if="users.length">
           <tr class="head">
-            <td class="col-2 text-center">ID</td>
-            <td class="col-2">缩略图</td>
+            <td class="col">ID</td>
+            <td class="col-4">缩略图</td>
             <td class="col-2">用户昵称</td>
+            <td class="col-3">点击数</td>
           </tr>
           <tr v-for="(item, idx) in users" key="idx">
-            <td class="col-2 text-center">{{idx + 1}}</td>
-            <td class="col-2"><img :src="getUserIcon(item)" class="icon" /></td>
+            <td class="col">{{idx + 1}}</td>
+            <td class="col-4"><img :src="getUserIcon(item)" class="icon" /></td>
             <td class="col-2">{{(item.nickName) || '匿名'}}</td>
+            <td class="col-3" @click.stop.prevent="getUserLog(item)">{{item.pv || 0}}</td>
           </tr>
         </table>
         <split></split>
@@ -66,6 +68,22 @@
             <td class="col">{{idx + 1}}</td>
             <td class="col-1" @click.stop.prevent="openGoodDetail(item)"><img :src="getThumbnail(item)" class="thumbnail" /></td>
             <td class="col-2" @click.stop.prevent="openGoodDetail(item)">{{fillName(item)}}</td>
+            <td class="col-3" @click.stop.prevent="showPvDetail(item)">{{item.count}}</td>
+          </tr>
+        </table>
+        <split></split>
+        <h1 class="title">文章访问详情</h1>
+        <table class="detail_list">
+          <tr class="head">
+            <td class="col">ID</td>
+            <td class="col-1">文章图</td>
+            <td class="col-2">文章名</td>
+            <td class="col-3">用户数</td>
+          </tr>
+          <tr v-for="(item, index) in articleList" key="index">
+            <td class="col">{{index + 1}}</td>
+            <td class="col-1" @click.stop.prevent="openArticleDetail(item)"><img :src="getThumbnail(item)" class="thumbnail" /></td>
+            <td class="col-2" @click.stop.prevent="openArticleDetail(item)">{{fillName(item)}}</td>
             <td class="col-3" @click.stop.prevent="showPvDetail(item)">{{item.count}}</td>
           </tr>
         </table>
@@ -97,6 +115,7 @@
           }
         },
         topList: [],
+        articleList: [],
         uvList: [],
         totalUv: 0,
         homeUv: 0,
@@ -121,7 +140,10 @@
     },
     methods: {
       fetchData() {
-        api.stats().then(response => {
+        let dateStr = this.$route.query.dateStr || '';
+        api.stats({
+          dateStr: dateStr
+        }).then(response => {
           if (response.result === 0) {
             if (response.allstat) {
               this.totalUv = response.allstat.visitusers && response.allstat.visitusers.length || 0;
@@ -137,9 +159,24 @@
           }
         });
         this.$store.dispatch('openLoading');
-        api.topGoods().then(response => {
+        api.topGoods({
+          dateStr: dateStr
+        }).then(response => {
           if (response.result === 0) {
             this.topList = response.tops || [];
+            this._initScroll();
+          }
+          this.$store.dispatch('closeLoading');
+        }).catch(response => {
+          this.$store.dispatch('closeLoading');
+        });
+        // 查询文章访问列表
+        api.topGoods({
+          dateStr: dateStr,
+          type: 'articledetail'
+        }).then(response => {
+          if (response.result === 0) {
+            this.articleList = response.tops || [];
             this._initScroll();
           }
           this.$store.dispatch('closeLoading');
@@ -190,8 +227,25 @@
       openGoodDetail(item) {
         this.$router.push({name: 'good', params: {id: item.pid}});
       },
+      openArticleDetail(item) {
+        this.$router.push({name: 'articledetail', params: {id: item.pid}});
+      },
       showPvDetail(item) {
-        this.$router.push({name: 'uvdetail', query: {id: item.pid}});
+        let dateStr = this.$route.query.dateStr || '';
+        this.$router.push({name: 'uvdetail', query: {id: item.pid, dateStr: dateStr}});
+      },
+      getUserLog(item) {
+        let dateStr = this.$route.query.dateStr || '';
+        let uid = item.userId || '';
+        let unlogin = item.nickName || '';
+        if (!uid && !unlogin) {
+          return;
+        }
+        if (uid) {
+          this.$router.push({name: 'uvdetail', query: {userId: uid, dateStr: dateStr}});
+        } else if (unlogin) {
+          this.$router.push({name: 'uvdetail', query: {unlogin: unlogin, dateStr: dateStr}});
+        }
       },
       show() {
         this.$store.commit('HIDE_FOOTER');

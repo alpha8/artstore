@@ -3,25 +3,27 @@
     <fixedheader title="用户访问详情"></fixedheader>
     <div class="stats">
       <div class="stats-wrapper">
-        <div class="stats-container" ref="stats" v-show="items.length">
+        <div class="stats-container" ref="statList" v-show="pvs.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="detail_list">
-              <ul class="newitem head">
-                <li class="col">ID</li>
-                <li class="col-2">访问用户</li>
-                <li class="col-2">访问时间</li>
-                <li class="col-3">浏览量</li>
-              </ul>
-              <mu-flexbox-item basis="100%" class="newitem border-1px" v-for="(item, idx) in items" :key="idx">
-                <div class="col">{{idx + 1}}</div>
-                <div class="col-2"><img :src="getThumbnail(item)" class="thumbnail" />{{(item.user && item.user.nickName) || '匿名'}}</div>
-                <div class="col-2">{{item.createAt | formatDate}}</div>
-                <div class="col-3">{{item.pv}}</div>
-              </mu-flexbox-item>
+            <ul class="newitem head">
+              <li class="col-2">访问用户</li>
+              <li class="col-1">模块</li>
+              <li class="col-2">详情</li>
+              <li class="col-2">访问时间</li>
+              <li class="col-5">点击数</li>
+            </ul>
+            <mu-flexbox-item basis="100%" class="newitem border-1px" v-for="(item, idx) in pvs" :key="idx">
+              <div class="col-2"><img :src="getThumbnail(item)" class="thumbnail" />{{(item.user && item.user.nickName) || '匿名'}}</div>
+              <div class="col-1">{{moduleMapping[item.module] || ''}}</div>
+              <div class="col-2" @click.stop.prevent="openGoodDetail(item)">{{getDetailItem(item).name || ''}}</div>
+              <div class="col-2">{{item.createAt | formatDate}}</div>
+              <div class="col-5">{{item.pv}}</div>
+            </mu-flexbox-item>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
-        <div class="no-stats" v-show="items.length === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
+        <div class="no-stats" v-show="pvs.length === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
       </div>
     </div>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
@@ -47,10 +49,22 @@
         scroller: null,
         loading: false,
         lastExec: +new Date(),
-        items: []
+        pvs: [],
+        moduleMapping: {
+          'productdetail': '商品详情',
+          'seckilldetail': '秒杀详情',
+          'groupbuydetail': '团购详情',
+          'auctiondetail': '拍卖详情',
+          'articledetail': '文章详情',
+          'home': '首页',
+          'category': '分类',
+          'usercenter': '个人中心',
+          'pay': '下单'
+        }
       };
     },
     activated() {
+      this.pvs = [];
       this.fetchData(true);
       this.show();
     },
@@ -59,14 +73,13 @@
       this.hide();
     },
     mounted() {
-      this.scroller = this.$refs.stats;
+      this.scroller = this.$refs.statList;
       window.onscroll = () => {
         this.scrollY = window.pageYOffset;
       };
     },
     methods: {
       fetchData(force) {
-        let id = this.$route.query.id;
         if (this.totalPages && this.pageNumber > this.totalPages) {
           return;
         }
@@ -74,13 +87,23 @@
         if (!force && now - this.lastExec <= 50) {
           return;
         }
+        this.loading = true;
+        let id = this.$route.query.id || '';
+        let dateStr = this.$route.query.dateStr || '';
+        let userId = this.$route.query.userId || 0;
+        let unlogin = this.$route.query.unlogin || '';
         api.goodsPvDetail({
-          pid: id || ''
+          currentPage: this.pageNumber,
+          pageSize: this.pageSize,
+          pid: id,
+          dateStr: dateStr,
+          userId: userId,
+          unlogin: unlogin
         }).then(response => {
           if (response.result === 0) {
             if (response.userBehaviors && response.userBehaviors.length) {
               response.userBehaviors.forEach(item => {
-                this.items.push(item);
+                this.pvs.push(item);
               });
             }
             this.totalPages = response.totalPages;
@@ -96,7 +119,7 @@
         });
       },
       _reset() {
-        this.items = [];
+        this.pvs = [];
         this.pageNumber = 1;
         this.totalPages = 0;
         this.loadEnd = false;
@@ -104,6 +127,23 @@
       getThumbnail(item) {
         let icon = item.user && item.user.icon;
         return icon || api.CONFIG.usericon;
+      },
+      getDetailItem(item) {
+        if (item.behavior) {
+          return item.behavior;
+        }
+        return {};
+      },
+      openGoodDetail(item) {
+        if (item.behavior && item.behavior.pid) {
+          if (item.module === 'productdetail') {
+            this.$router.push({name: 'good', params: {id: item.behavior.pid}});
+          } else if (item.module === 'articledetail') {
+            this.$router.push({name: 'articledetail', params: {id: item.behavior.pid}});
+          } else if (item.module === 'groupbuydetail') {
+            this.$router.push({name: 'groupbuyDetail', params: {id: item.behavior.pid}});
+          }
+        }
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -125,7 +165,7 @@
     filters: {
       formatDate(time) {
         let date = new Date(time);
-        return formatDate(date, 'yyyy-MM-dd hh:mm:ss');
+        return formatDate(date, 'yy/MM/dd hh:mm:ss');
       }
     }
   };
@@ -133,13 +173,18 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin';
+  .header
+    position: fixed
+    top: 0
+    width: 100%
+    height: 44px
+    overflow: hidden
+    z-index: 2
   .stats
     position: absolute
-    left: 0
     top: 44px
     bottom: 0
     width: 100%
-    overflow: hidden
     .no-more
       width: 100%
       padding: 10px 0 18px
@@ -147,6 +192,9 @@
       text-align: center
       font-size: 12px
       margin-bottom: 10px
+    .stats-wrapper
+      position: relative
+      width: 460px
     .stats-container
       position: relative
       width: 100%
@@ -167,6 +215,8 @@
           border-1px(rgba(7, 17, 27, 0.1))
           box-sizing: border-box
           font-size: 12px
+          &:nth-child(odd)
+            background: #fafafa
           &.head
             font-size: 13px
             background-color: #fafafa
@@ -177,6 +227,9 @@
             width: 25px
           .col-1
             width: 18%
+          .col-5
+            width: 12%
+            text-align: center
           .col-2
             flex: 1
             word-break: break-all

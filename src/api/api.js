@@ -151,13 +151,17 @@ export default {
   GetGood(id) {
     return doGet(this.CONFIG.webCtx + '/artwork/' + id + '?type=productdetail&stat=1');
   },
+  /** 查询单个商品详情 */
+  GetGoodDetail(id, params) {
+    return doGet(this.CONFIG.webCtx + '/artwork/' + id, params);
+  },
   /** 查询产品的关联产品列表 */
   GetRelatedGoods(params) {
     return doGet(this.CONFIG.cmsCtx + '/artwork/list/related', params);
   },
   /** 获取所有商品分类 */
-  GetCategories() {
-    return doGet(this.CONFIG.cmsCtx + '/datadic/childrens?parentPath=cms/basedata/tea/type&type=category&stat=1');
+  GetCategories(params) {
+    return doGet(this.CONFIG.cmsCtx + '/datadic/childrens?parentPath=cms/basedata/tea/type', params);
   },
   /** 获取商品分类统计值 */
   getTeaTotal() {
@@ -367,8 +371,8 @@ export default {
    /**
     * 秒杀单品详情
     */
-  getSeckillDetail(id) {
-    return doGet(this.CONFIG.seckillCtx + '/seckill/' + id + '/detail' + '?type=seckilldetail&stat=1');
+  getSeckillDetail(id, params) {
+    return doGet(this.CONFIG.seckillCtx + '/seckill/' + id + '/detail', params);
   },
 
    /**
@@ -473,8 +477,8 @@ export default {
    /**
     * 团购单品详情
     */
-  getGroupbuyDetail(id) {
-    return doGet(this.CONFIG.cmsCtx + '/groupBuy/' + id + '?type=groupbuydetail&stat=1');
+  getGroupbuyDetail(id, params) {
+    return doGet(this.CONFIG.cmsCtx + '/groupBuy/' + id, params);
   },
 
    /**
@@ -501,8 +505,8 @@ export default {
    /**
     * 获取单个拍品
     */
-  getAuction(id) {
-    return doGet(this.CONFIG.auctionCtx + '/auction/' + id + '?type=auctiondetail&stat=1');
+  getAuction(id, params) {
+    return doGet(this.CONFIG.auctionCtx + '/auction/' + id, params);
   },
 
    /**
@@ -522,8 +526,8 @@ export default {
   /**
    * 查询文章详情
    */
-  getArticleDetail(id) {
-    return doGet(this.CONFIG.cmsCtx + '/article/' + id + '?type=articledetail&stat=1');
+  getArticleDetail(id, params) {
+    return doGet(this.CONFIG.cmsCtx + '/article/' + id, params);
   },
 
   /**
@@ -536,15 +540,15 @@ export default {
   /**
    * 今日统计数据
    */
-  stats() {
-    return doGet(this.CONFIG.cmsCtx + '/user/allstat');
+  stats(params) {
+    return doGet(this.CONFIG.cmsCtx + '/user/allstat', params);
   },
 
   /**
    * 今日商品统计数据
    */
-  topGoods() {
-    return doGet(this.CONFIG.cmsCtx + '/user/topbehavior');
+  topGoods(params) {
+    return doGet(this.CONFIG.cmsCtx + '/user/topbehavior', params);
   },
 
   /**

@@ -67,6 +67,7 @@
           return value;
         }
         let SUPPLIER = 2;
+        let SYSUSER = 0;
         if (key === 'level') {
           // let userLevel = {'lv0': '普通用户', 'lv1': 'VIP一钻', 'lv2': 'VIP二钻', 'lv3': 'VIP三钻', 'lv4': 'VIP四钻', 'lv5': 'VIP五钻'};
           let agentLevel = {'lv0': '普通用户', 'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
@@ -75,7 +76,13 @@
           return agentLevel[level];
         }
         if (key === 'model') {
-          return this.userProfile.user && this.userProfile.user.model === SUPPLIER ? '代理商' : '会员';
+          let model = this.userProfile.user && this.userProfile.user.model || 0;
+          if (model === SYSUSER) {
+            return '系统用户';
+          } else if (model === SUPPLIER) {
+            return '代理商';
+          }
+          return '会员';
         } else if (key === 'phone') {
           return this.userProfile.user && this.userProfile.user.mobileNumber || '';
         }

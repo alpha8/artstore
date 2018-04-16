@@ -16,6 +16,7 @@ const KILL_PRODUCT = 'killProducts';
 const SEARCH_HISTORY = 'searchhistory';
 const USED_DISCOUNT = 'USED_DISCOUNT';
 const HISTORY_SIZE = 10;
+const ANONYMOUS = 'anonymous';
 const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
 
 // states
@@ -36,7 +37,8 @@ export const state = {
   payRemark: load(PAY_REMARK, '工作日收货'),
   killProducts: load(KILL_PRODUCT, []),  // 已参与的秒杀列表
   searchHistory: load(SEARCH_HISTORY, []),
-  usedDiscount: load(USED_DISCOUNT, [])   // 已使用的折扣券
+  usedDiscount: load(USED_DISCOUNT, []),   // 已使用的折扣券
+  anonymous: load(ANONYMOUS, '')
 };
 
 // getters
@@ -69,7 +71,8 @@ export const getters = {
   getPayRemark: state => state.payRemark,
   getKilledProduct: state => state.killProducts,
   loadSearchHistory: state => state.searchHistory,
-  loadUsedDiscount: state => state.usedDiscount
+  loadUsedDiscount: state => state.usedDiscount,
+  getAnonymous: state => state.anonymous
 };
 
 // actions
@@ -170,6 +173,17 @@ export const actions = {
   },
   cleanUsedDiscount(context) {
     context.commit(types.CLEAN_USED_DISCOUNT);
+  },
+  setAnonymous() {
+    let anon = state.anonymous;
+    let uid = state.userInfo && state.userInfo.userId;
+    if (!anon && !uid) {
+      let now = +new Date();
+      let rand = Math.round(Math.random() * 1000);
+      let unlogin = 'u' + now + rand;
+      state.anonymous = unlogin;
+      save(ANONYMOUS, state.anonymous);
+    }
   }
 };
 

@@ -73,6 +73,7 @@
           return;
         }
         let user = this.$store.getters.getUserInfo;
+        this.loading = true;
         api.getUserCollect({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,

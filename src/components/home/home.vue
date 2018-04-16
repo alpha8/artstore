@@ -158,6 +158,12 @@
     created() {
       this.wxReady();
       // this.loadTencentPlayer();
+      let user = this.$store.getters.getUserInfo;
+      let anon = '';
+      if (!user.userId) {
+        this.$store.dispatch('setAnonymous');
+        anon = this.$store.getters.getAnonymous;
+      }
       api.GetGoods({
         artworkTypeName: 'tea',
         categoryParentName: 'art',
@@ -166,7 +172,8 @@
         commodityStatesId: 2,
         scoreSort: true,
         type: 'home',
-        stat: 1
+        stat: 1,
+        unlogin: anon
       }).then((response) => {
         this.arts = response.artworks;
       });

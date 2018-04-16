@@ -9,7 +9,18 @@
           <span class="catname" @click.stop.prevent="showCategory(article)">{{article.categoryName}}</span>
           <span class="author">{{article.author}}</span>
         </div>
-        <div class="article-content" v-html="article.content" ref="articleContent"></div>
+        <div class="article-content articleContentHook" v-html="article.content" ref="articleContent"></div>
+        <split v-show="article.videos && article.videos.length"></split>
+        <div class="article-content" v-show="article.videos && article.videos.length">
+          <h1 class="title">文章视频</h1>
+          <div class="player">
+            <div id="tencent_video_player">
+              <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://www.yihuyixi.com/ps/download/5a4c7ceae4b065c96d6562dc" v-for="v in article.videos">
+                <source :src="v.url" type="video/mp4">
+              </video>
+            </div>
+          </div>
+        </div>
         <div class="article-footer">
           <span class="pv">[ 阅读: {{article.pv}} ]</span>
         </div>
@@ -23,6 +34,7 @@
         </div>
       </div>
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
+      <frame></frame>
     </div>
   </div>
 </template>
@@ -32,6 +44,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import modalTitle from '@/components/modal-title/modal-title';
   import channel from '@/components/channel/channel';
+  import frame from '@/components/common/myiframe';
   import gotop from '@/components/fixedtoolbar/gotop';
   import split from '@/components/split/split';
   // import {formatDate} from '@/common/js/date';
@@ -67,7 +80,16 @@
       fetchData() {
         let id = this.$route.params.id;
         this.$store.dispatch('openLoading');
-        api.getArticleDetail(id).then(res => {
+        let user = this.$store.getters.getUserInfo;
+        let anon = '';
+        if (!user.userId) {
+          anon = this.$store.getters.getAnonymous;
+        }
+        api.getArticleDetail(id, {
+          type: 'articledetail',
+          stat: 1,
+          unlogin: anon
+        }).then(res => {
           if (res.result === 1) {
             this.$store.dispatch('closeLoading');
             return;
@@ -88,7 +110,11 @@
             this.scroll = new BScroll(this.$refs.article, {
               click: true,
               bounce: false,
-              probeType: 3
+              probeType: 3,
+              preventDefaultException: {
+                className: /(^|\s)articleContentHook(\s|$)/,
+                tagName: /^(P|SPAN)$/
+              }
             });
           } else {
             this.scroll.refresh();
@@ -236,7 +262,7 @@
       }
     },
     components: {
-      gotop, fixedheader, split, modalTitle, channel
+      gotop, fixedheader, split, modalTitle, channel, frame
     },
     filters: {
       formatDate(time) {
@@ -289,11 +315,13 @@
         &.catname
           color: #4f7eaa
     .article-footer
-      padding: 0 8px 8px
+      padding: 1px 8px 9px
       font-size: 14px
       color: #999
       .source
         line-height: 1.3
+      .pv
+        padding-left: 4px
     .article-content
       padding: 0 8px
       font-size: 16px
@@ -301,6 +329,17 @@
       line-height: 1.45
       box-sizing: border-box
       overflow-x: hidden
+      .title
+        line-height: 14px
+        padding: 10px 7px
+        font-size: 14px
+        color: #07111b
+      #tencent_video_player
+          width: 100%
+          height: auto
+          overflow: hidden
+          video
+            object-fit: cover
     .wx_follow
       position: relative
       width: 100%

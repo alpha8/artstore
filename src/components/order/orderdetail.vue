@@ -31,9 +31,9 @@
           <p><label>支付方式：</label><span>在线支付</span></p>
           <!-- <p><label>发票信息：</label><span>普通发票</span></p> -->
         </div>
-        <split v-if="order.type !== 6"></split>
-        <div class="title" v-if="order.type !== 6">商品列表</div>
-        <ul class="goods-info" v-if="order.type !== 6">
+        <split v-show="order.type !== 6"></split>
+        <div class="title" v-show="order.type !== 6">商品列表</div>
+        <ul class="goods-info" v-show="order.type !== 6">
           <li class="good-item" v-for="product in order.products" @click.stop.prevent="showProductDetail(product)">
             <div class="item-img"><img :src="getThumbnail(product)" alt=""></div>
             <div class="item-info">
@@ -60,8 +60,8 @@
         </div>
       </div>
     </div>
-    <div class="footer border-top-1px" v-if="canShowFooter">
-      <div class="btn-group" v-if="loginUser && loginUser.userId === order.userId">
+    <div class="footer border-top-1px" v-show="canShowFooter">
+      <div class="btn-group" v-show="loginUser && loginUser.userId === order.userId">
        <div class="button" v-if="order.status === 0 && !order.express && order.type !== 6" @click.stop.prevent="goFillAddress"><span class="btn-red">填写收货地址</span></div>
         <div class="button" v-else-if="order.status === 0" @click.stop.prevent="weixinPay"><span class="btn-red">支付</span></div>
         <div class="button" v-if="order.status === 0" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
@@ -69,8 +69,8 @@
         <div class="button" v-if="order.status === 5" @click.stop.prevent="cancelRefund"><span class="btn-red">取消退款申请</span></div>
         <div class="button" v-if="order.status === 2" @click.stop.prevent="trackExpress"><span class="btn-white">查看物流</span></div>
         <div class="button" v-if="order.status === 2" @click.stop.prevent="confirmDelivery"><span class="btn-green">确认收货</span></div>
-        <div class="button" v-if="order.status === 6"><span class="btn-white">看相似</span></div>
-        <div class="button" v-if="order.status === 6"><span class="btn-orange">再次购买</span></div>
+        <div class="button" v-if="order.status === 60"><span class="btn-white">看相似</span></div>
+        <div class="button" v-if="order.status === 60"><span class="btn-orange">再次购买</span></div>
       </div>
     </div>
     <transition name="move">
@@ -113,6 +113,14 @@
       this.hide();
       this.paying = false;
     },
+    updated() {
+      setTimeout(() => {
+        this._initScroll();
+      }, 1500);
+    },
+    mounted() {
+      this._initScroll();
+    },
     computed: {
       statusDesc() {
         return this.mapStatus[this.order.status];
@@ -138,7 +146,8 @@
       canShowFooter() {
         let status = this.order.status;
         let canShowStatus = [0, 1, 2, 5];
-        return canShowStatus.filter(o => o === status).length;
+        let isOwner = this.loginUser && this.loginUser.userId === this.order.userId;
+        return canShowStatus.filter(o => o === status).length && isOwner;
       },
       totalPrice() {
         if (this.order && this.order.type === 6) {

@@ -61,6 +61,10 @@ li {
   list-style: none;
 }
 
+pre{
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -112,7 +116,7 @@ input::-webkit-search-decoration, input::-webkit-search-cancel-button { display:
 input:-ms-clear{display: none;}
 a{text-decoration: none;}
 i, em{font-style: normal;}
-html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6, a, span{
+html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6, a, span, pre{
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   text-size-adjust: 100%;

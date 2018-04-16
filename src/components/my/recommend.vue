@@ -178,10 +178,16 @@
         });
       },
       previewQrcode() {
-        wx.previewImage({
-          current: this.icon,
-          urls: [this.icon]
-        });
+        if (this.icon) {
+          let url = this.icon;
+          if (url.indexOf('http') < 0) {
+            url = 'http://www.yihuyixi.com' + url;
+          }
+          wx.previewImage({
+            current: url,
+            urls: [url]
+          });
+        }
       },
       _reset() {
         this.coupons = [];

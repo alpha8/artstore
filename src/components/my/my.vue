@@ -179,10 +179,15 @@
       }),
       refreshData() {
         let user = this.$store.getters.getUserInfo;
+        let anon = '';
+        if (!user.userId) {
+          anon = this.$store.getters.getAnonymous;
+        }
         api.getProfile({
           userId: user.userId || 0,
           type: 'usercenter',
-          stat: 1
+          stat: 1,
+          unlogin: anon
         }).then(response => {
           if (response.result === 0) {
             this.$store.dispatch('updateUserProfile', response);

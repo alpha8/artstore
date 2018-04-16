@@ -65,14 +65,14 @@
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
         </div>
-        <split></split>
+        <split v-if="good.parameter"></split>
         <div class="info" v-if="good.parameter">
           <h1 class="title">商品参数</h1>
           <div class="text">
             <table class="table">
               <tr v-for="p in good.parameter" v-if="p.value">
                 <td>{{p.text}}</td>
-                <td v-html="p.value"></td>
+                <td class="adjustText"><pre v-html="p.value"></pre></td>
               </tr>
             </table>
           </div>
@@ -265,7 +265,16 @@
           return;
         }
         this.$store.dispatch('openLoading');
-        api.GetGood(id).then(response => {
+        let user = this.$store.getters.getUserInfo;
+        let anon = '';
+        if (!user.userId) {
+          anon = this.$store.getters.getAnonymous;
+        }
+        api.GetGoodDetail(id, {
+          type: 'productdetail',
+          stat: 1,
+          unlogin: anon
+        }).then(response => {
           let good = response;
           let sid = 'p' + good.id;
           var qty = this.addedProducts && this.addedProducts[sid];
@@ -928,6 +937,8 @@
         border-left: solid 1px #e7e7e7
         word-wrap: break-word
         word-break: break-all
+        tr
+          display: flex
         td, th
           border-top: solid 1px #e7e7e7
           border-right: solid 1px #e7e7e7
@@ -936,6 +947,8 @@
           font-size: 12px
           &:first-child
             width: 80px
+        .adjustText
+          flex: 1
     .intro
       margin-bottom: 5px
     .row

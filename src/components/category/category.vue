@@ -129,7 +129,16 @@
         totalPivot['artcount'] = res.artcount;
         this.teaTotal = totalPivot;
 
-        api.GetCategories().then((response) => {
+        let user = this.$store.getters.getUserInfo;
+        let anon = '';
+        if (!user.userId) {
+          anon = this.$store.getters.getAnonymous;
+        }
+        api.GetCategories({
+          type: 'category',
+          stat: 1,
+          unlogin: anon
+        }).then((response) => {
           this.goods = response.childrens;
           this.goods.forEach(good => {
             try {

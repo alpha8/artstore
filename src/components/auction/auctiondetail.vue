@@ -240,7 +240,16 @@
           return;
         }
         this.$store.dispatch('openLoading');
-        api.getAuction(id).then(response => {
+        let user = this.$store.getters.getUserInfo;
+        let anon = '';
+        if (!user.userId) {
+          anon = this.$store.getters.getAnonymous;
+        }
+        api.getAuction(id, {
+          type: 'auctiondetail',
+          stat: 1,
+          unlogin: anon
+        }).then(response => {
           this.auction = response;
           this.timerLoop();
           this.show();
