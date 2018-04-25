@@ -125,6 +125,7 @@
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
+  @require '../../common/stylus/variables'
   .channel
     display: flex
     flex-wrap: wrap
@@ -163,7 +164,7 @@
         h3
           line-height: 1.5
           height: 20px
-          font-size: 14px
+          font-size: $fontsize-medium
           overflow: hidden
           text-overflow: ellipsis
           display: -webkit-box
@@ -173,16 +174,16 @@
           word-break: break-all
         .sellpoint
           display: block
-          font-size: 12px
-          color: #7f7f7f
+          font-size: $fontsize-small
+          color: $color-grey
           padding: 2px 0 3px
           white-space: nowrap
           text-overflow: ellipsis
           overflow: hidden
         .price
           position: relative
-          color: #ff463c
-          font-size: 14px
+          color: $color-red
+          font-size: $fontsize-medium
           font-weight: 700
           white-space: nowrap
           overflow: hidden
@@ -194,8 +195,8 @@
             bottom: 0
           .salesCount
             display: block
-            color: #999
-            font-size: 11px
+            color: $color-gray
+            font-size: $fontsize-small-s
             margin-left: 6px
             float: left
             margin-top: 1.5px
@@ -208,8 +209,8 @@
           height: 40px
           line-height: 40px
           text-align: center
-          font-size: 20px
+          font-size: $fontsize-icon
           box-sizing: border-box
           .icon-favorite
-            color: #ff463c
+            color: $color-orange
 </style>

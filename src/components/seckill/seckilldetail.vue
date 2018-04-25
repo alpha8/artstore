@@ -187,7 +187,7 @@
         nowTimes: +new Date(),
         md5: '',
         countdownStats: {},
-        showFollow: false,
+        showFollow: true,
         wxqrcode: api.CONFIG.wxqrcode
       };
     },
@@ -252,7 +252,7 @@
             this.wxReady();
             this.fetchComments();
             this.getLikeGoods();
-            this.getWXFollow();
+            // this.getWXFollow();
           }).catch(response => {
             this.$store.dispatch('closeLoading');
           });

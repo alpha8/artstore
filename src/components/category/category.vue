@@ -310,6 +310,7 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import "../../common/stylus/mixin";
+  @require "../../common/stylus/variables";
 
   .goods
     display: flex
@@ -324,7 +325,7 @@
       position: relative
       width: 32%
       float: left
-      background: #f3f5f7
+      background: $color-lightgrey
       overflow: hidden
       .menu-item
         flex: 1
@@ -337,8 +338,8 @@
           margin-top: -1px
           background: #fff
           font-weight: 700
-          border-left: 4px solid #00bb9c
-          color: #00bb9c
+          border-left: 4px solid $color-molv
+          color: $color-molv
           .text
             border-none()
         &.twoline
@@ -350,8 +351,8 @@
             height: 10px
             line-height: 10px
             display: block
-            font-size: 11px
-            color: #999
+            font-size: $fontsize-small-s
+            color: $color-gray
         .text
           position: relative
           display: block
@@ -364,7 +365,7 @@
             position: relative
             display: block
             float: left
-            font-size: 13px
+            font-size: $fontsize-medium-s
             word-wrap: break-word
             text-overflow: ellipsis
             -webkit-line-clamp: 2
@@ -377,13 +378,13 @@
           em
             display: block
             clear: both
-            font-size: 11px
+            font-size: $fontsize-small-s
           .highlight
             position: absolute
             width: 5px
             height: 5px
             border-radius: 50%
-            background: #fb4741
+            background: $color-redpoint
             right: 0
             top: 2px
             z-index: 10
@@ -397,17 +398,17 @@
         padding-left: 10px
         height: 40px
         line-height: 40px
-        font-size: 12px
+        font-size: $fontsize-small
         color: #333
-        background: #f2f2f2
+        background: $color-lightgray
         border-1px(rgba(7, 17, 27, 0.1))
       .item-footer
         position: relative
         width: 100%
         padding: 14px 0 10px 0
         text-align: center
-        color: #999
-        font-size: 12px
+        color: $color-gray
+        font-size: $fontsize-small
         box-sizing: border-box
       .itemList
         display: flex
@@ -447,7 +448,7 @@
               padding: 0
               vertical-align: middle
               .icon
-                font-size: 12px
+                font-size: $fontsize-small
                 height: 60px
                 overflow: hidden
               img
@@ -456,7 +457,7 @@
                 box-sizing: border-box
             .icon
               display: block
-              font-size: 40px
+              font-size: $fontsize-bigicon
             .content
               position: relative
               display: block
@@ -465,8 +466,8 @@
                 display: block
                 float: left
                 line-height: 1.2
-                font-size: 13px
-                color: #505050
+                font-size: $fontsize-medium-s
+                color: $color-dark
                 white-space: nowrap
                 word-wrap: break-word
                 word-break: break-all
@@ -476,18 +477,18 @@
                 padding-right: 7px
                 box-sizing: border-box
                 .dot
-                  font-size: 11px
-                  color: #999
+                  font-size: $fontsize-small-s
+                  color: $color-gray
                 em
                   display: block
                   clear: both
-                  font-size: 11px
+                  font-size: $fontsize-small-s
                 .highlight
                   position: absolute
                   width: 5px
                   height: 5px
                   border-radius: 50%
-                  background: #fb4741
+                  background: $color-redpoint
                   right: 0
                   top: 0
                   z-index: 10

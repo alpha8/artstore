@@ -151,7 +151,7 @@
           'vip': 'http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5db404564972818869478317/v.f20.mp4',
           'spring': 'http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5d37d4564972818869478170/v.f20.mp4'
         },
-        showFollow: false,
+        showFollow: true,
         wxqrcode: api.CONFIG.wxqrcode
       };
     },
@@ -254,7 +254,7 @@
       }).then(response => {
         this.articles = response.articles;
       });
-      this.getWXFollow();
+      // this.getWXFollow();
     },
     mounted() {
       this._initScroll();

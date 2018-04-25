@@ -211,7 +211,7 @@
         timer: null,
         nowTimes: +new Date(),
         countdownStats: {},
-        showFollow: false,
+        showFollow: true,
         wxqrcode: api.CONFIG.wxqrcode
       };
     },
@@ -260,7 +260,7 @@
           // this.fetchBids();
           this.fetchComments();
           this.getLikeGoods();
-          this.getWXFollow();
+          // this.getWXFollow();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });

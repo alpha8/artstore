@@ -62,7 +62,7 @@ export default new Router({
     {path: '*', redirect: '/home'},
     {path: '/home', component: home},
     {path: '/category', component: category},
-    {path: '/search', component: search},
+    {path: '/search', component: search, name: 'search'},
     {path: '/good/:id', component: goodDetail, name: 'good'},
     {path: '/good/:id/comments', component: goodComment, name: 'goodComment'},
     {path: '/cart', component: shopcart},

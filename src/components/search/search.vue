@@ -75,6 +75,10 @@
     },
     activated() {
       this.show();
+      // let reload = this.$route.query.reload;
+      // if (reload === '0') {
+      //   return;
+      // }
       this._reset();
       this.keyword = this.$route.query.key || '';
       let parentCategory = this.$route.query.parentCat;
@@ -121,6 +125,14 @@
       this.$refs.sidebar.reset();
       this.hide();
     },
+    // beforeRouteLeave(to, from, next) {
+    //   let queryJson = this.$route.query;
+    //   if (queryJson.reload) {
+    //     queryJson.reload = 0;
+    //     this.$router.replace({name: 'search', query: queryJson});
+    //   }
+    //   next();
+    // },
     mounted() {
       this.scroller = this.$refs.productWrapper;
       window.onscroll = () => {

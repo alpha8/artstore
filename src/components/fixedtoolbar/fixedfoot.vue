@@ -26,6 +26,7 @@
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
+  @require "../../common/stylus/variables";
   .fixed-foot
     position: fixed
     left: 0
@@ -33,18 +34,18 @@
     bottom: 0
     height: 50px
     z-index: 8
-    background: #fafafa
+    background: $color-greywhite
     .foot-wrapper
       display: flex
       padding-top: 1px
       .foot-item
         flex: 1
         height: 50px
-        font-size: 12px
+        font-size: $fontsize-small
         text-align: center
-        color: #666
+        color: $color-darkgray
         &.active
-          color: #00bb9c
+          color: $color-molv
         .icon
           display: block
           padding-top: 5px
@@ -53,7 +54,7 @@
             display: inline-block
             width: 25px
             height: 25px
-            font-size: 22px
+            font-size: $fontsize-midicon
         .text
           display: block
           line-height: 1

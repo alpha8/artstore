@@ -58,7 +58,7 @@
         lazyloaded: false,
         processing: false,
         previewImgList: [],
-        showFollow: false,
+        showFollow: true,
         wxqrcode: api.CONFIG.wxqrcode
       };
     },
@@ -99,7 +99,7 @@
           this.processing = false;
           this.$store.dispatch('closeLoading');
           this.wxReady();
-          this.getWXFollow();
+          // this.getWXFollow();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });

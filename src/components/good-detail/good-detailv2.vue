@@ -215,7 +215,7 @@
             text: '知道了!'
           }
         },
-        showFollow: false,
+        showFollow: true,
         wxqrcode: api.CONFIG.wxqrcode
       };
     },
@@ -288,7 +288,7 @@
           this.getRelatedGoods();
           this.fetchComments();
           this.getLikeGoods();
-          this.getWXFollow();
+          // this.getWXFollow();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });

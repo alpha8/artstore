@@ -75,6 +75,7 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin';
+  @require '../../common/stylus/variables'
   .top_wrapper
     position: relative
     width: 100%
@@ -108,15 +109,15 @@
             width: 35px
             height: 35px
             margin: 0 auto
-            font-size: 28px
-            color: #00BB9C
+            font-size: $fontsize-homeicon
+            color: $color-molv
             &.big
-              font-size: 30px
+              font-size: $fontsize-homebigicon
             &.icon-teapot_kitchen
               font-size: 34px
           .top_name
-            font-size: 12px
-            color: #666
+            font-size: $fontsize-small
+            color: $color-darkgray
             text-align: center
             line-height: 1.2
             margin-top: 1px
