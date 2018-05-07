@@ -6,7 +6,7 @@
           <div class="box-container">
             <div class="avatar">
               <a v-show="!hasLogin()" :href="getLoginUrl()"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
-              <img :src="user().icon" alt="" class="pic" v-show="hasLogin()">
+              <img :src="profile.user && profile.user.icon" alt="" class="pic" v-show="hasLogin()">
             </div>
             <div class="line">
               <div class="userName" v-show="!hasLogin()"><a :href="getLoginUrl()">点击登录</a></div>
@@ -69,7 +69,7 @@
             <span class="text">创建优惠券</span>
             <span class="more"><i class="icon-keyboard_arrow_right"></i></span>
           </router-link>
-          <router-link :to="item.link" class="item border-1px" v-for="(item, index) in others" key="index" :class="{'highlight': item.highlight}">
+          <router-link :to="item.link" class="item border-1px" v-for="(item, index) in others" :key="index" :class="{'highlight': item.highlight}">
             <i :class="item.icon"></i>
             <span class="text" v-show="!item.callable">{{item.text}}</span>
             <span class="text" v-show="item.callable" @click.stop.prevent="item.callable">{{item.text}}</span>

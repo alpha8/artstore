@@ -1,7 +1,7 @@
 <template>
   <div class="fixed-foot" v-show="toggle">
     <div class="foot-wrapper">
-      <router-link :to="item.link" class="foot-item" v-for="(item,index) in items" key="index">
+      <router-link :to="item.link" class="foot-item" v-for="(item,index) in items" :key="index">
         <span class="icon"><i :class="item.icon"></i></span>
         <span class="text" :class="{'highlight': item.highlight}">{{item.text}}</span>
       </router-link>

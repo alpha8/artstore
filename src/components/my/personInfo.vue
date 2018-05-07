@@ -85,6 +85,8 @@
           return '会员';
         } else if (key === 'phone') {
           return this.userProfile.user && this.userProfile.user.mobileNumber || '';
+        } else if (key === 'icon') {
+          return this.userProfile.user && this.userProfile.user.icon || 'http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80';
         }
         return this.user[key] || '';
       },

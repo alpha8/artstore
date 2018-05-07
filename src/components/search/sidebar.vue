@@ -10,7 +10,7 @@
           </div>
           <div class="filter-wrapper" ref="filter">
             <ul class="filter">
-              <div v-for="(filter, index) in filters" key="index" v-show="filter.children.length">
+              <div v-for="(filter, index) in filters" :key="index" v-show="filter.children.length">
                 <li class="filter-item border-1px">
                   <div class="item-name">{{filter.name}}</div>
                   <div class="status" @click.stop.prevent="toggle(filter)">

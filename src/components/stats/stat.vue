@@ -48,7 +48,7 @@
             <td class="col-2">用户昵称</td>
             <td class="col-3">点击数</td>
           </tr>
-          <tr v-for="(item, idx) in users" key="idx">
+          <tr v-for="(item, idx) in users" :key="idx">
             <td class="col">{{idx + 1}}</td>
             <td class="col-4"><img :src="getUserIcon(item)" class="icon" /></td>
             <td class="col-2">{{(item.nickName) || '匿名'}}</td>
@@ -64,7 +64,7 @@
             <td class="col-2">商品名称</td>
             <td class="col-3">用户数</td>
           </tr>
-          <tr v-for="(item, idx) in topList" key="idx">
+          <tr v-for="(item, idx) in topList" :key="idx">
             <td class="col">{{idx + 1}}</td>
             <td class="col-1" @click.stop.prevent="openGoodDetail(item)"><img :src="getThumbnail(item)" class="thumbnail" /></td>
             <td class="col-2" @click.stop.prevent="openGoodDetail(item)">{{fillName(item)}}</td>
@@ -80,7 +80,7 @@
             <td class="col-2">文章名</td>
             <td class="col-3">用户数</td>
           </tr>
-          <tr v-for="(item, index) in articleList" key="index">
+          <tr v-for="(item, index) in articleList" :key="index">
             <td class="col">{{index + 1}}</td>
             <td class="col-1" @click.stop.prevent="openArticleDetail(item)"><img :src="getThumbnail(item)" class="thumbnail" /></td>
             <td class="col-2" @click.stop.prevent="openArticleDetail(item)">{{fillName(item)}}</td>

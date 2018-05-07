@@ -1,6 +1,6 @@
 <template>
   <swiper :options="swiperOption">
-    <swiper-slide v-for="(slide, index) in swiperSlides" key="index">
+    <swiper-slide v-for="(slide, index) in swiperSlides" :key="index">
       <div class="slide" :style="getSlideUrl(slide)"></div>
     </swiper-slide>
     <div class="swiper-pagination" slot="pagination"></div>

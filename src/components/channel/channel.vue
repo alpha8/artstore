@@ -1,6 +1,6 @@
 <template>
   <div class="channel">
-    <div class="chanel-item" v-for="(item, index) in items" key="index" :class="{'p50': cols===2, 'p100': cols===1}">
+    <div class="chanel-item" v-for="(item, index) in items" :key="index" :class="{'p50': cols===2, 'p100': cols===1}">
       <div @click.stop.prevent="goGoodDetail(item)" class="good-item">
         <div class="item-img">
           <img v-lazy="getThumbnail(item)" alt="">

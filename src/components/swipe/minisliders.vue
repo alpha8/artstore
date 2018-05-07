@@ -1,6 +1,6 @@
 <template>
   <swiper :options="swiperOption" class="swiperHook" :style="getStyle">
-    <swiper-slide v-for="(slide, index) in swiperSlides" key="index">
+    <swiper-slide v-for="(slide, index) in swiperSlides" :key="index">
       <div class="slide2" :style="getSlideUrl(slide)" @click.stop.prevent="preview(slide.src)"></div>
     </swiper-slide>
     <div class="swiper-pagination pager" slot="pagination"></div>
