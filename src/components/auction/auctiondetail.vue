@@ -25,7 +25,7 @@
           拍卖时间：<span>{{auction.startTime | formatDate}} ~ {{auction.endTime | formatDate}}</span>
         </div>
         <div class="duration spacer" v-if="auction.leftStartTimes > 0" v-html="countdownTips()"></div>
-        <div class="duration spacer" v-else>距秒杀结束还剩：<p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p></div>
+        <div class="duration spacer" v-else>距拍卖结束还剩：<p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p></div>
         <split></split>
         <div class="info">
           <h1 class="title" @click.stop.prevent="gotoBidPrices">出价记录 <em v-if="auction.countAppr">({{auction.countAppr}}次)</em><i class="num"></i></h1>
@@ -626,11 +626,7 @@
         if (this.auction.icon) {
           icon = api.CONFIG.psCtx + this.auction.icon + '?w=423&h=423';
         }
-        let redirect = 'http://' + location.host + location.pathname + '#/auction/' + this.auction.id + '/detail';
-        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
-        if (!ios) {
-          redirect = 'http://' + location.host + '/weixin/a/' + this.auction.id;
-        }
+        let redirect = 'http://' + location.host + '/weixin/a/' + this.auction.id;
         let uid = this.$store.getters.getUserInfo.userId;
         if (uid) {
           redirect += '?userId=' + uid;

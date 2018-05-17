@@ -144,20 +144,22 @@
         let goods = this.$store.getters.cartProducts;
         this.cartProducts = [];
         goods.forEach((product) => {
-          this.cartProducts.push({
-            id: product.id,
-            name: product.name,
-            icon: product.icon,
-            src: product.src,
-            info: product.info,
-            description: product.description,
-            price: product.price,
-            oldPrice: product.oldPrice,
-            count: product.count,
-            checked: product.checked || false,
-            stock: product.stock,
-            fromCart: true
-          });
+          if (product.id && product.id.indexOf('_fp') === -1) {
+            this.cartProducts.push({
+              id: product.id,
+              name: product.name,
+              icon: product.icon,
+              src: product.src,
+              info: product.info,
+              description: product.description,
+              price: product.price,
+              oldPrice: product.oldPrice,
+              count: product.count,
+              checked: product.checked || false,
+              stock: product.stock,
+              fromCart: true
+            });
+          }
         });
         this._initScroll();
       },

@@ -6,7 +6,10 @@
       </div>
     </transition>
     <div class="cart-count" v-show="good.count >= 0">{{good.count}}</div>
-    <div class="cart-add" @click.stop.prevent="addCart">
+    <div class="cart-add" v-if="maxCount === -1 || good.count < maxCount" @click.stop.prevent="addCart">
+      <span class="inner icon-add_circle"></span>
+    </div>
+    <div class="cart-add disable" v-else>
       <span class="inner icon-add_circle"></span>
     </div>
   </div>
@@ -19,6 +22,10 @@
     props: {
       good: {
         type: Object
+      },
+      maxCount: {
+        type: Number,
+        default: -1
       }
     },
     methods: {
@@ -105,4 +112,6 @@
       line-height: 24px
       font-size: 24px
       color: rgb(0, 160, 220)
+      &.disable span
+        color: #dedede
 </style>

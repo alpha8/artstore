@@ -13,7 +13,7 @@
         isAutoLogin: window.sessionStorage.getItem('autologin') || false
       };
     },
-    created() {
+    mounted() {
       if (!this.$store.getters.checkLogined) {
         this.$store.dispatch('setAnonymous');
         let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
@@ -25,7 +25,7 @@
           this.isAutoLogin = true;
           window.sessionStorage.setItem('autologin', true);
           this.$store.dispatch('openToast', '正在登录中...');
-          window.location.href = `${api.CONFIG.wxCtx}/wx/base?url=` + escape(redirect);
+          window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
         }
       }
     },
@@ -48,7 +48,7 @@
           redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
         }
         this.redirectUrl = redirect;
-        return `${api.CONFIG.wxCtx}/wx/base?url=` + escape(redirect);
+        return `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
       }
     }
   };

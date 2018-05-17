@@ -600,11 +600,7 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone']
           });
         });
-        let redirect = 'http://' + location.host + location.pathname + '#/good/' + this.good.id;
-        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
-        if (!ios) {
-          redirect = 'http://' + location.host + '/weixin/g/' + this.good.id;
-        }
+        let redirect = 'http://' + location.host + '/weixin/g/' + this.good.id;
         let uid = this.$store.getters.getUserInfo.userId;
         if (uid) {
           redirect += '?userId=' + uid;

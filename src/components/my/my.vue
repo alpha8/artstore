@@ -6,7 +6,7 @@
           <div class="box-container">
             <div class="avatar">
               <a v-show="!hasLogin()" :href="getLoginUrl()"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
-              <img :src="profile.user && profile.user.icon" alt="" class="pic" v-show="hasLogin()">
+              <img :src="getUserIcon" alt="" class="pic" v-show="hasLogin()">
             </div>
             <div class="line">
               <div class="userName" v-show="!hasLogin()"><a :href="getLoginUrl()">点击登录</a></div>
@@ -119,6 +119,7 @@
             noPage: true,
             callable: () => {
               window.localStorage.clear();
+              window.sessionStorage.clear();
               removeCookie('wxuser', '', '.yihuyixi.com');
               this.$store.dispatch('openToast', '缓存清理成功！');
             }
@@ -167,6 +168,13 @@
       },
       getSVipIcon() {
         return this.userExt.spreadLevel || 'lv1';
+      },
+      getUserIcon() {
+        let user = this.$store.getters.getUserInfo;
+        if (user && user.icon) {
+          return user.icon;
+        }
+        return this.profile.user && this.profile.user.icon;
       }
     },
     updated() {

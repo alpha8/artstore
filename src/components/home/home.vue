@@ -58,6 +58,7 @@
       </div>
     </div>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
+    <frame></frame>
   </div>
 </template>
 
@@ -65,7 +66,7 @@
   import BScroll from 'better-scroll';
   import fixedsearch from '@/components/fixedtoolbar/fixedsearch';
   import swipe from '@/components/swipe/swipe';
-  import topchanel from '@/components/channel/topchanel';
+  import topchanel from '@/components/channel/topchanelv2';
   import split from '@/components/split/split';
   import modalTitle from '@/components/modal-title/modal-title';
   import sectionTitle from '@/components/common/section-title';
@@ -73,6 +74,7 @@
   import gotop from '@/components/fixedtoolbar/gotop';
   import search from '@/components/fixedtoolbar/search';
   import articlelist from '@/components/article/articlelist';
+  import frame from '@/components/common/myiframe';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
 
@@ -116,13 +118,13 @@
           name: '四折秒杀',
           url: '/seckill',
           icon: 'icon-miaosha big'
-        }, {
-          name: '全部栏目',
-          url: '',
-          icon: 'icon-down2 big',
-          tag: 'more',
-          replace: '收起栏目',
-          replaceIcon: 'icon-upward2 big'
+        // }, {
+        //   name: '全部栏目',
+        //   url: '',
+        //   icon: 'icon-down2 big',
+        //   tag: 'more',
+        //   replace: '收起栏目',
+        //   replaceIcon: 'icon-upward2 big'
         }, {
           name: '五折团购',
           url: '/groupbuy',
@@ -137,6 +139,18 @@
           name: '文 章',
           url: '/articles',
           icon: 'icon-file'
+        }, {
+          name: '首单特惠',
+          url: '/firstpurchase',
+          icon: 'icon-prefer big'
+        }, {
+          name: '拼 团',
+          url: '/tuan',
+          icon: 'icon-tuan big'
+        }, {
+          name: '分享特惠',
+          url: '/sharepay',
+          icon: 'icon-cutingprice big'
         }],
         swiperSlides: [
           'http://www.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=500',
@@ -369,7 +383,8 @@
       gotop,
       search,
       articlelist,
-      sectionTitle
+      sectionTitle,
+      frame
     }
   };
 </script>

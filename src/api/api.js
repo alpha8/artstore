@@ -88,6 +88,7 @@ export default {
    cmsCtx: 'http://www.yihuyixi.com/cms',
    wxCtx: 'http://www.yihuyixi.com/wxservice',
    webCtx: 'http://www.yihuyixi.com/yihu',
+   webspreadCtx: 'http://www.yihuyixi.com/webspread',
    auctionCtx: 'http://www.yihuyixi.com/cmsAuction',
    seckillCtx: 'http://www.yihuyixi.com/goodsKill',
    psCtx: 'http://www.yihuyixi.com/ps/download/',
@@ -556,5 +557,19 @@ export default {
    */
   goodsPvDetail(params) {
     return doGet(this.CONFIG.cmsCtx + '/user/listbehavior', params);
+  },
+
+  /**
+   * 首单特惠商品列表
+   */
+  firstpayGoods(params) {
+    return doGet(this.CONFIG.webspreadCtx + '/specialfield/list', params);
+  },
+
+  /**
+   * 查询单个首单特惠商品
+   */
+  getFirstpayGood(id, params) {
+    return doGet(this.CONFIG.webspreadCtx + '/specialfield/get/' + id, params);
   }
 };

@@ -50,6 +50,8 @@ import articles from '@/components/article/articles';
 import articledetail from '@/components/article/articledetail';
 import stat from '@/components/stats/stat';
 import uvdetail from '@/components/stats/uv_detail';
+import firstpurchase from '@/components/firstpurchase/firstpurchase';
+import firstdetail from '@/components/firstpurchase/firstdetail';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -108,6 +110,8 @@ export default new Router({
     {path: '/article/:id', component: articledetail, name: 'articledetail'},
     {path: '/stat', component: stat, name: 'stat'},
     {path: '/uvdetail', component: uvdetail, name: 'uvdetail'},
+    {path: '/firstpurchase', component: firstpurchase, name: 'firstpurchase'},
+    {path: '/firstpurchase/:id', component: firstdetail, name: 'firstdetail'},
     {path: '/my', component: my}
   ]
   // ,scrollBehavior (to, from, savedPosition) {

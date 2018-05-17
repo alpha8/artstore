@@ -569,11 +569,7 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
           });
         });
-        let redirect = 'http://' + location.host + location.pathname + '#/seckill/' + this.seckill.seckillId + '/detail';
-        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
-        if (!ios) {
-          redirect = 'http://' + location.host + '/weixin/k/' + this.seckill.seckillId;
-        }
+        let redirect = 'http://' + location.host + '/weixin/k/' + this.seckill.seckillId;
         let uid = this.$store.getters.getUserInfo.userId;
         if (uid) {
           redirect += '?userId=' + uid;
