@@ -22,7 +22,7 @@
             </div>
           </div>
           <div class="cartcontrol-wrapper" v-if="firstpay.count">
-            <cartcontrol @add="addGood" :good="firstpay" :maxCount="1"></cartcontrol>
+            <cartcontrol @add="addGood" :good="firstpay" :maxCount="1" :stock="firstpay.stock"></cartcontrol>
           </div>
           <transition name="fade">
             <div @click.stop.prevent="addFirst" class="buy" v-if="firstpay.stock && !firstpay.count">加入购物车</div>
@@ -118,7 +118,7 @@
     <frame></frame>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <share ref="weixinShare"></share>
-    <minicart ref="shopcart" :selectGoods="selectGoods" :max-items="3"></minicart>
+    <minicart ref="shopcart" :selectGoods="selectGoods" :max-items="3" @fireEmpty="doClear" @fireReload="doRefresh"></minicart>
   </div>
 </template>
 
@@ -169,6 +169,7 @@
         scrollY: 0,
         good: {},
         firstpay: {},
+        extFirstpay: {},
         lazyloaded: false,
         processing: false,
         previewImgList: [],
@@ -236,8 +237,10 @@
         let items = [];
         let goods = this.$store.getters.cartProducts;
         goods.forEach((product) => {
-          if (product.count && product.id && product.id.indexOf('_fp') !== -1) {
-            items.push(product);
+          if (product.count && product.type === this.prefix) {
+            let o = {};
+            Object.assign(o, product);
+            items.push(o);
           }
         });
         return items;
@@ -266,9 +269,7 @@
             let good = response;
             this.good = good;
             Object.assign(this.good, firstpay);
-            let sid = 'p' + this.prefix + firstpay.id;
-            var qty = this.addedProducts && this.addedProducts[sid];
-            this.firstpay.count = qty || 0;
+            this.extendedGoodsAttrs(good);
             this.show();
             this.processing = false;
             this.$store.dispatch('closeLoading');
@@ -282,6 +283,19 @@
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });
+      },
+      extendedGoodsAttrs(good) {
+        if (!this.firstpay.count) {
+          Vue.set(this.firstpay, 'count', 0);
+        }
+        let sid = 'p' + this.prefix + this.firstpay.id;
+        var qty = this.addedProducts && this.addedProducts[sid];
+        this.firstpay.count = qty || 0;
+        this.firstpay.pictures = good.pictures;
+        this.firstpay.price = this.firstpay.buttomFee;
+        this.firstpay.oldPrice = this.firstpay.fieldPrice;
+        this.firstpay.extendId = this.prefix + this.firstpay.id;
+        this.firstpay.type = this.prefix;
       },
       loadTencentPlayer() {
         if (!this.good.videoUrl) {
@@ -424,21 +438,23 @@
       showQrcode() {
         this.$refs.layerWin.show();
       },
+      doClear() {
+        this.firstpay.count = 0;
+      },
+      doRefresh(target) {
+        let newCount = 0;
+        this.$store.getters.cartProducts.forEach(product => {
+          if (product.id === this.firstpay.id) {
+            newCount = product.count || 0;
+          }
+        });
+        this.firstpay.count = newCount;
+      },
       addFirst(event) {
         Vue.set(this.firstpay, 'count', 1);
         this._drop(event.target);
         this.$store.commit('ADD_QUANTITY', this.prefix + this.firstpay.id);
-        this.$store.dispatch('addToCart', {
-          id: this.prefix + this.firstpay.id,
-          name: this.firstpay.name,
-          pictures: this.good.pictures,
-          src: this.good.src,
-          content: this.good.content,
-          price: this.firstpay.fieldPrice,
-          oldPrice: this.firstpay.buttomFee,
-          count: this.firstpay.count,
-          stock: this.firstpay.stock
-        });
+        this.$store.dispatch('addToCart', this.firstpay);
       },
       addGood(target) {
         this._drop(target);

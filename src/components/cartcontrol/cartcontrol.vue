@@ -26,6 +26,14 @@
       maxCount: {
         type: Number,
         default: -1
+      },
+      stock: {
+        type: Number,
+        default: 0
+      },
+      bookStock: {
+        type: Number,
+        default: 0
       }
     },
     methods: {
@@ -33,6 +41,14 @@
         let stockEmpty = false;
         if (!this.good.count) {
           Vue.set(this.good, 'count', 1);
+        } else if (this.stock > 0) {
+          let total = this.stock + (this.bookStock || 0);
+          if (this.good.count >= total) {
+            this.$store.dispatch('openToast', '超过当前库存数了哦!');
+            stockEmpty = true;
+          } else {
+            this.good.count++;
+          }
         } else {
           let stock = this.good.stock && this.good.stock.total || 0;
           let bookStock = this.good.stock && this.good.stock.bookTotal || 0;
@@ -45,21 +61,29 @@
           }
         }
         if (!stockEmpty) {
-          this.$emit('add', event.target);
-          this.$store.commit('ADD_QUANTITY', this.good.id);
+          this.$store.commit('ADD_QUANTITY', this.getGoodsId());
           this.$store.dispatch('addToCart', this.good);
+          this.$emit('add', event.target);
         }
       },
       decreaseCart() {
         if (this.good.count > 1) {
           this.good.count--;
-          this.$store.commit('REDUCE_QUANTITY', this.good.id);
+          this.$store.commit('REDUCE_QUANTITY', this.getGoodsId());
         } else {
           if (!this.good.fromCart) {
             this.good.count = 0;
-            this.$store.commit('REDUCE_QUANTITY', this.good.id);
+            this.$store.commit('REDUCE_QUANTITY', this.getGoodsId());
           }
           this.$emit('confirm', this.good);
+        }
+        this.$emit('refresh', this.good);
+      },
+      getGoodsId() {
+        if (this.good.type) {
+          return this.good.type + this.good.id;
+        } else {
+          return this.good.id;
         }
       }
     }

@@ -36,13 +36,14 @@ const mutations = {
         name: product.name,
         pictures: product.pictures,
         src: product.src,
-        content: product.content,
         price: product.price,
         oldPrice: product.oldPrice,
         count: product.count,
         icon: img,
         stock: product.stock,
-        checked: true
+        checked: true,
+        type: product.type,
+        extendId: product.extendId || product.id
       });
     } else {
       record.count++;

@@ -2,6 +2,7 @@
 export const ADD_TO_CART = 'ADD_TO_CART';
 export const REMOVE_CART_ITEM = 'REMOVE_CART_ITEM';
 export const CLEAR_CART = 'CLEAR_CART';
+export const REMOVE_SAMETYPE_GOODS = 'REMOVE_SAMETYPE_GOODS';
 export const REDUCE_QUANTITY = 'REDUCE_QUANTITY';
 export const ADD_QUANTITY = 'ADD_QUANTITY';
 

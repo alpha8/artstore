@@ -144,7 +144,7 @@
         let goods = this.$store.getters.cartProducts;
         this.cartProducts = [];
         goods.forEach((product) => {
-          if (product.id && product.id.indexOf('_fp') === -1) {
+          if (!product.type) {
             this.cartProducts.push({
               id: product.id,
               name: product.name,

@@ -39,7 +39,7 @@
                   <span>{{good.price * good.count | currency}}</span>
                 </div>
                 <div class="cartcontrol-wrapper">
-                  <cartcontrol @add="addFood" :good="good" :maxCount="1"></cartcontrol>
+                  <cartcontrol @add="addGood" :good="good" :maxCount="1" :stock="good.stock" @refresh="reloadItems"></cartcontrol>
                 </div>
               </li>
             </ul>
@@ -142,6 +142,8 @@
         this.selectGoods.forEach((good) => {
           good.count = 0;
         });
+        this.$store.dispatch('removeSameTypeGoods', this.selectGoods);
+        this.$emit('fireEmpty');
       },
       pay() {
         if (this.totalPrice <= 0 || this.selectGoods.length > this.maxItems) {
@@ -149,8 +151,12 @@
         }
         window.alert(`支付${this.totalPrice}元`);
       },
-      addFood(target) {
+      addGood(target) {
         this.drop(target);
+        this.reloadItems();
+      },
+      reloadItems(target) {
+        this.$emit('fireReload', target);
       },
       drop(el) {
         for (let i = 0; i < this.balls.length; i++) {

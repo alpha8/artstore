@@ -103,6 +103,9 @@ export const actions = {
   clearCart({ commit }) {
     commit(types.CLEAR_CART);
   },
+  removeSameTypeGoods({commit}, goods) {
+    commit(types.REMOVE_SAMETYPE_GOODS, goods);
+  },
   removeCartItems({ commit }, products) {
     if (!products || products.length === 0) {
       return;
@@ -213,7 +216,9 @@ export const mutations = {
     state.searchDialog = false;
   },
   [types.ADD_QUANTITY](state, id) {
-    state.cartAmount++;
+    if (id.indexOf('_') === -1) {
+      state.cartAmount++;
+    }
 
     let sid = prefix + id;
     let product = state.products[sid];
@@ -226,7 +231,7 @@ export const mutations = {
     save('cartAmount', state.cartAmount);
   },
   [types.REDUCE_QUANTITY](state, id) {
-    if (state.cartAmount > 0) {
+    if (id.indexOf('_') === -1 && state.cartAmount > 0) {
       state.cartAmount--;
     }
 
@@ -238,13 +243,13 @@ export const mutations = {
         delete state.products[sid];
         let arr = state.cart.added;
         for (let i = 0; i < arr.length; i++) {
-          if (arr[i].id === id) {
+          if (arr[i].id === id || arr[i].extendId === id) {
             state.cart.added.splice(i, 1);
           }
         }
       } else {
         state.cart.added.forEach(p => {
-          if (p.id === id) {
+          if (p.id === id || p.extendId === id) {
             p.count = product;
           }
         });
@@ -262,6 +267,19 @@ export const mutations = {
     save('products', state.products);
     save('cartAdded', state.cart.added);
     save('cartAmount', state.cartAmount);
+  },
+  [types.REMOVE_SAMETYPE_GOODS](state, goods) {
+    let arr = state.cart.added;
+    goods.forEach(good => {
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i].id === good.id || arr[i].extendId === good.id) {
+          state.cart.added.splice(i, 1);
+        }
+      }
+      delete state.products[prefix + good.extendId];
+    });
+    save('cartAdded', state.cart.added);
+    save('products', state.products);
   },
   [types.SET_ADDRESS](state, { address }) {
     state.addressList = address;
