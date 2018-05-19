@@ -4,7 +4,7 @@
       <div class="content">
         <div class="content-left">
           <div class="logo-wrapper">
-            <div class="logo" :class="{'highlight': totalCount > 0}">
+            <div class="logo" :class="{'highlight': totalCount > 0, 'animate-shake': flash}">
               <span class="icon-shopping_cart"></span>
             </div>
             <div class="num" v-show="totalCount > 0">{{totalCount}}</div>
@@ -74,7 +74,8 @@
       return {
         balls: [{show: false}, {show: false}, {show: false}, {show: false}, {show: false}],
         dropBalls: [],
-        fold: true
+        fold: true,
+        flash: false  /** LOGO动画 */
       };
     },
     computed: {
@@ -149,7 +150,8 @@
         if (this.totalPrice <= 0 || this.selectGoods.length > this.maxItems) {
           return;
         }
-        window.alert(`支付${this.totalPrice}元`);
+        this.$store.dispatch('addPayGoods', this.selectGoods);
+        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=7';
       },
       addGood(target) {
         this.drop(target);
@@ -159,6 +161,7 @@
         this.$emit('fireReload', target);
       },
       drop(el) {
+        this.flash = true;
         for (let i = 0; i < this.balls.length; i++) {
           let ball = this.balls[i];
           if (!ball.show) {
@@ -195,7 +198,16 @@
           let inner = el.getElementsByClassName('inner-hook')[0];
           inner.style.webkitTransform = 'translate3d(0,0,0)';
           inner.style.transform = 'translate3d(0,0,0)';
-          el.addEventListener('transitionend', done, false);
+          if (el.addEventListener) {
+            el.addEventListener('transitionend', done, false);
+          } else if (el.attachEvent) {
+            el.attachEvent('transitionend', done);
+            el.attachEvent('onTransitionend', done);
+          }
+          setTimeout(() => {
+            this.flash = false;
+            this.afterDrop(el);
+          }, 450);
         });
       },
       afterDrop(el) {
@@ -247,10 +259,20 @@
             border-radius: 50%
             background: #2b343c
             text-align: center
+            will-change: transform
             &.highlight
               background: rgb(0, 160, 220)
               >.icon-shopping_cart
                 color: #fff
+            &.animate-shake
+              animation:animate-shake .5s ease-in-out
+              @keyframes animate-shake{
+                0%{-webkit-transform:scale(1);transform:scale(1)}
+                25%{-webkit-transform:scale(.8);transform:scale(.8)}
+                50%{-webkit-transform:scale(1.1);transform:scale(1.1)}
+                75%{-webkit-transform:scale(.9);transform:scale(.9)}
+                to{-webkit-transform:scale(1);transform:scale(1)}
+              }
             .icon-shopping_cart
               line-height: 44px
               font-size: 24px

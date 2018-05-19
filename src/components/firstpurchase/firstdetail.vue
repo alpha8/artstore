@@ -13,12 +13,8 @@
           </div>
           <div v-if="good.stock">
             <div class="row">
-              <div class="label">商品库存：</div>
-              <div class="desc">{{good.stock || 0}}</div>
-            </div>
-            <div class="row" v-if="good.deliveryDays">
-              <div class="label">预计发货：</div>
-              <div class="desc">{{good.deliveryDays}}天</div>
+              <div class="label">库存：</div>
+              <div class="desc">{{good.stock || 0}}件</div>
             </div>
           </div>
           <div class="cartcontrol-wrapper" v-if="firstpay.count">

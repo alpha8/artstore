@@ -23,7 +23,9 @@
     props: {
       articles: {
         type: Array,
-        default: []
+        default() {
+          return [];
+        }
       }
     },
     methods: {

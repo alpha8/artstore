@@ -327,7 +327,11 @@ export const mutations = {
       for (let i = 0; i < cartGoods.length; i++) {
         if (cartGoods[i].id === good.id) {
           cartGoods.splice(i, 1);
-          delete goodCount['p' + good.id];
+          if (!good.extendId) {
+            delete goodCount['p' + good.id];
+          } else {
+            delete goodCount['p' + good.extendId];
+          }
           state.cartAmount -= good.count;
         }
       }

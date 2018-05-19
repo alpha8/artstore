@@ -171,9 +171,14 @@
           return '拍卖';
         } else if (item.type === 6) {
           return '充值订单';
-        } else {
-          return '';
+        } else if (item.type === 7) {
+          return '首单特惠';
+        } else if (item.type === 8) {
+          return '拼团';
+        } else if (item.type === 9) {
+          return '分享特惠';
         }
+        return '';
       },
       changeTab(item) {
         this.activeItem = item.val;
@@ -194,6 +199,8 @@
           this.$router.push({name: 'groupbuyDetail', params: {id: product.id}});
         } else if (order.type === 5) {  // 拍卖
           this.$router.push({name: 'auctiondetail', params: {id: product.id}});
+        } else if (order.type === 7) {  // 首单特惠
+          this.$router.push({name: 'firstdetail', params: {id: product.id}});
         } else {
           this.$router.push({name: 'good', params: {id: product.id}});
         }

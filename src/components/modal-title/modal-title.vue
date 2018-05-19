@@ -1,8 +1,8 @@
 <template>
   <div class="title" :class="{'no-more': !moreText}">
-    <div class="line left"></div>
-    <div class="text">{{title}}</div>
-    <div class="line right"></div>
+    <div class="line left" v-if="!moreText"></div>
+    <div class="text" :class="{'nopadding': moreText}">{{title}}</div>
+    <div class="line right" v-if="!moreText"></div>
     <div class="more" @click.stop.prevent="fetchMore">{{moreText}}</div>
   </div>
 </template>
@@ -45,8 +45,9 @@
   .title
     position: relative
     display: flex
-    width: 90%
-    margin: 14px auto 12px auto
+    width: 100%
+    padding: 14px 18px 12px 14px
+    box-sizing: border-box
     &:after
       position: absolute
       display: block
@@ -60,7 +61,7 @@
       -webkit-transform: rotate(135deg)
       transform: rotate(135deg)
       top: 50%
-      right: -6px
+      right: 13px
       margin-top: -4px
     &.no-more:after
       display: none
@@ -70,9 +71,9 @@
       top: -8px
       border-bottom: 1px solid #fafafa
       &.left
-        margin-left: 30px
+        margin-left: 32px
       &.right
-        margin-right: 30px
+        margin-right: 32px
     .text
       padding: 0 12px
       height: 16px
@@ -85,13 +86,17 @@
       display: -webkit-box
       -webkit-line-clamp: 1
       -webkit-box-orient: vertical
+      &.nopadding
+        padding: 0
+        padding-left: 5px
+        border-left: 3px solid #ccc
     .more
       position: absolute
       display: block
       height: 16px
       line-height: 16px
       top: 50%
-      right: 3px
+      right: 21px
       margin-top: -8px
       font-size: 14px
       color: #666

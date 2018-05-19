@@ -37,6 +37,13 @@
   };
 </script>
 
+<style scoped lang="stylus" rel="stylesheet/stylus">
+  .swiper-container-horizontal > .swiper-pagination-bullets
+    text-align: right
+    right: 10px
+    width: auto
+</style>
+
 <style lang="stylus" rel="stylesheet/stylus">
   .swiper-container-horizontal > .swiper-pagination-bullets
     bottom: 7px

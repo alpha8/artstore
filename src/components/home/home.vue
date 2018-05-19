@@ -115,7 +115,19 @@
           url: '/search?parentCat=museum&key=老茶博物馆',
           icon: 'icon-museum big'
         }, {
-          name: '四折秒杀',
+          name: '首单特惠',
+          url: '/firstpurchase',
+          icon: 'icon-prefer big'
+        }, {
+          name: '分享特惠',
+          url: '/sharepay',
+          icon: 'icon-cutingprice big'
+        }, {
+          name: '三折拼团',
+          url: '/tuan',
+          icon: 'icon-tuan big'
+        }, {
+          name: '三折秒杀',
           url: '/seckill',
           icon: 'icon-miaosha big'
         // }, {
@@ -126,12 +138,12 @@
         //   replace: '收起栏目',
         //   replaceIcon: 'icon-upward2 big'
         }, {
-          name: '五折团购',
+          name: '团 购',
           url: '/groupbuy',
           icon: 'icon-group_purchase',
           css: 'nobottom'
         }, {
-          name: '五折抢拍',
+          name: '拍 卖',
           url: '/auction',
           icon: 'icon-auction',
           css: 'nobottom'
@@ -139,18 +151,6 @@
           name: '文 章',
           url: '/articles',
           icon: 'icon-file'
-        }, {
-          name: '首单特惠',
-          url: '/firstpurchase',
-          icon: 'icon-prefer big'
-        }, {
-          name: '拼 团',
-          url: '/tuan',
-          icon: 'icon-tuan big'
-        }, {
-          name: '分享特惠',
-          url: '/sharepay',
-          icon: 'icon-cutingprice big'
         }],
         swiperSlides: [
           'http://www.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=500',
