@@ -1,6 +1,6 @@
 <template>
   <div class="main-wrapper">
-    <fixedheader title="首单特惠" right-icon="icon-more"></fixedheader>
+    <fixedheader title="首单二折" right-icon="icon-more"></fixedheader>
     <div class="product-wrapper">
       <div class="productlist" ref="productWrapper">
         <mu-flexbox wrap="wrap" justify="space-around" :gutter="0">
@@ -17,9 +17,9 @@
         </mu-flexbox>
         <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
         <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
+        <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
-    <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
 
@@ -46,6 +46,7 @@
     activated() {
       this.show();
       this.fetchData(true);
+      this.loadUserProfile();
     },
     deactivated() {
       this._reset();
@@ -87,6 +88,18 @@
           this.loadEnd = false;
           this.loading = false;
           this.totalPages = 0;
+        });
+      },
+      loadUserProfile() {
+        let user = this.$store.getters.getUserInfo;
+        api.getProfile({
+          userId: user.userId || 0
+        }).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('updateUserProfile', response);
+          }
+        }).catch(response => {
+          console.error(response);
         });
       },
       _reset() {

@@ -258,7 +258,7 @@
           this.wxReady();
           this.connectSocket();
           // this.fetchBids();
-          this.fetchComments();
+          // this.fetchComments();
           this.getLikeGoods();
           // this.getWXFollow();
         }).catch(response => {

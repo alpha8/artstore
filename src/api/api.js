@@ -571,5 +571,33 @@ export default {
    */
   getFirstpayGood(id, params) {
     return doGet(this.CONFIG.webspreadCtx + '/specialfield/get/' + id, params);
+  },
+
+  /**
+   * 创建砍价预订单
+   */
+  createSharePreOrder(params) {
+    return doPost(this.CONFIG.webspreadCtx + '/spreadcut/add', params);
+  },
+
+  /**
+   * 查询砍价列表
+   */
+  getShareCuttings(params) {
+    return doPost(this.CONFIG.webspreadCtx + '/spreadcut/check', params);
+  },
+
+  /**
+   * 创建发起和参加拼团
+   */
+  createTuanOrder(params) {
+    return doPost(this.CONFIG.webspreadCtx + '/spreadteam/add', params);
+  },
+
+  /**
+   * 查询拼团列表
+   */
+  getTuanList(params) {
+    return doPost(this.CONFIG.webspreadCtx + '/spreadteam/check', params);
   }
 };

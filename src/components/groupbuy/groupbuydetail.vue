@@ -235,7 +235,7 @@
           this.processing = false;
           this.$store.dispatch('closeLoading');
           this.wxReady();
-          this.fetchComments();
+          // this.fetchComments();
           this.getLikeGoods();
           // this.getWXFollow();
         }).catch(response => {

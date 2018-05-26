@@ -52,6 +52,10 @@ import stat from '@/components/stats/stat';
 import uvdetail from '@/components/stats/uv_detail';
 import firstpurchase from '@/components/firstpurchase/firstpurchase';
 import firstdetail from '@/components/firstpurchase/firstdetail';
+import sharepayList from '@/components/sharepay/sharelist';
+import sharedetail from '@/components/sharepay/sharedetail';
+import tuanList from '@/components/tuan/tuanlist';
+import tuandetail from '@/components/tuan/tuandetail';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -112,6 +116,10 @@ export default new Router({
     {path: '/uvdetail', component: uvdetail, name: 'uvdetail'},
     {path: '/firstpurchase', component: firstpurchase, name: 'firstpurchase'},
     {path: '/firstpurchase/:id', component: firstdetail, name: 'firstdetail'},
+    {path: '/sharepay', component: sharepayList, name: 'sharepay'},
+    {path: '/sharepay/:id', component: sharedetail, name: 'sharedetail'},
+    {path: '/tuan', component: tuanList, name: 'tuan'},
+    {path: '/tuan/:id', component: tuandetail, name: 'tuandetail'},
     {path: '/my', component: my}
   ]
   // ,scrollBehavior (to, from, savedPosition) {

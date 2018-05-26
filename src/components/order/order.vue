@@ -201,6 +201,10 @@
           this.$router.push({name: 'auctiondetail', params: {id: product.id}});
         } else if (order.type === 7) {  // 首单特惠
           this.$router.push({name: 'firstdetail', params: {id: product.id}});
+        } else if (order.type === 8) {  // 拼团
+          this.$router.push({name: 'tuandetail', params: {id: product.id}});
+        } else if (order.type === 9) {  // 分享特惠
+          this.$router.push({name: 'sharedetail', params: {id: product.id}});
         } else {
           this.$router.push({name: 'good', params: {id: product.id}});
         }

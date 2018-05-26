@@ -17,7 +17,7 @@ const SEARCH_HISTORY = 'searchhistory';
 const USED_DISCOUNT = 'USED_DISCOUNT';
 const HISTORY_SIZE = 10;
 const ANONYMOUS = 'anonymous';
-const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
+const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38, "icon": "http://thirdwx.qlogo.cn/mmopen/vi_32/Qh7KvJCbGynQiaSxvup9KP0SHmRnua0kJYzKWPRYGPvCwpDjZf8JiahrodQZNwbRjh1b4oRicOABr73DjGSrZ6vAA/132"}';
 
 // states
 export const state = {

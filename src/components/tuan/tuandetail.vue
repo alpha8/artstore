@@ -1,20 +1,26 @@
 <template>
   <div>
-    <fixedheader title="首单商品详情" right-icon="icon-more"></fixedheader>
+    <fixedheader title="拼团商品详情" right-icon="icon-more"></fixedheader>
     <div class="good" ref="good">
       <div class="good-content">
         <div class="image-header">
           <swipe :swiperSlides="swiperSlides"></swipe>
         </div>
-        <div class="content">
-          <h1 class="title">{{firstpay.name}}</h1>
-          <div class="price">
-            <span class="now">¥{{getGoodPrice}}</span><span class="old" v-show="firstpay.fieldPrice !== firstpay.buttomFee">¥{{firstpay.fieldPrice}}</span>
+        <div class="tuan_price">
+          <span class="tuan_tag"><i class="icon-person"></i><em>{{tuan.limitCount}}人拼</em></span>
+          <span class="tuan_newprice">¥<em>{{tuan.buttomFee}}</em></span>
+          <span class="tuan_oldprice"><del v-show="tuan.fieldPrice">{{tuan.fieldPrice | currency}}</del></span>
+          <div class="tuan_countdown" v-show="tuan.leftEndTimes >= 0">
+            <small>距拼购结束还剩:</small>
+            <span><i>{{countdownStats.days}}</i>天<i v-if="countdownStats.hours">{{countdownStats.hours}}</i>:<i v-if="countdownStats.mins">{{countdownStats.mins}}</i>:<i v-if="countdownStats.seconds">{{countdownStats.seconds}}</i></span>
           </div>
-          <div v-if="firstpay.stock">
+        </div>
+        <div class="content">
+          <h1 class="title">{{tuan.name}}</h1>
+          <div v-if="tuan.stock">
             <div class="row">
               <div class="label">商品库存：</div>
-              <div class="desc">{{firstpay.stock || 0}}</div>
+              <div class="desc">{{tuan.stock || 0}}</div>
             </div>
             <div class="row" v-if="good.deliveryDays">
               <div class="label">预计发货：</div>
@@ -25,12 +31,20 @@
             <div class="label">优惠活动：</div>
             <div class="desc">不支持优惠券</div>
           </div>
-          <div class="cartcontrol-wrapper" v-if="userProfile.hasFirst && firstpay.count">
-            <cartcontrol @add="addGood" :good="firstpay" :maxCount="1" :stock="firstpay.stock"></cartcontrol>
-          </div>
-          <transition name="fade">
-            <div @click.stop.prevent="addFirst" class="buy" v-if="userProfile.hasFirst && firstpay.stock && !firstpay.count">加入购物车</div>
-          </transition>
+        </div>
+        <split v-if="tuanData && tuanData.teamOrders"></split>
+        <div class="info" v-if="tuanData && tuanData.teamOrders">
+          <h1 class="title">拼团列表</h1>
+          <table class="tablist">
+            <tr class="head">
+              <td class="col-2" nowrap>拼团用户</td>
+              <td class="col-4">拼团时间</td>
+            </tr>
+            <tr v-for="(item, index) in tuanData.teamOrders" :key="index">
+              <td class="col-2" nowrap><img :src="getUserIcon(item.userIcon)" class="thumbnail">{{getFriendlyUsername(item.userName)}}</td>
+              <td class="col-4">{{item.createAt | formatDate}}</td>
+            </tr>
+          </table>
         </div>
         <split v-show="good.content"></split>
         <div class="info" v-if="good.videoUrl || (good.videos && good.videos.length)">
@@ -121,14 +135,25 @@
     </div>
     <frame></frame>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
-    <minicart ref="shopcart" :selectGoods="selectGoods" :max-items="3" @fireEmpty="doClear" @fireReload="doRefresh" :isAvailable="userProfile.hasFirst"></minicart>
+    <div class="fixed-foot">
+      <div class="foot-wrapper">
+        <div class="foot-item btn-share" @click.stop.prevent="pay">
+          <span class="button-lg orange"><span class="line">¥<strong>{{tuan.fieldPrice}}</strong></span>单独购买</span>
+        </div>
+        <div class="foot-item">
+          <span class="button-lg gray" v-if="tuan.leftEndTimes <= 0"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
+          <span class="button-lg darkred" v-else @click.stop.prevent="joinGroupbuy"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {mixUsername, formatDate, convertVideoUrl} from '@/common/js/util';
+  import {mixUsername, convertVideoUrl} from '@/common/js/util';
+  import {formatDate, countdown} from '@/common/js/date';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
   import modalTitle from '@/components/modal-title/modal-title';
@@ -143,7 +168,7 @@
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   import layer from '@/components/common/layer';
-  import minicart from '@/components/cart/minicart';
+  let Base64 = require('js-base64').Base64;
 
   const ALL = 3;
   // const ERR_OK = 0;
@@ -157,6 +182,7 @@
       this.good.videos = [];
       this.hide();
       this.processing = false;
+      this.stopTimer();
     },
     updated() {
       if (this.good.content && !this.processing) {
@@ -170,8 +196,7 @@
       return {
         scrollY: 0,
         good: {},
-        firstpay: {},
-        extFirstpay: {},
+        tuan: {},
         lazyloaded: false,
         processing: false,
         previewImgList: [],
@@ -194,7 +219,11 @@
         },
         showFollow: true,
         wxqrcode: api.CONFIG.wxqrcode,
-        prefix: '_fp'
+        prefix: '_fp',
+        timer: null,
+        countdownStats: {},
+        tuanData: {}, // 拼团响应信息
+        mutex: false
       };
     },
     computed: {
@@ -221,7 +250,7 @@
         return '';
       },
       getGoodPrice() {
-        return this.firstpay.buttomFee;
+        return this.tuan.buttomFee;
       },
       getFrameHeight() {
         let width = document.documentElement.clientWidth || 375;
@@ -246,9 +275,6 @@
           }
         });
         return items;
-      },
-      userProfile() {
-        return this.$store.getters.getUserProfile;
       }
     },
     methods: {
@@ -264,22 +290,23 @@
           anon = this.$store.getters.getAnonymous;
         }
         api.getFirstpayGood(id, {
-          type: 'firstpaydetail',
+          type: 'tuandetail',
           stat: 1,
           unlogin: anon
         }).then(res => {
-          let firstpay = res;
-          this.firstpay = firstpay;
-          api.GetGood(firstpay.artworkId).then(response => {
+          let tuan = res;
+          this.tuan = tuan;
+          this.timerLoop();
+          api.GetGood(tuan.artworkId).then(response => {
             let good = response;
             this.good = good;
-            Object.assign(this.good, firstpay);
-            this.extendedGoodsAttrs(good);
+            Object.assign(this.good, tuan);
             this.show();
             this.processing = false;
             this.$store.dispatch('closeLoading');
             this.wxReady();
             // this.fetchComments();
+            this.fetchTuanData();
             this.getRelatedGoods();
             this.getLikeGoods();
           }).catch(response => {
@@ -289,32 +316,76 @@
           this.$store.dispatch('closeLoading');
         });
       },
-      extendedGoodsAttrs(good) {
-        if (!this.firstpay.count) {
-          Vue.set(this.firstpay, 'count', 0);
-        }
-        let sid = 'p' + this.prefix + this.firstpay.id;
-        var qty = this.addedProducts && this.addedProducts[sid];
-        this.firstpay.count = qty || 0;
-        this.firstpay.pictures = good.pictures;
-        this.firstpay.price = this.firstpay.buttomFee;
-        this.firstpay.oldPrice = this.firstpay.fieldPrice;
-        this.firstpay.extendId = this.prefix + this.firstpay.id;
-        this.firstpay.type = this.prefix;
-      },
       loadTencentPlayer() {
         if (!this.good.videoUrl) {
           return;
         }
       },
-      wxshare() {
-        this.$refs.weixinShare.show();
+      timerLoop() {
+        if (this.tuan.leftEndTimes < 0) {
+          return;
+        }
+        this.tuan.leftEndTimes -= 1000;
+        this.countdownStats = countdown(this.tuan.leftEndTimes / 1000);
+        if (this.tuan.leftEndTimes <= 0) {
+          this.countdownStats = {
+            days: 0,
+            hours: '00',
+            mins: '00',
+            seconds: '00',
+            milliseconds: 0
+          };
+          clearTimeout(this.timer);
+        }
+        this.timer = setTimeout(this.timerLoop, 1000);
+      },
+      stopTimer() {
+        if (this.timer) {
+          clearTimeout(this.timer);
+        }
+        this.countdownStats = {};
+      },
+      fetchTuanData() {
+        let tuanId = this.$route.query.tuanId;
+        if (!tuanId) {
+          return;
+        }
+        let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
+          return;
+        }
+        api.getTuanList({
+          userId: user.userId,
+          fieldId: this.tuan.id,
+          createId: shareId,
+          userName: user.nickName || '匿名',
+          userIcon: user.icon || ''
+        }).then(response => {
+          if (response.result === 0) {
+            this.tuanData = response.data;
+          }
+          this._initScroll();
+        }).catch(response => {
+          console.error(response);
+        });
+      },
+      getUserIcon(icon) {
+        if (!icon) {
+          return 'http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10';
+        }
+        return icon;
+      },
+      getFriendlyUsername(userName) {
+        if (userName) {
+          return Base64.decode(userName);
+        }
+        return '匿名';
       },
       fetchComments() {
         api.getProductComments({
           currentPage: 1,
           pageSize: 5,
-          productId: this.firstpay.artworkId || ''
+          productId: this.tuan.artworkId || ''
         }).then(response => {
           this.good.ratings = response.comments;
           this._initScroll();
@@ -371,7 +442,7 @@
           pageSize: 12,
           keyword: kw,
           categoryParentName: cat || '',
-          pid: this.firstpay.artworkId,
+          pid: this.tuan.artworkId,
           commodityStatesId: 2,
           scoreSort: true
         }).then((response) => {
@@ -442,33 +513,6 @@
       },
       showQrcode() {
         this.$refs.layerWin.show();
-      },
-      doClear() {
-        this.firstpay.count = 0;
-      },
-      doRefresh(target) {
-        let newCount = 0;
-        this.$store.getters.cartProducts.forEach(product => {
-          if (product.id === this.firstpay.id) {
-            newCount = product.count || 0;
-          }
-        });
-        this.firstpay.count = newCount;
-      },
-      addFirst(event) {
-        Vue.set(this.firstpay, 'count', 1);
-        this._drop(event.target);
-        this.$store.commit('ADD_QUANTITY', this.prefix + this.firstpay.id);
-        this.$store.dispatch('addToCart', this.firstpay);
-      },
-      addGood(target) {
-        this._drop(target);
-      },
-      _drop(target) {
-        // 优化体验，异步执行小球下落动画
-        this.$nextTick(() => {
-          this.$refs.shopcart.drop(target);
-        });
       },
       selectRating(type) {
         this.selectType = type;
@@ -548,23 +592,23 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone']
           });
         });
-        let redirect = 'http://' + location.host + '/weixin/fp/' + this.firstpay.id;
+        let redirect = 'http://' + location.host + '/weixin/tuan/' + this.tuan.id;
         let user = this.$store.getters.getUserInfo;
         if (user.userId) {
-          redirect += '?userId=' + user.userId;
+          redirect += '?tuanId=' + user.userId;
         }
         let img = api.CONFIG.psCtx + '5959aca5e4b00faa50475a18?w=423&h=423';
-        if (this.firstpay.icon) {
-          img = api.CONFIG.psCtx + this.firstpay.icon;
+        if (this.tuan.icon) {
+          img = api.CONFIG.psCtx + this.tuan.icon;
         } else if (this.good.pictures && this.good.pictures.length) {
           img = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423';
         }
         let vm = this;
         let shareData = {
-          title: this.firstpay.name,
-          desc: '售价：¥' + (this.firstpay.buttomFee) + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
+          title: this.tuan.name,
+          desc: '开团价：¥' + this.tuan.buttomFee + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
-          imgUrl: img,
+          imgUrl: icon,
           success: function () {
             vm.$refs.weixinShare.hideDialog();
           }
@@ -621,18 +665,56 @@
       goTop() {
         let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
         this.scroll.scrollToElement(goodWrapper, 300);
+      },
+      joinGroupbuy() {
+        let user = this.$store.getters.getUserInfo;
+        if (user.userId) {
+          this.$store.dispatch('openToast', '未登录!');
+          return;
+        }
+        api.createTuanOrder({
+          fieldId: this.tuan.id,
+          userId: user.userId,
+          createId: user.userId,
+          openid: user.openid,
+          userName: user.nickName,
+          userIcon: user.icon || ''
+        }).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('openToast', '开团成功!');
+          }
+        }).catch(response => {
+          console.error(response);
+        });
+      },
+      pay() {
+        let good = {
+          id: this.tuan.id,
+          name: this.tuan.name,
+          pictures: this.good.pictures,
+          src: this.tuan.icon,
+          content: '',
+          price: this.tuan.fieldPrice,
+          oldPrice: this.tuan.fieldPrice,
+          count: 1,
+          icon: (this.tuan.icon) ? api.CONFIG.psCtx + this.tuan.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
+          checked: false
+        };
+        this.$store.dispatch('addPayGoods', [good]);
+        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
       }
     },
     filters: {
       formatDate(time) {
-        return formatDate(time);
+        let date = new Date(time);
+        return formatDate(date, 'yyyy-MM-dd hh:mm:ss');
       },
       mix(name) {
         return mixUsername(name);
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, minicart
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer
     }
   };
 </script>
@@ -643,7 +725,7 @@
   .good
     position: absolute
     top: 44px
-    bottom: 48px
+    bottom: 50px
     width: 100%
     background: #fff
     overflow: hidden
@@ -742,6 +824,92 @@
               box-sizing: border-box
               .icon-favorite
                 color: #ff463c
+      .tuan_price
+        position: relative
+        display: flex
+        -webkit-box-align: center
+        align-items: center
+        height: 49px
+        color: #fff
+        background-image:-webkit-linear-gradient(left,#f94c00,#fcc04e)
+        padding: 0 10px
+        .tuan_tag
+          position: relative
+          color: #fff
+          font-size: 0
+          height: 18px
+          padding-right: 5px
+          margin-right: 10px
+          overflow: hidden
+          box-sizing: border-box
+          &::after
+            content: ""
+            display: block
+            border: 1px solid #e5e5e5
+            position: absolute
+            top: 0
+            left: 0
+            pointer-events: none
+            -webkit-transform: scale(.5);
+            -webkit-transform-origin: 0 0;
+            bottom: -100%;
+            right: -100%;
+            border-color: #fff
+            border-radius: 2px
+          i
+            display: inline-block
+            font-size: 18px
+            height: 18px
+            padding-right: 2px
+            vertical-align: top
+          em
+            display: inline-block
+            font-size: 14px
+            padding-top: 2px
+            vertical-align: top
+            box-sizing: border-box
+        .tuan_newprice
+          color: #fff
+          font-family: arial
+          font-size: 18px
+          em
+            margin-left: 4px
+            font-size: 24px
+        .tuan_oldprice
+          position: relative
+          color: hsla(0,0%,100%,.5)
+          font-size: 12px
+          top: 2px
+          margin-left: 10px
+        .tuan_countdown
+          position: absolute
+          right: 0
+          top: 0
+          bottom: 0
+          width: 120px
+          text-align: center
+          small
+            display: block
+            font-size: 12px
+            height: 17px
+            line-height: 17px
+            color: #cf2c01
+            margin-top: 4px
+          span
+            display: block
+            font-size: 12px
+            color: #cf2c01
+            i
+              display: inline-block
+              width: 19px
+              height: 24px
+              line-height: 24px
+              text-align: center
+              color: #fff
+              font-size: 12px
+              background-color: #fc8117
+              border-radius: 2px
+              margin: 0 2px
     .content
       position: relative
       padding: 16px 18px 15px 14px
@@ -908,6 +1076,9 @@
         flex: 1
         font-size: 13px
         oveflow: hidden
+      .icon-question_mark
+        padding-left: 20px
+        color: #666
     .rating
       position: relative
       .title
@@ -992,4 +1163,146 @@
         position: relative
         width: 100%
         height: auto
+  .fixed-foot
+    position: fixed
+    left: 0
+    right: 0
+    bottom: 0
+    height: 50px
+    z-index: 80
+    background: #fafafa
+    .foot-wrapper
+      display: flex
+      height: 100%
+      .foot-item, .mini-favorite-item
+        flex: 1
+        position: relative
+        height: 100%
+        font-size: 12px
+        text-align: center
+        color: #666
+        &.active
+          color: #00bb9c
+        .icon
+          display: block
+          line-height: 1
+          padding-top: 5px
+          i
+            display: inline-block
+            width: 20px
+            height: 20px
+            font-size: 16px
+        .text
+          display: block
+          line-height: 1
+          font-size: 10px
+        .button-lg
+          display: block
+          line-height: 50px
+          font-size: 14px
+          i
+            font-size: 22px
+          &.gray
+            background: #999
+            color: #fff
+          &.green
+            background: #44b549
+            color: #fff
+          &.orange
+            background: rgba(250,180,90,0.93)
+            color: #fff
+          &.red
+            background: #ff463c
+            color: #fff
+          &.darkred
+            background: #d05148
+            color: #fff
+          &.disabled
+            opacity: 0.2
+          &.blue
+            background: #00a0dc
+            color: #fff
+          .icon-favorite
+            color: #ff463c
+          .line
+            display:block
+            font-size: 12px
+            line-height: 12px
+            color: #fff
+            padding-top: 10px
+            margin-bottom: -14px
+            strong
+              font-size: 18px
+              font-weight: 400
+              margin-left: 2px
+        .input-group
+          position: relative
+          flex: 1
+          box-sizing: border-box
+          .input-group-btn
+            display: block
+            float: left
+            width: 20%
+            height: 50px
+            line-height: 50px
+            font-size: 26px
+            background-color: rgba(250,180,90,0.93)
+            color: #FFF
+          .form-control
+            float: left
+            width: 60%
+            height: 50px
+            line-height: 50px
+            font-size: 16px
+            color: #555
+            text-align: center
+            background-color: #fff
+            background-image: none
+            border-top: 1px solid rgba(250,180,90,0.93)
+            border-bottom: 1px solid rgba(250,180,90,0.93)
+            -webkit-appearance: none
+            border-radius: 0
+            outline: none
+            box-sizing: border-box
+      .btn-share
+        flex: none
+        float: left
+        width: 45%
+        display: block
+      .mini-favorite-item
+        flex: 70px 0 0
+        .button-lg
+          height: 50px
+          line-height: 30px
+          margin-top: 15px
+          overflow: hidden
+        .badge
+          display: inline-block
+          position: absolute
+          top: 6px
+          right: 13px
+          background: #f23030
+          color: #fff
+          border-radius: 50%
+          padding: 2px
+          width: 14px
+          height: 14px
+          line-height: 14px
+          font-size: 10px
+          overflow: hidden
+          text-overflow: ellipsis
+          white-space: nowrap
+    .ball-container
+      .ball
+        position: fixed
+        left: 32px
+        bottom: 22px
+        z-index: 200
+        transition: all 0.4s cubic-bezier(0.49, -0.29, 0.75, 0.41)
+        .inner
+          width: 16px
+          height: 16px
+          border-radius: 50%
+          background: rgb(0, 160, 220)
+          transition: all 0.4s linear
 </style>

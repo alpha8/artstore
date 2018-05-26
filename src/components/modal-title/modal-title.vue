@@ -1,8 +1,8 @@
 <template>
   <div class="title" :class="{'no-more': !moreText}">
-    <div class="line left" v-if="!moreText"></div>
-    <div class="text" :class="{'nopadding': moreText}">{{title}}</div>
-    <div class="line right" v-if="!moreText"></div>
+    <div class="line left"></div>
+    <div class="text">{{title}}</div>
+    <div class="line right"></div>
     <div class="more" @click.stop.prevent="fetchMore">{{moreText}}</div>
   </div>
 </template>
@@ -75,7 +75,7 @@
       &.right
         margin-right: 32px
     .text
-      padding: 0 12px
+      padding: 0 8px
       height: 16px
       line-height: 16px
       font-size: 14px

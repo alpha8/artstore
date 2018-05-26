@@ -82,28 +82,32 @@
 
 <style lang="stylus" rel="stylesheet/stylus">
   .swiper-container-horizontal > .swiper-pager
-    bottom: 5px
     left: 0
+    bottom: 0
     width: 100%
     font-size:0
+    height: 16px
+    border-top: 1px solid rgba(7, 17, 27, 0.1)
+    border-bottom: 1px solid rgba(7, 17, 27, 0.1)
+    background: #f3f5f7
     .swiper-pagination-bullet
-      width: 40px
+      width: 30px
       height: 3px
       background: #ccc
       opacity: .6
-      border-radius: 0
-      margin: 0
+      border-radius: 20px
+      margin: 7.5px 3px 7.5px 0
       &.swiper-pagination-bullet-active
         background: #00a0dc
-        width: 40px
-        border-radius: 0
+        width: 30px
+        border-radius: 20px
 </style>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin';
   @require '../../common/stylus/variables'
   .swiper-container
-    height: 138px
+    height: 147px
     .slide
       display: block
       width: 100%
@@ -123,6 +127,7 @@
       display: flex
       flex-wrap: wrap
       height: 129px
+      box-sizing: border-box
       overflow: hidden
       &.more
         height: auto

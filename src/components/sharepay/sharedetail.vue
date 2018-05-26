@@ -1,20 +1,28 @@
 <template>
   <div>
-    <fixedheader title="首单商品详情" right-icon="icon-more"></fixedheader>
+    <fixedheader title="特惠商品详情" right-icon="icon-more"></fixedheader>
     <div class="good" ref="good">
       <div class="good-content">
         <div class="image-header">
           <swipe :swiperSlides="swiperSlides"></swipe>
         </div>
         <div class="content">
-          <h1 class="title">{{firstpay.name}}</h1>
+          <h1 class="title">{{sharepay.name}}</h1>
           <div class="price">
-            <span class="now">¥{{getGoodPrice}}</span><span class="old" v-show="firstpay.fieldPrice !== firstpay.buttomFee">¥{{firstpay.fieldPrice}}</span>
+            <span class="now">¥{{getGoodPrice}}</span><span class="old" v-if="sharepay.fieldPrice !== getGoodPrice">¥{{sharepay.fieldPrice}}</span>
           </div>
-          <div v-if="firstpay.stock">
+          <div class="row">
+            <div class="label">分享底价：</div>
+            <div class="desc">{{sharepay.buttomFee | currency}}</div>
+          </div>
+          <div class="row">
+            <div class="label">分享优惠：</div>
+            <div class="desc">新访客已贡献{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元<i class="icon-question_mark" @click.stop.prevent="showRules"></i></div>
+          </div>
+          <div v-if="sharepay.stock">
             <div class="row">
               <div class="label">商品库存：</div>
-              <div class="desc">{{firstpay.stock || 0}}</div>
+              <div class="desc">{{sharepay.stock || 0}}</div>
             </div>
             <div class="row" v-if="good.deliveryDays">
               <div class="label">预计发货：</div>
@@ -25,12 +33,22 @@
             <div class="label">优惠活动：</div>
             <div class="desc">不支持优惠券</div>
           </div>
-          <div class="cartcontrol-wrapper" v-if="userProfile.hasFirst && firstpay.count">
-            <cartcontrol @add="addGood" :good="firstpay" :maxCount="1" :stock="firstpay.stock"></cartcontrol>
-          </div>
-          <transition name="fade">
-            <div @click.stop.prevent="addFirst" class="buy" v-if="userProfile.hasFirst && firstpay.stock && !firstpay.count">加入购物车</div>
-          </transition>
+        </div>
+        <split v-if="cuttingData && cuttingData.cutInfos"></split>
+        <div class="info" v-if="cuttingData && cuttingData.cutInfos">
+          <h1 class="title">新访客贡献。 <span v-if="cuttingData.leftEndTimes">(离优惠清零只剩<span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span>)</span></h1>
+          <table class="tablist">
+            <tr class="head">
+              <td class="col-2" nowrap>访问用户</td>
+              <td class="col-4">访问时间</td>
+              <td class="col-3">贡献金额</td>
+            </tr>
+            <tr v-for="(item, index) in cuttingData.cutInfos" :key="index">
+              <td class="col-2" nowrap><img :src="getUserIcon(item.userIcon)" class="thumbnail">{{getFriendlyUsername(item.userName)}}</td>
+              <td class="col-4">{{item.createAt | formatDate}}</td>
+              <td class="col-3 text-center">{{item.cutFee | currency}}</td>
+            </tr>
+          </table>
         </div>
         <split v-show="good.content"></split>
         <div class="info" v-if="good.videoUrl || (good.videos && good.videos.length)">
@@ -120,15 +138,29 @@
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
     <frame></frame>
+    <share ref="weixinShare"></share>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
-    <minicart ref="shopcart" :selectGoods="selectGoods" :max-items="3" @fireEmpty="doClear" @fireReload="doRefresh" :isAvailable="userProfile.hasFirst"></minicart>
+    <div class="fixed-foot">
+      <div class="foot-wrapper">
+        <div class="foot-item btn-share" @click.stop.prevent="pay">
+          <span class="button-lg orange" v-if="GotAndPay">已达成(待付款)</span>
+          <span class="button-lg orange" v-else>立即购买</span>
+        </div>
+        <div class="foot-item" @click.stop.prevent="wxshare">
+          <span class="button-lg darkred">分享特惠</span>
+        </div>
+      </div>
+    </div>
+    <!-- 活动规则 -->
+    <rules ref="rules" title="分享特惠活动规则"></rules>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {mixUsername, formatDate, convertVideoUrl} from '@/common/js/util';
+  import {mixUsername, convertVideoUrl} from '@/common/js/util';
+  import {formatDate, countdown} from '@/common/js/date';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
   import modalTitle from '@/components/modal-title/modal-title';
@@ -143,7 +175,9 @@
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   import layer from '@/components/common/layer';
-  import minicart from '@/components/cart/minicart';
+  import share from '@/components/sharepay/share';
+  import rules from '@/components/sharepay/rules';
+  let Base64 = require('js-base64').Base64;
 
   const ALL = 3;
   // const ERR_OK = 0;
@@ -157,6 +191,7 @@
       this.good.videos = [];
       this.hide();
       this.processing = false;
+      this.stopTimer();
     },
     updated() {
       if (this.good.content && !this.processing) {
@@ -170,8 +205,7 @@
       return {
         scrollY: 0,
         good: {},
-        firstpay: {},
-        extFirstpay: {},
+        sharepay: {},
         lazyloaded: false,
         processing: false,
         previewImgList: [],
@@ -194,7 +228,12 @@
         },
         showFollow: true,
         wxqrcode: api.CONFIG.wxqrcode,
-        prefix: '_fp'
+        prefix: '_fp',
+        timer: null,
+        countdownStats: {},
+        leftSeconds: 0,
+        cuttingData: {}, // 砍价响应信息
+        mutex: false  // 创建过一次预订单，即为true
       };
     },
     computed: {
@@ -221,7 +260,10 @@
         return '';
       },
       getGoodPrice() {
-        return this.firstpay.buttomFee;
+        if (this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.owner) {
+          return this.cuttingData.cutOrder.dealFee;
+        }
+        return this.sharepay.specialPrice;
       },
       getFrameHeight() {
         let width = document.documentElement.clientWidth || 375;
@@ -247,8 +289,17 @@
         });
         return items;
       },
-      userProfile() {
-        return this.$store.getters.getUserProfile;
+      getCuttingUsers() {
+        if (this.cuttingData && this.cuttingData.cutInfos) {
+          return this.cuttingData.cutInfos.length;
+        }
+        return 0;
+      },
+      GotAndPay() {
+        if (this.cuttingData) {
+          return this.cuttingData.owner && (this.cuttingData.leftEndTimes <= 0 || this.cuttingData.cutOrder.dealFee + this.sharepay.forwardFee >= this.sharepay.buttomFee);
+        }
+        return false;
       }
     },
     methods: {
@@ -264,21 +315,21 @@
           anon = this.$store.getters.getAnonymous;
         }
         api.getFirstpayGood(id, {
-          type: 'firstpaydetail',
+          type: 'sharepaydetail',
           stat: 1,
           unlogin: anon
         }).then(res => {
-          let firstpay = res;
-          this.firstpay = firstpay;
-          api.GetGood(firstpay.artworkId).then(response => {
+          let sharepay = res;
+          this.sharepay = sharepay;
+          api.GetGood(sharepay.artworkId).then(response => {
             let good = response;
             this.good = good;
-            Object.assign(this.good, firstpay);
-            this.extendedGoodsAttrs(good);
+            Object.assign(this.good, sharepay);
             this.show();
             this.processing = false;
             this.$store.dispatch('closeLoading');
             this.wxReady();
+            this.fetchCuttingData();
             // this.fetchComments();
             this.getRelatedGoods();
             this.getLikeGoods();
@@ -289,32 +340,107 @@
           this.$store.dispatch('closeLoading');
         });
       },
-      extendedGoodsAttrs(good) {
-        if (!this.firstpay.count) {
-          Vue.set(this.firstpay, 'count', 0);
-        }
-        let sid = 'p' + this.prefix + this.firstpay.id;
-        var qty = this.addedProducts && this.addedProducts[sid];
-        this.firstpay.count = qty || 0;
-        this.firstpay.pictures = good.pictures;
-        this.firstpay.price = this.firstpay.buttomFee;
-        this.firstpay.oldPrice = this.firstpay.fieldPrice;
-        this.firstpay.extendId = this.prefix + this.firstpay.id;
-        this.firstpay.type = this.prefix;
-      },
       loadTencentPlayer() {
         if (!this.good.videoUrl) {
           return;
         }
       },
+      timerLoop() {
+        if (!this.leftSeconds) {
+          let leftTimeMillis = this.cuttingData && this.cuttingData.leftEndTimes || 0;
+          if (!leftTimeMillis) {
+            return;
+          }
+          this.leftSeconds = leftTimeMillis / 1000;
+        }
+        this.leftSeconds -= 60;
+        this.countdownStats = countdown(this.leftSeconds);
+        if (this.leftSeconds <= 0) {
+          clearTimeout(this.timer);
+        }
+        this.timer = setTimeout(this.timerLoop, 60000);
+      },
+      stopTimer() {
+        if (this.timer) {
+          clearTimeout(this.timer);
+        }
+      },
+      showRules() {
+        this.$refs.rules.showDetail();
+      },
+      getUserIcon(icon) {
+        if (!icon) {
+          return 'http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10';
+        }
+        return icon;
+      },
+      getFriendlyUsername(userName) {
+        if (userName) {
+          return Base64.decode(userName);
+        }
+        return '匿名';
+      },
       wxshare() {
-        this.$refs.weixinShare.show();
+        // 如果已经创建了砍价预订单，即跳过创建预订单，直接分享
+        if ((this.cuttingData && this.cuttingData.owner) || this.mutex) {
+          this.$refs.weixinShare.show();
+          return;
+        }
+        /** 用户已登录，创建分享预订单 */
+        let user = this.$store.getters.getUserInfo;
+        if (user && user.userId) {
+          api.createSharePreOrder({
+            fieldId: this.sharepay.id,
+            userId: user.userId,
+            openid: user.openid
+          }).then(response => {
+            if (response.code) {
+              this.$store.dispatch('openToast', '您已参加此商品活动!');
+              this.mutex = true;
+              return;
+            } else if (response.result !== 0) {
+              this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
+              return;
+            }
+            this.mutex = true;
+            // 显示分享指引页
+            this.$refs.weixinShare.show();
+          }).catch(response => {
+            this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
+            console.error(response);
+          });
+        }
+      },
+      fetchCuttingData() {
+        let shareId = this.$route.query.shareId;
+        if (!shareId) {
+          return;
+        }
+        let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
+          return;
+        }
+        api.getShareCuttings({
+          userId: user.userId,
+          fieldId: this.sharepay.id,
+          createId: shareId,
+          userName: user.nickName || '匿名',
+          userIcon: user.icon || ''
+        }).then(response => {
+          if (response.result === 0) {
+            this.cuttingData = response.data;
+          }
+          this._initScroll();
+          this.timerLoop();
+        }).catch(response => {
+          console.error(response);
+        });
       },
       fetchComments() {
         api.getProductComments({
           currentPage: 1,
           pageSize: 5,
-          productId: this.firstpay.artworkId || ''
+          productId: this.sharepay.artworkId || ''
         }).then(response => {
           this.good.ratings = response.comments;
           this._initScroll();
@@ -371,7 +497,7 @@
           pageSize: 12,
           keyword: kw,
           categoryParentName: cat || '',
-          pid: this.firstpay.artworkId,
+          pid: this.sharepay.artworkId,
           commodityStatesId: 2,
           scoreSort: true
         }).then((response) => {
@@ -443,23 +569,11 @@
       showQrcode() {
         this.$refs.layerWin.show();
       },
-      doClear() {
-        this.firstpay.count = 0;
-      },
-      doRefresh(target) {
-        let newCount = 0;
-        this.$store.getters.cartProducts.forEach(product => {
-          if (product.id === this.firstpay.id) {
-            newCount = product.count || 0;
-          }
-        });
-        this.firstpay.count = newCount;
-      },
       addFirst(event) {
-        Vue.set(this.firstpay, 'count', 1);
+        Vue.set(this.sharepay, 'count', 1);
         this._drop(event.target);
-        this.$store.commit('ADD_QUANTITY', this.prefix + this.firstpay.id);
-        this.$store.dispatch('addToCart', this.firstpay);
+        this.$store.commit('ADD_QUANTITY', this.prefix + this.sharepay.id);
+        this.$store.dispatch('addToCart', this.sharepay);
       },
       addGood(target) {
         this._drop(target);
@@ -548,21 +662,21 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone']
           });
         });
-        let redirect = 'http://' + location.host + '/weixin/fp/' + this.firstpay.id;
+        let redirect = 'http://' + location.host + '/weixin/sp/' + this.sharepay.id;
         let user = this.$store.getters.getUserInfo;
         if (user.userId) {
-          redirect += '?userId=' + user.userId;
+          redirect += '?shareId=' + user.userId;
         }
         let img = api.CONFIG.psCtx + '5959aca5e4b00faa50475a18?w=423&h=423';
-        if (this.firstpay.icon) {
-          img = api.CONFIG.psCtx + this.firstpay.icon;
+        if (this.sharepay.icon) {
+          img = api.CONFIG.psCtx + this.sharepay.icon;
         } else if (this.good.pictures && this.good.pictures.length) {
           img = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423';
         }
         let vm = this;
         let shareData = {
-          title: this.firstpay.name,
-          desc: '售价：¥' + (this.firstpay.buttomFee) + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
+          title: `${user.nickName}想要低价拿${this.sharepay.name}, 就差你一下了!`,
+          desc: '各位帮忙点一下，我是真的很想要',
           link: redirect,
           imgUrl: img,
           success: function () {
@@ -621,18 +735,38 @@
       goTop() {
         let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
         this.scroll.scrollToElement(goodWrapper, 300);
+      },
+      pay() {
+        let good = {
+          id: this.sharepay.id,
+          name: this.sharepay.name,
+          pictures: this.good.pictures,
+          src: this.sharepay.icon,
+          content: '',
+          price: this.sharepay.specialPrice,
+          oldPrice: this.sharepay.fieldPrice,
+          count: 1,
+          icon: (this.sharepay.icon) ? api.CONFIG.psCtx + this.sharepay.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
+          checked: false
+        };
+        if (this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.owner) {
+          good.price = this.cuttingData.cutOrder.dealFee;
+        }
+        this.$store.dispatch('addPayGoods', [good]);
+        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=9';
       }
     },
     filters: {
       formatDate(time) {
-        return formatDate(time);
+        let date = new Date(time);
+        return formatDate(date, 'yyyy-MM-dd hh:mm:ss');
       },
       mix(name) {
         return mixUsername(name);
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, minicart
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, rules
     }
   };
 </script>
@@ -643,7 +777,7 @@
   .good
     position: absolute
     top: 44px
-    bottom: 48px
+    bottom: 50px
     width: 100%
     background: #fff
     overflow: hidden
@@ -893,6 +1027,63 @@
             width: 80px
         .adjustText
           flex: 1
+    .tablist
+      position: relative
+      width: 100%
+      font-size: 12px
+      background-color: #fff
+      color: #666
+      text-align: left
+      tr
+        height: 40px
+        line-height: 40px
+      >.head
+        background-color: #fafafa
+        font-size: 13px
+      .col-1
+        width: 15%
+        padding-left: 10px
+        box-sizing: border-box
+        span
+          display: inline-block
+          height: 15px
+          width: 30px
+          line-height: 15px
+          vertical-align: middle
+          text-align: center
+          color: #f1f1f1
+          background-color: #747474
+          border-radius: 1px
+          &.highlight
+            background-color: #00a0dc
+      .col-2
+        flex: 1
+        padding-left: 10px
+        overflow: hidden
+        box-sizing: border-box
+      .col-3
+        width: 25%
+        padding-left: 10px
+        word-break: break-all
+        overflow: hidden
+        box-sizing: border-box
+      .col-4
+        flex: 1
+        padding-left: 10px
+        text-overflow: ellipsis
+        white-space: nowrap
+        overflow: hidden
+        box-sizing: border-box
+      .thumbnail
+        width: 32px
+        height: 32px
+        border-radius: 50%
+        margin-right: 3px
+        vertical-align: middle
+        overflow: hidden
+        box-sizing: border-box
+      .text-center
+        text-align: center
     .intro
       margin-bottom: 5px
     .row
@@ -908,6 +1099,9 @@
         flex: 1
         font-size: 13px
         oveflow: hidden
+      .icon-question_mark
+        padding-left: 20px
+        color: #666
     .rating
       position: relative
       .title
@@ -992,4 +1186,144 @@
         position: relative
         width: 100%
         height: auto
+  .fixed-foot
+    position: fixed
+    left: 0
+    right: 0
+    bottom: 0
+    height: 50px
+    z-index: 80
+    background: #fafafa
+    .foot-wrapper
+      display: flex
+      height: 100%
+      .foot-item, .mini-favorite-item
+        flex: 1
+        position: relative
+        height: 100%
+        font-size: 12px
+        text-align: center
+        color: #666
+        &.active
+          color: #00bb9c
+        .icon
+          display: block
+          line-height: 1
+          padding-top: 5px
+          i
+            display: inline-block
+            width: 20px
+            height: 20px
+            font-size: 16px
+        .text
+          display: block
+          line-height: 1
+          font-size: 10px
+        .button-lg
+          display: block
+          line-height: 50px
+          font-size: 14px
+          i
+            font-size: 22px
+          &.gray
+            background: #999
+            color: #fff
+          &.green
+            background: #44b549
+            color: #fff
+          &.orange
+            background: rgba(250,180,90,0.93)
+            color: #fff
+          &.red
+            background: #ff463c
+            color: #fff
+          &.darkred
+            background: #d05148
+            color: #fff
+          &.blue
+            background: #00a0dc
+            color: #fff
+          .icon-favorite
+            color: #ff463c
+          .line
+            display:block
+            font-size: 12px
+            line-height: 12px
+            color: #fff
+            padding-top: 10px
+            margin-bottom: -14px
+            strong
+              font-size: 18px
+              font-weight: 400
+              margin-left: 2px
+        .input-group
+          position: relative
+          flex: 1
+          box-sizing: border-box
+          .input-group-btn
+            display: block
+            float: left
+            width: 20%
+            height: 50px
+            line-height: 50px
+            font-size: 26px
+            background-color: rgba(250,180,90,0.93)
+            color: #FFF
+          .form-control
+            float: left
+            width: 60%
+            height: 50px
+            line-height: 50px
+            font-size: 16px
+            color: #555
+            text-align: center
+            background-color: #fff
+            background-image: none
+            border-top: 1px solid rgba(250,180,90,0.93)
+            border-bottom: 1px solid rgba(250,180,90,0.93)
+            -webkit-appearance: none
+            border-radius: 0
+            outline: none
+            box-sizing: border-box
+      .btn-share
+        flex: none
+        float: left
+        width: 45%
+        display: block
+      .mini-favorite-item
+        flex: 70px 0 0
+        .button-lg
+          height: 50px
+          line-height: 30px
+          margin-top: 15px
+          overflow: hidden
+        .badge
+          display: inline-block
+          position: absolute
+          top: 6px
+          right: 13px
+          background: #f23030
+          color: #fff
+          border-radius: 50%
+          padding: 2px
+          width: 14px
+          height: 14px
+          line-height: 14px
+          font-size: 10px
+          overflow: hidden
+          text-overflow: ellipsis
+          white-space: nowrap
+    .ball-container
+      .ball
+        position: fixed
+        left: 32px
+        bottom: 22px
+        z-index: 200
+        transition: all 0.4s cubic-bezier(0.49, -0.29, 0.75, 0.41)
+        .inner
+          width: 16px
+          height: 16px
+          border-radius: 50%
+          background: rgb(0, 160, 220)
+          transition: all 0.4s linear
 </style>

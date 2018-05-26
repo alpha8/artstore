@@ -10,10 +10,14 @@
             <div class="num" v-show="totalCount > 0">{{totalCount}}</div>
           </div>
           <div class="price" :class="{'highlight': totalPrice > 0}">{{totalPrice | currency}}</div>
-          <div class="desc">首单特惠限购{{maxItems}}件</div>
+          <div class="desc" v-if="isAvailable">首单特惠限购{{maxItems}}件</div>
+          <div class="desc" v-else>非首单购买</div>
         </div>
-        <div class="content-right" @click.stop.prevent="pay">
+        <div class="content-right" v-if="isAvailable" @click.stop.prevent="pay">
           <div class="pay" :class="payClass">{{payDesc}}</div>
+        </div>
+        <div class="content-right" v-else>
+          <div class="pay">已参加</div>
         </div>
       </div>
       <div class="ball-container">
@@ -68,6 +72,10 @@
       maxItems: {
         type: Number,
         default: 0
+      },
+      isAvailable: {
+        type: Boolean,
+        default: true
       }
     },
     data() {

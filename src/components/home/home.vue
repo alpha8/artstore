@@ -8,7 +8,6 @@
           <swipe :swiperSlides="swiperSlides"></swipe>
         </div>
         <topchanel :channels="channels"></topchanel>
-        <split></split>
         <modal-title title="茶席套装.三百席" moreText="更多" catKey="art" catName="茶席套装.三百席"></modal-title>
         <channel :items="arts" :cols="2"></channel>
         <split></split>
@@ -115,11 +114,11 @@
           url: '/search?parentCat=museum&key=老茶博物馆',
           icon: 'icon-museum big'
         }, {
-          name: '首单特惠',
+          name: '首单二折',
           url: '/firstpurchase',
           icon: 'icon-prefer big'
         }, {
-          name: '分享特惠',
+          name: '特惠分享',
           url: '/sharepay',
           icon: 'icon-cutingprice big'
         }, {
@@ -262,7 +261,7 @@
 
       api.getArticles({
         currentPage: 1,
-        pageSize: 4,
+        pageSize: 6,
         type: 1,
         status: 1
       }).then(response => {
