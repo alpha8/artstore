@@ -175,6 +175,7 @@
         clearInterval(this.timer);
       }
       this.discount = 0;
+      this.coupons = [];
     },
     mounted() {
       this._initScroll();
@@ -315,14 +316,14 @@
           this.$store.dispatch('openToast', '请选择收货人信息');
           return;
         }
+        let orderType = this.$route.query.orderType || 0;
         let userInfo = this.$store.getters.getUserInfo;
         if (!userInfo.openid) {
           this.$store.dispatch('openToast', '正在登录中...');
           setTimeout(() => {
             let redirect = 'http://' + location.host + location.pathname + '#/pay';
-            let type = this.$route.query.orderType || 0;
-            if (type >= 3) {
-              redirect += '?orderType=' + type;
+            if (orderType >= 3) {
+              redirect += '?orderType=' + orderType;
             }
             window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
           }, 1500);
@@ -338,7 +339,7 @@
           userId: userInfo.userId,
           totalPrice: this.totalFee,
           remarks: this.remarks,
-          type: this.$route.query.orderType || 0
+          type: orderType
         };
         if (this.selfservice) {
           params.express = {
@@ -353,13 +354,22 @@
             receiver: this.defaultAddress.name
           };
         }
-        let seckillId = 0;
-        let items = [];
-        this.products.forEach(product => {
-          seckillId = product.id;
-          items.push({'id': product.id, 'count': product.count});
-        });
-        params.products = items;
+        if (orderType === '8' || orderType === '9') {
+          // 拼团订单和分享订单采用预订单ID作为产品ID给后台
+          let items = [];
+          this.products.forEach(product => {
+            items.push({'id': product.preOrderId || product.id, 'count': product.count});
+          });
+          params.products = items;
+        } else {
+          let seckillId = 0;
+          let items = [];
+          this.products.forEach(product => {
+            seckillId = product.id;
+            items.push({'id': product.id, 'count': product.count});
+          });
+          params.products = items;
+        }
         if (this.discount) {
           params.coupons = this.discountTickets;
         }

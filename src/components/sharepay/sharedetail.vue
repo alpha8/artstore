@@ -1,6 +1,6 @@
 <template>
   <div>
-    <fixedheader title="特惠商品详情" right-icon="icon-more"></fixedheader>
+    <fixedheader title="砍价商品详情" right-icon="icon-more"></fixedheader>
     <div class="good" ref="good">
       <div class="good-content">
         <div class="image-header">
@@ -12,12 +12,12 @@
             <span class="now">¥{{getGoodPrice}}</span><span class="old" v-if="sharepay.fieldPrice !== getGoodPrice">¥{{sharepay.fieldPrice}}</span>
           </div>
           <div class="row">
-            <div class="label">分享底价：</div>
+            <div class="label">商品底价：</div>
             <div class="desc">{{sharepay.buttomFee | currency}}</div>
           </div>
           <div class="row">
-            <div class="label">分享优惠：</div>
-            <div class="desc">新访客已贡献{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元<i class="icon-question_mark" @click.stop.prevent="showRules"></i></div>
+            <div class="label">砍价优惠：</div>  
+            <div class="desc">好友助力{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元<i class="icon-question_mark" @click.stop.prevent="showRules"></i></div>
           </div>
           <div v-if="sharepay.stock">
             <div class="row">
@@ -36,12 +36,12 @@
         </div>
         <split v-if="cuttingData && cuttingData.cutInfos"></split>
         <div class="info" v-if="cuttingData && cuttingData.cutInfos">
-          <h1 class="title">新访客贡献。 <span v-if="cuttingData.leftEndTimes">(离优惠清零只剩<span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span>)</span></h1>
+          <h1 class="title">好友助力砍价 <span v-if="cuttingData.leftEndTimes && !hasProgressOrder">(离优惠清零只剩<span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span>)</span></h1>
           <table class="tablist">
             <tr class="head">
-              <td class="col-2" nowrap>访问用户</td>
+              <td class="col-2" nowrap>好友名称</td>
               <td class="col-4">访问时间</td>
-              <td class="col-3">贡献金额</td>
+              <td class="col-3">砍价金额</td>
             </tr>
             <tr v-for="(item, index) in cuttingData.cutInfos" :key="index">
               <td class="col-2" nowrap><img :src="getUserIcon(item.userIcon)" class="thumbnail">{{getFriendlyUsername(item.userName)}}</td>
@@ -143,16 +143,17 @@
     <div class="fixed-foot">
       <div class="foot-wrapper">
         <div class="foot-item btn-share" @click.stop.prevent="pay">
-          <span class="button-lg orange" v-if="GotAndPay">已达成(待付款)</span>
+          <span class="button-lg orange" v-if="hasProgressOrder">待付款</span>
+          <span class="button-lg orange" v-else-if="GotAndPay">已达成(待付款)</span>
           <span class="button-lg orange" v-else>立即购买</span>
         </div>
         <div class="foot-item" @click.stop.prevent="wxshare">
-          <span class="button-lg darkred">分享特惠</span>
+          <span class="button-lg darkred">好友助力砍价</span>
         </div>
       </div>
     </div>
     <!-- 活动规则 -->
-    <rules ref="rules" title="分享特惠活动规则"></rules>
+    <rules ref="rules" title="砍价活动规则"></rules>
   </div>
 </template>
 
@@ -187,6 +188,9 @@
       this.fetchData();
     },
     deactivated() {
+      this.cuttingData = {};
+      this.hasProgressOrder = false;
+      this.mutex = false;
       this.good.videoUrl = '';
       this.good.videos = [];
       this.hide();
@@ -233,7 +237,8 @@
         countdownStats: {},
         leftSeconds: 0,
         cuttingData: {}, // 砍价响应信息
-        mutex: false  // 创建过一次预订单，即为true
+        mutex: false,  // 创建过一次预订单，即为true
+        hasProgressOrder: false   // 砍价订单正在进行中
       };
     },
     computed: {
@@ -260,7 +265,8 @@
         return '';
       },
       getGoodPrice() {
-        if (this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.owner) {
+        let user = this.$store.getters.getUserInfo;
+        if (this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.userId === user.userId) {
           return this.cuttingData.cutOrder.dealFee;
         }
         return this.sharepay.specialPrice;
@@ -297,7 +303,7 @@
       },
       GotAndPay() {
         if (this.cuttingData) {
-          return this.cuttingData.owner && (this.cuttingData.leftEndTimes <= 0 || this.cuttingData.cutOrder.dealFee + this.sharepay.forwardFee >= this.sharepay.buttomFee);
+          return this.cuttingData.owner && (this.cuttingData.leftEndTimes <= 0 || this.cuttingData.cutOrder.dealFee <= this.sharepay.buttomFee || this.cuttingData.cutOrder.dealFee - this.sharepay.forwardFee < this.sharepay.buttomFee);
         }
         return false;
       }
@@ -382,7 +388,7 @@
       },
       wxshare() {
         // 如果已经创建了砍价预订单，即跳过创建预订单，直接分享
-        if ((this.cuttingData && this.cuttingData.owner) || this.mutex) {
+        if (this.hasProgressOrder || (this.cuttingData && this.cuttingData.owner) || this.mutex) {
           this.$refs.weixinShare.show();
           return;
         }
@@ -429,6 +435,9 @@
         }).then(response => {
           if (response.result === 0) {
             this.cuttingData = response.data;
+            if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
+              this.hasProgressOrder = true;
+            }
           }
           this._initScroll();
           this.timerLoop();
@@ -737,6 +746,14 @@
         this.scroll.scrollToElement(goodWrapper, 300);
       },
       pay() {
+        if (this.hasProgressOrder) {
+          window.location.href = 'http://' + location.host + location.pathname + '#/order?type=0';
+          return;
+        }
+        let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
+        if (!preOrderId) {
+          return;
+        }
         let good = {
           id: this.sharepay.id,
           name: this.sharepay.name,
@@ -747,7 +764,8 @@
           oldPrice: this.sharepay.fieldPrice,
           count: 1,
           icon: (this.sharepay.icon) ? api.CONFIG.psCtx + this.sharepay.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
-          checked: false
+          checked: false,
+          preOrderId: preOrderId
         };
         if (this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.owner) {
           good.price = this.cuttingData.cutOrder.dealFee;

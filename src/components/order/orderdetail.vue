@@ -145,7 +145,9 @@
         } else if (this.order.type === 8) {
           return '拼团';
         } else if (this.order.type === 9) {
-          return '分享特惠';
+          return '砍价订单';
+        } else if (this.order.type === 10) {
+          return '拼团直购';
         }
         return '';
       },
@@ -192,7 +194,7 @@
           this.order = response;
           this._initScroll();
         }).catch(response => {
-          this.$store.dispatch('openToast', '数据出错，请联系后台管理员！');
+          this.$store.dispatch('openToast', '网络太忙，请稍候再试！');
           this.$router.back();
           return;
         });
@@ -217,10 +219,10 @@
           this.$router.push({name: 'auctiondetail', params: {id: product.id}});
         } else if (this.order.type === 7) {  // 首单特惠
           this.$router.push({name: 'firstdetail', params: {id: product.id}});
-        } else if (this.order.type === 8) {  // 拼团
-          this.$router.push({name: 'tuandetail', params: {id: product.id}});
-        } else if (this.order.type === 9) {  // 分享特惠
-          this.$router.push({name: 'sharedetail', params: {id: product.id}});
+        } else if (this.order.type === 8 || this.order.type === 10) {  // 8: 拼团, 10: 拼团直购
+          this.$router.push({name: 'tuandetail', params: {id: product.id}, query: {tuanId: this.order.userId}});
+        } else if (this.order.type === 9) {  // 砍价订单
+          this.$router.push({name: 'sharedetail', params: {id: product.id}, query: {shareId: this.order.userId}});
         } else {
           this.$router.push({name: 'good', params: {id: product.id}});
         }

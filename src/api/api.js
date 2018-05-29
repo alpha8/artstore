@@ -598,6 +598,6 @@ export default {
    * 查询拼团列表
    */
   getTuanList(params) {
-    return doPost(this.CONFIG.webspreadCtx + '/spreadteam/check', params);
+    return doGet(this.CONFIG.webspreadCtx + '/spreadteam/check', params);
   }
 };

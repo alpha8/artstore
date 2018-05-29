@@ -176,7 +176,9 @@
         } else if (item.type === 8) {
           return '拼团';
         } else if (item.type === 9) {
-          return '分享特惠';
+          return '砍价订单';
+        } else if (item.type === 10) {
+          return '拼团直购';
         }
         return '';
       },
@@ -201,10 +203,10 @@
           this.$router.push({name: 'auctiondetail', params: {id: product.id}});
         } else if (order.type === 7) {  // 首单特惠
           this.$router.push({name: 'firstdetail', params: {id: product.id}});
-        } else if (order.type === 8) {  // 拼团
-          this.$router.push({name: 'tuandetail', params: {id: product.id}});
-        } else if (order.type === 9) {  // 分享特惠
-          this.$router.push({name: 'sharedetail', params: {id: product.id}});
+        } else if (order.type === 8 || order.type === 10) {  // 8: 拼团, 10: 拼团直购
+          this.$router.push({name: 'tuandetail', params: {id: product.id}, query: {tuanId: order.userId}});
+        } else if (order.type === 9) {  // 砍价订单
+          this.$router.push({name: 'sharedetail', params: {id: product.id}, query: {shareId: order.userId}});
         } else {
           this.$router.push({name: 'good', params: {id: product.id}});
         }

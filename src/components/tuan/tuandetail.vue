@@ -39,10 +39,12 @@
             <tr class="head">
               <td class="col-2" nowrap>拼团用户</td>
               <td class="col-4">拼团时间</td>
+              <td class="col-4">操作</td>
             </tr>
             <tr v-for="(item, index) in tuanData.teamOrders" :key="index">
               <td class="col-2" nowrap><img :src="getUserIcon(item.userIcon)" class="thumbnail">{{getFriendlyUsername(item.userName)}}</td>
               <td class="col-4">{{item.createAt | formatDate}}</td>
+              <td class="col-4"><span class="btn-join" v-if="item.createId === item.userId" @click.stop.prevent="joinTuan">去参团</span></td>
             </tr>
           </table>
         </div>
@@ -142,7 +144,7 @@
         </div>
         <div class="foot-item">
           <span class="button-lg gray" v-if="tuan.leftEndTimes <= 0"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
-          <span class="button-lg darkred" v-else @click.stop.prevent="joinGroupbuy"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
+          <span class="button-lg darkred" v-else @click.stop.prevent="createTuan"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
         </div>
       </div>
     </div>
@@ -183,6 +185,7 @@
       this.hide();
       this.processing = false;
       this.stopTimer();
+      this.mutex = false;
     },
     updated() {
       if (this.good.content && !this.processing) {
@@ -357,7 +360,7 @@
         api.getTuanList({
           userId: user.userId,
           fieldId: this.tuan.id,
-          createId: shareId,
+          createId: tuanId,
           userName: user.nickName || '匿名',
           userIcon: user.icon || ''
         }).then(response => {
@@ -604,13 +607,16 @@
           img = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423';
         }
         let vm = this;
+        let tuanName = this.tuan.name;
+        if (tuanName) {
+          tuanName = tuanName.replace('[一虎一席]', '');
+        }
         let shareData = {
-          title: this.tuan.name,
-          desc: '开团价：¥' + this.tuan.buttomFee + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
+          title: `${user.nickName}邀你加入${tuanName}拼团`,
+          desc: `开团价：¥${this.tuan.buttomFee}, 单买价：¥${this.tuan.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
-          imgUrl: icon,
+          imgUrl: img,
           success: function () {
-            vm.$refs.weixinShare.hideDialog();
           }
         };
         wx.ready(function() {
@@ -666,9 +672,48 @@
         let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
         this.scroll.scrollToElement(goodWrapper, 300);
       },
-      joinGroupbuy() {
+      joinTuan() {
         let user = this.$store.getters.getUserInfo;
-        if (user.userId) {
+        if (!user.userId) {
+          this.$store.dispatch('openToast', '未登录!');
+          return;
+        }
+        let tuanId = this.$route.query.tuanId;
+        if (!tuanId) {
+          return;
+        }
+        api.createTuanOrder({
+          fieldId: this.tuan.id,
+          userId: user.userId,
+          createId: tuanId,
+          openid: user.openid,
+          userName: user.nickName,
+          userIcon: user.icon || ''
+        }).then(response => {
+          if (response.result === 0) {
+            let good = {
+              id: this.tuan.id,
+              name: this.tuan.name,
+              pictures: this.good.pictures,
+              src: this.tuan.icon,
+              content: '',
+              price: this.tuan.buttomFee,
+              oldPrice: this.tuan.fieldPrice,
+              count: 1,
+              icon: (this.tuan.icon) ? api.CONFIG.psCtx + this.tuan.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
+              checked: false,
+              preOrderId: response.data.teamOrderId
+            };
+            this.$store.dispatch('addPayGoods', [good]);
+            window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+          }
+        }).catch(response => {
+          console.error(response);
+        });
+      },
+      createTuan() {
+        let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
           this.$store.dispatch('openToast', '未登录!');
           return;
         }
@@ -681,7 +726,21 @@
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
-            this.$store.dispatch('openToast', '开团成功!');
+            let good = {
+              id: this.tuan.id,
+              name: this.tuan.name,
+              pictures: this.good.pictures,
+              src: this.tuan.icon,
+              content: '',
+              price: this.tuan.buttomFee,
+              oldPrice: this.tuan.fieldPrice,
+              count: 1,
+              icon: (this.tuan.icon) ? api.CONFIG.psCtx + this.tuan.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
+              checked: false,
+              preOrderId: response.data.teamOrderId
+            };
+            this.$store.dispatch('addPayGoods', [good]);
+            window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
           }
         }).catch(response => {
           console.error(response);
@@ -701,7 +760,7 @@
           checked: false
         };
         this.$store.dispatch('addPayGoods', [good]);
-        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=10';
       }
     },
     filters: {
@@ -1061,6 +1120,73 @@
             width: 80px
         .adjustText
           flex: 1
+    .tablist
+      position: relative
+      width: 100%
+      font-size: 12px
+      background-color: #fff
+      color: #666
+      text-align: left
+      tr
+        height: 40px
+        line-height: 40px
+      >.head
+        background-color: #fafafa
+        font-size: 13px
+      .col-1
+        width: 15%
+        padding-left: 10px
+        box-sizing: border-box
+        span
+          display: inline-block
+          height: 15px
+          width: 30px
+          line-height: 15px
+          vertical-align: middle
+          text-align: center
+          color: #f1f1f1
+          background-color: #747474
+          border-radius: 1px
+          &.highlight
+            background-color: #00a0dc
+      .col-2
+        flex: 1
+        padding-left: 10px
+        overflow: hidden
+        box-sizing: border-box
+      .col-3
+        width: 25%
+        padding-left: 10px
+        word-break: break-all
+        overflow: hidden
+        box-sizing: border-box
+      .col-4
+        flex: 1
+        padding-left: 10px
+        text-overflow: ellipsis
+        white-space: nowrap
+        overflow: hidden
+        box-sizing: border-box
+        .btn-join
+          display: block
+          font-size: 11px
+          height: 20px
+          line-height: 20px
+          margin: 8px 5px 8px 0
+          background-image: -webkit-linear-gradient(left, #f94c00, #fcc04e)
+          color: #fff
+          text-align: center
+          box-sizing: border-box
+      .thumbnail
+        width: 32px
+        height: 32px
+        border-radius: 50%
+        margin-right: 3px
+        vertical-align: middle
+        overflow: hidden
+        box-sizing: border-box
+      .text-center
+        text-align: center
     .intro
       margin-bottom: 5px
     .row

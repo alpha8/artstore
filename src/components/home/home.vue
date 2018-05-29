@@ -118,7 +118,7 @@
           url: '/firstpurchase',
           icon: 'icon-prefer big'
         }, {
-          name: '特惠分享',
+          name: '助力砍价',
           url: '/sharepay',
           icon: 'icon-cutingprice big'
         }, {

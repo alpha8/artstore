@@ -1,16 +1,16 @@
 <template>
   <div class="main-wrapper">
-    <fixedheader title="特惠分享" right-icon="icon-more"></fixedheader>
+    <fixedheader title="助力砍价" right-icon="icon-more"></fixedheader>
     <div class="order">
       <div class="order-wrap">
         <div class="order-container" ref="groupbuy" v-show="products.length">
           <div class="rules-wrap">
-            <div class="rule-title">“特惠分享”简介：</div>
+            <div class="rule-title">“助力砍价”简介：</div>
             <div class="rule-button" @click.stop.prevent="showDetail">规则</div>
             <div class="rule-flow">
               <div class="flow-item">
                 <i class="icon-shopping_bag"></i>
-                <div class="text">分享商品</div>
+                <div class="text">分享砍价商品</div>
               </div>
               <div class="flow-item">
                 <i class="icon-dancers"></i>
@@ -38,7 +38,7 @@
                     </div>
                     <div class="more-ops">
                       <span class="btn-buy disabled" v-if="item.status === 3">已下架</span>
-                      <span class="btn-buy" v-else-if="item.status === 0" @click.stop.prevent="goGoodDetail(item)">分享购</span>
+                      <span class="btn-buy" v-else-if="item.status === 0" @click.stop.prevent="goGoodDetail(item)">助力砍价</span>
                       <span class="btn-buy disabled" v-else>已售罄</span>
                     </div>
                   </div>
@@ -53,7 +53,7 @@
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
-    <rules ref="rules" title="分享特惠活动规则"></rules>
+    <rules ref="rules" title="砍价活动规则"></rules>
   </div>
 </template>
 
