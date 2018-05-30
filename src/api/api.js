@@ -588,6 +588,13 @@ export default {
   },
 
   /**
+   * 查询我的砍价
+   */
+  getMyShareOrder(params) {
+    return doGet(this.CONFIG.webspreadCtx + '/spreadcut/list', params);
+  },
+
+  /**
    * 创建发起和参加拼团
    */
   createTuanOrder(params) {
@@ -599,5 +606,12 @@ export default {
    */
   getTuanList(params) {
     return doGet(this.CONFIG.webspreadCtx + '/spreadteam/check', params);
+  },
+
+  /**
+   * 查询我的拼团列表
+   */
+  getMyTuanList(params) {
+    return doGet(this.CONFIG.webspreadCtx + '/spreadteam/list', params);
   }
 };

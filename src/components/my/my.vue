@@ -106,6 +106,8 @@
           { amount: 0, text: '奖金余额', link: '/cashback' }
         ],
         others: [
+          { icon: 'icon-tuan', text: '我的拼团', link: '/mytuan' },
+          { icon: 'icon-cutingprice', text: '我的砍价', link: '/myshare' },
           { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
           { icon: 'icon-group_purchase', text: '我的团购', link: '/mygroupbuy' },
           { icon: 'icon-auction', text: '我的拍卖', link: '/myauction' },

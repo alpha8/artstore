@@ -54,9 +54,11 @@ import firstpurchase from '@/components/firstpurchase/firstpurchase';
 import firstdetail from '@/components/firstpurchase/firstdetail';
 import sharepayList from '@/components/sharepay/sharelist';
 import sharedetail from '@/components/sharepay/sharedetail';
+import myshare from '@/components/sharepay/myshare';
 import tuanList from '@/components/tuan/tuanlist';
 import tuandetail from '@/components/tuan/tuandetail';
 import sharetuan from '@/components/tuan/sharetuan';
+import mytuan from '@/components/tuan/mytuan';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -118,8 +120,10 @@ export default new Router({
     {path: '/firstpurchase', component: firstpurchase, name: 'firstpurchase'},
     {path: '/firstpurchase/:id', component: firstdetail, name: 'firstdetail'},
     {path: '/sharepay', component: sharepayList, name: 'sharepay'},
+    {path: '/myshare', component: myshare, name: 'myshare'},
     {path: '/sharepay/:id', component: sharedetail, name: 'sharedetail'},
     {path: '/tuan', component: tuanList, name: 'tuan'},
+    {path: '/mytuan', component: mytuan, name: 'mytuan'},
     {path: '/tuan/:id', component: tuandetail, name: 'tuandetail'},
     {path: '/sharetuan/:id', component: sharetuan, name: 'sharetuan'},
     {path: '/my', component: my}

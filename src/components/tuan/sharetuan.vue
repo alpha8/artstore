@@ -21,11 +21,11 @@
             </div>
           </div>
         </div>
-        <div class="tuan_wrap">
+        <div class="tuan_wrap" @click.stop.prevent="goTuanDetail">
           <div class="tuan_icon">
             <img :src="tuanIcon" alt="" class="thumbnail">
           </div>
-          <div class="tuan_info" @click.stop.prevent="goTuanDetail">
+          <div class="tuan_info">
             <div class="tuan_name">{{tuan.name}}</div>
             <div class="price-wrap">
               <span class="tuan_tag"><i class="icon-person"></i><em>{{tuan.limitCount}}人拼</em></span>
@@ -34,21 +34,21 @@
             <div class="tuan_oldprice">单买价: <del v-show="tuan.fieldPrice">{{tuan.fieldPrice | currency}}</del></div>
           </div>
         </div>
-        <div class="tuan_list" v-if="tuanData && tuanData.teamOrders">
+        <div class="tuan_list" v-if="tuanData && tuanData.teamOrders && tuanData.team">
           <div class="tuan_stat" v-if="tuanStatus === 5 || tuan.leftEndTimes <= 0">该团未能按时凑齐人数，拼团失败</div>
           <div class="tuan_stat" v-else-if="tuanStatus === 1 || leftPerson <= 0">团长人气太高，已经拼团成功啦</div>
           <div class="tuan_stat" v-else-if="tuanStatus <= 3 && leftPerson">还差<span class="text-red">{{leftPerson}}人</span>拼团成功，剩余<span class="countdown"><i>{{countdownStats.days}}</i>天<i v-if="countdownStats.hours">{{countdownStats.hours}}</i>:<i v-if="countdownStats.mins">{{countdownStats.mins}}</i>:<i v-if="countdownStats.seconds">{{countdownStats.seconds}}</i></span></div>
           <ul class="tuan_users">
             <li class="user_item" v-for="(item, index) in tuanData.teamOrders" :key="index">
-              <span :class="{'tips': item.userId === item.createId}">团长</span>
+              <span class="tips" v-show="item.userId === item.createId">团长</span>
               <img :src="getUserIcon(item.userIcon)" :class="{'leader': item.userId === item.createId}" alt="">
             </li>
           </ul>
         </div>
         <div class="ops">
-          <div class="btns btn-red" v-if="!tuanData.owner && (tuanStatus === 1 || leftPerson <= 0) || tuan.leftEndTimes <= 0" @click.stop.prevent="goTuanDetail"><span>我也要开团</span></div>
-          <div class="btns btn-red" v-else-if="tuanData.owner && leftPerson && tuanStatus <= 3 && tuan.leftEndTimes > 0" @click.stop.prevent="wxshare"><span>邀请好友参团</span></div>
-          <div class="btns btn-red" v-else-if="tuanStatus <= 3 && leftPerson && tuan.leftEndTimes > 0" @click.stop.prevent="joinTuan"><span>我要参团</span></div>
+          <div class="btns btn-red" v-if="isTuanOwner && leftPerson && tuanStatus <= 3 && tuan.leftEndTimes > 0" @click.stop.prevent="wxshare"><span>邀请好友参团</span></div>
+          <div class="btns btn-red" v-else-if="!isTuanOwner && tuanStatus <= 3 && leftPerson && tuan.leftEndTimes > 0" @click.stop.prevent="joinTuan"><span>我要参团</span></div>
+          <div class="btns btn-red" v-else-if="!isTuanOwner && (tuanStatus === 1 || leftPerson <= 0) || tuan.leftEndTimes <= 0" @click.stop.prevent="createTuan"><span>我也要开团</span></div>
           <div class="btns btn-red" v-else @click.stop.prevent="createTuan"><span>再开一团</span></div>
         </div>
       </div>
@@ -74,13 +74,15 @@
     deactivated() {
       this.stopTimer();
       this.hide();
+      this.cleanup();
     },
     data() {
       return {
         tuan: {},
         tuanData: {},
         countdownStats: {},
-        timer: null
+        timer: null,
+        preOrderId: ''
       };
     },
     computed: {
@@ -102,6 +104,9 @@
         let actual = this.tuanData && this.tuanData.teamOrders && this.tuanData.teamOrders.length;
         let expected = this.tuan.limitCount;
         return expected - actual;
+      },
+      isTuanOwner() {
+        return this.tuanData.owner;
       }
     },
     methods: {
@@ -144,18 +149,14 @@
         });
       },
       fetchTuanData() {
-        let tuanId = this.$route.query.tuanId;
-        if (!tuanId) {
-          return;
-        }
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
           return;
         }
+        let tuanId = this.$route.query.tuanId || '';
         api.getTuanList({
           userId: user.userId,
-          fieldId: this.tuan.id,
-          createId: tuanId
+          preOrderId: tuanId
         }).then(response => {
           if (response.result === 0) {
             this.tuanData = response.data;
@@ -187,8 +188,11 @@
         if (this.timer) {
           clearTimeout(this.timer);
         }
+      },
+      cleanup() {
         this.countdownStats = {};
         this.tuanData = {};
+        this.preOrderId = '';
       },
       goTuanDetail() {
         let tuanId = this.$route.query.tuanId;
@@ -214,16 +218,17 @@
         api.createTuanOrder({
           fieldId: this.tuan.id,
           userId: user.userId,
-          createId: tuanId,
+          parentId: tuanId,
           openid: user.openid,
           userName: user.nickName,
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
+            this.preOrderId = response.data.teamOrderId;
             let good = {
               id: this.tuan.id,
               name: this.tuan.name,
-              pictures: this.good.pictures,
+              pictures: [this.tuan.icon],
               src: this.tuan.icon,
               content: '',
               price: this.tuan.buttomFee,
@@ -231,12 +236,16 @@
               count: 1,
               icon: (this.tuan.icon) ? api.CONFIG.psCtx + this.tuan.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
               checked: false,
-              preOrderId: response.data.teamOrderId
+              preOrderId: this.preOrderId
             };
             this.$store.dispatch('addPayGoods', [good]);
             window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+          } else {
+            this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
+            console.error(response);
           }
         }).catch(response => {
+          this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
           console.error(response);
         });
       },
@@ -249,12 +258,13 @@
         api.createTuanOrder({
           fieldId: this.tuan.id,
           userId: user.userId,
-          createId: user.userId,
+          parentId: '',
           openid: user.openid,
           userName: user.nickName,
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
+            this.preOrderId = response.data.teamOrderId;
             let good = {
               id: this.tuan.id,
               name: this.tuan.name,
@@ -266,12 +276,16 @@
               count: 1,
               icon: (this.tuan.icon) ? api.CONFIG.psCtx + this.tuan.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
               checked: false,
-              preOrderId: response.data.teamOrderId
+              preOrderId: this.preOrderId
             };
             this.$store.dispatch('addPayGoods', [good]);
             window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+          } else {
+            this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
+            console.error(response);
           }
         }).catch(response => {
+          this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
           console.error(response);
         });
       },
@@ -290,14 +304,14 @@
           });
         });
         let redirect = 'http://' + location.host + '/weixin/tuan/' + this.tuan.id;
-        let user = this.$store.getters.getUserInfo;
-        if (user.userId) {
-          redirect += '?tuanId=' + user.userId;
+        if (this.preOrderId) {
+          redirect += '?tuanId=' + this.preOrderId;
         }
         let img = api.CONFIG.psCtx + '5959aca5e4b00faa50475a18?w=423&h=423';
         if (this.tuan.icon) {
           img = api.CONFIG.psCtx + this.tuan.icon;
         }
+        let user = this.$store.getters.getUserInfo;
         let vm = this;
         let tuanName = this.tuan.name;
         if (tuanName) {

@@ -238,7 +238,8 @@
         leftSeconds: 0,
         cuttingData: {}, // 砍价响应信息
         mutex: false,  // 创建过一次预订单，即为true
-        hasProgressOrder: false   // 砍价订单正在进行中
+        hasProgressOrder: false,   // 砍价订单正在进行中
+        preOrderId: ''
       };
     },
     computed: {
@@ -400,6 +401,7 @@
             userId: user.userId,
             openid: user.openid
           }).then(response => {
+            this.preOrderId = response.data && response.data.preOrderId;
             if (response.code) {
               this.$store.dispatch('openToast', '您已参加此商品活动!');
               this.mutex = true;
@@ -418,18 +420,14 @@
         }
       },
       fetchCuttingData() {
-        let shareId = this.$route.query.shareId;
-        if (!shareId) {
-          return;
-        }
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
           return;
         }
+        let shareId = this.$route.query.shareId || '';
         api.getShareCuttings({
           userId: user.userId,
-          fieldId: this.sharepay.id,
-          createId: shareId,
+          preOrderId: shareId,
           userName: user.nickName || '匿名',
           userIcon: user.icon || ''
         }).then(response => {
@@ -672,9 +670,8 @@
           });
         });
         let redirect = 'http://' + location.host + '/weixin/sp/' + this.sharepay.id;
-        let user = this.$store.getters.getUserInfo;
-        if (user.userId) {
-          redirect += '?shareId=' + user.userId;
+        if (this.preOrderId) {
+          redirect += '?shareId=' + this.preOrderId;
         }
         let img = api.CONFIG.psCtx + '5959aca5e4b00faa50475a18?w=423&h=423';
         if (this.sharepay.icon) {
@@ -682,6 +679,7 @@
         } else if (this.good.pictures && this.good.pictures.length) {
           img = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423';
         }
+        let user = this.$store.getters.getUserInfo;
         let vm = this;
         let shareData = {
           title: `${user.nickName}想要低价拿${this.sharepay.name}, 就差你一下了!`,

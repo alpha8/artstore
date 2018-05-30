@@ -44,7 +44,7 @@
             <tr v-for="(item, index) in tuanData.teamOrders" :key="index">
               <td class="col-2" nowrap><img :src="getUserIcon(item.userIcon)" class="thumbnail">{{getFriendlyUsername(item.userName)}}</td>
               <td class="col-4">{{item.createAt | formatDate}}</td>
-              <td class="col-4"><span class="btn-join" v-if="item.createId === item.userId" @click.stop.prevent="joinTuan">去参团</span></td>
+              <td class="col-4"><span class="btn-join" v-show="isTuanOwner(item)" @click.stop.prevent="joinTuan">去参团</span></td>
             </tr>
           </table>
         </div>
@@ -180,12 +180,9 @@
       this.fetchData();
     },
     deactivated() {
-      this.good.videoUrl = '';
-      this.good.videos = [];
-      this.hide();
-      this.processing = false;
       this.stopTimer();
-      this.mutex = false;
+      this.hide();
+      this.cleanup();
     },
     updated() {
       if (this.good.content && !this.processing) {
@@ -226,7 +223,8 @@
         timer: null,
         countdownStats: {},
         tuanData: {}, // 拼团响应信息
-        mutex: false
+        mutex: false,
+        preOrderId: ''
       };
     },
     computed: {
@@ -349,20 +347,14 @@
         this.countdownStats = {};
       },
       fetchTuanData() {
-        let tuanId = this.$route.query.tuanId;
-        if (!tuanId) {
-          return;
-        }
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
           return;
         }
+        let tuanId = this.$route.query.tuanId || '';
         api.getTuanList({
           userId: user.userId,
-          fieldId: this.tuan.id,
-          createId: tuanId,
-          userName: user.nickName || '匿名',
-          userIcon: user.icon || ''
+          preOrderId: tuanId
         }).then(response => {
           if (response.result === 0) {
             this.tuanData = response.data;
@@ -371,6 +363,10 @@
         }).catch(response => {
           console.error(response);
         });
+      },
+      isTuanOwner(order) {
+        let user = this.$store.getters.getUserInfo;
+        return order.createId === order.userId && order.createId !== user.userId;
       },
       getUserIcon(icon) {
         if (!icon) {
@@ -596,9 +592,8 @@
           });
         });
         let redirect = 'http://' + location.host + '/weixin/tuan/' + this.tuan.id;
-        let user = this.$store.getters.getUserInfo;
-        if (user.userId) {
-          redirect += '?tuanId=' + user.userId;
+        if (this.preOrderId) {
+          redirect += '?tuanId=' + this.preOrderId;
         }
         let img = api.CONFIG.psCtx + '5959aca5e4b00faa50475a18?w=423&h=423';
         if (this.tuan.icon) {
@@ -606,6 +601,7 @@
         } else if (this.good.pictures && this.good.pictures.length) {
           img = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423';
         }
+        let user = this.$store.getters.getUserInfo;
         let vm = this;
         let tuanName = this.tuan.name;
         if (tuanName) {
@@ -683,9 +679,9 @@
           return;
         }
         api.createTuanOrder({
+          parentId: tuanId,
           fieldId: this.tuan.id,
           userId: user.userId,
-          createId: tuanId,
           openid: user.openid,
           userName: user.nickName,
           userIcon: user.icon || ''
@@ -706,8 +702,12 @@
             };
             this.$store.dispatch('addPayGoods', [good]);
             window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+          } else {
+            this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
+            console.error(response);
           }
         }).catch(response => {
+          this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
           console.error(response);
         });
       },
@@ -720,12 +720,13 @@
         api.createTuanOrder({
           fieldId: this.tuan.id,
           userId: user.userId,
-          createId: user.userId,
+          parentId: '',
           openid: user.openid,
           userName: user.nickName,
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
+            this.preOrderId = response.data.teamOrderId;
             let good = {
               id: this.tuan.id,
               name: this.tuan.name,
@@ -737,12 +738,16 @@
               count: 1,
               icon: (this.tuan.icon) ? api.CONFIG.psCtx + this.tuan.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
               checked: false,
-              preOrderId: response.data.teamOrderId
+              preOrderId: this.preOrderId
             };
             this.$store.dispatch('addPayGoods', [good]);
             window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+          } else {
+            this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
+            console.error(response);
           }
         }).catch(response => {
+          this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
           console.error(response);
         });
       },
@@ -761,6 +766,13 @@
         };
         this.$store.dispatch('addPayGoods', [good]);
         window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=10';
+      },
+      cleanup() {
+        this.good.videoUrl = '';
+        this.good.videos = [];
+        this.processing = false;
+        this.mutex = false;
+        this.preOrderId = '';
       }
     },
     filters: {
