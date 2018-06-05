@@ -1,11 +1,11 @@
 <template>
   <div class="main-wrapper">
-    <fixedheader title="助力砍价" right-icon="icon-more"></fixedheader>
+    <fixedheader title="砍价" right-icon="icon-more"></fixedheader>
     <div class="order">
       <div class="order-wrap">
         <div class="order-container" ref="groupbuy" v-show="products.length">
           <div class="rules-wrap">
-            <div class="rule-title">“助力砍价”简介：</div>
+            <div class="rule-title">“砍价”玩法：</div>
             <div class="rule-button" @click.stop.prevent="showDetail">规则</div>
             <div class="rule-flow">
               <div class="flow-item">

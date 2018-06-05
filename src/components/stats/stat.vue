@@ -131,6 +131,7 @@
     },
     activated() {
       this.show();
+      this._initScroll();
     },
     deactivated() {
       this.hide();

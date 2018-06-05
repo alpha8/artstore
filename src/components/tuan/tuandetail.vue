@@ -31,6 +31,10 @@
             <div class="label">优惠活动：</div>
             <div class="desc">不支持优惠券</div>
           </div>
+          <div class="row">
+            <div class="label">团购时间：</div>
+            <div class="desc">{{tuan.startDate | formatDate}} ~ {{tuan.endDate | formatDate}}</div>
+          </div>
         </div>
         <split v-if="tuanData && tuanData.teamOrders"></split>
         <div class="info" v-if="tuanData && tuanData.teamOrders">
@@ -44,7 +48,11 @@
             <tr v-for="(item, index) in tuanData.teamOrders" :key="index">
               <td class="col-2" nowrap><img :src="getUserIcon(item.userIcon)" class="thumbnail">{{getFriendlyUsername(item.userName)}}</td>
               <td class="col-4">{{item.createAt | formatDate}}</td>
-              <td class="col-4"><span class="btn-join" v-show="isTuanOwner(item)" @click.stop.prevent="joinTuan">去参团</span></td>
+              <td class="col-4">
+                <span class="btn-join owner" v-if="item.owner && isTuanOwner(item)">团长</span>
+                <span class="btn-join" v-else-if="item.owner && !isTuanOwner(item)" @click.stop.prevent="joinTuan">去参团</span>
+                <span class="btn-join disabled" v-else>已参团</span>
+              </td>
             </tr>
           </table>
         </div>
@@ -143,7 +151,8 @@
           <span class="button-lg orange"><span class="line">¥<strong>{{tuan.fieldPrice}}</strong></span>单独购买</span>
         </div>
         <div class="foot-item">
-          <span class="button-lg gray" v-if="tuan.leftEndTimes <= 0"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
+          <span class="button-lg gray" v-if="tuanData.status <= 2 && tuanData.join">已参加</span>
+          <span class="button-lg gray" v-else-if="tuan.leftEndTimes <= 0">已结束</span>
           <span class="button-lg darkred" v-else @click.stop.prevent="createTuan"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
         </div>
       </div>
@@ -366,7 +375,7 @@
       },
       isTuanOwner(order) {
         let user = this.$store.getters.getUserInfo;
-        return order.createId === order.userId && order.createId !== user.userId;
+        return user.userId === order.userId;
       },
       getUserIcon(icon) {
         if (!icon) {
@@ -679,7 +688,7 @@
           return;
         }
         api.createTuanOrder({
-          parentId: tuanId,
+          id: tuanId,
           fieldId: this.tuan.id,
           userId: user.userId,
           openid: user.openid,
@@ -720,7 +729,7 @@
         api.createTuanOrder({
           fieldId: this.tuan.id,
           userId: user.userId,
-          parentId: '',
+          id: '',
           openid: user.openid,
           userName: user.nickName,
           userIcon: user.icon || ''
@@ -1189,6 +1198,14 @@
           color: #fff
           text-align: center
           box-sizing: border-box
+          &.disabled
+            background: #fff
+            color: #666
+            text-align: left
+          &.owner
+            background: #fff
+            color: #666
+            text-align: left
       .thumbnail
         width: 32px
         height: 32px

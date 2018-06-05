@@ -114,11 +114,11 @@
           url: '/search?parentCat=museum&key=老茶博物馆',
           icon: 'icon-museum big'
         }, {
-          name: '首单二折',
+          name: '首单2折区',
           url: '/firstpurchase',
           icon: 'icon-prefer big'
         }, {
-          name: '助力砍价',
+          name: '砍 价',
           url: '/sharepay',
           icon: 'icon-cutingprice big'
         }, {

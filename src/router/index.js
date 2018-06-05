@@ -59,6 +59,7 @@ import tuanList from '@/components/tuan/tuanlist';
 import tuandetail from '@/components/tuan/tuandetail';
 import sharetuan from '@/components/tuan/sharetuan';
 import mytuan from '@/components/tuan/mytuan';
+import signature from '@/components/common/signature';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -126,6 +127,7 @@ export default new Router({
     {path: '/mytuan', component: mytuan, name: 'mytuan'},
     {path: '/tuan/:id', component: tuandetail, name: 'tuandetail'},
     {path: '/sharetuan/:id', component: sharetuan, name: 'sharetuan'},
+    {path: '/signature', component: signature, name: 'signature'},
     {path: '/my', component: my}
   ]
   // ,scrollBehavior (to, from, savedPosition) {

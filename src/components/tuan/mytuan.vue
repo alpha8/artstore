@@ -7,18 +7,17 @@
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in orders" :key="index">
               <div class="item-content">
-                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.status === 5}"><span class="text">{{stateDesc(item.status)}}</span></i></div>
+                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.teamStatus === '4'}"><span class="text">{{stateDesc(item.status)}}</span></i></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}<span v-if="resultFlag" class="resultFlag">({{resultDesc(item)}})</span></h3>
+                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}<span v-show="item.teamStatus >= 3" class="resultFlag">({{resultDesc(item)}})</span></h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
                       <span class="price">{{item.teamFee | currency}}</span>
                     </div>
                     <div class="more-ops">
-                      <span class="btn-buy red" v-if="item.status === 0" @click.stop.prevent="pay(item)">去付款</span>
-                      <span class="pricing" v-else-if="item.status === 5"></span>
+                      <span class="btn-buy red" v-if="item.teamStatus <= 1" @click.stop.prevent="pay(item)">去付款</span>
+                      <span class="pricing" v-else-if="item.teamStatus === '4'"></span>
                       <span class="btn-buy blue" v-else @click.stop.prevent="showOrders()">我的订单</span>
-                      <!-- <span class="pricing"></span> -->
                     </div>
                   </div>
                 </div>
@@ -55,11 +54,10 @@
         scrollY: 0,
         states: {
           0: '正在拼购',
-          1: '拼团成功',
+          1: '正在拼购',
           2: '正在拼购',
-          3: '正在拼购',
-          4: '正在拼购',
-          5: '拼团失败'
+          3: '拼团成功',
+          4: '拼团失败'
         }
       };
     },
@@ -127,10 +125,12 @@
         return this.states[state];
       },
       resultDesc(item) {
-        if (item.status === 1) {
-          return '拼团成功';
-        } else if (item.status === 5) {
+        if (item.teamStatus === '0' || item.teamStatus === '1') {
+          return '正在拼购';
+        } else if (item.teamStatus === '4') {
           return '拼团失败';
+        } else if (item.teamStatus === '3') {
+          return '拼团成功';
         } else {
           return '';
         }
@@ -140,7 +140,7 @@
         return item.apUserNameId === uid;
       },
       showDetail(item) {
-        this.$router.push({name: 'sharetuan', params: {id: item.fieldId}, query: {tuanId: item.parentId || ''}});
+        this.$router.push({name: 'sharetuan', params: {id: item.fieldId}, query: {tuanId: item.teamOrderId || ''}});
       },
       pay(item) {
         let good = {

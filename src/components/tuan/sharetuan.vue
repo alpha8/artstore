@@ -34,21 +34,21 @@
             <div class="tuan_oldprice">单买价: <del v-show="tuan.fieldPrice">{{tuan.fieldPrice | currency}}</del></div>
           </div>
         </div>
-        <div class="tuan_list" v-if="tuanData && tuanData.teamOrders && tuanData.team">
-          <div class="tuan_stat" v-if="tuanStatus === 5 || tuan.leftEndTimes <= 0">该团未能按时凑齐人数，拼团失败</div>
-          <div class="tuan_stat" v-else-if="tuanStatus === 1 || leftPerson <= 0">团长人气太高，已经拼团成功啦</div>
-          <div class="tuan_stat" v-else-if="tuanStatus <= 3 && leftPerson">还差<span class="text-red">{{leftPerson}}人</span>拼团成功，剩余<span class="countdown"><i>{{countdownStats.days}}</i>天<i v-if="countdownStats.hours">{{countdownStats.hours}}</i>:<i v-if="countdownStats.mins">{{countdownStats.mins}}</i>:<i v-if="countdownStats.seconds">{{countdownStats.seconds}}</i></span></div>
+        <div class="tuan_list">
+          <div class="tuan_stat" v-if="tuanData.status === 4">该团未能按时凑齐人数，拼团失败</div>
+          <div class="tuan_stat" v-else-if="tuanData.status === 3">团长人气太高，已经拼团成功啦</div>
+          <div class="tuan_stat">还差<span class="text-red">{{leftPerson}}人</span>拼团成功，剩余<span class="countdown"><i>{{countdownStats.days}}</i>天<i v-if="countdownStats.hours">{{countdownStats.hours}}</i>:<i v-if="countdownStats.mins">{{countdownStats.mins}}</i>:<i v-if="countdownStats.seconds">{{countdownStats.seconds}}</i></span></div>
           <ul class="tuan_users">
             <li class="user_item" v-for="(item, index) in tuanData.teamOrders" :key="index">
-              <span class="tips" v-show="item.userId === item.createId">团长</span>
-              <img :src="getUserIcon(item.userIcon)" :class="{'leader': item.userId === item.createId}" alt="">
+              <span class="tips" v-show="item.owner">团长</span>
+              <img :src="getUserIcon(item.userIcon)" :class="{'leader': item.owner}" alt="">
             </li>
           </ul>
         </div>
         <div class="ops">
-          <div class="btns btn-red" v-if="isTuanOwner && leftPerson && tuanStatus <= 3 && tuan.leftEndTimes > 0" @click.stop.prevent="wxshare"><span>邀请好友参团</span></div>
-          <div class="btns btn-red" v-else-if="!isTuanOwner && tuanStatus <= 3 && leftPerson && tuan.leftEndTimes > 0" @click.stop.prevent="joinTuan"><span>我要参团</span></div>
-          <div class="btns btn-red" v-else-if="!isTuanOwner && (tuanStatus === 1 || leftPerson <= 0) || tuan.leftEndTimes <= 0" @click.stop.prevent="createTuan"><span>我也要开团</span></div>
+          <div class="btns btn-red" v-if="tuanData.owner && tuanData.status <= 2" @click.stop.prevent="wxshare"><span>邀请好友参团</span></div>
+          <div class="btns btn-red" v-else-if="!tuanData.join && tuanData.status <= 2" @click.stop.prevent="joinTuan"><span>我要参团</span></div>
+          <div class="btns btn-red" v-else-if="!tuanData.owner && tuanData.status >= 3" @click.stop.prevent="createTuan"><span>我也要开团</span></div>
           <div class="btns btn-red" v-else @click.stop.prevent="createTuan"><span>再开一团</span></div>
         </div>
       </div>
@@ -218,7 +218,7 @@
         api.createTuanOrder({
           fieldId: this.tuan.id,
           userId: user.userId,
-          parentId: tuanId,
+          id: tuanId,
           openid: user.openid,
           userName: user.nickName,
           userIcon: user.icon || ''
@@ -258,7 +258,7 @@
         api.createTuanOrder({
           fieldId: this.tuan.id,
           userId: user.userId,
-          parentId: '',
+          id: '',
           openid: user.openid,
           userName: user.nickName,
           userIcon: user.icon || ''
@@ -577,4 +577,9 @@
               padding: 10px 15px
             .text
               font-size: 14px
+    .ops
+      position: relative
+      width: 100%
+      padding: 0 10px
+      box-sizing: border-box
 </style>
