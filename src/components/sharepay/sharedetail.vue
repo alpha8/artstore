@@ -160,7 +160,7 @@
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {mixUsername, convertVideoUrl} from '@/common/js/util';
+  import {mixUsername, convertVideoUrl, reduceGoodsName} from '@/common/js/util';
   import {formatDate, countdown} from '@/common/js/date';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
@@ -682,8 +682,8 @@
         let user = this.$store.getters.getUserInfo;
         let vm = this;
         let shareData = {
-          title: `${user.nickName}想要低价拿${this.sharepay.name}, 就差你一下了!`,
-          desc: '各位帮忙点一下，我是真的很想要',
+          title: `[一虎一席.茶席艺术节][砍价.${this.sharepay.buttomFee}元] ` + reduceGoodsName(this.sharepay.name),
+          desc: `砍到底：¥${this.sharepay.buttomFee}, 单买价：¥${this.sharepay.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
           success: function () {

@@ -163,7 +163,7 @@
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {mixUsername, convertVideoUrl} from '@/common/js/util';
+  import {mixUsername, convertVideoUrl, reduceGoodsName} from '@/common/js/util';
   import {formatDate, countdown} from '@/common/js/date';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
@@ -612,12 +612,8 @@
         }
         let user = this.$store.getters.getUserInfo;
         let vm = this;
-        let tuanName = this.tuan.name;
-        if (tuanName) {
-          tuanName = tuanName.replace('[一虎一席]', '');
-        }
         let shareData = {
-          title: `${user.nickName}邀你加入${tuanName}拼团`,
+          title: `[一虎一席.茶席艺术节][拼购.${this.tuan.buttomFee}元] ` + reduceGoodsName(this.tuan.name),
           desc: `开团价：¥${this.tuan.buttomFee}, 单买价：¥${this.tuan.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,

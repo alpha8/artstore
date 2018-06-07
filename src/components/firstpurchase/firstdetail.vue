@@ -128,7 +128,7 @@
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {mixUsername, formatDate, convertVideoUrl} from '@/common/js/util';
+  import {mixUsername, formatDate, convertVideoUrl, reduceGoodsName} from '@/common/js/util';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
   import modalTitle from '@/components/modal-title/modal-title';
@@ -561,8 +561,8 @@
         }
         let vm = this;
         let shareData = {
-          title: this.firstpay.name,
-          desc: '售价：¥' + (this.firstpay.buttomFee) + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
+          title: `[一虎一席][首单2折.${this.firstpay.buttomFee}元] ` + reduceGoodsName(this.firstpay.name),
+          desc: `首单价：¥${this.firstpay.buttomFee}, 市场价：¥${this.firstpay.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
           success: function () {

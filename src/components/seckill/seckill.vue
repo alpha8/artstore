@@ -9,7 +9,7 @@
               <div class="item-content">
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
+                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}</h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
                       <div class="countdowntips" v-if="item.leftStartTimes" v-html="countdownTips(item.countdownStats, true)"></div>
@@ -50,6 +50,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
   import {formatDate, countdown} from '@/common/js/date';
+  import {reduceGoodsName} from '@/common/js/util';
   import api from '@/api/api';
 
   export default {
@@ -186,6 +187,9 @@
         } else {
           return api.CONFIG.defaultImg;
         }
+      },
+      reduceName(name) {
+        return reduceGoodsName(name);
       },
       showDetail(item) {
         this.$router.push({name: 'seckillDetail', params: {id: item.seckillId}});

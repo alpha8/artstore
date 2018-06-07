@@ -27,7 +27,7 @@
               <div class="item-content">
                 <div class="item-img" @click.stop.prevent="goGoodDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="goGoodDetail(item)">{{item.name}}</h3>
+                  <h3 class="title" @click.stop.prevent="goGoodDetail(item)">{{reduceName(item.name)}}</h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
                       <div class="countdowntips">&nbsp;</div>
@@ -62,6 +62,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
   import rules from '@/components/sharepay/rules';
+  import {reduceGoodsName} from '@/common/js/util';
   import api from '@/api/api';
 
   export default {
@@ -144,6 +145,9 @@
       },
       goGoodDetail(item) {
         this.$router.push({name: 'sharedetail', params: {id: item.id}});
+      },
+      reduceName(name) {
+        return reduceGoodsName(name);
       },
       show() {
         this.$store.commit('HIDE_FOOTER');

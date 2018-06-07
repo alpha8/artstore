@@ -9,7 +9,7 @@
               <div class="item-content">
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.status === 5}"><span class="text">{{stateDesc(item.status)}}</span></i></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}<span v-if="resultFlag" class="resultFlag">({{resultDesc(item)}})</span></h3>
+                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}<span v-if="resultDesc(item)" class="resultFlag">({{resultDesc(item)}})</span></h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
                       <span class="price">{{item.dealFee | currency}}</span>
@@ -40,6 +40,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
   import {formatDate} from '@/common/js/date';
+  import {reduceGoodsName} from '@/common/js/util';
   import api from '@/api/api';
 
   export default {
@@ -123,6 +124,9 @@
         } else {
           return api.CONFIG.defaultImg;
         }
+      },
+      reduceName(name) {
+        return reduceGoodsName(name);
       },
       stateDesc(state) {
         return this.states[state];

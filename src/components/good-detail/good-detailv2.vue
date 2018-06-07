@@ -140,7 +140,7 @@
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import BScroll from 'better-scroll';
-  import {mixUsername, formatDate, convertVideoUrl} from '@/common/js/util';
+  import {mixUsername, formatDate, convertVideoUrl, reduceGoodsName} from '@/common/js/util';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
   import modalTitle from '@/components/modal-title/modal-title';

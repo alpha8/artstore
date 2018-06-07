@@ -27,7 +27,7 @@
               <div class="item-content">
                 <div class="item-img" @click.stop.prevent="goGoodDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="goGoodDetail(item)">{{item.name}}</h3>
+                  <h3 class="title" @click.stop.prevent="goGoodDetail(item)">{{reduceName(item.name)}}</h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
                       <div class="countdowntips">{{item.limitCount}}人拼团</div>
@@ -63,6 +63,7 @@
   import gotop from '@/components/fixedtoolbar/gotop';
   import rules from '@/components/tuan/rules';
   import api from '@/api/api';
+  import {reduceGoodsName} from '@/common/js/util';
 
   export default {
     data() {
@@ -130,9 +131,8 @@
         this.totalPages = -1;
         this.loadEnd = false;
       },
-      fillName(name) {
-        name = name || '';
-        return name.replace('[一虎一席]', '');
+      reduceName(name) {
+        return reduceGoodsName(name);
       },
       getThumbnail(item) {
         let icon = item.icon;

@@ -27,6 +27,7 @@
   import Vue from 'vue';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
+  import {reduceGoodsName} from '@/common/js/util';
   import api from '@/api/api';
 
   export default {
@@ -109,8 +110,7 @@
         this.loadEnd = false;
       },
       fillName(name) {
-        name = name || '';
-        return name.replace('[一虎一席]', '');
+        return reduceGoodsName(name);
       },
       getThumbnail(item) {
         let icon = item.icon;

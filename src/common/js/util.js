@@ -63,6 +63,18 @@ export function mixUsername (name) {
 }
 
 /**
+ * 替换[]多余品牌名称
+ * @param  {[type]} str [description]
+ * @return {[type]}     [description]
+ */
+export function reduceGoodsName (str) {
+  if (!str) {
+    return '';
+  }
+  return str.replace(/\[一[^]+\]/, '');
+}
+
+/**
  * 格式化时间
  * @param {String} str
  * @returns 格式化后的时间
@@ -116,6 +128,11 @@ function handleFontSize() {
       'fontSize': 0
     });
   });
+  try {
+    WeixinJSBridge.call('hideToolbar');
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 export function convertVideoUrl(url) {

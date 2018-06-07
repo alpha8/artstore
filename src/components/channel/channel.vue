@@ -18,6 +18,7 @@
 
 <script type="text/ecmascript-6">
   import Vue from 'vue';
+  import {reduceGoodsName} from '@/common/js/util';
   import api from '@/api/api';
   export default {
     props: {
@@ -43,7 +44,7 @@
       },
       fillName(item) {
         let name = item.name || '';
-        return name.replace('[一虎一席]', '');
+        return reduceGoodsName(name);
       },
       getThumbnail(item) {
         let pic = item.pictures;
