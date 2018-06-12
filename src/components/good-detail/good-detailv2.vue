@@ -291,6 +291,7 @@
           // this.getWXFollow();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
+          this.$router.replace('/404');
         });
       },
       loadTencentPlayer() {

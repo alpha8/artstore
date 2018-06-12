@@ -36,6 +36,5 @@
       word-break: break-all
       text-overflow: ellipsis
       overflow: hidden
-      -webkit-line-clamp: 2
       -webkit-box-orient: vertical
 </style>

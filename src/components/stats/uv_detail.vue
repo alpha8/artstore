@@ -194,7 +194,7 @@
       margin-bottom: 10px
     .stats-wrapper
       position: relative
-      width: 460px
+      width: 580px
       @media screen and (min-width: 768px)
         width: 100%
     .stats-container

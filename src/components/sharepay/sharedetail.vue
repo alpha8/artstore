@@ -13,11 +13,11 @@
           </div>
           <div class="row">
             <div class="label">商品底价：</div>
-            <div class="desc">{{sharepay.buttomFee | currency}}</div>
+            <div class="desc oldPrice">{{sharepay.buttomFee | currency}}</div>
           </div>
           <div class="row">
             <div class="label">砍价优惠：</div>  
-            <div class="desc">好友助力{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元<i class="icon-question_mark" @click.stop.prevent="showRules"></i></div>
+            <div class="desc fixedheight"><div class="box"><em>好友助力{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</em><i class="icon-question_mark" @click.stop.prevent="showRules"></i></div></div>
           </div>
           <div v-if="sharepay.stock">
             <div class="row">
@@ -36,7 +36,7 @@
         </div>
         <split v-if="cuttingData && cuttingData.cutInfos"></split>
         <div class="info" v-if="cuttingData && cuttingData.cutInfos">
-          <h1 class="title">好友助力砍价 <span v-if="cuttingData.leftEndTimes && !hasProgressOrder">(离优惠清零只剩<span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span>)</span></h1>
+          <h1 class="title">好友助力砍价 <span v-if="cuttingData.leftEndTimes && !hasProgressOrder">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
           <table class="tablist">
             <tr class="head">
               <td class="col-2" nowrap>好友名称</td>
@@ -193,6 +193,7 @@
       this.mutex = false;
       this.good.videoUrl = '';
       this.good.videos = [];
+      this.shareData = {};
       this.hide();
       this.processing = false;
       this.stopTimer();
@@ -239,7 +240,8 @@
         cuttingData: {}, // 砍价响应信息
         mutex: false,  // 创建过一次预订单，即为true
         hasProgressOrder: false,   // 砍价订单正在进行中
-        preOrderId: ''
+        preOrderId: '',
+        shareData: {}
       };
     },
     computed: {
@@ -328,6 +330,11 @@
         }).then(res => {
           let sharepay = res;
           this.sharepay = sharepay;
+          if (typeof res.id === 'undefined') {
+            this.$store.dispatch('closeLoading');
+            this.$router.replace('/404');
+            return;
+          }
           api.GetGood(sharepay.artworkId).then(response => {
             let good = response;
             this.good = good;
@@ -395,29 +402,40 @@
         }
         /** 用户已登录，创建分享预订单 */
         let user = this.$store.getters.getUserInfo;
-        if (user && user.userId) {
-          api.createSharePreOrder({
-            fieldId: this.sharepay.id,
-            userId: user.userId,
-            openid: user.openid
-          }).then(response => {
-            this.preOrderId = response.data && response.data.preOrderId;
-            if (response.code) {
-              this.$store.dispatch('openToast', '您已参加此商品活动!');
-              this.mutex = true;
-              return;
-            } else if (response.result !== 0) {
-              this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
-              return;
-            }
-            this.mutex = true;
-            // 显示分享指引页
-            this.$refs.weixinShare.show();
-          }).catch(response => {
-            this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
-            console.error(response);
-          });
+        if (!user.userId) {
+          this.$store.dispatch('openToast', '正在登录中...');
+          setTimeout(() => {
+            let redirect = 'http://' + location.host + location.pathname + '#/sharepay/' + this.sharepay.id;
+            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+          }, 1500);
+          return;
         }
+        api.createSharePreOrder({
+          fieldId: this.sharepay.id,
+          userId: user.userId,
+          openid: user.openid
+        }).then(response => {
+          this.preOrderId = response.data && response.data.preOrderId;
+          if (response.code === 1005) {
+            this.$store.dispatch('openToast', '您已参加此商品活动!');
+            this.mutex = true;
+            return;
+          } else if (response.code === 2001) {
+            this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
+            this.mutex = true;
+            return;
+          } else if (response.result !== 0 || response.code) {
+            this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
+            return;
+          }
+          this.mutex = true;
+          // 显示分享指引页
+          this.$refs.weixinShare.show();
+          this.updateShareData();
+        }).catch(response => {
+          this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
+          console.error(response);
+        });
       },
       fetchCuttingData() {
         let user = this.$store.getters.getUserInfo;
@@ -425,9 +443,12 @@
           return;
         }
         let shareId = this.$route.query.shareId || '';
+        this.preOrderId = shareId;
+        this.updateShareData();
         api.getShareCuttings({
           userId: user.userId,
           preOrderId: shareId,
+          fieldId: this.sharepay.id,
           userName: user.nickName || '匿名',
           userIcon: user.icon || ''
         }).then(response => {
@@ -435,6 +456,10 @@
             this.cuttingData = response.data;
             if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
               this.hasProgressOrder = true;
+            }
+            let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
+            if (preOrderId) {
+              this.preOrderId = preOrderId;
             }
           }
           this._initScroll();
@@ -681,7 +706,7 @@
         }
         let user = this.$store.getters.getUserInfo;
         let vm = this;
-        let shareData = {
+        this.shareData = {
           title: `[一虎一席.茶席艺术节][砍价.${this.sharepay.buttomFee}元] ` + reduceGoodsName(this.sharepay.name),
           desc: `砍到底：¥${this.sharepay.buttomFee}, 单买价：¥${this.sharepay.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
@@ -691,9 +716,16 @@
           }
         };
         wx.ready(function() {
-          wx.onMenuShareTimeline(shareData);
-          wx.onMenuShareAppMessage(shareData);
+          wx.onMenuShareTimeline(vm.shareData);
+          wx.onMenuShareAppMessage(vm.shareData);
         });
+      },
+      updateShareData() {
+        let redirect = 'http://' + location.host + '/weixin/sp/' + this.sharepay.id;
+        if (this.preOrderId) {
+          redirect += '?shareId=' + this.preOrderId;
+        }
+        this.shareData.link = redirect;
       },
       lazyload() {
         let w = window.innerWidth;
@@ -750,6 +782,7 @@
         }
         let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
         if (!preOrderId) {
+          this.$store.dispatch('openToast', '未发起过砍价哦!');
           return;
         }
         let good = {
@@ -769,7 +802,8 @@
           good.price = this.cuttingData.cutOrder.dealFee;
         }
         this.$store.dispatch('addPayGoods', [good]);
-        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=9';
+        // window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=9';
+        window.location.href = 'http://' + location.host + '/weixin/pay?orderType=9';
       }
     },
     filters: {
@@ -1011,6 +1045,8 @@
       .text
         padding-left: 14px
         padding-right: 10px
+      .countdownStats
+        color: #f01414
       .sellpoint
         padding: 0 10px 0 14px
         font-size: 13px
@@ -1056,6 +1092,8 @@
       >.head
         background-color: #fafafa
         font-size: 13px
+        .col-2
+          padding-left: 14px
       .col-1
         width: 15%
         padding-left: 10px
@@ -1112,12 +1150,31 @@
         float: left
         font-size: 13px
       .desc
+        position: relative
         flex: 1
         font-size: 13px
-        oveflow: hidden
-      .icon-question_mark
-        padding-left: 20px
-        color: #666
+        &.fixedheight
+          height: 13px
+        &.oldPrice
+          color: #07111b
+          font-weight: 700
+        .box
+          position: relative
+          display: inline-block
+          width: auto
+          padding-right: 26px
+          box-sizing: border-box
+          em
+            display: block
+            float: left
+            width: auto
+          .icon-question_mark
+            position: absolute
+            display: block
+            top: -2px
+            right: 0
+            color: #666
+            font-size: 16px
     .rating
       position: relative
       .title

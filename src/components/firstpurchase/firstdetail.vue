@@ -270,6 +270,11 @@
         }).then(res => {
           let firstpay = res;
           this.firstpay = firstpay;
+          if (typeof res.id === 'undefined') {
+            this.$store.dispatch('closeLoading');
+            this.$router.replace('/404');
+            return;
+          }
           api.GetGood(firstpay.artworkId).then(response => {
             let good = response;
             this.good = good;

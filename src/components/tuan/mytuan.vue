@@ -12,6 +12,7 @@
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}<span v-show="item.teamStatus >= 3" class="resultFlag">({{resultDesc(item)}})</span></h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
+                      <div class="countdowntips">{{item.limitCount}}人拼团</div>
                       <span class="price">{{item.teamFee | currency}}</span>
                     </div>
                     <div class="more-ops">
@@ -333,23 +334,27 @@
                   position: absolute
                   display: flex
                   width: 100%
-                  bottom: 10px
+                  bottom: 2px
                 .price-wrap
                   position: relative
-                  flex: 1
-                  height: 25px
-                  .line
-                    height: 25px
-                    line-height: 25px
-                    padding: 1px 0
-                  .price
+                  display: block
+                  float: left
+                  width: auto
+                  line-height: 1.3
+                  .countdowntips
+                    margin-top: 5px
+                    font-size: 12px
+                    font-weight: 700
+                  span
                     display: inline-block
-                    width: auto
-                    height: 25px
-                    line-height: 25px
-                    color: #f01414
+                    padding-top: 3px
+                    color: #e4393c
                     font-size: 14px
                     font-weight: 700
+                  del
+                    display: inline-block
+                    color: #999
+                    font-size: 12px
                   .state
                     display: inline-block
                     height: 25px
@@ -376,13 +381,15 @@
                 .more-ops
                   position: relative
                   display: block
-                  float: right
-                  width: auto
+                  flex: 1
                   text-align: right
+                  margin-right: 2px
                   .btn-buy
-                    position: relative
+                    position: absolute
+                    bottom: 0
+                    right: 0
                     display: inline-block
-                    padding: 0 10px
+                    padding: 0 6px
                     height: 25px
                     line-height: 25px
                     text-align: center
@@ -390,6 +397,8 @@
                     background: #e4393c
                     color: #fff
                     border-radius: 2px
+                    min-width: 56px
+                    box-sizing: border-box
                     &.disabled
                       background: #999
                     &.orange
@@ -398,11 +407,11 @@
                     &.green
                       background: #44b549
                       color: #fff
-                    &.blue
-                      background: #00a0dc
-                      color: #fff
                     &.darkred
                       background: #d05148
+                      color: #fff
+                    &.blue
+                      background: #00a0dc
                       color: #fff
                     &.white
                       color: #000

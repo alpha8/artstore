@@ -5,7 +5,7 @@
       <div class="order-wrap">
         <div class="order-container" ref="groupbuy" v-show="products.length">
           <div class="rules-wrap">
-            <div class="rule-title">“砍价”玩法：</div>
+            <div class="rule-title">“砍价” 简介：</div>
             <div class="rule-button" @click.stop.prevent="showDetail">规则</div>
             <div class="rule-flow">
               <div class="flow-item">
@@ -38,7 +38,7 @@
                     </div>
                     <div class="more-ops">
                       <span class="btn-buy disabled" v-if="item.status === 3">已下架</span>
-                      <span class="btn-buy" v-else-if="item.status === 0" @click.stop.prevent="goGoodDetail(item)">助力砍价</span>
+                      <span class="btn-buy" v-else-if="item.status === 0" @click.stop.prevent="goGoodDetail(item)">砍价</span>
                       <span class="btn-buy disabled" v-else>已售罄</span>
                     </div>
                   </div>
@@ -341,6 +341,7 @@
                   display: block
                   flex: 1
                   text-align: right
+                  margin-right: 2px
                   .btn-buy
                     position: absolute
                     bottom: 0

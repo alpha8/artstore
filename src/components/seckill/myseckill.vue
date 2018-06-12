@@ -280,6 +280,7 @@
                 display: block
                 float: right
                 width: 80px
+                margin-right: 2px
                 .btn
                   display: inline-block
                   float: right

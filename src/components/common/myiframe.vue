@@ -5,27 +5,41 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import {removeCookie} from '@/common/js/store';
   import api from '@/api/api';
   export default {
     data() {
       return {
         redirectUrl: '',
-        isAutoLogin: window.sessionStorage.getItem('autologin') || false
+        isAutoLogin: false
       };
+    },
+    created() {
+      let hotfix = window.localStorage.getItem('hotfix') || false;
+      if (!hotfix) {
+        window.localStorage.clear();
+        window.sessionStorage.clear();
+        removeCookie('wxuser', '', '.yihuyixi.com');
+        window.localStorage.setItem('hotfix', true);
+        console.log('HotFix online issue.');
+      }
     },
     mounted() {
       if (!this.$store.getters.checkLogined) {
+        this.isAutoLogin = window.sessionStorage.getItem('auto') || false;
         this.$store.dispatch('setAnonymous');
         let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
         if (!ios && !this.isAutoLogin) {
-          let redirect = location.href;
+          let redirect = window.location.href;
           if (redirect) {
             redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
           }
           this.isAutoLogin = true;
-          window.sessionStorage.setItem('autologin', true);
+          window.sessionStorage.setItem('auto', true);
           this.$store.dispatch('openToast', '正在登录中...');
-          window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+          setTimeout(() => {
+            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+          }, 500);
         }
       }
     },

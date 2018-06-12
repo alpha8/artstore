@@ -122,11 +122,11 @@
           url: '/sharepay',
           icon: 'icon-cutingprice big'
         }, {
-          name: '三折拼团',
+          name: '3折拼团',
           url: '/tuan',
           icon: 'icon-tuan big'
         }, {
-          name: '三折秒杀',
+          name: '3折秒杀',
           url: '/seckill',
           icon: 'icon-miaosha big'
         // }, {

@@ -505,8 +505,8 @@
               };
               this.$store.dispatch('addPayGoods', [good]);
               this.$store.dispatch('addKillProduct', this.seckill.seckillId);
-              // this.$router.push({name: 'pay', query: {orderType: 3}});
-              window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=3';
+              // window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=3';
+              window.location.href = 'http://' + location.host + '/weixin/pay?orderType=3';
             });
           }
         });

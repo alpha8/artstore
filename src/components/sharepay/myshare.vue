@@ -385,6 +385,7 @@
                   float: right
                   width: auto
                   text-align: right
+                  margin-right: 2px
                   .btn-buy
                     position: relative
                     display: inline-block

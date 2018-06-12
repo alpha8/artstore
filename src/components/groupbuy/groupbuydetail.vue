@@ -100,7 +100,7 @@
           <span class="button-lg gray">已抢完</span>
         </div>
         <div class="foot-item" v-else-if="good.leftStartTimes <= 0 && good.leftEndTimes > 0 && good.bookmoq != good.moq" @click.stop.prevent="pay">
-          <span class="button-lg red">立即抢购</span>
+          <span class="button-lg red">参加团购</span>
         </div>
         <div class="foot-item btn-share" @click.stop.prevent="wxshare">
           <span class="button-lg orange">分享有礼</span>
@@ -485,8 +485,8 @@
           checked: false
         };
         this.$store.dispatch('addPayGoods', [good]);
-        // this.$router.push({name: 'pay', query: {orderType: 4}});
-        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=4';
+        // window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=4';
+        window.location.href = 'http://' + location.host + '/weixin/pay?orderType=4';
       },
       mark() {
         let uid = this.$store.getters.getUserInfo.userId;

@@ -6,7 +6,7 @@
         <div class="image-header">
           <swipe :swiperSlides="swiperSlides"></swipe>
         </div>
-        <div class="tuan_price">
+       <!--  <div class="tuan_price">
           <span class="tuan_tag"><i class="icon-person"></i><em>{{tuan.limitCount}}人拼</em></span>
           <span class="tuan_newprice">¥<em>{{tuan.buttomFee}}</em></span>
           <span class="tuan_oldprice"><del v-show="tuan.fieldPrice">{{tuan.fieldPrice | currency}}</del></span>
@@ -14,9 +14,12 @@
             <small>距拼购结束还剩:</small>
             <span><i>{{countdownStats.days}}</i>天<i v-if="countdownStats.hours">{{countdownStats.hours}}</i>:<i v-if="countdownStats.mins">{{countdownStats.mins}}</i>:<i v-if="countdownStats.seconds">{{countdownStats.seconds}}</i></span>
           </div>
-        </div>
+        </div> -->
         <div class="content">
           <h1 class="title">{{tuan.name}}</h1>
+          <div class="price">
+            <span class="now">¥{{tuan.buttomFee}}</span><span class="old" v-show="tuan.fieldPrice">¥{{tuan.fieldPrice}}</span><span class="tuanPerson">({{tuan.limitCount}}人拼)</span>
+          </div>
           <div v-if="tuan.stock">
             <div class="row">
               <div class="label">商品库存：</div>
@@ -32,9 +35,10 @@
             <div class="desc">不支持优惠券</div>
           </div>
           <div class="row">
-            <div class="label">团购时间：</div>
+            <div class="label">拼团时间：</div>
             <div class="desc">{{tuan.startDate | formatDate}} ~ {{tuan.endDate | formatDate}}</div>
           </div>
+          <div class="duration">距拼团结束还剩：<p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p></div>
         </div>
         <split v-if="tuanData && tuanData.teamOrders"></split>
         <div class="info" v-if="tuanData && tuanData.teamOrders">
@@ -144,6 +148,7 @@
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
     <frame></frame>
+    <share ref="weixinShare"></share>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <div class="fixed-foot">
       <div class="foot-wrapper">
@@ -151,7 +156,7 @@
           <span class="button-lg orange"><span class="line">¥<strong>{{tuan.fieldPrice}}</strong></span>单独购买</span>
         </div>
         <div class="foot-item">
-          <span class="button-lg gray" v-if="tuanData.status <= 2 && tuanData.join">已参加</span>
+          <span class="button-lg darkred" v-if="tuanData.status <= 2 && tuanData.join" @click.stop.prevent="wxshare">邀请好友参团</span>
           <span class="button-lg gray" v-else-if="tuan.leftEndTimes <= 0">已结束</span>
           <span class="button-lg darkred" v-else @click.stop.prevent="createTuan"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
         </div>
@@ -178,6 +183,7 @@
   import star from '@/components/star/star';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
+  import share from '@/components/tuan/share';
   import layer from '@/components/common/layer';
   let Base64 = require('js-base64').Base64;
 
@@ -233,7 +239,8 @@
         countdownStats: {},
         tuanData: {}, // 拼团响应信息
         mutex: false,
-        preOrderId: ''
+        preOrderId: '',
+        shareData: {}
       };
     },
     computed: {
@@ -306,6 +313,11 @@
         }).then(res => {
           let tuan = res;
           this.tuan = tuan;
+          if (typeof res.id === 'undefined') {
+            this.$store.dispatch('closeLoading');
+            this.$router.replace('/404');
+            return;
+          }
           this.timerLoop();
           api.GetGood(tuan.artworkId).then(response => {
             let good = response;
@@ -361,12 +373,19 @@
           return;
         }
         let tuanId = this.$route.query.tuanId || '';
+        this.preOrderId = tuanId;
+        this.updateShareData();
         api.getTuanList({
           userId: user.userId,
-          preOrderId: tuanId
+          preOrderId: tuanId,
+          fieldId: this.tuan.id
         }).then(response => {
           if (response.result === 0) {
             this.tuanData = response.data;
+            let preOrderId = this.tuanData && this.tuanData.order && this.tuanData.order.id || 0;
+            if (preOrderId) {
+              this.preOrderId = preOrderId;
+            }
           }
           this._initScroll();
         }).catch(response => {
@@ -509,6 +528,9 @@
           console.error(response);
         });
       },
+      wxshare() {
+        this.$refs.weixinShare.show();
+      },
       show() {
         this.$store.commit('HIDE_FOOTER');
         this._initScroll();
@@ -612,18 +634,26 @@
         }
         let user = this.$store.getters.getUserInfo;
         let vm = this;
-        let shareData = {
+        this.shareData = {
           title: `[一虎一席.茶席艺术节][拼购.${this.tuan.buttomFee}元] ` + reduceGoodsName(this.tuan.name),
           desc: `开团价：¥${this.tuan.buttomFee}, 单买价：¥${this.tuan.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
           success: function () {
+            vm.$refs.weixinShare.hideDialog();
           }
         };
         wx.ready(function() {
-          wx.onMenuShareTimeline(shareData);
-          wx.onMenuShareAppMessage(shareData);
+          wx.onMenuShareTimeline(vm.shareData);
+          wx.onMenuShareAppMessage(vm.shareData);
         });
+      },
+      updateShareData() {
+        let redirect = 'http://' + location.host + '/weixin/tuan/' + this.tuan.id;
+        if (this.preOrderId) {
+          redirect += '?tuanId=' + this.preOrderId;
+        }
+        this.shareData.link = redirect;
       },
       lazyload() {
         let w = window.innerWidth;
@@ -703,10 +733,19 @@
               count: 1,
               icon: (this.tuan.icon) ? api.CONFIG.psCtx + this.tuan.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
               checked: false,
-              preOrderId: response.data.teamOrderId
+              preOrderId: response.data.infoOrderId
             };
             this.$store.dispatch('addPayGoods', [good]);
             window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+          } else if (response.code === 2001) {
+            this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
+            console.log(response);
+          } else if (response.code === 1006) {
+            this.$store.dispatch('openToast', '活动已结束!');
+            console.log(response);
+          } else if (response.code === 1005) {
+            this.$store.dispatch('openToast', '你有一单未完成的订单，请前往[个人中心|我的拼团]查看!');
+            console.log(response);
           } else {
             this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
             console.error(response);
@@ -731,7 +770,8 @@
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
-            this.preOrderId = response.data.teamOrderId;
+            this.preOrderId = response.data.infoOrderId;
+            this.updateShareData();
             let good = {
               id: this.tuan.id,
               name: this.tuan.name,
@@ -747,6 +787,15 @@
             };
             this.$store.dispatch('addPayGoods', [good]);
             window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+          } else if (response.code === 2001) {
+            this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
+            console.log(response);
+          } else if (response.code === 1006) {
+            this.$store.dispatch('openToast', '活动已结束!');
+            console.log(response);
+          } else if (response.code === 1005) {
+            this.$store.dispatch('openToast', '你有一单未完成的订单，请前往[个人中心|我的拼团]查看!');
+            console.log(response);
           } else {
             this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
             console.error(response);
@@ -770,7 +819,8 @@
           checked: false
         };
         this.$store.dispatch('addPayGoods', [good]);
-        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=10';
+        // window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=10';
+        window.location.href = 'http://' + location.host + '/weixin/pay?orderType=10';
       },
       cleanup() {
         this.good.videoUrl = '';
@@ -778,6 +828,7 @@
         this.processing = false;
         this.mutex = false;
         this.preOrderId = '';
+        this.shareData = {};
       }
     },
     filters: {
@@ -790,7 +841,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share
     }
   };
 </script>
@@ -900,6 +951,26 @@
               box-sizing: border-box
               .icon-favorite
                 color: #ff463c
+      .duration
+        display: block
+        margin-top: 5px
+        font-size: 13px
+        color: #666
+        .countdown_nums
+          position: relative
+          display: inline-block
+          font-size: 12px
+          .box
+            display:inline-block
+            margin:0 1px
+            width: 20px
+            height: 19px
+            line-height: 19px
+            font-weight:700
+            text-align: center
+            color:#fff
+            background:#e4393c
+            background-size:13px
       .tuan_price
         position: relative
         display: flex
@@ -1021,6 +1092,11 @@
           text-decoration: line-through
           font-size: 12px
           color: rgb(147, 153, 159)
+        .tuanPerson
+          font-size: 13px
+          margin-left: 10px
+          color: #666
+          font-weight: 700
       .delivery-annouce
         font-size: 12px
         color: rgb(147, 153, 159)
@@ -1150,6 +1226,8 @@
       >.head
         background-color: #fafafa
         font-size: 13px
+        .col-2
+          padding-left: 14px
       .col-1
         width: 15%
         padding-left: 10px
@@ -1350,7 +1428,7 @@
         .button-lg
           display: block
           line-height: 50px
-          font-size: 14px
+          font-size: 12px
           i
             font-size: 22px
           &.gray

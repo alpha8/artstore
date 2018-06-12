@@ -4,7 +4,7 @@
     <div class="tuan" ref="tuan">
       <div class="tuan_content">
         <div class="rules-wrap">
-          <div class="rule-title">拼团玩法：</div>
+          <div class="rule-title">"拼团" 简介：</div>
           <div class="rule-button" @click.stop.prevent="showDetail">规则</div>
           <div class="rule-flow">
             <div class="flow-item">
@@ -28,10 +28,10 @@
           <div class="tuan_info">
             <div class="tuan_name">{{tuan.name}}</div>
             <div class="price-wrap">
-              <span class="tuan_tag"><i class="icon-person"></i><em>{{tuan.limitCount}}人拼</em></span>
-              <span class="tuan_newprice">¥<em>{{tuan.buttomFee}}</em></span>
+              <!-- <span class="tuan_tag"><i class="icon-person"></i><em>{{tuan.limitCount}}人拼</em></span> -->
+              <span class="tuan_newprice">¥<em>{{tuan.buttomFee}}</em><del class="tuan_oldPrice" v-show="tuan.fieldPrice">{{tuan.fieldPrice | currency}}</del><span class="tuanPerson">({{tuan.limitCount}}人拼)</span></span>
             </div>
-            <div class="tuan_oldprice">单买价: <del v-show="tuan.fieldPrice">{{tuan.fieldPrice | currency}}</del></div>
+            <!-- <div class="tuan_oldprice">单买价: <del v-show="tuan.fieldPrice">{{tuan.fieldPrice | currency}}</del></div> -->
           </div>
         </div>
         <div class="tuan_list">
@@ -39,7 +39,7 @@
           <div class="tuan_stat" v-else-if="tuanData.status === 3">团长人气太高，已经拼团成功啦</div>
           <div class="tuan_stat">还差<span class="text-red">{{leftPerson}}人</span>拼团成功，剩余<span class="countdown"><i>{{countdownStats.days}}</i>天<i v-if="countdownStats.hours">{{countdownStats.hours}}</i>:<i v-if="countdownStats.mins">{{countdownStats.mins}}</i>:<i v-if="countdownStats.seconds">{{countdownStats.seconds}}</i></span></div>
           <ul class="tuan_users">
-            <li class="user_item" v-for="(item, index) in tuanData.teamOrders" :key="index">
+            <li class="user_item" v-for="(item, index) in tuanData.teamOrders" :key="index" v-show="item.owner || item.status === 3">
               <span class="tips" v-show="item.owner">团长</span>
               <img :src="getUserIcon(item.userIcon)" :class="{'leader': item.owner}" alt="">
             </li>
@@ -49,22 +49,26 @@
           <div class="btns btn-red" v-if="tuanData.owner && tuanData.status <= 2" @click.stop.prevent="wxshare"><span>邀请好友参团</span></div>
           <div class="btns btn-red" v-else-if="!tuanData.join && tuanData.status <= 2" @click.stop.prevent="joinTuan"><span>我要参团</span></div>
           <div class="btns btn-red" v-else-if="!tuanData.owner && tuanData.status >= 3" @click.stop.prevent="createTuan"><span>我也要开团</span></div>
+          <div class="btns btn-gray" v-else-if="tuan.leftEndTimes <= 0"><span>活动已结束</span></div>
           <div class="btns btn-red" v-else @click.stop.prevent="createTuan"><span>再开一团</span></div>
         </div>
       </div>
     </div>
     <rules ref="rules" title="拼团规则"></rules>
     <share ref="weixinShare"></share>
+    <frame></frame>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
+  import {reduceGoodsName} from '@/common/js/util';
   import {countdown} from '@/common/js/date';
   import share from '@/components/tuan/share';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import split from '@/components/split/split';
   import rules from '@/components/tuan/rules';
+  import frame from '@/components/common/myiframe';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   export default {
@@ -82,7 +86,8 @@
         tuanData: {},
         countdownStats: {},
         timer: null,
-        preOrderId: ''
+        preOrderId: '',
+        shareData: {}
       };
     },
     computed: {
@@ -101,7 +106,13 @@
         return 0;
       },
       leftPerson() {
-        let actual = this.tuanData && this.tuanData.teamOrders && this.tuanData.teamOrders.length;
+        let actual = 0;
+        let orders = this.tuanData.teamOrders || [];
+        orders.forEach(item => {
+          if (item.owner || item.status === 3) {
+            actual++;
+          }
+        });
         let expected = this.tuan.limitCount;
         return expected - actual;
       },
@@ -154,12 +165,19 @@
           return;
         }
         let tuanId = this.$route.query.tuanId || '';
+        this.preOrderId = tuanId;
+        this.updateShareData();
         api.getTuanList({
           userId: user.userId,
-          preOrderId: tuanId
+          preOrderId: tuanId,
+          fieldId: this.tuan.id
         }).then(response => {
           if (response.result === 0) {
             this.tuanData = response.data;
+            let preOrderId = this.tuanData && this.tuanData.order && this.tuanData.order.id || 0;
+            if (preOrderId) {
+              this.preOrderId = preOrderId;
+            }
           }
           this._initScroll();
         }).catch(response => {
@@ -193,6 +211,7 @@
         this.countdownStats = {};
         this.tuanData = {};
         this.preOrderId = '';
+        this.shareData = {};
       },
       goTuanDetail() {
         let tuanId = this.$route.query.tuanId;
@@ -224,7 +243,7 @@
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
-            this.preOrderId = response.data.teamOrderId;
+            let preOrderId = response.data.infoOrderId;
             let good = {
               id: this.tuan.id,
               name: this.tuan.name,
@@ -236,10 +255,20 @@
               count: 1,
               icon: (this.tuan.icon) ? api.CONFIG.psCtx + this.tuan.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
               checked: false,
-              preOrderId: this.preOrderId
+              preOrderId: preOrderId
             };
             this.$store.dispatch('addPayGoods', [good]);
-            window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+            // window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+            window.location.href = 'http://' + location.host + '/weixin/pay?orderType=8';
+          } else if (response.code === 2001) {
+            this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
+            console.log(response);
+          } else if (response.code === 1006) {
+            this.$store.dispatch('openToast', '活动已结束!');
+            console.log(response);
+          } else if (response.code === 1005) {
+            this.$store.dispatch('openToast', '你有一单未完成的订单，请前往[个人中心|我的拼团]查看!');
+            console.log(response);
           } else {
             this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
             console.error(response);
@@ -264,11 +293,12 @@
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
-            this.preOrderId = response.data.teamOrderId;
+            this.preOrderId = response.data.infoOrderId;
+            this.updateShareData();
             let good = {
               id: this.tuan.id,
               name: this.tuan.name,
-              pictures: this.good.pictures,
+              pictures: [this.tuan.icon],
               src: this.tuan.icon,
               content: '',
               price: this.tuan.buttomFee,
@@ -280,6 +310,15 @@
             };
             this.$store.dispatch('addPayGoods', [good]);
             window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+          } else if (response.code === 2001) {
+            this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
+            console.log(response);
+          } else if (response.code === 1006) {
+            this.$store.dispatch('openToast', '活动已结束!');
+            console.log(response);
+          } else if (response.code === 1005) {
+            this.$store.dispatch('openToast', '你有一单未完成的订单，请前往[个人中心|我的拼团]查看!');
+            console.log(response);
           } else {
             this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
             console.error(response);
@@ -313,12 +352,8 @@
         }
         let user = this.$store.getters.getUserInfo;
         let vm = this;
-        let tuanName = this.tuan.name;
-        if (tuanName) {
-          tuanName = tuanName.replace('[一虎一席]', '');
-        }
-        let shareData = {
-          title: `${user.nickName}邀你加入${tuanName}拼团`,
+        this.shareData = {
+          title: `[一虎一席.茶席艺术节][拼购.${this.tuan.buttomFee}元] ` + reduceGoodsName(this.tuan.name),
           desc: `开团价：¥${this.tuan.buttomFee}, 单买价：¥${this.tuan.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
@@ -327,9 +362,16 @@
           }
         };
         wx.ready(function() {
-          wx.onMenuShareTimeline(shareData);
-          wx.onMenuShareAppMessage(shareData);
+          wx.onMenuShareTimeline(vm.shareData);
+          wx.onMenuShareAppMessage(vm.shareData);
         });
+      },
+      updateShareData() {
+        let redirect = 'http://' + location.host + '/weixin/tuan/' + this.tuan.id;
+        if (this.preOrderId) {
+          redirect += '?tuanId=' + this.preOrderId;
+        }
+        this.shareData.link = redirect;
       },
       showDetail() {
         this.$refs.rules.showDetail();
@@ -343,7 +385,7 @@
       }
     },
     components: {
-      share, fixedheader, split, rules
+      share, fixedheader, split, rules, frame
     }
   };
 </script>
@@ -397,7 +439,7 @@
             font-size: 14px
             line-height: 1.2
             height: 34px
-            margin-bottom: 3px
+            padding-top: 2px
         .tuan_tag
           position: relative
           display: inline-block
@@ -432,6 +474,11 @@
             padding-top: 2px
             vertical-align: top
             box-sizing: border-box
+        .price-wrap
+          position: absolute
+          display: flex
+          width: 100%
+          bottom: 3px
         .tuan_newprice
           color: #ff463c
           font-family: arial
@@ -439,6 +486,15 @@
           em
             margin-left: 3px
             font-size: 18px
+          .tuan_oldPrice
+            margin-left: 7px
+            font-size: 12px
+            color: rgb(147, 153, 159)
+          .tuanPerson
+            font-size: 13px
+            margin-left: 8px
+            color: #666
+            font-weight: 700
         .tuan_oldprice
           position: relative
           font-size: 12px
@@ -493,7 +549,7 @@
               text-align: center
               color: #fff
               font-size: 12px
-              background-color: #333333
+              background:#e4393c
               border-radius: 2px
               margin: 0 2px
         .tuan_users

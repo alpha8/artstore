@@ -20,6 +20,7 @@
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
+    <minicart ref="shopcart" :selectGoods="selectGoods" :max-items="3" @fireEmpty="doClear" @fireReload="doRefresh" :isAvailable="userProfile.hasFirst"></minicart>
   </div>
 </template>
 
@@ -28,6 +29,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
   import {reduceGoodsName} from '@/common/js/util';
+  import minicart from '@/components/cart/minicart';
   import api from '@/api/api';
 
   export default {
@@ -41,8 +43,26 @@
         scroller: null,
         loading: false,
         scrollY: 0,
-        lastExec: +new Date()
+        lastExec: +new Date(),
+        prefix: '_fp'
       };
+    },
+    computed: {
+      selectGoods() {
+        let items = [];
+        let goods = this.$store.getters.cartProducts;
+        goods.forEach((product) => {
+          if (product.count && product.type === this.prefix) {
+            let o = {};
+            Object.assign(o, product);
+            items.push(o);
+          }
+        });
+        return items;
+      },
+      userProfile() {
+        return this.$store.getters.getUserProfile;
+      }
     },
     activated() {
       this.show();
@@ -138,10 +158,20 @@
       goTop() {
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
+      },
+      doClear() {
+      },
+      doRefresh(target) {
+        let newCount = 0;
+        this.$store.getters.cartProducts.forEach(product => {
+          if (product.id === this.firstpay.id) {
+            newCount = product.count || 0;
+          }
+        });
       }
     },
     components: {
-      gotop, fixedheader
+      gotop, fixedheader, minicart
     }
   };
 </script>
@@ -151,7 +181,7 @@
   .product-wrapper
     position: absolute
     top: 44px
-    bottom: 0
+    bottom: 48px
     width: 100%
     .productlist
       position: relative

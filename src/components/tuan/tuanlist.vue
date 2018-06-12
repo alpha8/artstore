@@ -5,7 +5,7 @@
       <div class="order-wrap">
         <div class="order-container" ref="tuanList" v-show="products.length">
           <div class="rules-wrap">
-            <div class="rule-title">拼团玩法：</div>
+            <div class="rule-title">"拼团" 简介：</div>
             <div class="rule-button" @click.stop.prevent="showDetail">规则</div>
             <div class="rule-flow">
               <div class="flow-item">
@@ -106,7 +106,8 @@
         api.firstpayGoods({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          type: 2
+          type: 2,
+          online: true
         }).then((response) => {
           let goods = response.list;
           if (goods && goods.length) {
@@ -321,7 +322,7 @@
                   .countdowntips
                     margin-top: 5px
                     font-size: 12px
-                    color: #999
+                    font-weight: 700
                   span
                     display: inline-block
                     padding-top: 3px
@@ -337,6 +338,7 @@
                   display: block
                   flex: 1
                   text-align: right
+                  margin-right: 2px
                   .btn-buy
                     position: absolute
                     bottom: 0

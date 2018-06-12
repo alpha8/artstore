@@ -96,7 +96,7 @@
       background: #ccc
       opacity: .6
       border-radius: 20px
-      margin: 7.5px 3px 7.5px 0
+      margin: 6.5px 3px 7.5px 0
       &.swiper-pagination-bullet-active
         background: #00a0dc
         width: 30px
@@ -157,6 +157,9 @@
               font-size: $fontsize-homebigicon
             &.icon-teapot_kitchen
               font-size: 34px
+            &.icon-file
+              height: 33px
+              padding-top: 2px
           .top_name
             font-size: $fontsize-small
             color: $color-darkgray

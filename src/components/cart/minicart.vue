@@ -32,7 +32,7 @@
       <transition name="fold">
         <div class="shopcart-list" v-show="listShow">
           <div class="list-header">
-            <h1 class="title">已选商品</h1>
+            <h1 class="title">已选商品：</h1>
             <span class="empty" @click.stop.prevent="empty"><span class="icon-recycle"></span> 清空</span>
           </div>
           <div class="list-content" ref="listContent">
@@ -105,9 +105,9 @@
         if (this.selectGoods.length > this.maxItems) {
           return `限购${this.maxItems}件`;
         } else if (this.totalPrice <= 0) {
-          return `立即选购`;
+          return `请选购`;
         } else {
-          return `去结算`;
+          return `结算`;
         }
       },
       payClass() {
@@ -159,7 +159,8 @@
           return;
         }
         this.$store.dispatch('addPayGoods', this.selectGoods);
-        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=7';
+        // window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=7';
+        window.location.href = 'http://' + location.host + '/weixin/pay?orderType=7';
       },
       addGood(target) {
         this.drop(target);
@@ -316,7 +317,7 @@
           vertical-align: top
           margin: 12px 0 0 12px
           line-height: 24px
-          font-size: 10px
+          font-size: 13px
       .content-right
         flex: 0 0 105px
         width: 105px
@@ -324,7 +325,7 @@
           height: 48px
           line-height: 48px
           text-align: center
-          font-size: 12px
+          font-size: 13px
           font-weight: 700
           background: #444
           &.activated
@@ -361,8 +362,6 @@
         border-bottom: 1px solid rgba(7, 17, 27, 0.1)
         box-sizing: border-box
         .title
-          border-left: 3px solid #2395ff
-          text-indent: 5px
           float: left
           font-size: 15px
           color: rgb(7, 17, 27)
@@ -370,6 +369,9 @@
           float: right
           font-size: 13px
           color: rgb(7, 17, 27)
+          .icon-recycle
+            display: inline-block
+            vertical-align: bottom
       .list-content
         padding: 0 10px 20px
         max-height: 217px
@@ -407,6 +409,7 @@
             flex: 3
             height: 40px
             line-height: 40px
+            margin-top: 2px
   .list-mask
     position: fixed
     top: 0

@@ -350,6 +350,7 @@
                   display: block
                   flex: 1
                   text-align: right
+                  margin-right: 2px
                   .btn-buy
                     position: relative
                     display: inline-block
