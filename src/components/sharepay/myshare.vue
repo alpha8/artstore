@@ -7,19 +7,18 @@
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in orders" :key="index">
               <div class="item-content">
-                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.status === 5}"><span class="text">{{stateDesc(item.status)}}</span></i></div>
+                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.status === 4}"><span class="text">{{stateDesc(item.status)}}</span></i></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}<span v-if="resultDesc(item)" class="resultFlag">({{resultDesc(item)}})</span></h3>
+                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}</h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
                       <span class="price">{{item.dealFee | currency}}</span>
                       <del class="oldprice" v-if="item.originalFee !== item.dealFee">{{item.originalFee | currency}}</del>
                     </div>
                     <div class="more-ops">
-                      <span class="btn-buy red" v-if="item.status === 0" @click.stop.prevent="pay(item)">去付款</span>
-                      <span class="pricing" v-else-if="item.status === 5"></span>
+                      <span class="btn-buy red" v-if="item.status <= 2" @click.stop.prevent="pay(item)">去付款</span>
+                      <span class="pricing" v-else-if="item.status === 4"></span>
                       <span class="btn-buy blue" v-else @click.stop.prevent="showOrders()">我的订单</span>
-                      <!-- <span class="pricing"></span> -->
                     </div>
                   </div>
                 </div>
@@ -57,11 +56,11 @@
         scrollY: 0,
         states: {
           0: '正在砍价',
-          1: '砍价成功',
-          2: '正在砍价',
-          3: '正在砍价',
-          4: '正在砍价',
-          5: '砍价失败'
+          1: '到达底价',
+          2: '等待付款',
+          3: '砍价成功',
+          4: '付款超时',
+          5: '砍价成功'
         }
       };
     },
@@ -134,7 +133,7 @@
       resultDesc(item) {
         if (item.status === 1) {
           return '砍价成功';
-        } else if (item.status === 5) {
+        } else if (item.status === 4) {
           return '砍价失败';
         } else {
           return '';
@@ -181,7 +180,7 @@
         document.documentElement.scrollTop = 0;
       },
       showOrders() {
-        window.location.href = 'http://' + location.host + location.pathname + '#/order?type=0';
+        window.location.href = 'http://' + location.host + location.pathname + '#/order?type=-1';
       }
     },
     components: {
@@ -334,7 +333,7 @@
                   position: absolute
                   display: flex
                   width: 100%
-                  bottom: 10px
+                  bottom: 2px
                 .price-wrap
                   position: relative
                   flex: 1

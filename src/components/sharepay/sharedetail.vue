@@ -9,7 +9,7 @@
         <div class="content">
           <h1 class="title">{{sharepay.name}}</h1>
           <div class="price">
-            <span class="now">¥{{getGoodPrice}}</span><span class="old" v-if="sharepay.fieldPrice !== getGoodPrice">¥{{sharepay.fieldPrice}}</span>
+            <span class="now">¥{{getCutPrice}}</span><span class="old" v-if="sharepay.fieldPrice !== getCutPrice">¥{{sharepay.fieldPrice}}</span>
           </div>
           <div class="row">
             <div class="label">商品底价：</div>
@@ -36,7 +36,8 @@
         </div>
         <split v-if="cuttingData && cuttingData.cutInfos"></split>
         <div class="info" v-if="cuttingData && cuttingData.cutInfos">
-          <h1 class="title">好友助力砍价 <span v-if="cuttingData.leftEndTimes && !hasProgressOrder">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
+          <h1 class="title" v-if="isOwner">好友助力砍价 <span v-if="cuttingData.leftEndTimes && !hasProgressOrder">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.days">{{countdownStats.days}}天</span><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
+          <h1 class="title" v-else>您的朋友获得了如下各位的助力砍价：</h1>
           <table class="tablist">
             <tr class="head">
               <td class="col-2" nowrap>好友名称</td>
@@ -142,13 +143,25 @@
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <div class="fixed-foot">
       <div class="foot-wrapper">
-        <div class="foot-item btn-share" @click.stop.prevent="pay">
+        <div class="foot-item btn-share" v-if="isOwner && cuttingData.cutOrder && cuttingData.cutOrder.status >= 3">
+          <span class="button-lg gray">{{stateDesc}}</span>
+        </div>
+        <div class="foot-item btn-share" v-else-if="isOwner || !cuttingData.cutOrder" @click.stop.prevent="pay">
           <span class="button-lg orange" v-if="hasProgressOrder">待付款</span>
           <span class="button-lg orange" v-else-if="GotAndPay">已达成(待付款)</span>
           <span class="button-lg orange" v-else>立即购买</span>
         </div>
-        <div class="foot-item" @click.stop.prevent="wxshare">
+        <div class="foot-item btn-share" v-else @click.stop.prevent="viewMime">
+          <span class="button-lg orange">查看我的</span>
+        </div>
+        <div class="foot-item" @click.stop.prevent="wxshare" v-if="isOwner && cuttingData.cutOrder && cuttingData.cutOrder.status >= 3">
+          <span class="button-lg darkred">好友重新助力砍价</span>
+        </div>
+        <div class="foot-item" @click.stop.prevent="wxshare" v-else-if="isOwner || !cuttingData.cutOrder">
           <span class="button-lg darkred">好友助力砍价</span>
+        </div>
+        <div class="foot-item" @click.stop.prevent="wxshare" v-else>
+          <span class="button-lg darkred">帮好友助力砍价</span>
         </div>
       </div>
     </div>
@@ -241,7 +254,15 @@
         mutex: false,  // 创建过一次预订单，即为true
         hasProgressOrder: false,   // 砍价订单正在进行中
         preOrderId: '',
-        shareData: {}
+        shareData: {},
+        states: {
+          0: '正在砍价',
+          1: '到达底价',
+          2: '等待付款',
+          3: '砍价成功',
+          4: '付款超时',
+          5: '砍价成功'
+        }
       };
     },
     computed: {
@@ -269,10 +290,20 @@
       },
       getGoodPrice() {
         let user = this.$store.getters.getUserInfo;
-        if (this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.userId === user.userId) {
+        if (this.cuttingData.cutOrder && this.cuttingData.cutOrder.userId === user.userId) {
           return this.cuttingData.cutOrder.dealFee;
         }
         return this.sharepay.specialPrice;
+      },
+      getCutPrice() {
+        if (this.cuttingData.cutOrder) {
+          return this.cuttingData.cutOrder.dealFee;
+        }
+        return this.sharepay.specialPrice;
+      },
+      isOwner() {
+        let user = this.$store.getters.getUserInfo;
+        return (this.cuttingData.cutOrder && this.cuttingData.cutOrder.userId === user.userId) || false;
       },
       getFrameHeight() {
         let width = document.documentElement.clientWidth || 375;
@@ -309,6 +340,10 @@
           return this.cuttingData.owner && (this.cuttingData.leftEndTimes <= 0 || this.cuttingData.cutOrder.dealFee <= this.sharepay.buttomFee || this.cuttingData.cutOrder.dealFee - this.sharepay.forwardFee < this.sharepay.buttomFee);
         }
         return false;
+      },
+      stateDesc() {
+        let status = this.cuttingData.cutOrder && this.cuttingData.cutOrder.status || 0;
+        return this.states[status];
       }
     },
     methods: {
@@ -394,9 +429,38 @@
         }
         return '匿名';
       },
+      viewMime() {
+        this.stopTimer();
+        this.preOrderId = '';
+        this.updateShareData();
+        let user = this.$store.getters.getUserInfo;
+        api.getShareCuttings({
+          userId: user.userId,
+          preOrderId: '',
+          fieldId: this.sharepay.id,
+          userName: user.nickName || '匿名',
+          userIcon: user.icon || ''
+        }).then(response => {
+          if (response.result === 0) {
+            this.cuttingData = response.data;
+            if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
+              this.hasProgressOrder = true;
+            }
+            let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
+            if (preOrderId) {
+              this.preOrderId = preOrderId;
+              this.updateShareData();
+            }
+          }
+          this._initScroll();
+          this.timerLoop();
+        }).catch(response => {
+          console.error(response);
+        });
+      },
       wxshare() {
         // 如果已经创建了砍价预订单，即跳过创建预订单，直接分享
-        if (this.hasProgressOrder || (this.cuttingData && this.cuttingData.owner) || this.mutex) {
+        if (this.hasProgressOrder || (this.cuttingData && this.cuttingData.owner) || this.mutex || this.preOrderId) {
           this.$refs.weixinShare.show();
           return;
         }
@@ -415,9 +479,12 @@
           userId: user.userId,
           openid: user.openid
         }).then(response => {
-          this.preOrderId = response.data && response.data.preOrderId;
+          let preOrderId = response.data && response.data.preOrderId;
+          if (preOrderId) {
+            this.preOrderId = preOrderId;
+          }
           if (response.code === 1005) {
-            this.$store.dispatch('openToast', '您已参加此商品活动!');
+            this.$refs.weixinShare.show();
             this.mutex = true;
             return;
           } else if (response.code === 2001) {
@@ -432,6 +499,7 @@
           // 显示分享指引页
           this.$refs.weixinShare.show();
           this.updateShareData();
+          this.firstCut();
         }).catch(response => {
           this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
           console.error(response);
@@ -460,6 +528,28 @@
             let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
             if (preOrderId) {
               this.preOrderId = preOrderId;
+              this.updateShareData();
+            }
+          }
+          this._initScroll();
+          this.timerLoop();
+        }).catch(response => {
+          console.error(response);
+        });
+      },
+      firstCut() {
+        let user = this.$store.getters.getUserInfo;
+        api.getShareCuttings({
+          userId: user.userId,
+          preOrderId: this.preOrderId,
+          fieldId: this.sharepay.id,
+          userName: user.nickName || '匿名',
+          userIcon: user.icon || ''
+        }).then(response => {
+          if (response.result === 0) {
+            this.cuttingData = response.data;
+            if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
+              this.hasProgressOrder = true;
             }
           }
           this._initScroll();
@@ -707,7 +797,7 @@
         let user = this.$store.getters.getUserInfo;
         let vm = this;
         this.shareData = {
-          title: `[一虎一席.茶席艺术节][砍价.${this.sharepay.buttomFee}元] ` + reduceGoodsName(this.sharepay.name),
+          title: `[一虎一席.茶席艺术节]•[砍价至${this.sharepay.buttomFee}元] ` + reduceGoodsName(this.sharepay.name),
           desc: `砍到底：¥${this.sharepay.buttomFee}, 单买价：¥${this.sharepay.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,

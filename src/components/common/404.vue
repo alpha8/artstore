@@ -4,7 +4,7 @@
     <div class="content_wrap">
       <div class="icon">
         <img src="../../common/images/404.png" alt="商品已下架" />
-        <h1>Oops, 商品下架了！</h1>
+        <h1>啊哦, 商品下架了！</h1>
       </div>
     </div>
   </div>
@@ -32,7 +32,7 @@
     bottom: 0
     width: 100%
     display: flex
-    padding-top: 40px
+    padding-top: 34px
     box-sizing: border-box
     .icon
       margin: 0 auto
@@ -42,6 +42,7 @@
       img
         width: 100%
         height: auto
+        opacity: 0.2
     h1
       position: relative
       padding-top: 15px

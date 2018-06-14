@@ -580,7 +580,7 @@
         }
         let vm = this;
         let shareData = {
-          title: `[一虎一席.茶席艺术节][秒杀价.${this.good.killPrice}元] ` + reduceGoodsName(this.good.name),
+          title: `[一虎一席.茶席艺术节]•[秒杀价.${this.good.killPrice}元] ` + reduceGoodsName(this.good.name),
           desc: '秒杀价：¥' + this.good.killPrice + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: icon,

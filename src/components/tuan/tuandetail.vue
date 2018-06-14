@@ -11,7 +11,7 @@
           <span class="tuan_newprice">¥<em>{{tuan.buttomFee}}</em></span>
           <span class="tuan_oldprice"><del v-show="tuan.fieldPrice">{{tuan.fieldPrice | currency}}</del></span>
           <div class="tuan_countdown" v-show="tuan.leftEndTimes >= 0">
-            <small>距拼购结束还剩:</small>
+            <small>距拼团结束还剩:</small>
             <span><i>{{countdownStats.days}}</i>天<i v-if="countdownStats.hours">{{countdownStats.hours}}</i>:<i v-if="countdownStats.mins">{{countdownStats.mins}}</i>:<i v-if="countdownStats.seconds">{{countdownStats.seconds}}</i></span>
           </div>
         </div> -->
@@ -149,6 +149,7 @@
     </div>
     <frame></frame>
     <share ref="weixinShare"></share>
+    <mydialog :text="dialog.text" :btns="dialog.btns" :options="dialog.options" ref="dialogWin"></mydialog>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <div class="fixed-foot">
       <div class="foot-wrapper">
@@ -156,8 +157,10 @@
           <span class="button-lg orange"><span class="line">¥<strong>{{tuan.fieldPrice}}</strong></span>单独购买</span>
         </div>
         <div class="foot-item">
-          <span class="button-lg darkred" v-if="tuanData.status <= 2 && tuanData.join" @click.stop.prevent="wxshare">邀请好友参团</span>
-          <span class="button-lg gray" v-else-if="tuan.leftEndTimes <= 0">已结束</span>
+          <span class="button-lg gray big" v-if="tuan.leftEndTimes <= 0">已结束</span>
+          <span class="button-lg gray big" v-else-if="ownerNoPaid">团长未完成付款</span>
+          <span class="button-lg darkred big" v-else-if="tuanData.owner && tuanData.status <= 2" @click.stop.prevent="wxshare">邀请好友参团</span>
+          <span class="button-lg darkred big" v-else-if="!tuanData.join && tuanData.status <= 2" @click.stop.prevent="joinTuan">我要参团</span>
           <span class="button-lg darkred" v-else @click.stop.prevent="createTuan"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
         </div>
       </div>
@@ -185,6 +188,7 @@
   import wx from 'weixin-js-sdk';
   import share from '@/components/tuan/share';
   import layer from '@/components/common/layer';
+  import mydialog from '@/components/common/mydialog';
   let Base64 = require('js-base64').Base64;
 
   const ALL = 3;
@@ -240,7 +244,23 @@
         tuanData: {}, // 拼团响应信息
         mutex: false,
         preOrderId: '',
-        shareData: {}
+        shareData: {},
+        dialog: {
+          text: '您当前有未完成的拼团，可现在前往「个人中心」→「我的拼团」查看所有拼团信息及付款。',
+          options: {
+            textAlign: 'left'
+          },
+          btns: {
+            ok: {
+              text: '查看拼团',
+              callback: function() {
+                console.log('ok');
+              }
+            },
+            cancelText: '知道了'
+          }
+        },
+        ownerNoPaid: false
       };
     },
     computed: {
@@ -380,11 +400,22 @@
           preOrderId: tuanId,
           fieldId: this.tuan.id
         }).then(response => {
-          if (response.result === 0) {
+          if (response.data) {
             this.tuanData = response.data;
             let preOrderId = this.tuanData && this.tuanData.order && this.tuanData.order.id || 0;
             if (preOrderId) {
               this.preOrderId = preOrderId;
+              this.updateShareData();
+            }
+          }
+          if (response.code === 1009) {
+            this.ownerNoPaid = true;
+            if (response.data.owner) {
+              let vm = this;
+              this.dialog.btns.ok.callback = function() {
+                window.location.href = 'http://' + location.host + location.pathname + '#/mytuan';
+              };
+              this.$refs.dialogWin.show();
             }
           }
           this._initScroll();
@@ -635,8 +666,8 @@
         let user = this.$store.getters.getUserInfo;
         let vm = this;
         this.shareData = {
-          title: `[一虎一席.茶席艺术节][拼购.${this.tuan.buttomFee}元] ` + reduceGoodsName(this.tuan.name),
-          desc: `开团价：¥${this.tuan.buttomFee}, 单买价：¥${this.tuan.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
+          title: `[一虎一席.茶席艺术节]•[拼团.${this.tuan.buttomFee}元] ` + reduceGoodsName(this.tuan.name),
+          desc: `拼团价：¥${this.tuan.buttomFee}, 单买价：¥${this.tuan.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
           success: function () {
@@ -829,6 +860,7 @@
         this.mutex = false;
         this.preOrderId = '';
         this.shareData = {};
+        this.ownerNoPaid = false;
       }
     },
     filters: {
@@ -841,7 +873,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, mydialog
     }
   };
 </script>
@@ -1429,6 +1461,8 @@
           display: block
           line-height: 50px
           font-size: 12px
+          &.big
+            font-size: 14px
           i
             font-size: 22px
           &.gray

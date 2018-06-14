@@ -3,10 +3,10 @@
     <div class="dialog">
       <div class="dialog-content">
         <i class="icon"></i>
-        <p v-if="text">{{text}}</p>
+        <p v-show="text" :class="{'left': options.textAlign}">{{text}}</p>
       </div>
       <div class="dialog-footer">
-        <span class="btn" @click.stop.prevent="closeDialog">取消</span>
+        <span class="btn" @click.stop.prevent="closeDialog">{{btns.cancelText || '取消'}}</span>
         <span class="btn ok" v-if="btns.ok" @click.stop.prevent="doAction">{{btns.ok.text}}</span>
       </div>
     </div>
@@ -20,6 +20,12 @@
       text: {
         type: String,
         default: ''
+      },
+      options: {
+        type: Object,
+        default() {
+          return {};
+        }
       },
       btns: {
         type: Object,
@@ -112,6 +118,9 @@
         background-size: 50px auto
       p
         font-size: 16px
+        line-height: 1.3
+        &.left
+          text-align: left
     .dialog-footer
       margin: 20px -15px -15px
       text-align: center

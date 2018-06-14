@@ -18,7 +18,7 @@
               </div>
               <div class="flow-item">
                 <i class="icon-time_of_appointment"></i>
-                <div class="text">24小时内付款</div>
+                <div class="text">48小时内付款</div>
               </div>
             </div>
           </div>

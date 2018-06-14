@@ -26,7 +26,7 @@
         },
         screen: {
           width: document.documentElement.clientWidth,
-          height: screen.width ? screen.width * 2 / 3 : 250
+          height: document.documentElement.clientWidth ? document.documentElement.clientWidth * 2 / 3 : 250
         }
       };
     },

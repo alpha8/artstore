@@ -40,7 +40,7 @@
           </li>
           <li>
             <strong>现场自提：</strong>
-            <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span>已自提</span>
+            <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span>线下自提</span>
           </li>
           <li class="shipping" v-show="!selfservice">
             <strong>配送方式：</strong>

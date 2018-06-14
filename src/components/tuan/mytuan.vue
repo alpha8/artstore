@@ -7,12 +7,12 @@
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in orders" :key="index">
               <div class="item-content">
-                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.teamStatus === '4'}"><span class="text">{{stateDesc(item.status)}}</span></i></div>
+                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.teamStatus === '4'}"><span class="text">{{stateDesc(item.teamStatus)}}</span></i></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}<span v-show="item.teamStatus >= 3" class="resultFlag">({{resultDesc(item)}})</span></h3>
+                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}</h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
-                      <div class="countdowntips">{{item.limitCount}}人拼团</div>
+                      <div class="countdowntips">{{tuanResult(item)}}</div>
                       <span class="price">{{item.teamFee | currency}}</span>
                     </div>
                     <div class="more-ops">
@@ -55,9 +55,9 @@
         lastExec: +new Date(),
         scrollY: 0,
         states: {
-          0: '正在拼购',
-          1: '正在拼购',
-          2: '正在拼购',
+          0: '正在拼团',
+          1: '正在拼团',
+          2: '正在拼团',
           3: '拼团成功',
           4: '拼团失败'
         }
@@ -131,7 +131,7 @@
       },
       resultDesc(item) {
         if (item.teamStatus === '0' || item.teamStatus === '1') {
-          return '正在拼购';
+          return '正在拼团';
         } else if (item.teamStatus === '4') {
           return '拼团失败';
         } else if (item.teamStatus === '3') {
@@ -144,8 +144,11 @@
         let uid = this.$store.getters.getUserInfo.userId;
         return item.apUserNameId === uid;
       },
+      tuanResult(item) {
+        return `已拼${item.joinCount || 0}人 • ${item.limitCount}人拼`;
+      },
       showDetail(item) {
-        this.$router.push({name: 'sharetuan', params: {id: item.fieldId}, query: {tuanId: item.teamOrderId || ''}});
+        this.$router.push({name: 'sharetuan', params: {id: item.fieldId}, query: {tuanId: item.teamOrderId || '', from: 1}});
       },
       pay(item) {
         let good = {
@@ -181,7 +184,7 @@
         document.documentElement.scrollTop = 0;
       },
       showOrders() {
-        window.location.href = 'http://' + location.host + location.pathname + '#/order?type=0';
+        window.location.href = 'http://' + location.host + location.pathname + '#/order?type=-1';
       }
     },
     components: {

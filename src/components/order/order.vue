@@ -382,8 +382,8 @@
                 padding-right: 20px
               .orderflag
                 margin-left: 5px
-                font-size: 12px
-                color: #999
+                font-size: 13px
+                font-weight: 700
             .item-summary
               position: relative
               display: flex
