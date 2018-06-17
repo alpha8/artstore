@@ -7,7 +7,7 @@
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in orders" :key="index">
               <div class="item-content">
-                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.status === 4}"><span class="text">{{stateDesc(item.status)}}</span></i></div>
+                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.status === 4}"><span class="text" v-if="item.status !== 4" :class="{'whitetext': item.status === 1}">{{stateDesc(item.status)}}</span></i></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}</h3>
                   <div class="extra-wrap">
@@ -17,8 +17,8 @@
                     </div>
                     <div class="more-ops">
                       <span class="btn-buy red" v-if="item.status <= 2" @click.stop.prevent="pay(item)">去付款</span>
-                      <span class="pricing" v-else-if="item.status === 4"></span>
-                      <span class="btn-buy blue" v-else @click.stop.prevent="showOrders()">我的订单</span>
+                      <span class="btn-buy disabled" v-else-if="item.status === 4">付款超时</span>
+                      <span class="btn-buy blue" v-else @click.stop.prevent="showOrders(item)">我的订单</span>
                     </div>
                   </div>
                 </div>
@@ -59,7 +59,7 @@
           1: '到达底价',
           2: '等待付款',
           3: '砍价成功',
-          4: '付款超时',
+          4: '',
           5: '砍价成功'
         }
       };
@@ -161,7 +161,7 @@
           preOrderId: item.id
         };
         this.$store.dispatch('addPayGoods', [good]);
-        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=9';
+        window.location.href = 'http://' + location.host + '/weixin/pay?orderType=9';
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -179,8 +179,8 @@
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
       },
-      showOrders() {
-        window.location.href = 'http://' + location.host + location.pathname + '#/order?type=-1';
+      showOrders(item) {
+        window.location.href = 'http://' + location.host + '/weixin/order?type=-1';
       }
     },
     components: {
@@ -306,6 +306,8 @@
                       width: 0
                       height: 100%
                       margin-top: 1px
+                    &.whitetext
+                      color: #f2f2f2
                   &.expired .text
                     background-color: #747474
                     color: #fff

@@ -16,9 +16,9 @@
                       <span class="price">{{item.teamFee | currency}}</span>
                     </div>
                     <div class="more-ops">
-                      <span class="btn-buy red" v-if="item.teamStatus <= 1" @click.stop.prevent="pay(item)">去付款</span>
-                      <span class="pricing" v-else-if="item.teamStatus === '4'"></span>
-                      <span class="btn-buy blue" v-else @click.stop.prevent="showOrders()">我的订单</span>
+                      <span class="btn-buy red" v-if="item.status <= 2" @click.stop.prevent="showOrders(item)">去付款</span>
+                      <span class="btn-buy disabled" v-else-if="item.status === 4">拼团失败</span>
+                      <span class="btn-buy blue" v-else @click.stop.prevent="showOrders(item)">我的订单</span>
                     </div>
                   </div>
                 </div>
@@ -59,7 +59,7 @@
           1: '正在拼团',
           2: '正在拼团',
           3: '拼团成功',
-          4: '拼团失败'
+          4: '未满人数'
         }
       };
     },
@@ -150,23 +150,6 @@
       showDetail(item) {
         this.$router.push({name: 'sharetuan', params: {id: item.fieldId}, query: {tuanId: item.teamOrderId || '', from: 1}});
       },
-      pay(item) {
-        let good = {
-          id: item.fieldId,
-          name: item.name,
-          pictures: [(item.icon) ? api.CONFIG.psCtx + item.icon + '?w=750&h=500' : api.CONFIG.defaultImg],
-          src: (item.icon) ? api.CONFIG.psCtx + item.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
-          content: '',
-          price: item.teamFee,
-          oldPrice: item.teamFee,
-          count: 1,
-          icon: (item.icon) ? api.CONFIG.psCtx + item.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
-          checked: false,
-          preOrderId: item.id
-        };
-        this.$store.dispatch('addPayGoods', [good]);
-        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
-      },
       show() {
         this.$store.commit('HIDE_FOOTER');
       },
@@ -183,8 +166,14 @@
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
       },
-      showOrders() {
-        window.location.href = 'http://' + location.host + location.pathname + '#/order?type=-1';
+      showOrders(item) {
+        api.getCmsOrderInfo({
+          spreadId: item.teamOrderId
+        }).then(response => {
+          window.location.href = 'http://' + location.host + '/weixin/order/' + response.orderNo;
+        }).catch(response => {
+          window.location.href = 'http://' + location.host + '/weixin/order?type=0';
+        });
       }
     },
     components: {

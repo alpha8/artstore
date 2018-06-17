@@ -11,36 +11,38 @@
     data() {
       return {
         redirectUrl: '',
-        isAutoLogin: false
+        isAutoLogin: window.sessionStorage.getItem('auto_login') || false
       };
     },
-    created() {
-      let hotfix = window.localStorage.getItem('hotfix') || false;
-      if (!hotfix) {
-        window.localStorage.clear();
-        window.sessionStorage.clear();
-        removeCookie('wxuser', '', '.yihuyixi.com');
-        window.localStorage.setItem('hotfix', true);
-        console.log('HotFix online issue.');
-      }
-    },
+    // created() {
+    //   let hotfix = window.localStorage.getItem('hotfix') || false;
+    //   if (!hotfix) {
+    //     window.localStorage.clear();
+    //     window.sessionStorage.clear();
+    //     removeCookie('wxuser', '', '.yihuyixi.com');
+    //     window.localStorage.setItem('hotfix', true);
+    //     console.log('HotFix online issue.');
+    //   }
+    // },
     mounted() {
       if (!this.$store.getters.checkLogined) {
-        this.isAutoLogin = window.sessionStorage.getItem('auto') || false;
         this.$store.dispatch('setAnonymous');
         let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
+        console.log(this.isAutoLogin);
         if (!ios && !this.isAutoLogin) {
           let redirect = window.location.href;
           if (redirect) {
             redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
           }
           this.isAutoLogin = true;
-          window.sessionStorage.setItem('auto', true);
+          window.sessionStorage.setItem('auto_login', true);
           this.$store.dispatch('openToast', '正在登录中...');
           setTimeout(() => {
             window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
           }, 500);
         }
+      } else {
+        window.sessionStorage.clear();
       }
     },
     computed: {
@@ -54,8 +56,11 @@
         if (this.$store.getters.checkLogined) {
           return 'about:blank';
         }
-        this.isAutoLogin = true;
-        window.sessionStorage.setItem('autologin', true);
+        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
+        if (ios) {
+          this.isAutoLogin = true;
+          window.sessionStorage.setItem('auto_login', true);
+        }
         let redirect = location.href;
         // fixed wexin sharing url
         if (redirect) {

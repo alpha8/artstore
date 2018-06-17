@@ -220,9 +220,9 @@
         } else if (this.order.type === 7) {  // 首单特惠
           this.$router.push({name: 'firstdetail', params: {id: product.id}});
         } else if (this.order.type === 8 || this.order.type === 10) {  // 8: 拼团, 10: 拼团直购
-          this.$router.push({name: 'tuandetail', params: {id: product.id}, query: {tuanId: this.order.userId}});
+          this.$router.push({name: 'tuandetail', params: {id: product.id}, query: {tuanId: this.order.spreadId || ''}});
         } else if (this.order.type === 9) {  // 砍价订单
-          this.$router.push({name: 'sharedetail', params: {id: product.id}, query: {shareId: this.order.userId}});
+          this.$router.push({name: 'sharedetail', params: {id: product.id}, query: {shareId: this.order.spreadId || ''}});
         } else {
           this.$router.push({name: 'good', params: {id: product.id}});
         }
@@ -297,6 +297,10 @@
                 that.$store.dispatch('openToast', '支付成功！');
               } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
                 that.$store.dispatch('openToast', '取消支付！');
+                if (that.order.type === 8) {
+                  // 拼团订单取消付款，删除拼团订单
+                  api.deleteTuan(that.order.orderNo);
+                }
               } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
                 that.$store.dispatch('openToast', '支付失败！');
               }

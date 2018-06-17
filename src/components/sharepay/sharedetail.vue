@@ -147,21 +147,24 @@
           <span class="button-lg gray">{{stateDesc}}</span>
         </div>
         <div class="foot-item btn-share" v-else-if="isOwner || !cuttingData.cutOrder" @click.stop.prevent="pay">
-          <span class="button-lg orange" v-if="hasProgressOrder">待付款</span>
-          <span class="button-lg orange" v-else-if="GotAndPay">已达成(待付款)</span>
+          <span class="button-lg orange" v-if="hasProgressOrder">去付款</span>
+          <span class="button-lg orange" v-else-if="GotAndPay">去付款</span>
           <span class="button-lg orange" v-else>立即购买</span>
         </div>
         <div class="foot-item btn-share" v-else @click.stop.prevent="viewMime">
           <span class="button-lg orange">查看我的</span>
         </div>
-        <div class="foot-item" @click.stop.prevent="wxshare" v-if="isOwner && cuttingData.cutOrder && cuttingData.cutOrder.status >= 3">
+        <div class="foot-item" @click.stop.prevent="reshare" v-if="isOwner && cuttingData.cutOrder && cuttingData.cutOrder.status >= 3">
           <span class="button-lg darkred">好友重新助力砍价</span>
         </div>
+        <div class="foot-item" v-else-if="isOwner && getCutPrice <= sharepay.buttomFee">
+          <span class="button-lg gray">到达底价</span>
+        </div>
         <div class="foot-item" @click.stop.prevent="wxshare" v-else-if="isOwner || !cuttingData.cutOrder">
-          <span class="button-lg darkred">好友助力砍价</span>
+          <span class="button-lg darkred" :class="{'gray': getCutPrice <= sharepay.buttomFee}">好友助力砍价</span>
         </div>
         <div class="foot-item" @click.stop.prevent="wxshare" v-else>
-          <span class="button-lg darkred">帮好友助力砍价</span>
+          <span class="button-lg darkred" :class="{'gray': getCutPrice <= sharepay.buttomFee}">帮好友助力砍价</span>
         </div>
       </div>
     </div>
@@ -207,6 +210,9 @@
       this.good.videoUrl = '';
       this.good.videos = [];
       this.shareData = {};
+      this.leftSeconds = 0;
+      this.countdownStats = {};
+      this.preOrderId = '';
       this.hide();
       this.processing = false;
       this.stopTimer();
@@ -459,11 +465,18 @@
         });
       },
       wxshare() {
+        let cutPrice = this.cuttingData.cutOrder ? this.cuttingData.cutOrder.dealFee : this.sharepay.specialPrice;
+        if (cutPrice <= this.sharepay.buttomFee) {
+          return;
+        }
         // 如果已经创建了砍价预订单，即跳过创建预订单，直接分享
         if (this.hasProgressOrder || (this.cuttingData && this.cuttingData.owner) || this.mutex || this.preOrderId) {
           this.$refs.weixinShare.show();
           return;
         }
+        this.reshare();
+      },
+      reshare() {
         /** 用户已登录，创建分享预订单 */
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
@@ -795,6 +808,7 @@
           img = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423';
         }
         let user = this.$store.getters.getUserInfo;
+        redirect += '&userId=' + user.userId;
         let vm = this;
         this.shareData = {
           title: `[一虎一席.茶席艺术节]•[砍价至${this.sharepay.buttomFee}元] ` + reduceGoodsName(this.sharepay.name),
@@ -811,9 +825,10 @@
         });
       },
       updateShareData() {
+        let user = this.$store.getters.getUserInfo;
         let redirect = 'http://' + location.host + '/weixin/sp/' + this.sharepay.id;
         if (this.preOrderId) {
-          redirect += '?shareId=' + this.preOrderId;
+          redirect += '?shareId=' + this.preOrderId + '&userId=' + user.userId;
         }
         this.shareData.link = redirect;
       },
@@ -867,7 +882,7 @@
       },
       pay() {
         if (this.hasProgressOrder) {
-          window.location.href = 'http://' + location.host + location.pathname + '#/order?type=0';
+          window.location.href = 'http://' + location.host + '/weixin/order?type=0';
           return;
         }
         let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
@@ -1388,9 +1403,6 @@
           font-size: 14px
           i
             font-size: 22px
-          &.gray
-            background: #999
-            color: #fff
           &.green
             background: #44b549
             color: #fff
@@ -1405,6 +1417,9 @@
             color: #fff
           &.blue
             background: #00a0dc
+            color: #fff
+          &.gray
+            background: #999
             color: #fff
           .icon-favorite
             color: #ff463c

@@ -61,6 +61,7 @@ import sharetuan from '@/components/tuan/sharetuan';
 import mytuan from '@/components/tuan/mytuan';
 import signature from '@/components/common/signature';
 import notfound from '@/components/common/404';
+import info from '@/components/common/info';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -130,6 +131,7 @@ export default new Router({
     {path: '/sharetuan/:id', component: sharetuan, name: 'sharetuan'},
     {path: '/signature', component: signature, name: 'signature'},
     {path: '/404', component: notfound, name: 'notfound'},
+    {path: '/info', component: info, name: 'info'},
     {path: '/my', component: my}
   ]
   // ,scrollBehavior (to, from, savedPosition) {

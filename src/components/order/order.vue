@@ -189,7 +189,14 @@
         this.fetchData(true);
       },
       showOrder(order) {
-        return this.activeItem === -1 || order.status === this.activeItem;
+        if (order.type === 8 && (order.status === 0 || order.status === 4)) {
+          return false;
+        } else if (this.activeItem === -1) {
+          return true;
+        } else if (order.status === this.activeItem) {
+          return true;
+        }
+        return false;
       },
       showOrderDetail(order) {
         this.$router.push({name: 'orderdetail', params: {id: order.orderNo}});
@@ -204,9 +211,9 @@
         } else if (order.type === 7) {  // 首单特惠
           this.$router.push({name: 'firstdetail', params: {id: product.id}});
         } else if (order.type === 8 || order.type === 10) {  // 8: 拼团, 10: 拼团直购
-          this.$router.push({name: 'tuandetail', params: {id: product.id}, query: {tuanId: order.userId}});
+          this.$router.push({name: 'tuandetail', params: {id: product.id}, query: {tuanId: order.spreadId || ''}});
         } else if (order.type === 9) {  // 砍价订单
-          this.$router.push({name: 'sharedetail', params: {id: product.id}, query: {shareId: order.userId}});
+          this.$router.push({name: 'sharedetail', params: {id: product.id}, query: {shareId: order.spreadId || ''}});
         } else {
           this.$router.push({name: 'good', params: {id: product.id}});
         }
@@ -267,6 +274,10 @@
                 that.fetchData(true);
               } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
                 that.$store.dispatch('openToast', '取消支付！');
+                if (order.type === 8) {
+                  // 拼团订单取消付款，删除拼团订单
+                  api.deleteTuan(order.orderNo);
+                }
               } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
                 that.$store.dispatch('openToast', '支付失败！');
               }

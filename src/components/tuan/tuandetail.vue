@@ -18,7 +18,7 @@
         <div class="content">
           <h1 class="title">{{tuan.name}}</h1>
           <div class="price">
-            <span class="now">¥{{tuan.buttomFee}}</span><span class="old" v-show="tuan.fieldPrice">¥{{tuan.fieldPrice}}</span><span class="tuanPerson">({{tuan.limitCount}}人拼)</span>
+            <span class="now">¥{{tuan.buttomFee}}</span><span class="old" v-show="tuan.fieldPrice">¥{{tuan.fieldPrice}}</span><span class="tuanPerson" v-if="tuanData.join && tuanData.order && tuanData.order.joinCount">(已拼{{tuanData.order.joinCount}}人 • {{tuan.limitCount}}人拼)</span><span class="tuanPerson" v-else>({{tuan.limitCount}}人拼)</span>
           </div>
           <div v-if="tuan.stock">
             <div class="row">
@@ -39,6 +39,7 @@
             <div class="desc">{{tuan.startDate | formatDate}} ~ {{tuan.endDate | formatDate}}</div>
           </div>
           <div class="duration">距拼团结束还剩：<p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p></div>
+          <div class="buy" @click.stop.prevent="wxshare" v-show="!tuanData.owner">分 享</div>
         </div>
         <split v-if="tuanData && tuanData.teamOrders"></split>
         <div class="info" v-if="tuanData && tuanData.teamOrders">
@@ -149,7 +150,6 @@
     </div>
     <frame></frame>
     <share ref="weixinShare"></share>
-    <mydialog :text="dialog.text" :btns="dialog.btns" :options="dialog.options" ref="dialogWin"></mydialog>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <div class="fixed-foot">
       <div class="foot-wrapper">
@@ -158,7 +158,6 @@
         </div>
         <div class="foot-item">
           <span class="button-lg gray big" v-if="tuan.leftEndTimes <= 0">已结束</span>
-          <span class="button-lg gray big" v-else-if="ownerNoPaid">团长未完成付款</span>
           <span class="button-lg darkred big" v-else-if="tuanData.owner && tuanData.status <= 2" @click.stop.prevent="wxshare">邀请好友参团</span>
           <span class="button-lg darkred big" v-else-if="!tuanData.join && tuanData.status <= 2" @click.stop.prevent="joinTuan">我要参团</span>
           <span class="button-lg darkred" v-else @click.stop.prevent="createTuan"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
@@ -188,7 +187,6 @@
   import wx from 'weixin-js-sdk';
   import share from '@/components/tuan/share';
   import layer from '@/components/common/layer';
-  import mydialog from '@/components/common/mydialog';
   let Base64 = require('js-base64').Base64;
 
   const ALL = 3;
@@ -244,23 +242,7 @@
         tuanData: {}, // 拼团响应信息
         mutex: false,
         preOrderId: '',
-        shareData: {},
-        dialog: {
-          text: '您当前有未完成的拼团，可现在前往「个人中心」→「我的拼团」查看所有拼团信息及付款。',
-          options: {
-            textAlign: 'left'
-          },
-          btns: {
-            ok: {
-              text: '查看拼团',
-              callback: function() {
-                console.log('ok');
-              }
-            },
-            cancelText: '知道了'
-          }
-        },
-        ownerNoPaid: false
+        shareData: {}
       };
     },
     computed: {
@@ -408,16 +390,6 @@
               this.updateShareData();
             }
           }
-          if (response.code === 1009) {
-            this.ownerNoPaid = true;
-            if (response.data.owner) {
-              let vm = this;
-              this.dialog.btns.ok.callback = function() {
-                window.location.href = 'http://' + location.host + location.pathname + '#/mytuan';
-              };
-              this.$refs.dialogWin.show();
-            }
-          }
           this._initScroll();
         }).catch(response => {
           console.error(response);
@@ -562,6 +534,9 @@
       wxshare() {
         this.$refs.weixinShare.show();
       },
+      goOrder() {
+        window.location.href = 'http://' + location.host + '/weixin/order?type=0';
+      },
       show() {
         this.$store.commit('HIDE_FOOTER');
         this._initScroll();
@@ -664,6 +639,7 @@
           img = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423';
         }
         let user = this.$store.getters.getUserInfo;
+        redirect += '&userId=' + user.userId;
         let vm = this;
         this.shareData = {
           title: `[一虎一席.茶席艺术节]•[拼团.${this.tuan.buttomFee}元] ` + reduceGoodsName(this.tuan.name),
@@ -680,9 +656,10 @@
         });
       },
       updateShareData() {
+        let user = this.$store.getters.getUserInfo;
         let redirect = 'http://' + location.host + '/weixin/tuan/' + this.tuan.id;
         if (this.preOrderId) {
-          redirect += '?tuanId=' + this.preOrderId;
+          redirect += '?tuanId=' + this.preOrderId + '&userId=' + user.userId;
         }
         this.shareData.link = redirect;
       },
@@ -767,7 +744,7 @@
               preOrderId: response.data.infoOrderId
             };
             this.$store.dispatch('addPayGoods', [good]);
-            window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+            window.location.href = 'http://' + location.host + '/weixin/pay?orderType=8';
           } else if (response.code === 2001) {
             this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
             console.log(response);
@@ -775,7 +752,7 @@
             this.$store.dispatch('openToast', '活动已结束!');
             console.log(response);
           } else if (response.code === 1005) {
-            this.$store.dispatch('openToast', '你有一单未完成的订单，请前往[个人中心|我的拼团]查看!');
+            this.$store.dispatch('openToast', '你有一单未完成的订单，请前往「个人中心」→「我的拼团」查看!');
             console.log(response);
           } else {
             this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
@@ -817,7 +794,7 @@
               preOrderId: this.preOrderId
             };
             this.$store.dispatch('addPayGoods', [good]);
-            window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=8';
+            window.location.href = 'http://' + location.host + '/weixin/pay?orderType=8';
           } else if (response.code === 2001) {
             this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
             console.log(response);
@@ -825,7 +802,7 @@
             this.$store.dispatch('openToast', '活动已结束!');
             console.log(response);
           } else if (response.code === 1005) {
-            this.$store.dispatch('openToast', '你有一单未完成的订单，请前往[个人中心|我的拼团]查看!');
+            this.$store.dispatch('openToast', '你有一单未完成的订单，请前往「个人中心」→「我的拼团」查看!');
             console.log(response);
           } else {
             this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
@@ -860,7 +837,6 @@
         this.mutex = false;
         this.preOrderId = '';
         this.shareData = {};
-        this.ownerNoPaid = false;
       }
     },
     filters: {
@@ -873,7 +849,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, mydialog
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share
     }
   };
 </script>
@@ -1141,22 +1117,16 @@
       .buy
         position: absolute
         right: 12px
-        top: 50%
-        margin-top: -12px
+        top: 32px
         z-index: 10
         height: 24px
         line-height: 24px
-        padding: 0 12px
+        padding: 0 18px
         box-sizing: border-box
-        font-size: 10px
+        font-size: 12px
         border-radius: 12px
         color: #fff
         background: rgb(0, 160, 220)
-        transition: all 0.2s
-        &.fade-enter-active, &.fade-leave-active
-          opacity: 1
-        &.fade-enter, &.fade-leave-active
-          opacity: 0
     .sku-wrap
       position: relative
       padding: 10px 18px

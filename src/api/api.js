@@ -613,5 +613,19 @@ export default {
    */
   getMyTuanList(params) {
     return doGet(this.CONFIG.webspreadCtx + '/spreadteam/list', params);
+  },
+
+  /**
+   * 删除指定的拼团
+   */
+  deleteTuan(orderNo) {
+    return doDelete(this.CONFIG.cmsCtx + '/order/delete/' + orderNo);
+  },
+
+  /**
+   * 查询拼团的cms订单信息
+   */
+  getCmsOrderInfo(params) {
+    return doGet(this.CONFIG.cmsCtx + '/order', params);
   }
 };

@@ -168,10 +168,10 @@
           checked: false
         };
         this.$store.dispatch('addPayGoods', [good]);
-        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=5';
+        window.location.href = 'http://' + location.host + '/weixin/pay?orderType=5';
       },
       showOrders() {
-        window.location.href = 'http://' + location.host + location.pathname + '#/order?type=0';
+        window.location.href = 'http://' + location.host + '/weixin/order?type=-1';
       }
     },
     components: {

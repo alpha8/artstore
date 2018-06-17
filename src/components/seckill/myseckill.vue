@@ -16,7 +16,7 @@
                       <p class="line">时间：{{item.createTime | formatDate}}</p>
                     </div>
                     <div class="item-ops">
-                      <span class="btn" v-show="item.status === 0" @click.stop.prevent="pay(item)">去付款</span>
+                      <span class="btn" v-show="item.status === 0" @click.stop.prevent="pay">去付款</span>
                       <span class="btn white" v-show="item.status === 1" @click.stop.prevent="showOrders()">我的订单</span>
                     </div>
                   </div>
@@ -135,21 +135,10 @@
         document.documentElement.scrollTop = 0;
       },
       showOrders() {
-        window.location.href = 'http://' + location.host + location.pathname + '#/order?type=0';
+        window.location.href = 'http://' + location.host + '/weixin/order?type=-1';
       },
-      pay(item) {
-        let good = {
-          id: item.seckillId,
-          name: item.name,
-          price: item.killPrice,
-          oldPrice: item.price,
-          count: 1,
-          icon: (item.icon) ? api.CONFIG.psCtx + item.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
-          checked: false,
-          createTime: item.createTime
-        };
-        this.$store.dispatch('addPayGoods', [good]);
-        window.location.href = 'http://' + location.host + location.pathname + '#/pay?orderType=3';
+      pay() {
+        window.location.href = 'http://' + location.host + '/weixin/order?type=0';
       }
     },
     components: {

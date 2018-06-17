@@ -39,7 +39,7 @@
             <span v-else class="disabled">无可用</span>
           </li>
           <li>
-            <strong>现场自提：</strong>
+            <strong>是否自提：</strong>
             <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span>线下自提</span>
           </li>
           <li class="shipping" v-show="!selfservice">
@@ -321,7 +321,7 @@
         if (!userInfo.openid) {
           this.$store.dispatch('openToast', '正在登录中...');
           setTimeout(() => {
-            let redirect = 'http://' + location.host + location.pathname + '#/pay';
+            let redirect = 'http://' + location.host + '/weixin/pay';
             if (orderType >= 3) {
               redirect += '?orderType=' + orderType;
             }
@@ -354,10 +354,12 @@
             receiver: this.defaultAddress.name
           };
         }
+        let goodsId = '';
         if (orderType === '8' || orderType === '9') {
           // 拼团订单和分享订单采用预订单ID作为产品ID给后台
           let items = [];
           this.products.forEach(product => {
+            goodsId = product.id;
             items.push({'id': product.preOrderId || product.id, 'count': product.count});
           });
           params.products = items;
@@ -407,12 +409,28 @@
                 // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
                 if (res.err_msg === 'get_brand_wcpay_request:ok') {
                   that.$store.dispatch('openToast', '支付成功！');
+                  if (orderType === '8') {
+                    that.$router.replace('mytuan');
+                    return;
+                  } else if (orderType === '9') {
+                    that.$router.replace('myshare');
+                    return;
+                  }
                 } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
                   that.$store.dispatch('openToast', '取消支付！');
+                  if (orderType === '8') {
+                    // 拼团订单取消付款，删除拼团订单
+                    api.deleteTuan(order.orderNo);
+                    that.$router.replace({name: 'tuandetail', params: {id: goodsId}});
+                    return;
+                  } else if (orderType === '9') {
+                    that.$router.replace({name: 'sharedetail', params: {id: goodsId}});
+                    return;
+                  }
                 } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
                   that.$store.dispatch('openToast', '支付失败！');
                 }
-                that.$router.push('order');
+                that.$router.replace('order');
               }
             );
             pay();
