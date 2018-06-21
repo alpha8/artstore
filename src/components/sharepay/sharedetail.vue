@@ -17,7 +17,7 @@
           </div>
           <div class="row">
             <div class="label">砍价优惠：</div>  
-            <div class="desc fixedheight"><div class="box"><em>好友助力{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</em><i class="icon-question_mark" @click.stop.prevent="showRules"></i></div></div>
+            <div class="desc fixedheight"><div class="box"><em>好友助力<strong>{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</strong></em><i class="icon-question_mark" @click.stop.prevent="showRules"></i></div></div>
           </div>
           <div v-if="sharepay.stock">
             <div class="row">
@@ -40,9 +40,14 @@
           <h1 class="title" v-else>您的朋友获得了如下各位的助力砍价：</h1>
           <table class="tablist">
             <tr class="head">
-              <td class="col-2" nowrap>好友名称</td>
+              <td class="col-2" nowrap>好友名称 <span class="moreuv" v-if="cuttingData.count" @click.stop.prevent="goVisitList">[{{cuttingData.count}}人..]</span></td>
               <td class="col-4">访问时间</td>
               <td class="col-3">砍价金额</td>
+            </tr>
+            <tr v-if="cuttingData.enterInfo">
+              <td class="col-2" nowrap><img :src="getUserIcon(cuttingData.enterInfo.userIcon)" class="thumbnail">{{getFriendlyUsername(cuttingData.enterInfo.userName)}}</td>
+              <td class="col-4">{{cuttingData.enterInfo.createAt | formatDate}}</td>
+              <td class="col-3 text-center">已至底价</td>
             </tr>
             <tr v-for="(item, index) in cuttingData.cutInfos" :key="index">
               <td class="col-2" nowrap><img :src="getUserIcon(item.userIcon)" class="thumbnail">{{getFriendlyUsername(item.userName)}}</td>
@@ -143,18 +148,20 @@
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <div class="fixed-foot">
       <div class="foot-wrapper">
-        <div class="foot-item btn-share" v-if="isOwner && cuttingData.cutOrder && cuttingData.cutOrder.status >= 3">
+        <div class="foot-item btn-share" v-if="isOwner && cutStatus >= 3">
           <span class="button-lg gray">{{stateDesc}}</span>
         </div>
-        <div class="foot-item btn-share" v-else-if="isOwner || !cuttingData.cutOrder" @click.stop.prevent="pay">
-          <span class="button-lg orange" v-if="hasProgressOrder">去付款</span>
-          <span class="button-lg orange" v-else-if="GotAndPay">去付款</span>
+        <div class="foot-item btn-share" v-else-if="!cuttingData.cutOrder" @click.stop.prevent="showRules">
+          <span class="button-lg orange">活动规则</span>
+        </div>
+        <div class="foot-item btn-share" v-else-if="isOwner" @click.stop.prevent="pay">
+          <span class="button-lg orange" v-if="hasProgressOrder || GotAndPay">去付款</span>
           <span class="button-lg orange" v-else>立即购买</span>
         </div>
         <div class="foot-item btn-share" v-else @click.stop.prevent="viewMime">
           <span class="button-lg orange">查看我的</span>
         </div>
-        <div class="foot-item" @click.stop.prevent="reshare" v-if="isOwner && cuttingData.cutOrder && cuttingData.cutOrder.status >= 3">
+        <div class="foot-item" @click.stop.prevent="reshare" v-if="isOwner && cutStatus >= 3">
           <span class="button-lg darkred">好友重新助力砍价</span>
         </div>
         <div class="foot-item" v-else-if="isOwner && getCutPrice <= sharepay.buttomFee">
@@ -267,7 +274,7 @@
           2: '等待付款',
           3: '砍价成功',
           4: '付款超时',
-          5: '砍价成功'
+          5: '付款超时'
         }
       };
     },
@@ -343,13 +350,25 @@
       },
       GotAndPay() {
         if (this.cuttingData) {
-          return this.cuttingData.owner && (this.cuttingData.leftEndTimes <= 0 || this.cuttingData.cutOrder.dealFee <= this.sharepay.buttomFee || this.cuttingData.cutOrder.dealFee - this.sharepay.forwardFee < this.sharepay.buttomFee);
+          return this.cuttingData.owner && (this.cuttingData.leftEndTimes <= 0 || this.cuttingData.cutOrder.status === 1);
         }
         return false;
       },
       stateDesc() {
         let status = this.cuttingData.cutOrder && this.cuttingData.cutOrder.status || 0;
         return this.states[status];
+      },
+      cutStatus() {
+        return this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.status || 0;
+      },
+      isBottomPrice() {
+        let cutOrder = this.cuttingData && this.cuttingData.cutOrder;
+        if (cutOrder.status === 1) {
+          return true;
+        } else if (cutOrder.dealFee <= cutOrder.buttomFee) {
+          return true;
+        }
+        return false;
       }
     },
     methods: {
@@ -451,6 +470,8 @@
             this.cuttingData = response.data;
             if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
               this.hasProgressOrder = true;
+            } else {
+              this.hasProgressOrder = false;
             }
             let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
             if (preOrderId) {
@@ -481,8 +502,9 @@
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
           this.$store.dispatch('openToast', '正在登录中...');
+          let shareId = this.$route.query.shareId || '';
           setTimeout(() => {
-            let redirect = 'http://' + location.host + location.pathname + '#/sharepay/' + this.sharepay.id;
+            let redirect = 'http://' + location.host + location.pathname + '#/sharepay/' + this.sharepay.id + '?shareId=' + shareId;
             window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
           }, 1500);
           return;
@@ -691,6 +713,9 @@
           console.error(response);
         });
       },
+      goVisitList() {
+        this.$router.push({name: 'visitlist', query: {id: this.preOrderId}});
+      },
       show() {
         this.$store.commit('HIDE_FOOTER');
         this._initScroll();
@@ -881,15 +906,12 @@
         this.scroll.scrollToElement(goodWrapper, 300);
       },
       pay() {
-        if (this.hasProgressOrder) {
-          window.location.href = 'http://' + location.host + '/weixin/order?type=0';
-          return;
-        }
-        let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
-        if (!preOrderId) {
-          this.$store.dispatch('openToast', '未发起过砍价哦!');
-          return;
-        }
+        // let status = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.status || 0;
+        // if (status === 2) {
+        //   this.$store.dispatch('openToast', '你有一笔未付款的订单!');
+        //   window.location.href = 'http://' + location.host + '/weixin/order?type=0';
+        //   return;
+        // }
         let good = {
           id: this.sharepay.id,
           name: this.sharepay.name,
@@ -901,7 +923,7 @@
           count: 1,
           icon: (this.sharepay.icon) ? api.CONFIG.psCtx + this.sharepay.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
           checked: false,
-          preOrderId: preOrderId
+          preOrderId: this.preOrderId
         };
         if (this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.owner) {
           good.price = this.cuttingData.cutOrder.dealFee;
@@ -1064,7 +1086,7 @@
           color: rgb(240, 20, 20)
         .old
           text-decoration: line-through
-          font-size: 12px
+          font-size: 15px
           color: rgb(147, 153, 159)
       .delivery-annouce
         font-size: 12px
@@ -1219,7 +1241,7 @@
         flex: 1
         padding-left: 10px
         overflow: hidden
-        box-sizing: border-box
+        box-sizing: border-box      
       .col-3
         width: 25%
         padding-left: 10px
@@ -1243,6 +1265,9 @@
         box-sizing: border-box
       .text-center
         text-align: center
+      .moreuv
+        font-weight: 700
+        color: #07111b
     .intro
       margin-bottom: 5px
     .row
@@ -1273,6 +1298,9 @@
             display: block
             float: left
             width: auto
+          strong
+            font-weight: 700
+            color: #07111b
           .icon-question_mark
             position: absolute
             display: block

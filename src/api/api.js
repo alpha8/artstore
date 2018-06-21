@@ -588,6 +588,13 @@ export default {
   },
 
   /**
+   * 查询我的砍价访客列表
+   */
+  getCutVisitList(params) {
+    return doGet(this.CONFIG.webspreadCtx + '/spreadcut/list/all', params);
+  },
+
+  /**
    * 查询我的砍价
    */
   getMyShareOrder(params) {

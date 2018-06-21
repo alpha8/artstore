@@ -3,17 +3,17 @@
     <fixedheader title="我的砍价"></fixedheader>
     <div class="order">
       <div class="order-wrap">
-        <div class="order-container" ref="orders" v-if="orders.length">
+        <div class="order-container" ref="orders" v-show="orders.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in orders" :key="index">
               <div class="item-content">
-                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.status === 4}"><span class="text" v-if="item.status !== 4" :class="{'whitetext': item.status === 1}">{{stateDesc(item.status)}}</span></i></div>
+                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.status === 4}"><span class="text" v-if="item.status !== 4" :class="{'whitetext': item.status === 1, 'success': item.status === 3}">{{stateDesc(item.status)}}</span></i></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}</h3>
                   <div class="extra-wrap">
                     <div class="price-wrap">
                       <span class="price">{{item.dealFee | currency}}</span>
-                      <del class="oldprice" v-if="item.originalFee !== item.dealFee">{{item.originalFee | currency}}</del>
+                      <del class="oldprice" v-show="item.originalFee !== item.dealFee">{{item.originalFee | currency}}</del>
                     </div>
                     <div class="more-ops">
                       <span class="btn-buy red" v-if="item.status <= 2" @click.stop.prevent="pay(item)">去付款</span>
@@ -28,7 +28,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
-        <div class="no-order" v-if="!orders.length && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
+        <div class="no-order" v-show="!orders.length && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -307,7 +307,10 @@
                       height: 100%
                       margin-top: 1px
                     &.whitetext
-                      color: #f2f2f2
+                      color: #f01414
+                    &.success
+                      background: #d05148
+                      color: #f1f1f1
                   &.expired .text
                     background-color: #747474
                     color: #fff

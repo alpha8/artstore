@@ -1,17 +1,18 @@
 <template>
   <div class="iframe">
-    <iframe :src="getUrl" class="noframe" frameborder="0" id="myframe" scrolling="no"></iframe>
+    <!-- <iframe :src="getUrl" class="noframe" frameborder="0" id="myframe" scrolling="no"></iframe> -->
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import {removeCookie} from '@/common/js/store';
   import api from '@/api/api';
+  let AUTO_LOGIN = 'auto_login';
   export default {
     data() {
       return {
         redirectUrl: '',
-        isAutoLogin: window.sessionStorage.getItem('auto_login') || false
+        isAutoLogin: false
       };
     },
     // created() {
@@ -24,22 +25,29 @@
     //     console.log('HotFix online issue.');
     //   }
     // },
+    activated() {
+      this.$store.dispatch('reloadUserInfo');
+    },
+    deactivated() {
+      this.isAutoLogin = false;
+      window.sessionStorage.removeItem(AUTO_LOGIN);
+    },
     mounted() {
-      if (!this.$store.getters.checkLogined) {
+      let user = this.$store.getters.getUserInfo;
+      if (!user.userId) {
         this.$store.dispatch('setAnonymous');
-        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
-        console.log(this.isAutoLogin);
-        if (!ios && !this.isAutoLogin) {
+        this.isAutoLogin = window.sessionStorage.getItem(AUTO_LOGIN) || false;
+        if (!this.isAutoLogin) {
           let redirect = window.location.href;
           if (redirect) {
             redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
           }
           this.isAutoLogin = true;
-          window.sessionStorage.setItem('auto_login', true);
+          window.sessionStorage.setItem(AUTO_LOGIN, true);
           this.$store.dispatch('openToast', '正在登录中...');
           setTimeout(() => {
             window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
-          }, 500);
+          }, 50);
         }
       } else {
         window.sessionStorage.clear();
@@ -53,13 +61,12 @@
         if (this.isAutoLogin) {
           return 'about:blank';
         }
-        if (this.$store.getters.checkLogined) {
-          return 'about:blank';
-        }
         let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
-        if (ios) {
+        let user = this.$store.getters.getUserInfo;
+        if (user.userId && ios) {
           this.isAutoLogin = true;
-          window.sessionStorage.setItem('auto_login', true);
+          window.sessionStorage.setItem(AUTO_LOGIN, true);
+          return 'about:blank';
         }
         let redirect = location.href;
         // fixed wexin sharing url

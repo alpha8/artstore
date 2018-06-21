@@ -189,7 +189,7 @@
         this.fetchData(true);
       },
       showOrder(order) {
-        if (order.type === 8 && (order.status === 0 || order.status === 4)) {
+        if ((order.type === 8 || order.type === 9) && (order.status === 0 || order.status === 4)) {
           return false;
         } else if (this.activeItem === -1) {
           return true;

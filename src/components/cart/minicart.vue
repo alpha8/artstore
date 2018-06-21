@@ -89,6 +89,9 @@
     computed: {
       totalPrice() {
         let total = 0;
+        if (!this.isAvailable) {
+          return total;
+        }
         this.selectGoods.forEach((good) => {
           total += good.price * good.count;
         });
@@ -96,6 +99,9 @@
       },
       totalCount() {
         let count = 0;
+        if (!this.isAvailable) {
+          return count;
+        }
         this.selectGoods.forEach((good) => {
           count += good.count;
         });

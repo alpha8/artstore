@@ -62,6 +62,7 @@ import mytuan from '@/components/tuan/mytuan';
 import signature from '@/components/common/signature';
 import notfound from '@/components/common/404';
 import info from '@/components/common/info';
+import visitlist from '@/components/sharepay/visitlist';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -123,6 +124,7 @@ export default new Router({
     {path: '/firstpurchase', component: firstpurchase, name: 'firstpurchase'},
     {path: '/firstpurchase/:id', component: firstdetail, name: 'firstdetail'},
     {path: '/sharepay', component: sharepayList, name: 'sharepay'},
+    {path: '/sharepay/uvlog', component: visitlist, name: 'visitlist'},
     {path: '/myshare', component: myshare, name: 'myshare'},
     {path: '/sharepay/:id', component: sharedetail, name: 'sharedetail'},
     {path: '/tuan', component: tuanList, name: 'tuan'},

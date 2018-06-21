@@ -56,10 +56,14 @@ export function mixUsername (name) {
   if (name === 'yihuyixi') {
     return name;
   }
-  if (name.length > 2) {
-    return name.substring(0, 1) + '*' + name.substring(name.length - 1);
+  if (name.length === 3) {
+    return name.substring(0, 1) + '***' + name.substring(name.length - 1);
+  } else if (name.length === 4) {
+    return name.substring(0, 2) + '***' + name.substring(name.length - 1);
+  } else if (name.length > 4) {
+    return name.substring(0, 2) + '***' + name.substring(name.length - 2);
   }
-  return name.substring(0, 1) + '*';
+  return name.substring(0, 1) + '***';
 }
 
 /**

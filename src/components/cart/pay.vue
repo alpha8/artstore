@@ -80,7 +80,7 @@
             <span class="totalPrice"><strong>{{totalFee - couponValue - discount | currency}}</strong></span>
           </p>
           <div class="payBtnList">
-            <div class="btns btn-green" @click.stop.prevent="weixinPay"><span>微信支付</span></div>
+            <div class="btns btn-green" :class="{'btn-gray': paying}" @click.stop.prevent="weixinPay"><span>微信支付</span></div>
             <!-- <div class="btns btn-red"><span>京东支付</span></div>
             <div class="btns btn-lightblue"><span>货到付款</span></div> -->
           </div>
@@ -345,7 +345,7 @@
           params.express = {
             expressAddress: '现场自提',
             mobile: '',
-            receiver: ''
+            receiver: userInfo.nickName || ''
           };
         } else {
           params.express = {
@@ -378,6 +378,16 @@
         this.paying = true;
         api.createOrder(params).then(response => {
           if (response.result !== 0) {
+            if (orderType === '7') {
+              // 首单订单失败，存在未付款的订单或已经参加过首单
+              if (response.order && response.order.status === 0) {
+                this.$store.dispatch('openToast', '你有一个未付款的首单订单!');
+                this.$router.replace({name: 'orderdetail', params: {id: response.order && response.order.orderNo}});
+              } else {
+                this.$store.dispatch('openToast', '你已经参加过首单优惠了! 看看其他的吧!');
+              }
+              return;
+            }
             this.$store.dispatch('openToast', '生成订单失败！');
             this.paying = false;
             return;

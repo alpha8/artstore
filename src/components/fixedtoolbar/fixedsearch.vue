@@ -39,7 +39,9 @@
         typing: false,
         highlight: false,
         trans: false,
-        slogan: '一站式优品商城、品味脱凡'
+        slogan: '一站式优品商城、品味脱凡',
+        timer: null,
+        counter: 10
       };
     },
     computed: {
@@ -63,9 +65,28 @@
         return this.slogan;
       }
     },
+    activated() {
+      this.$store.dispatch('reloadUserInfo');
+      let user = this.$store.getters.getUserInfo;
+      this.isLogin = (user.userId > 0);
+      if (!user.userId) {
+        this.timer = setInterval(() => {
+          this.counter--;
+          let uinfo = this.$store.getters.getUserInfo;
+          this.isLogin = (user.userId > 0);
+          if (this.counter <= 0) {
+            clearInterval(this.timer);
+          }
+        }, 500);
+      }
+    },
     deactivated() {
       this.hideDialog();
       this.keyword = '';
+      this.counter = 10;
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
     },
     created() {
       let ads = ['1200款，300席，年增100%', '优质茶生活、茶文化高端礼品', '领略东方生活之美...', '一站式优品商城、品味脱凡'];

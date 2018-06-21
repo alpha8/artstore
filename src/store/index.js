@@ -17,7 +17,7 @@ const SEARCH_HISTORY = 'searchhistory';
 const USED_DISCOUNT = 'USED_DISCOUNT';
 const HISTORY_SIZE = 10;
 const ANONYMOUS = 'anonymous';
-const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38, "icon": "http://thirdwx.qlogo.cn/mmopen/vi_32/Qh7KvJCbGynQiaSxvup9KP0SHmRnua0kJYzKWPRYGPvCwpDjZf8JiahrodQZNwbRjh1b4oRicOABr73DjGSrZ6vAA/132"}';
+const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
 
 // states
 export const state = {
@@ -77,6 +77,9 @@ export const getters = {
 
 // actions
 export const actions = {
+  reloadUserInfo({commit}) {
+    state.userInfo = parseJson(loadCookie('wxuser', DEFAULT_USER), {});
+  },
   setDefaultAddress({ commit }, address) {
     commit(types.SET_ADDRESS, {
       address: address

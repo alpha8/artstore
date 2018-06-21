@@ -32,6 +32,7 @@
               <span class="tuan_newprice">¥<em>{{tuan.buttomFee}}</em><del class="tuan_oldPrice" v-show="tuan.fieldPrice">{{tuan.fieldPrice | currency}}</del><span class="tuanPerson">({{tuan.limitCount}}人拼)</span></span>
             </div>
             <!-- <div class="tuan_oldprice">单买价: <del v-show="tuan.fieldPrice">{{tuan.fieldPrice | currency}}</del></div> -->
+            <div class="btn_detail">商品详情</div>
           </div>
         </div>
         <div class="tuan_list">
@@ -52,6 +53,11 @@
           <div class="btns btn-red" v-else-if="!tuanData.owner && tuanData.status >= 3" @click.stop.prevent="createTuan"><span>我也要开团</span></div>
           <div class="btns btn-red" v-else @click.stop.prevent="createTuan"><span>再开一团</span></div>
         </div>
+        <split></split>
+        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName=""></modal-title>
+        <div class="wx_follow">
+          <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
+        </div>
       </div>
     </div>
     <rules ref="rules" title="拼团规则"></rules>
@@ -69,6 +75,7 @@
   import split from '@/components/split/split';
   import rules from '@/components/tuan/rules';
   import frame from '@/components/common/myiframe';
+  import modalTitle from '@/components/modal-title/modal-title';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   export default {
@@ -87,7 +94,8 @@
         countdownStats: {},
         timer: null,
         preOrderId: '',
-        shareData: {}
+        shareData: {},
+        wxqrcode: api.CONFIG.wxqrcode
       };
     },
     computed: {
@@ -213,6 +221,12 @@
         this.tuanData = {};
         this.preOrderId = '';
         this.shareData = {};
+      },
+      previewQrcode() {
+        wx.previewImage({
+          current: this.wxqrcode,
+          urls: [this.wxqrcode]
+        });
       },
       goTuanDetail() {
         let tuanId = this.$route.query.tuanId;
@@ -391,7 +405,7 @@
       }
     },
     components: {
-      share, fixedheader, split, rules, frame
+      share, fixedheader, split, rules, frame, modalTitle
     }
   };
 </script>
@@ -401,7 +415,7 @@
   .tuan
     position: absolute
     top: 44px
-    bottom: 50px
+    bottom: 0
     width: 100%
     background: #fff
     overflow: hidden
@@ -409,7 +423,16 @@
       transition: all 0.2s linear
       transform: translate3d(0, 0, 0)
     &.move-enter, &.move-leave-active
-      transform: translate3d(100%, 0, 0)
+      transform: translate3d(100%, 0, 0)      
+    .wx_follow
+      position: relative
+      width: 100%
+      height: auto
+      overflow: hidden
+      img
+        position: relative
+        width: 100%
+        height: auto
     .tuan_content
       position: relative
       width: 100%
@@ -446,6 +469,19 @@
             line-height: 1.2
             height: 34px
             padding-top: 2px
+          .btn_detail
+            position: absolute
+            right: 0
+            bottom: 3px
+            z-index: 10
+            height: 24px
+            line-height: 24px
+            padding: 0 12px
+            box-sizing: border-box
+            font-size: 12px
+            border-radius: 12px
+            color: #fff
+            background: #d05148
         .tuan_tag
           position: relative
           display: inline-block

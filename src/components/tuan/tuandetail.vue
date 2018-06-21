@@ -18,7 +18,7 @@
         <div class="content">
           <h1 class="title">{{tuan.name}}</h1>
           <div class="price">
-            <span class="now">¥{{tuan.buttomFee}}</span><span class="old" v-show="tuan.fieldPrice">¥{{tuan.fieldPrice}}</span><span class="tuanPerson" v-if="tuanData.join && tuanData.order && tuanData.order.joinCount">(已拼{{tuanData.order.joinCount}}人 • {{tuan.limitCount}}人拼)</span><span class="tuanPerson" v-else>({{tuan.limitCount}}人拼)</span>
+            <span class="now">¥{{tuan.buttomFee}}</span><span class="old" v-show="tuan.fieldPrice">¥{{tuan.fieldPrice}}</span><span class="tuanPerson" v-if="tuanData.order && tuanData.order.joinCount">(已拼{{tuanData.order.joinCount}}人 • {{tuan.limitCount}}人拼)</span><span class="tuanPerson" v-else>({{tuan.limitCount}}人拼)</span>
           </div>
           <div v-if="tuan.stock">
             <div class="row">
@@ -54,8 +54,7 @@
               <td class="col-2" nowrap><img :src="getUserIcon(item.userIcon)" class="thumbnail">{{getFriendlyUsername(item.userName)}}</td>
               <td class="col-4">{{item.createAt | formatDate}}</td>
               <td class="col-4">
-                <span class="btn-join owner" v-if="item.owner && isTuanOwner(item)">团长</span>
-                <span class="btn-join" v-else-if="item.owner && !isTuanOwner(item)" @click.stop.prevent="joinTuan">去参团</span>
+                <span class="btn-join owner" v-if="item.owner">团长</span>
                 <span class="btn-join disabled" v-else>已参团</span>
               </td>
             </tr>
@@ -395,6 +394,13 @@
           console.error(response);
         });
       },
+      isTuanFulled() {
+        let order = tuanData.order;
+        if (order) {
+          return order.joinCount === order.limitCount;
+        }
+        return false;
+      },
       isTuanOwner(order) {
         let user = this.$store.getters.getUserInfo;
         return user.userId === order.userId;
@@ -714,7 +720,7 @@
       joinTuan() {
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
-          this.$store.dispatch('openToast', '未登录!');
+          this.$store.dispatch('openToast', '您尚未登录，请至「个人中心 」点击登录。');
           return;
         }
         let tuanId = this.$route.query.tuanId;
@@ -766,7 +772,7 @@
       createTuan() {
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
-          this.$store.dispatch('openToast', '未登录!');
+          this.$store.dispatch('openToast', '您尚未登录，请至「个人中心 」点击登录。');
           return;
         }
         api.createTuanOrder({
@@ -1270,7 +1276,7 @@
           height: 20px
           line-height: 20px
           margin: 8px 5px 8px 0
-          background-image: -webkit-linear-gradient(left, #f94c00, #fcc04e)
+          background: #d05148
           color: #fff
           text-align: center
           box-sizing: border-box

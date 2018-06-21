@@ -18,7 +18,7 @@
           <p class="content-title">奖金余额是什么？</p>
           <p class="content-text">
             <p>好友通过您分享的商品链接，在平台上完成订单交易，系统将按照一定的额度返还给推荐人；</p>
-            <p>您可前往「个人中心 — 奖金余额」中查看账户余额和交易明细，账户余额可在「实物商品」下单结算时最大化使用。</p>
+            <p>您可前往「个人中心 — 奖金余额」中查看账户余额和交易明细，账户余额可在<span @click.stop.prevent="info">「实物商品」</span>下单结算时最大化使用。</p>
           </p>
         </div>
       </div>
@@ -56,6 +56,9 @@
             this.scroll.refresh();
           }
         });
+      },
+      info() {
+        this.$router.replace('/info');
       },
       detail() {
         this.$router.push('/cashbackdetail');

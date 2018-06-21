@@ -3,11 +3,11 @@
     <fixedheader title="我的拼团"></fixedheader>
     <div class="order">
       <div class="order-wrap">
-        <div class="order-container" ref="orders" v-if="orders.length">
+        <div class="order-container" ref="orders" v-show="orders.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in orders" :key="index">
               <div class="item-content">
-                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.teamStatus === '4'}"><span class="text">{{stateDesc(item.teamStatus)}}</span></i></div>
+                <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.teamStatus === '4'}"><span class="text" :class="{'success': item.teamStatus === '3'}">{{stateDesc(item.teamStatus)}}</span></i></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}</h3>
                   <div class="extra-wrap">
@@ -28,7 +28,7 @@
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
-        <div class="no-order" v-if="!orders.length && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
+        <div class="no-order" v-show="!orders.length && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
@@ -168,11 +168,15 @@
       },
       showOrders(item) {
         api.getCmsOrderInfo({
-          spreadId: item.teamOrderId
+          spreadId: item.id
         }).then(response => {
-          window.location.href = 'http://' + location.host + '/weixin/order/' + response.orderNo;
+          if (response && response.orderNo) {
+            window.location.href = 'http://' + location.host + '/weixin/order/' + response.orderNo;
+          } else {
+            window.location.href = 'http://' + location.host + '/weixin/order?type=1';
+          }
         }).catch(response => {
-          window.location.href = 'http://' + location.host + '/weixin/order?type=0';
+          window.location.href = 'http://' + location.host + '/weixin/order?type=1';
         });
       }
     },
@@ -299,6 +303,9 @@
                       width: 0
                       height: 100%
                       margin-top: 1px
+                    &.success
+                      background: #d05148
+                      color: #f1f1f1
                   &.expired .text
                     background-color: #747474
                     color: #fff
