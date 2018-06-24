@@ -12,7 +12,7 @@
           <p>选择 “发送给朋友”或者“分享到朋友圈”</p>
           <p>好友进入分享链接</p>
           <p>即可完成商品减价</p>
-          <p>记得48小时内完成付款哦!</p>
+          <p v-show="needPayTips">记得48小时内完成付款哦!</p>
         </div>
       </div>
     </div>
@@ -22,6 +22,12 @@
 
 <script type="text/ecmascript-6">
   export default {
+    props: {
+      needPayTips: {
+        type: Boolean,
+        default: true
+      }
+    },
     data() {
       return {
         isShow: false

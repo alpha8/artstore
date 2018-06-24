@@ -17,7 +17,7 @@
           </div>
           <div class="row">
             <div class="label">砍价优惠：</div>  
-            <div class="desc fixedheight"><div class="box"><em>好友助力<strong>{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</strong></em><i class="icon-question_mark" @click.stop.prevent="showRules"></i></div></div>
+            <div class="desc fixedheight"><div class="box"><em>好友助力<strong>{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</strong></em><em class="rules" @click.stop.prevent="showRules"><strong>[砍价规则]</strong></em></div></div>
           </div>
           <div v-if="sharepay.stock">
             <div class="row">
@@ -36,7 +36,7 @@
         </div>
         <split v-if="cuttingData && cuttingData.cutInfos"></split>
         <div class="info" v-if="cuttingData && cuttingData.cutInfos">
-          <h1 class="title" v-if="isOwner">好友助力砍价 <span v-if="cuttingData.leftEndTimes && !hasProgressOrder">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.days">{{countdownStats.days}}天</span><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
+          <h1 class="title" v-if="isOwner">好友助力砍价 <span v-if="cuttingData.leftEndTimes && cuttingData.cutOrder.status <= 2">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.days">{{countdownStats.days}}天</span><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
           <h1 class="title" v-else>您的朋友获得了如下各位的助力砍价：</h1>
           <table class="tablist">
             <tr class="head">
@@ -144,7 +144,7 @@
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
     <frame></frame>
-    <share ref="weixinShare"></share>
+    <share ref="weixinShare" :needPayTips="needPayTips"></share>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <div class="fixed-foot">
       <div class="foot-wrapper">
@@ -152,14 +152,14 @@
           <span class="button-lg gray">{{stateDesc}}</span>
         </div>
         <div class="foot-item btn-share" v-else-if="!cuttingData.cutOrder" @click.stop.prevent="showRules">
-          <span class="button-lg orange">活动规则</span>
+          <span class="button-lg orange">砍价规则</span>
         </div>
         <div class="foot-item btn-share" v-else-if="isOwner" @click.stop.prevent="pay">
           <span class="button-lg orange" v-if="hasProgressOrder || GotAndPay">去付款</span>
           <span class="button-lg orange" v-else>立即购买</span>
         </div>
         <div class="foot-item btn-share" v-else @click.stop.prevent="viewMime">
-          <span class="button-lg orange">查看我的</span>
+          <span class="button-lg orange">我也要砍价</span>
         </div>
         <div class="foot-item" @click.stop.prevent="reshare" v-if="isOwner && cutStatus >= 3">
           <span class="button-lg darkred">好友重新助力砍价</span>
@@ -177,6 +177,7 @@
     </div>
     <!-- 活动规则 -->
     <rules ref="rules" title="砍价活动规则"></rules>
+    <bargainshow ref="bargainShow" :amount="sharepay.forwardFee"></bargainshow>
   </div>
 </template>
 
@@ -201,6 +202,7 @@
   import layer from '@/components/common/layer';
   import share from '@/components/sharepay/share';
   import rules from '@/components/sharepay/rules';
+  import bargainshow from '@/components/sharepay/bargainshow';
   let Base64 = require('js-base64').Base64;
 
   const ALL = 3;
@@ -220,8 +222,9 @@
       this.leftSeconds = 0;
       this.countdownStats = {};
       this.preOrderId = '';
-      this.hide();
+      this.needPayTips = true;
       this.processing = false;
+      this.hide();
       this.stopTimer();
     },
     updated() {
@@ -275,7 +278,8 @@
           3: '砍价成功',
           4: '付款超时',
           5: '付款超时'
-        }
+        },
+        needPayTips: true
       };
     },
     computed: {
@@ -459,29 +463,32 @@
         this.preOrderId = '';
         this.updateShareData();
         let user = this.$store.getters.getUserInfo;
-        api.getShareCuttings({
-          userId: user.userId,
-          preOrderId: '',
+        api.createSharePreOrder({
           fieldId: this.sharepay.id,
-          userName: user.nickName || '匿名',
-          userIcon: user.icon || ''
+          userId: user.userId,
+          openid: user.openid
         }).then(response => {
-          if (response.result === 0) {
-            this.cuttingData = response.data;
-            if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
-              this.hasProgressOrder = true;
-            } else {
-              this.hasProgressOrder = false;
-            }
-            let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
-            if (preOrderId) {
-              this.preOrderId = preOrderId;
-              this.updateShareData();
-            }
+          let preOrderId = response.data && response.data.preOrderId;
+          if (preOrderId) {
+            this.preOrderId = preOrderId;
+            this.updateShareData();
           }
-          this._initScroll();
-          this.timerLoop();
+          if (response.code === 1005) {
+            this.mutex = true;
+          } else if (response.code === 2001) {
+            this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
+            this.mutex = true;
+            return;
+          } else if (response.result !== 0 || response.code) {
+            this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
+            return;
+          }
+          this.mutex = true;
+          this.firstCut();
+          // 显示分享指引页
+          this.$refs.weixinShare.show();
         }).catch(response => {
+          this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
           console.error(response);
         });
       },
@@ -489,6 +496,11 @@
         let cutPrice = this.cuttingData.cutOrder ? this.cuttingData.cutOrder.dealFee : this.sharepay.specialPrice;
         if (cutPrice <= this.sharepay.buttomFee) {
           return;
+        }
+        if (this.cuttingData.owner) {
+          this.needPayTips = true;
+        } else {
+          this.needPayTips = false;
         }
         // 如果已经创建了砍价预订单，即跳过创建预订单，直接分享
         if (this.hasProgressOrder || (this.cuttingData && this.cuttingData.owner) || this.mutex || this.preOrderId) {
@@ -559,6 +571,8 @@
             this.cuttingData = response.data;
             if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
               this.hasProgressOrder = true;
+            } else if (response.data.cutOrder && response.code !== 1007) {
+              this.$refs.bargainShow.show();
             }
             let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
             if (preOrderId) {
@@ -576,7 +590,7 @@
         let user = this.$store.getters.getUserInfo;
         api.getShareCuttings({
           userId: user.userId,
-          preOrderId: this.preOrderId,
+          preOrderId: this.preOrderId || '',
           fieldId: this.sharepay.id,
           userName: user.nickName || '匿名',
           userIcon: user.icon || ''
@@ -585,6 +599,13 @@
             this.cuttingData = response.data;
             if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
               this.hasProgressOrder = true;
+            } else if (response.data.cutOrder && response.code !== 1007) {
+              this.$refs.bargainShow.show();
+            }
+            let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
+            if (preOrderId) {
+              this.preOrderId = preOrderId;
+              this.updateShareData();
             }
           }
           this._initScroll();
@@ -892,6 +913,32 @@
             } else if (width === null) {
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
+          } else {
+            let pic = img.getAttribute('src');
+            let width = img.getAttribute('width');
+            let height = img.getAttribute('height');
+            let suffix = '';
+            if (width) {
+              suffix += ' width="' + width + '"';
+            }
+            if (height) {
+              suffix += ' height="' + height + '"';
+            }
+            let p1 = suffix + ' alt="" src="' + pic + '"';
+            let p2 = suffix + ' src="' + pic + '"';
+            if (pic.indexOf('http:') < 0) {
+              pic = prefix + pic;
+            }
+            if (pic.lastIndexOf('?') < 0) {
+              pic += '?1';
+            }
+            pic = pic + '&w=750';
+            html = html.replace(p1, ' src="' + pic + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"').replace(p2, 'img src="' + pic + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"');
+            if (width && width > 100) {
+              picImgList.push(pic.substring(0, pic.lastIndexOf('?')));
+            } else if (width === null) {
+              picImgList.push(pic.substring(0, pic.lastIndexOf('?')));
+            }
           }
         }
         if (picImgList.length) {
@@ -943,7 +990,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, rules
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, rules, bargainshow
     }
   };
 </script>
@@ -1080,7 +1127,7 @@
         font-weight: 700
         line-height: 18px
         .now
-          margin-right: 8px
+          margin-right: 6px
           font-size: 14px
           font-weight: 700
           color: rgb(240, 20, 20)
@@ -1220,6 +1267,7 @@
         background-color: #fafafa
         font-size: 13px
         .col-2
+          width: 135px
           padding-left: 14px
       .col-1
         width: 15%
@@ -1239,8 +1287,15 @@
             background-color: #00a0dc
       .col-2
         flex: 1
+        width: 135px
         padding-left: 10px
         overflow: hidden
+        text-overflow: ellipsis
+        display: -webkit-box
+        -webkit-line-clamp: 1
+        -webkit-box-orient: vertical
+        word-wrap: break-word
+        word-break: break-all
         box-sizing: border-box      
       .col-3
         width: 25%
@@ -1292,12 +1347,13 @@
           position: relative
           display: inline-block
           width: auto
-          padding-right: 26px
           box-sizing: border-box
           em
             display: block
             float: left
             width: auto
+            &.rules
+              padding-left: 6px
           strong
             font-weight: 700
             color: #07111b

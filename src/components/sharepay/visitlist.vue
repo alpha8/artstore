@@ -235,8 +235,15 @@
                 background-color: #00a0dc
           .col-2
             flex: 1
+            width: 135px
             padding-left: 10px
             overflow: hidden
+            text-overflow: ellipsis
+            display: -webkit-box
+            -webkit-line-clamp: 1
+            -webkit-box-orient: vertical
+            word-wrap: break-word
+            word-break: break-all
             box-sizing: border-box
           .col-3
             width: 25%
@@ -251,6 +258,8 @@
             white-space: nowrap
             overflow: hidden
             box-sizing: border-box
+          .text-center
+            text-align: center
           .thumbnail
             width: 32px
             height: 32px

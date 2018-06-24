@@ -56,7 +56,7 @@
     },
     computed: {
       getCartAmount() {
-        return this.$store.state.cartAmount;
+        return this.$store.getters.getCartAmount;
       }
     },
     watch: {

@@ -628,6 +628,32 @@
             } else if (width === null) {
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
+          } else {
+            let pic = img.getAttribute('src');
+            let width = img.getAttribute('width');
+            let height = img.getAttribute('height');
+            let suffix = '';
+            if (width) {
+              suffix += ' width="' + width + '"';
+            }
+            if (height) {
+              suffix += ' height="' + height + '"';
+            }
+            let p1 = suffix + ' alt="" src="' + pic + '"';
+            let p2 = suffix + ' src="' + pic + '"';
+            if (pic.indexOf('http:') < 0) {
+              pic = prefix + pic;
+            }
+            if (pic.lastIndexOf('?') < 0) {
+              pic += '?1';
+            }
+            pic = pic + '&w=750';
+            html = html.replace(p1, ' src="' + pic + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"').replace(p2, 'img src="' + pic + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"');
+            if (width && width > 100) {
+              picImgList.push(pic.substring(0, pic.lastIndexOf('?')));
+            } else if (width === null) {
+              picImgList.push(pic.substring(0, pic.lastIndexOf('?')));
+            }
           }
         }
         if (picImgList.length) {

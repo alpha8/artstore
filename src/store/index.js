@@ -17,7 +17,7 @@ const SEARCH_HISTORY = 'searchhistory';
 const USED_DISCOUNT = 'USED_DISCOUNT';
 const HISTORY_SIZE = 10;
 const ANONYMOUS = 'anonymous';
-const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
+const DEFAULT_USER = '{}';
 
 // states
 export const state = {
@@ -72,7 +72,14 @@ export const getters = {
   getKilledProduct: state => state.killProducts,
   loadSearchHistory: state => state.searchHistory,
   loadUsedDiscount: state => state.usedDiscount,
-  getAnonymous: state => state.anonymous
+  getAnonymous: state => state.anonymous,
+  getCartAmount (state) {
+   if (state.cartAmount <= 0) {
+    return 0;
+   } else {
+    return state.cartAmount;
+   }
+  }
 };
 
 // actions
@@ -259,6 +266,9 @@ export const mutations = {
         state.products[sid] = product;
       }
     }
+    if (state.cartAmount <= 0) {
+      state.cartAmount = 0;
+    }
     save('cartAdded', state.cart.added);
     save('products', state.products);
     save('cartAmount', state.cartAmount);
@@ -345,6 +355,9 @@ export const mutations = {
     save('payGoods', state.cart.payGoods);
     state.products = goodCount;
     save('products', state.products);
+    if (state.cartAmount <= 0) {
+      state.cartAmount = 0;
+    }
     save('cartAmount', state.cartAmount);
   },
   [types.ADD_SEARCH_HISTORY] (state, keyword) {

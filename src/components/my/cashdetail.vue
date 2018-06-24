@@ -6,6 +6,11 @@
         <div class="cash-container" ref="cashlist" v-show="cashs.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="cash-list">
             <mu-flexbox-item basis="100%" class="cash-item border-1px" v-for="(cash, index) in cashs" :key="index">
+              <div class="content">
+                <p class="line text">余额充值成功</p>
+                <p class="time">{{cash.createAt | formatDate}}</p>
+              </div>
+              <div class="amount">{{cash.totalFee | currency}}</div>
             </mu-flexbox-item>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
@@ -21,7 +26,8 @@
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
-  // import api from '@/api/api';
+  import {formatDate} from '@/common/js/date';
+  import api from '@/api/api';
 
   export default {
     data() {
@@ -61,21 +67,18 @@
         if (!force && now - this.lastExec <= 50) {
           return;
         }
-        this.totalPages = 1;
-        this.pageNumber++;
-        this.lastExec = +new Date();
-        this.loading = false;
-        this.loadEnd = this.pageNumber > this.totalPages;
-        /**
+        this.loading = true;
         let user = this.$store.getters.getUserInfo;
-        api.getCashHistory({
+        api.getOrders({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          userId: user.userId || 0
+          userId: user.userId || 0,
+          type: 6,
+          status: 3
         }).then(response => {
           if (response.code === 0) {
-            if (response.histories && response.histories.length) {
-              response.histories.forEach(item => {
+            if (response.orders && response.orders.length) {
+              response.orders.forEach(item => {
                 this.cashs.push(item);
               });
             }
@@ -89,7 +92,7 @@
           this.loadEnd = false;
           this.loading = false;
           this.totalPages = 0;
-        }); */
+        });
       },
       _reset() {
         this.cashs = [];
@@ -116,6 +119,12 @@
     },
     components: {
       fixedheader, gotop
+    },
+    filters: {
+      formatDate(time) {
+        let date = new Date(time);
+        return formatDate(date, 'yyyy-MM-dd hh:mm:ss');
+      }
     }
   };
 </script>
@@ -183,49 +192,45 @@
         .cash-list
           position: relative
           width: 100%
+          padding: 10px
+          box-sizing: border-box
           .cash-item
+            position: relative
             display: flex
             margin-bottom: 15px
-            padding: 0 8px
             border-1px(rgba(7, 17, 27, 0.1))
-            box-sizing: border-box
-            font-size: 12px
-            .item-img
-              flex: 15vw 0 0
-              img
-                width: 70px
-                height: 70px
-                overflow: hidden
-            .item-info
+            .content
               flex: 1
-              padding: 20px 50px 0 10px
-              >.title
-                overflow: hidden
+              background: #fff
+              height: 60px
+              box-sizing: border-box
+              overflow: hidden
+              .line
+                position: relative
+                font-size: 14px
+                line-height: 1.8
                 text-overflow: ellipsis
-                word-wrap: break-word
-                display: -webkit-box
-                -webkit-line-clamp: 2
-                -webkit-box-orient: vertical
-                line-height: 1.45
-              div
-                padding-top: 10px
-              .price
-                color: #e4393c
-                font-weight: 700
-            .item-ops
-              position: absolute
-              right: 0
-              top: 0
-              width: 50px
-              bottom: 0
-              .btn
-                display: inline-block
-                height: 25px
-                line-height: 25px
-                padding: 0 10px
-                border: 1px solid rgba(7, 17, 27,0.1)
-                margin-top: 20px
-                letter-spacing: 1px
+                white-space: nowrap
+                overflow: hidden
+                strong
+                  font-weight: 700
+                &.text
+                  padding-bottom: 10px
+                  -webkit-box-orient: vertical
+                  -webkit-line-clamp: 1
+                  font-weight: 400
+                  font-size: 14px
+                  line-height: 1.0625rem
+              .time
+                color: #666
+                font-size: 12px
+            .amount
+              width: 80px
+              height: 60px
+              color: #44b549
+              font-size: 14px
+              font-weight: 700
+              text-align: right
       .no-cash
         width: 100%
         padding: 40px 0
