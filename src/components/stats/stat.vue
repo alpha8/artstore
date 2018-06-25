@@ -35,7 +35,7 @@
           </li>
           <li @click.stop.prevent="showDetail('pay')">
             <span class="nums">{{payUv}}</span>
-            <span class="label">下单次数</span>
+            <span class="label">下单人数</span>
           </li>
         </ul>
         <div class="tips">统计数据截止于当前时间</div>

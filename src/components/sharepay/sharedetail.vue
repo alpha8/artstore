@@ -37,7 +37,7 @@
         <split v-if="cuttingData && cuttingData.cutInfos"></split>
         <div class="info" v-if="cuttingData && cuttingData.cutInfos">
           <h1 class="title" v-if="isOwner">好友助力砍价 <span v-if="cuttingData.leftEndTimes && cuttingData.cutOrder.status <= 2">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.days">{{countdownStats.days}}天</span><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
-          <h1 class="title" v-else>您的朋友获得了如下各位的助力砍价：</h1>
+          <h1 class="title" v-else>您的朋友获得助力： <span v-if="cuttingData.leftEndTimes && cuttingData.cutOrder.status <= 2">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.days">{{countdownStats.days}}天</span><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
           <table class="tablist">
             <tr class="head">
               <td class="col-2" nowrap>好友名称 <span class="moreuv" v-if="cuttingData.count" @click.stop.prevent="goVisitList">[{{cuttingData.count}}人..]</span></td>

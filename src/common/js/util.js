@@ -132,11 +132,6 @@ function handleFontSize() {
       'fontSize': 0
     });
   });
-  try {
-    WeixinJSBridge.call('hideToolbar');
-  } catch (e) {
-    console.error(e);
-  }
 }
 
 export function convertVideoUrl(url) {

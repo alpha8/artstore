@@ -39,7 +39,6 @@
           '{name}防梅西防得像跟女朋友逛街似的…手拉着手，一刻也不分离。成功帮好友砍价{amount}元。',
           '{name}打门！球~进~了！成功帮好友砍价{amount}元。',
           '詹姆斯可以扑出一次射门，两次射门，但是扑不出{name}总是射门。成功帮好友砍价{amount}元。',
-          '足球场上没有上帝，如果有，就是{name}。成功帮好友砍价{amount}元。',
           '谁敢横刀立马，唯我{name}大将军。成功帮好友砍价{amount}元。',
           '{name}脚踏风火轮, 单刀直入。成功帮好友砍价{amount}元。',
           '家有鲁小胖，福寿又安康。如今当队长，进球有保障。成功帮好友砍价{amount}元。',
@@ -116,7 +115,7 @@
             height: 64px
             margin-left: -32px
           .text
-            padding: 43px 20px 0
+            padding: 43px 20px 3px
             font-size: 14px
             line-height: 1.4
             box-sizing: border-box
