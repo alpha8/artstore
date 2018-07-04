@@ -59,7 +59,11 @@
           'home': '首页',
           'category': '分类',
           'usercenter': '个人中心',
-          'pay': '下单'
+          'sharepaydetail': '砍价详情',
+          'tuandetail': '拼团详情',
+          'sharetuan': '拼团分享',
+          'createbargain': '创建砍价',
+          'createtuan': '开团'
         }
       };
     },
@@ -129,7 +133,9 @@
         return icon || api.CONFIG.usericon;
       },
       getDetailItem(item) {
-        if (item.behavior) {
+        if (item.module === 'sharepaydetail' || item.module === 'tuandetail' || item.module === 'createtuan' || item.module === 'createbargain') {
+          return item.parameters;
+        } else if (item.behavior) {
           return item.behavior;
         }
         return {};
@@ -142,6 +148,10 @@
             this.$router.push({name: 'articledetail', params: {id: item.behavior.pid}});
           } else if (item.module === 'groupbuydetail') {
             this.$router.push({name: 'groupbuyDetail', params: {id: item.behavior.pid}});
+          } else if (item.module === 'sharepaydetail') {
+            this.$router.push({name: 'sharedetail', params: {id: item.behavior.pid}});
+          } else if (item.module === 'tuandetail') {
+            this.$router.push({name: 'tuandetail', params: {id: item.behavior.pid}});
           }
         }
       },

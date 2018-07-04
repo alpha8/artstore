@@ -37,8 +37,23 @@
             <span class="nums">{{payUv}}</span>
             <span class="label">下单人数</span>
           </li>
+          <li @click.stop.prevent="showDetail('sharepaydetail')">
+            <span class="nums">{{bargaindetail}}</span>
+            <span class="label">砍价详情</span>
+          </li>
+          <li @click.stop.prevent="showDetail('createbargain')">
+            <span class="nums">{{createbargain}}</span>
+            <span class="label">发起砍价</span>
+          </li>
+          <li @click.stop.prevent="showDetail('tuandetail')">
+            <span class="nums">{{tuandetail}}</span>
+            <span class="label">拼团详情</span>
+          </li>
+          <li @click.stop.prevent="showDetail('createtuan')">
+            <span class="nums">{{createtuan}}</span>
+            <span class="label">开团人数</span>
+          </li>
         </ul>
-        <div class="tips">统计数据截止于当前时间</div>
         <split v-if="users.length"></split>
         <h1 class="title" v-if="users.length">访问详情</h1>
         <table class="detail_list" v-if="users.length">
@@ -125,6 +140,10 @@
         payUv: 0,
         articleUv: 0,
         groupbuyUv: 0,
+        tuandetail: 0,
+        bargaindetail: 0,
+        createtuan: 0,
+        createbargain: 0,
         users: [],
         stats: {}
       };
@@ -155,6 +174,10 @@
               this.payUv = response.allstat.pay && response.allstat.pay.length || 0;
               this.articleUv = response.allstat.articledetail && response.allstat.articledetail.length || 0;
               this.groupbuyUv = response.allstat.groupbuydetail && response.allstat.groupbuydetail.length || 0;
+              this.tuandetail = response.allstat.tuandetail && response.allstat.tuandetail.length || 0;
+              this.bargaindetail = response.allstat.sharepaydetail && response.allstat.sharepaydetail.length || 0;
+              this.createtuan = response.allstat.createtuan && response.allstat.createtuan.length || 0;
+              this.createbargain = response.allstat.createbargain && response.allstat.createbargain.length || 0;
               this.stats = response.allstat;
             }
           }

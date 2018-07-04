@@ -9,7 +9,7 @@
         </div>
         <topchanel :channels="channels"></topchanel>
         <modal-title title="茶席套装.三百席" moreText="更多" catKey="art" catName="茶席套装.三百席"></modal-title>
-        <channel :items="arts" :cols="2"></channel>
+        <channel :items="arts" :cols="2" section="teasuite"></channel>
         <split></split>
         <modal-title title="一虎一席茶室艺术空间"></modal-title>
         <div class="vipmovie">
@@ -21,25 +21,25 @@
         </div>
         <split></split>
         <modal-title title="优质茶器(1000元以内)" moreText="更多" catKey="teaart" catName="优质茶器" price="0-1000"></modal-title>
-        <channel :items="teaPots" :cols="2"></channel>
+        <channel :items="teaPots" :cols="2" section="cheap_teaware"></channel>
         <split></split>
         <modal-title title="贵重茶器(1000元以上)" moreText="更多" catKey="teaart" catName="贵重茶器" price="1000-"></modal-title>
-        <channel :items="dearTeapots" :cols="2"></channel>
+        <channel :items="dearTeapots" :cols="2" section="dearly_teaware"></channel>
          <split></split>
         <modal-title title="一虎一席.200款老茶博物馆" moreText="更多" catKey="museum" catName="一虎一席.200款老茶博物馆"></modal-title>
-        <channel :items="oldTeas" :cols="2"></channel>
+        <channel :items="oldTeas" :cols="2" section="tealab"></channel>
         <split></split>
         <modal-title title="好茶 (百里挑一、更实惠)" moreText="更多" catKey="welltea" catName="好茶（精选汇聚、更实惠）"></modal-title>
-        <channel :items="goodTeas" :cols="2"></channel>
+        <channel :items="goodTeas" :cols="2" section="nicetea"></channel>
         <split></split>
         <modal-title title="茶室专业配画 (名家、新锐)" moreText="更多" catKey="paint" catName="茶室专业配画"></modal-title>
-        <channel :items="paints" :cols="2"></channel>
+        <channel :items="paints" :cols="2" section="teaspace"></channel>
         <split></split>
         <modal-title title="茶室空间雅物" moreText="更多" catKey="graceful" catName="茶室空间雅物"></modal-title>
-        <channel :items="ya" :cols="2"></channel>
+        <channel :items="ya" :cols="2" section="teagrace"></channel>
         <split v-show="articles && articles.length"></split>
         <section-title title='博览集萃 (茶.书画.美学)' v-show="articles && articles.length" moreText="更多" :getMore="getMoreArticles"></section-title>
-        <articlelist :articles="articles" v-show="articles && articles.length"></articlelist>
+        <articlelist :articles="articles" v-show="articles && articles.length" section="articles"></articlelist>
         <split></split>
         <modal-title title='关于 "一虎一席"'></modal-title>
         <div class="aboutus">

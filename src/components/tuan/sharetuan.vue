@@ -43,6 +43,7 @@
             <li class="user_item" v-for="(item, index) in tuanData.teamOrders" :key="index" v-show="item.owner || item.status === 3">
               <span class="tips" v-show="item.owner">团长</span>
               <img :src="getUserIcon(item.userIcon)" :class="{'leader': item.owner}" alt="">
+              <em>{{getFriendlyUsername(item.userName)}}</em>
             </li>
           </ul>
         </div>
@@ -78,6 +79,8 @@
   import modalTitle from '@/components/modal-title/modal-title';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
+  let Base64 = require('js-base64').Base64;
+
   export default {
     activated() {
       this.fetchData();
@@ -221,6 +224,12 @@
         this.tuanData = {};
         this.preOrderId = '';
         this.shareData = {};
+      },
+      getFriendlyUsername(userName) {
+        if (userName) {
+          return Base64.decode(userName);
+        }
+        return '匿名';
       },
       previewQrcode() {
         wx.previewImage({
@@ -597,19 +606,19 @@
         .tuan_users
           position: relative
           display: inline-block
-          padding: 0 10px
+          padding: 3px 10px
           .user_item
             position: relative
             display: block
             float: left
-            width: 50px
-            height: 50px
-            margin-right: 20px
+            width: auto
+            height: 70px
+            margin-right: 15px
             &:last-child
               margin-right: 0
             img
-              width: 100%
-              height: 100%
+              width: 50px
+              height: 50px
               border-radius: 100%
               border: 1px solid transparent
               &.leader
@@ -627,6 +636,18 @@
               margin-left: -15px
               padding: 2px
               text-align: center
+            em
+              width: 65px
+              line-height: 1.3
+              font-size: 12px
+              overflow: hidden
+              text-overflow: ellipsis
+              display: -webkit-box
+              -webkit-line-clamp: 1
+              -webkit-box-orient: vertical
+              word-wrap: break-word
+              word-break: break-all
+              box-sizing: border-box
       .rules-wrap
         position: relative
         width: 100%
@@ -678,6 +699,8 @@
     .ops
       position: relative
       width: 100%
-      padding: 0 10px
+      padding: 0 10px 3px
       box-sizing: border-box
+      .btns
+        margin-top: 0
 </style>

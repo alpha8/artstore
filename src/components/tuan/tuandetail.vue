@@ -135,10 +135,10 @@
         </div>
         <split v-show="good.relates && good.relates.length"></split>
         <modal-title title="相关商品" moreText="更多" catKey="" catName="" v-show="good.relates && good.relates.length"></modal-title>
-        <channel v-show="good.relates && good.relates.length" :items="good.relates || []" :cols="2"></channel>
+        <channel v-show="good.relates && good.relates.length" :items="good.relates || []" :cols="2" module="tuandetail" section="relatedGoods"></channel>
         <split v-show="guessGoods.length"></split>
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
-        <channel :items="guessGoods" :cols="2"></channel>
+        <channel :items="guessGoods" :cols="2" module="tuandetail" section="guessGoods"></channel>
         <split v-if="showFollow"></split>
         <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
@@ -1261,6 +1261,7 @@
         background-color: #fafafa
         font-size: 13px
         .col-2
+          width: 135px
           padding-left: 14px
       .col-1
         width: 15%
@@ -1280,9 +1281,16 @@
             background-color: #00a0dc
       .col-2
         flex: 1
+        width: 135px
         padding-left: 10px
         overflow: hidden
-        box-sizing: border-box
+        text-overflow: ellipsis
+        display: -webkit-box
+        -webkit-line-clamp: 1
+        -webkit-box-orient: vertical
+        word-wrap: break-word
+        word-break: break-all
+        box-sizing: border-box 
       .col-3
         width: 25%
         padding-left: 10px

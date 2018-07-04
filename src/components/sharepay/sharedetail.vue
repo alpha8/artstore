@@ -131,10 +131,10 @@
         </div>
         <split v-show="good.relates && good.relates.length"></split>
         <modal-title title="相关商品" moreText="更多" catKey="" catName="" v-show="good.relates && good.relates.length"></modal-title>
-        <channel v-show="good.relates && good.relates.length" :items="good.relates || []" :cols="2"></channel>
+        <channel v-show="good.relates && good.relates.length" :items="good.relates || []" :cols="2" module="sharedetail" section="relatedGoods"></channel>
         <split v-show="guessGoods.length"></split>
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
-        <channel :items="guessGoods" :cols="2"></channel>
+        <channel :items="guessGoods" :cols="2" module="sharedetail" section="guessGoods"></channel>
         <split v-if="showFollow"></split>
         <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
@@ -177,7 +177,7 @@
     </div>
     <!-- 活动规则 -->
     <rules ref="rules" title="砍价活动规则"></rules>
-    <bargainshow ref="bargainShow" :amount="sharepay.forwardFee"></bargainshow>
+    <bargainshow ref="bargainShow" :amount="sharepay.forwardFee" :isOwner="isOwner"></bargainshow>
   </div>
 </template>
 
@@ -544,9 +544,9 @@
           }
           this.mutex = true;
           // 显示分享指引页
-          this.$refs.weixinShare.show();
           this.updateShareData();
           this.firstCut();
+          this.$refs.weixinShare.show();
         }).catch(response => {
           this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
           console.error(response);
@@ -606,6 +606,11 @@
             if (preOrderId) {
               this.preOrderId = preOrderId;
               this.updateShareData();
+            }
+            if (this.cuttingData.owner) {
+              this.needPayTips = true;
+            } else {
+              this.needPayTips = false;
             }
           }
           this._initScroll();

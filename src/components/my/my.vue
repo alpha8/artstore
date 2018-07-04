@@ -69,10 +69,10 @@
             <span class="text">创建优惠券</span>
             <span class="more"><i class="icon-keyboard_arrow_right"></i></span>
           </router-link>
-          <router-link :to="item.link" class="item border-1px" v-for="(item, index) in others" :key="index" :class="{'highlight': item.highlight}">
+          <router-link :to="item.link" class="item border-1px" v-for="(item, index) in others" :key="index">
             <i :class="item.icon"></i>
-            <span class="text" v-show="!item.callable">{{item.text}}</span>
-            <span class="text" v-show="item.callable" @click.stop.prevent="item.callable">{{item.text}}</span>
+            <span class="text" v-if="!item.callable" :class="{'strong': item.highlight}">{{item.text}}</span>
+            <span class="text" v-else @click.stop.prevent="item.callable">{{item.text}}</span>
             <span class="more" v-show="!item.noPage"><i class="icon-keyboard_arrow_right"></i></span>
           </router-link>
         </div>
@@ -107,7 +107,7 @@
         ],
         others: [
           { icon: 'icon-tuan', text: '我的拼团', link: '/mytuan' },
-          { icon: 'icon-cutingprice', text: '我的砍价', link: '/myshare' },
+          { icon: 'icon-cutingprice', text: '我的砍价', link: '/myshare', highlight: true },
           { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
           { icon: 'icon-group_purchase', text: '我的团购', link: '/mygroupbuy' },
           { icon: 'icon-auction', text: '我的拍卖', link: '/myauction' },
@@ -476,6 +476,8 @@
           vertical-align: middle
         .text
           vertical-align: middle
+          &.strong
+            font-weight: 700
         .more
           float: right
           font-size: 18px

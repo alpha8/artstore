@@ -26,6 +26,12 @@
         default() {
           return 0;
         }
+      },
+      isOwner: {
+        type: Boolean,
+        default() {
+          return false;
+        }
       }
     },
     data() {
@@ -54,6 +60,9 @@
         let user = this.$store.getters.getUserInfo;
         let len = this.words.length;
         let pos = Math.floor(Math.random() * len);
+        if (this.isOwner) {
+          return this.words[pos].replace('{name}', user.nickName || '你').replace('{amount}', this.amount).replace('帮好友', '');
+        }
         return this.words[pos].replace('{name}', user.nickName || '你').replace('{amount}', this.amount);
       }
     },

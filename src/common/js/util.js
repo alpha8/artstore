@@ -140,3 +140,9 @@ export function convertVideoUrl(url) {
     .replace(/v\.qq\.com\/x\/cover\/[\w]+\/([\w]+)\.html/i, 'v.qq.com/iframe/player.html?vid=$1&tiny=0&auto=0')
     .replace(/v\.qq\.com\/x\/cover\/([\w]+)\.html/i, 'v.qq.com/iframe/player.html?vid=$1&tiny=0&auto=0');
 }
+
+export function reportTrackEvent(eventId, params) {
+  if (MtaH5) {
+    MtaH5.clickStat(eventId, params);
+  }
+}

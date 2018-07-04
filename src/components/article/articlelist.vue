@@ -1,5 +1,5 @@
 <template>
-  <ul class="article-list">
+  <ul class="article-list" @touchstart="trackEvent">
     <li class="article-item border-1px" v-for="item in articles" @click.stop.prevent="showDetail(item)">
       <div class="item-box">
         <img :src="getPoster(item.icons)" alt="" class="poster">
@@ -18,7 +18,7 @@
 
 <script type="text/ecmascript-6">
   import api from '@/api/api';
-  // import {formatDate} from '@/common/js/util';
+  import {formatDate, reportTrackEvent} from '@/common/js/util';
   export default {
     props: {
       articles: {
@@ -26,11 +26,37 @@
         default() {
           return [];
         }
+      },
+      module: {
+        type: String,
+        default: 'home'
+      },
+      section: {
+        type: String,
+        default: ''
       }
+    },
+    data() {
+      return {
+        eventQueue: []
+      };
+    },
+    deactivated() {
+      this.eventQueue = [];
     },
     methods: {
       showDetail(article) {
         this.$router.push({name: 'articledetail', params: {id: article.id}});
+      },
+      trackEvent() {
+        if (!this.section) {
+          return;
+        }
+        let found = this.eventQueue.find(item => item === this.section);
+        if (!found) {
+          this.eventQueue.push(this.section);
+          reportTrackEvent('pageview_articles', {'module': this.module, 'section': this.section});
+        }
       },
       getPoster(icons) {
         if (icons && icons.length) {

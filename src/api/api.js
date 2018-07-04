@@ -1,5 +1,6 @@
 /* jshint esnext: true */
 import axios from 'axios';
+import {reportTrackEvent} from '@/common/js/util';
 
 // axios 配置
 axios.defaults.timeout = 60000;
@@ -577,7 +578,7 @@ export default {
    * 创建砍价预订单
    */
   createSharePreOrder(params) {
-    return doPost(this.CONFIG.webspreadCtx + '/spreadcut/add', params);
+    return doPost(this.CONFIG.webspreadCtx + '/spreadcut/add?stat=1&type=createbargain&pid=' + (params.fieldId || ''), params);
   },
 
   /**
@@ -591,6 +592,9 @@ export default {
    * 查询我的砍价访客列表
    */
   getCutVisitList(params) {
+    if (params) {
+      reportTrackEvent('bargain_list', {'cutorderid': params.cutOrderId, 'currentpage': params.currentPage, 'pagesize': params.pageSize});
+    }
     return doGet(this.CONFIG.webspreadCtx + '/spreadcut/list/all', params);
   },
 
@@ -605,7 +609,7 @@ export default {
    * 创建发起和参加拼团
    */
   createTuanOrder(params) {
-    return doPost(this.CONFIG.webspreadCtx + '/spreadteam/add', params);
+    return doPost(this.CONFIG.webspreadCtx + '/spreadteam/add?stat=1&type=createtuan&pid=' + (params.fieldId || ''), params);
   },
 
   /**

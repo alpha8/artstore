@@ -15,16 +15,15 @@
         isAutoLogin: false
       };
     },
-    // created() {
-    //   let hotfix = window.localStorage.getItem('hotfix') || false;
-    //   if (!hotfix) {
-    //     window.localStorage.clear();
-    //     window.sessionStorage.clear();
-    //     removeCookie('wxuser', '', '.yihuyixi.com');
-    //     window.localStorage.setItem('hotfix', true);
-    //     console.log('HotFix online issue.');
-    //   }
-    // },
+    created() {
+      let user = this.$store.getters.getUserInfo;
+      let hotfix = window.localStorage.getItem('autohotfix') || false;
+      if (!user.icon && hotfix) {
+        removeCookie('wxuser', '', '.yihuyixi.com');
+        window.localStorage.setItem('autohotfix', true);
+        console.log('HotFix online issue.');
+      }
+    },
     activated() {
       this.$store.dispatch('reloadUserInfo');
     },

@@ -1,5 +1,5 @@
 <template>
-  <div class="channel">
+  <div class="channel" @touchstart="trackEvent">
     <div class="chanel-item" v-for="(item, index) in items" :key="index" :class="{'p50': cols===2, 'p100': cols===1}">
       <div @click.stop.prevent="goGoodDetail(item)" class="good-item">
         <div class="item-img">
@@ -18,7 +18,7 @@
 
 <script type="text/ecmascript-6">
   import Vue from 'vue';
-  import {reduceGoodsName} from '@/common/js/util';
+  import {reduceGoodsName, reportTrackEvent} from '@/common/js/util';
   import api from '@/api/api';
   export default {
     props: {
@@ -31,16 +31,37 @@
       cols: {
         type: Number,
         default: 3
+      },
+      module: {
+        type: String,
+        default: 'home'
+      },
+      section: {
+        type: String,
+        default: ''
       }
     },
     data() {
       return {
-        screenWidth: window.innerWidth
+        eventQueue: []
       };
+    },
+    deactivated() {
+      this.eventQueue = [];
     },
     methods: {
       selectGood(target) {
         this.$emit('select', target);
+      },
+      trackEvent() {
+        if (!this.section) {
+          return;
+        }
+        let found = this.eventQueue.find(item => item === this.section);
+        if (!found) {
+          this.eventQueue.push(this.section);
+          reportTrackEvent('pageview_' + this.module, {'section': this.section});
+        }
       },
       fillName(item) {
         let name = item.name || '';

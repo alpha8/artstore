@@ -118,10 +118,10 @@
         </div>
         <split v-show="good.relates && good.relates.length"></split>
         <modal-title title="相关商品" moreText="更多" catKey="" catName="" v-show="good.relates && good.relates.length"></modal-title>
-        <channel v-show="good.relates && good.relates.length" :items="good.relates || []" :cols="2"></channel>
+        <channel v-show="good.relates && good.relates.length" :items="good.relates || []" :cols="2" module="productdetail" section="relatedGoods"></channel>
         <split v-show="guessGoods.length"></split>
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
-        <channel :items="guessGoods" :cols="2"></channel>
+        <channel :items="guessGoods" :cols="2" module="productdetail" section="guessGoods"></channel>
         <split v-if="showFollow"></split>
         <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
