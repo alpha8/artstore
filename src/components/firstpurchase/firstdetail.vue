@@ -157,6 +157,7 @@
       this.good.videos = [];
       this.hide();
       this.processing = false;
+      this.lazyloaded = false;
     },
     updated() {
       if (this.good.content && !this.processing) {
@@ -615,6 +616,9 @@
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
           } else {
+            if (!picImgList.length) {
+              return;
+            }
             let pic = img.getAttribute('src');
             let width = img.getAttribute('width');
             let height = img.getAttribute('height');

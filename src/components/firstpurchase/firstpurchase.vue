@@ -1,6 +1,6 @@
 <template>
   <div class="main-wrapper">
-    <fixedheader title="首单2折区" right-icon="icon-more"></fixedheader>
+    <fixedheader title="首单3折区" right-icon="icon-more"></fixedheader>
     <div class="product-wrapper">
       <div class="productlist" ref="productWrapper">
         <mu-flexbox wrap="wrap" justify="space-around" :gutter="0">

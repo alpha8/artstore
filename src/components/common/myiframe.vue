@@ -1,6 +1,5 @@
 <template>
   <div class="iframe">
-    <!-- <iframe :src="getUrl" class="noframe" frameborder="0" id="myframe" scrolling="no"></iframe> -->
   </div>
 </template>
 
@@ -16,13 +15,13 @@
       };
     },
     created() {
-      let user = this.$store.getters.getUserInfo;
-      let hotfix = window.localStorage.getItem('autohotfix') || false;
-      if (!user.icon && hotfix) {
-        removeCookie('wxuser', '', '.yihuyixi.com');
-        window.localStorage.setItem('autohotfix', true);
-        console.log('HotFix online issue.');
-      }
+      // let user = this.$store.getters.getUserInfo;
+      // let hotfix = window.localStorage.getItem('autohotfix') || false;
+      // if (!user.icon && hotfix) {
+      //   removeCookie('wxuser', '', '.yihuyixi.com');
+      //   window.localStorage.setItem('autohotfix', true);
+      //   console.log('HotFix online issue.');
+      // }
     },
     activated() {
       this.$store.dispatch('reloadUserInfo');
@@ -44,36 +43,13 @@
           this.isAutoLogin = true;
           window.sessionStorage.setItem(AUTO_LOGIN, true);
           this.$store.dispatch('openToast', '正在登录中...');
+          let anon = this.$store.getters.getAnonymous;
           setTimeout(() => {
-            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}&uid=${anon}`;
           }, 50);
         }
       } else {
         window.sessionStorage.clear();
-      }
-    },
-    computed: {
-      getUrl() {
-        if (this.redirectUrl) {
-          return 'about:blank';
-        }
-        if (this.isAutoLogin) {
-          return 'about:blank';
-        }
-        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
-        let user = this.$store.getters.getUserInfo;
-        if (user.userId && ios) {
-          this.isAutoLogin = true;
-          window.sessionStorage.setItem(AUTO_LOGIN, true);
-          return 'about:blank';
-        }
-        let redirect = location.href;
-        // fixed wexin sharing url
-        if (redirect) {
-          redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
-        }
-        this.redirectUrl = redirect;
-        return `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
       }
     }
   };

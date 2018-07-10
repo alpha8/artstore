@@ -447,6 +447,9 @@
         });
       },
       bindPictureEvent() {
+        if (!this.previewImgList.length) {
+          return;
+        }
         if (this.lazyloaded) {
           let imgs = this.$refs.goodContent.getElementsByTagName('img');
           for (let j = 0; j < imgs.length; j++) {
@@ -705,6 +708,9 @@
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
           } else {
+            if (!picImgList.length) {
+              return;
+            }
             let pic = img.getAttribute('src');
             let width = img.getAttribute('width');
             let height = img.getAttribute('height');
@@ -866,6 +872,7 @@
         this.good.videoUrl = '';
         this.good.videos = [];
         this.processing = false;
+        this.lazyloaded = false;
         this.mutex = false;
         this.preOrderId = '';
         this.shareData = {};

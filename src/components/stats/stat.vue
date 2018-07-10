@@ -53,6 +53,11 @@
             <span class="nums">{{createtuan}}</span>
             <span class="label">开团人数</span>
           </li>
+          <li>
+            <span class="nums" v-if="stats.unlogin">{{stats.unlogin.unlogin || 0}}/{{stats.unlogin.all || 0}}</span>
+            <span class="nums" v-else>0</span>
+            <span class="label">拒授权次数</span>
+          </li>
         </ul>
         <split v-if="users.length"></split>
         <h1 class="title" v-if="users.length">访问详情</h1>

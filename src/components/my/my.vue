@@ -71,7 +71,7 @@
           </router-link>
           <router-link :to="item.link" class="item border-1px" v-for="(item, index) in others" :key="index">
             <i :class="item.icon"></i>
-            <span class="text" v-if="!item.callable" :class="{'strong': item.highlight}">{{item.text}}</span>
+            <span class="text" v-if="!item.callable">{{item.text}}<i class="dot" v-if="item.highlight"></i></span>
             <span class="text" v-else @click.stop.prevent="item.callable">{{item.text}}</span>
             <span class="more" v-show="!item.noPage"><i class="icon-keyboard_arrow_right"></i></span>
           </router-link>
@@ -106,7 +106,7 @@
           { amount: 0, text: '奖金余额', link: '/cashback' }
         ],
         others: [
-          { icon: 'icon-tuan', text: '我的拼团', link: '/mytuan' },
+          { icon: 'icon-tuan', text: '我的拼团', link: '/mytuan', highlight: true },
           { icon: 'icon-cutingprice', text: '我的砍价', link: '/myshare', highlight: true },
           { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
           { icon: 'icon-group_purchase', text: '我的团购', link: '/mygroupbuy' },
@@ -229,7 +229,8 @@
       },
       getLoginUrl() {
         let redirect = 'http://' + location.host + location.pathname + '#/my';
-        return `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+        let anon = this.$store.getters.getAnonymous;
+        return `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}&uid=${anon}`;
       }
     },
     components: {
@@ -475,9 +476,19 @@
           padding-right: 3px
           vertical-align: middle
         .text
+          position: relative
           vertical-align: middle
+          padding-right: 9px
           &.strong
             font-weight: 700
+          .dot
+            position: absolute
+            width: 6px
+            height: 6px
+            border-radius: 50%
+            background: #ff463c
+            right: 0
+            top: 1px
         .more
           float: right
           font-size: 18px

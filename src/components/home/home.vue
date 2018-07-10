@@ -57,7 +57,6 @@
       </div>
     </div>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
-    <frame></frame>
   </div>
 </template>
 
@@ -114,11 +113,12 @@
           url: '/search?parentCat=museum&key=老茶博物馆',
           icon: 'icon-museum big'
         }, {
-          name: '首单2折区',
+          name: '首单3折区',
           url: '/firstpurchase',
-          icon: 'icon-prefer big'
+          icon: 'icon-prefer big',
+          highlight: true
         }, {
-          name: '砍 价',
+          name: '砍价区',
           url: '/sharepay',
           icon: 'icon-cutingprice big'
         }, {
@@ -126,7 +126,7 @@
           url: '/tuan',
           icon: 'icon-tuan big'
         }, {
-          name: '3折秒杀',
+          name: '4折秒杀',
           url: '/seckill',
           icon: 'icon-miaosha big'
         // }, {
@@ -177,95 +177,19 @@
         this.$store.dispatch('setAnonymous');
         anon = this.$store.getters.getAnonymous;
       }
-      api.GetGoods({
-        artworkTypeName: 'tea',
-        categoryParentName: 'art',
-        currentPage: 1,
-        pageSize: 30,
-        commodityStatesId: 2,
-        scoreSort: true,
+      api.getHomeList({
         type: 'home',
         stat: 1,
         unlogin: anon
       }).then((response) => {
-        this.arts = response.artworks;
-      });
-
-      api.GetGoods({
-        artworkTypeName: 'tea',
-        categoryParentName: 'teaart',
-        currentPage: 1,
-        pageSize: 40,
-        commodityStatesId: 2,
-        price: '0-1000',
-        scoreSort: true
-      }).then((response) => {
-        this.teaPots = response.artworks;
-      });
-
-      api.GetGoods({
-        artworkTypeName: 'tea',
-        categoryParentName: 'teaart',
-        currentPage: 1,
-        pageSize: 20,
-        commodityStatesId: 2,
-        price: '1000-',
-        scoreSort: true
-      }).then((response) => {
-        this.dearTeapots = response.artworks;
-      });
-
-      api.GetGoods({
-        artworkTypeName: 'tea',
-        categoryParentName: 'welltea',
-        currentPage: 1,
-        pageSize: 24,
-        commodityStatesId: 2,
-        scoreSort: true
-      }).then((response) => {
-        this.goodTeas = response.artworks;
-      });
-
-      api.GetGoods({
-        artworkTypeName: 'tea',
-        categoryParentName: 'museum',
-        currentPage: 1,
-        pageSize: 20,
-        commodityStatesId: 2,
-        scoreSort: true
-      }).then((response) => {
-        this.oldTeas = response.artworks;
-      });
-
-      api.GetGoods({
-        artworkTypeName: 'tea',
-        categoryParentName: 'paint',
-        currentPage: 1,
-        pageSize: 24,
-        commodityStatesId: 2,
-        scoreSort: true
-      }).then((response) => {
-        this.paints = response.artworks;
-      });
-
-      api.GetGoods({
-        artworkTypeName: 'tea',
-        categoryParentName: 'graceful',
-        currentPage: 1,
-        pageSize: 16,
-        commodityStatesId: 2,
-        scoreSort: true
-      }).then((response) => {
-        this.ya = response.artworks;
-      });
-
-      api.getArticles({
-        currentPage: 1,
-        pageSize: 6,
-        type: 1,
-        status: 1
-      }).then(response => {
-        this.articles = response.articles;
+        this.arts = response.arts || [];
+        this.dearTeapots = response.dearTeapots || [];
+        this.teaPots = response.teaPots || [];
+        this.goodTeas = response.goodTeas || [];
+        this.ya = response.ya || [];
+        this.oldTeas = response.oldTeas || [];
+        this.articles = response.articles || [];
+        this.paints = response.paints || [];
       });
       // this.getWXFollow();
     },

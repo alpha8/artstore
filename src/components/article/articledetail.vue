@@ -67,6 +67,8 @@
     },
     deactivated() {
       this.hide();
+      this.processing = false;
+      this.lazyloaded = false;
     },
     updated() {
       if (!this.processing && this.article.content) {
@@ -128,6 +130,9 @@
         });
       },
       bindPictureEvent() {
+        if (!this.previewImgList.length) {
+          return;
+        }
         if (this.lazyloaded) {
           let imgs = this.$refs.articleContent.getElementsByTagName('img');
           for (let j = 0; j < imgs.length; j++) {

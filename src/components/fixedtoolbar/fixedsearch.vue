@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="ext-tools">
-        <span v-show="showLogin"><a href="/wxservice/baseInfo">登录</a></span>
+        <span v-show="showLogin"><a :href="getLoginUrl">登录</a></span>
         <span v-show="showDiscard" @click.stop.prevent="hideDialog"><span class="button" :class="{'active': !highlight}">取消</span></span>
         <span v-show="showSearchBtn"><span class="button" :class="{'active': !highlight}" @click.stop.prevent="search">搜索</span></span>
         <span v-show="hasLogin && !typing"><router-link to="/my" class="userIcon"><i class="icon-user2"></i></router-link></span>
@@ -23,6 +23,7 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import api from '@/api/api';
   export default {
     props: {
       showFixed: {
@@ -63,6 +64,10 @@
       },
       rollingSlogan() {
         return this.slogan;
+      },
+      getLoginUrl() {
+        let anon = this.$store.getters.getAnonymous;
+        return `${api.CONFIG.wxCtx}/baseInfo?uid=${anon}`;
       }
     },
     activated() {

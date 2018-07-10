@@ -131,7 +131,6 @@
       <fixedcart ref="shopcart" @add="addToCart" :good="good" @share="wxshare"></fixedcart>
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
-    <frame></frame>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <share ref="weixinShare"></share>
   </div>
@@ -169,6 +168,7 @@
       this.good.videos = [];
       this.hide();
       this.processing = false;
+      this.lazyloaded = false;
     },
     watch: {
       $route (to, from) {
@@ -176,6 +176,7 @@
           if (to.params.id !== from.params.id) {
             this.good.videoUrl = '';
             this.good.videos = [];
+            this.lazyloaded = false;
             this.fetchData();
           }
           let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
@@ -332,6 +333,9 @@
         });
       },
       bindPictureEvent() {
+        if (!this.previewImgList.length) {
+          return;
+        }
         if (this.lazyloaded) {
           let imgs = this.$refs.goodContent.getElementsByTagName('img');
           for (let j = 0; j < imgs.length; j++) {
@@ -663,6 +667,9 @@
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
           } else {
+            if (!picImgList.length) {
+              return;
+            }
             let pic = img.getAttribute('src');
             let width = img.getAttribute('width');
             let height = img.getAttribute('height');
