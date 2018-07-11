@@ -567,7 +567,7 @@
         }
         let vm = this;
         let shareData = {
-          title: `[一虎一席][首单2折.${this.firstpay.buttomFee}元] ` + reduceGoodsName(this.firstpay.name),
+          title: `[一虎一席][首单3折.${this.firstpay.buttomFee}元] ` + reduceGoodsName(this.firstpay.name),
           desc: `首单价：¥${this.firstpay.buttomFee}, 市场价：¥${this.firstpay.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
