@@ -21,6 +21,7 @@
       </div>
     </div>
     <minicart ref="shopcart" :selectGoods="selectGoods" :max-items="3" @fireEmpty="doClear" @fireReload="doRefresh" :isAvailable="userProfile.hasFirst"></minicart>
+    <frame></frame>
   </div>
 </template>
 
@@ -30,6 +31,7 @@
   import gotop from '@/components/fixedtoolbar/gotop';
   import {reduceGoodsName} from '@/common/js/util';
   import minicart from '@/components/cart/minicart';
+  import frame from '@/components/common/myiframe';
   import api from '@/api/api';
 
   export default {
@@ -171,7 +173,7 @@
       }
     },
     components: {
-      gotop, fixedheader, minicart
+      gotop, fixedheader, minicart, frame
     }
   };
 </script>

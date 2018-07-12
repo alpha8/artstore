@@ -57,6 +57,7 @@
       </div>
     </div>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
+    <quietlogin></quietlogin>
   </div>
 </template>
 
@@ -72,7 +73,7 @@
   import gotop from '@/components/fixedtoolbar/gotop';
   import search from '@/components/fixedtoolbar/search';
   import articlelist from '@/components/article/articlelist';
-  import frame from '@/components/common/myiframe';
+  import quietlogin from '@/components/common/quietlogin';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
 
@@ -262,7 +263,7 @@
         let redirect = 'http://' + location.host + location.pathname;
         let uid = this.$store.getters.getUserInfo.userId;
         if (uid) {
-          redirect += '?userId=' + uid;
+          redirect += '?userId=' + (uid || 0);
         }
         let shareData = {
           title: '[一虎一席茶席艺术商城] 一站式优品商城，品味脱凡',
@@ -307,7 +308,7 @@
       search,
       articlelist,
       sectionTitle,
-      frame
+      quietlogin
     }
   };
 </script>

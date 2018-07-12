@@ -133,6 +133,7 @@
     </div>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <share ref="weixinShare"></share>
+    <quietlogin></quietlogin>
   </div>
 </template>
 
@@ -147,7 +148,7 @@
   import ratingselect from '@/components/ratingselect/ratingselect';
   import fixedcart from '@/components/fixedtoolbar/fixedcart';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
-  import frame from '@/components/common/myiframe';
+  import quietlogin from '@/components/common/quietlogin';
   import gotop from '@/components/fixedtoolbar/gotop';
   import swipe from '@/components/swipe/quietswipe';
   import star from '@/components/star/star';
@@ -718,7 +719,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, quietlogin, gotop, layer, share
     }
   };
 </script>

@@ -10,9 +10,19 @@
     <div class="cashback" ref="cashback">
       <div class="cashback-wrapper">
         <div class="cashback-heading">
-          <p class="balance-name">奖金余额（元）</p>
+          <p class="balance-name">累计奖金(元)</p>
           <p class="balance-num">{{balance | currency}}</p>
         </div>
+        <ul class="itemList">
+          <li class="item border-1px">
+            <div class="text">已到账(元)</div>
+            <div class="amount">{{PaidIn | currency}}</div>
+          </li>
+          <li class="item border-1px">
+            <div class="text">待返现(元)</div>
+            <div class="amount">{{UnPaid | currency}}</div>
+          </li>
+        </ul>
         <div class="cashback-content">
           <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">奖金明细</span></div>
           <p class="content-title">奖金余额是什么？</p>
@@ -43,6 +53,14 @@
       balance() {
         let profile = this.$store.getters.getUserProfile;
         return profile && profile.wallet && profile.wallet.rewardValue || 0;
+      },
+      PaidIn() {
+        let profile = this.$store.getters.getUserProfile;
+        return profile && profile.wallet && profile.wallet.alreadyReward || 0;
+      },
+      UnPaid() {
+        let profile = this.$store.getters.getUserProfile;
+        return profile && profile.wallet && profile.wallet.notReward || 0;
       }
     },
     methods: {
@@ -136,6 +154,26 @@
           line-height:1
           font-weight: lighter
           margin-top: 5px
+      .itemList
+        display: flex
+        width: 100%
+        padding: 10px 0 0
+        .item
+          flex: 1
+          text-align: center
+          border-right: 1px solid rgba(7, 17, 27, 0.1)
+          &:last-child
+            border-right: none
+          .amount
+            font-size: 18px
+            color: rgb(255, 95, 62)
+            line-height: 1 
+            margin-bottom: 2px
+          .text
+            padding-bottom: 5px
+            line-height: 1
+            font-size: 14px
+            color: #666
       .cashback-content
         padding: 0 10px 13px
         color: #666

@@ -5,13 +5,20 @@
       <div class="cashback-wrap">
         <div class="cashback-container" ref="cashbackRef" v-show="cashbacks.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="cashback-list">
-            <mu-flexbox-item basis="100%" class="cashback-item border-1px" v-for="(item, index) in cashbacks" :key="index">
-              <div class="content">
-                <p class="line text">推荐{{item.userName}}成功下单，您获得了{{item.value}}元奖金</p>
-                <p class="time">{{item. createAt | formatDate}}</p>
-              </div>
-              <div class="amount">{{statusDesc(item.status)}}</div>
-            </mu-flexbox-item>
+            <table>
+              <tr>
+                <th class="col-1">创建时间</th>
+                <th class="col-3">奖金</th>
+                <th class="col-3">状态</th>
+                <th class="col-4">备注</th>
+              </tr>
+              <tr v-for="(item, index) in cashbacks" :key="index">
+                <td class="col-1">{{item. createAt | formatDate}}</td>
+                <td class="col-3 highlight">{{item.value | currency}}</td>
+                <td class="col-3">{{statusDesc(item.status)}}</td>
+                <td class="col-4" @click.stop.prevent="goOrderDetail(item)"><span v-if="item.orderNo">订单号：{{item.orderNo}}</span></td>
+              </tr>
+            </table>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
@@ -107,8 +114,11 @@
         if (status === 1) {
           return '已到账';
         } else {
-          return '即将发放';
+          return '待返现';
         }
+      },
+      goOrderDetail(order) {
+        this.$router.push({name: 'orderdetail', params: {id: order.orderNo}});
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -133,7 +143,7 @@
     filters: {
       formatDate(time) {
         let date = new Date(time);
-        return formatDate(date, 'yyyy-MM-dd hh:mm');
+        return formatDate(date, 'yyyy-MM-dd hh:mm:ss');
       }
     }
   };
@@ -195,6 +205,7 @@
       .cashback-container
         position: relative
         width: 100%
+        padding-right: 5px
         display: flex
         flex-wrap: wrap
         overflow: auto
@@ -203,45 +214,54 @@
         .cashback-list
           position: relative
           width: 100%
-          padding: 10px
-          box-sizing: border-box
-          .cashback-item
-            position: relative
+        table
+          position: relative
+          width: 100%
+          font-size: 12px
+          background-color: #fff
+          color: #666
+          text-align: left
+          tr
             display: flex
-            margin-bottom: 15px
-            border-1px(rgba(7, 17, 27, 0.1))
-            .content
-              flex: 1
-              background: #fff
-              height: 60px
-              box-sizing: border-box
-              overflow: hidden
-              .line
-                position: relative
-                font-size: 14px
-                line-height: 1.8
-                text-overflow: ellipsis
-                white-space: nowrap
-                overflow: hidden
-                strong
-                  font-weight: 700
-                &.text
-                  padding-bottom: 10px
-                  -webkit-box-orient: vertical
-                  -webkit-line-clamp: 1
-                  font-weight: 400
-                  font-size: 14px
-                  line-height: 1.0625rem
-              .time
-                color: #666
-                font-size: 12px
-            .amount
-              width: 80px
-              height: 60px
-              color: #44b549
-              font-size: 14px
-              font-weight: 700
-              text-align: right
+            height: 40px
+            line-height: 40px
+          th
+            background-color: #fafafa
+            font-size: 13px
+          .col-1, .col-4
+            flex: 1
+            padding-left: 10px
+            overflow: hidden
+            text-overflow: ellipsis
+            display: -webkit-box
+            -webkit-line-clamp: 1
+            -webkit-box-orient: vertical
+            word-wrap: break-word
+            word-break: break-all
+            box-sizing: border-box
+          .col-2
+            flex: 1
+            width: 135px
+            padding-left: 8px
+            overflow: hidden
+            text-overflow: ellipsis
+            display: -webkit-box
+            -webkit-line-clamp: 1
+            -webkit-box-orient: vertical
+            word-wrap: break-word
+            word-break: break-all
+            box-sizing: border-box
+          .col-3
+            width: 15%
+            padding-left: 8px
+            word-break: break-all
+            overflow: hidden
+            box-sizing: border-box
+          .col-4
+            padding-left: 8px
+          .highlight
+            font-weight: 700
+            color: #ff463c
       .no-cashback
         width: 100%
         padding: 40px 0
