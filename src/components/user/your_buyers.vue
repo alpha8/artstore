@@ -1,30 +1,32 @@
 <template>
   <div>
-    <fixedheader title="出价列表"></fixedheader>
-    <div class="bid">
-      <div class="bid-wrap">
-        <div class="bid-container" ref="bidlist" v-show="bids.length">
-          <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="bid-list">
-            <table class="auction-pricelist">
-              <tr class="head">
-                <td class="col-2" nowrap>出价用户</td>
-                <td class="col-3">金额</td>
-                <td class="col-1">状态</td>
-                <td class="col-4">出价时间</td>
+    <fixedheader title="购买过的买家"></fixedheader>
+    <div class="buyers">
+      <div class="buyers-wrap">
+        <div class="buyers-container" ref="buyersRef" v-show="buyers.length">
+          <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="buyers-list">
+            <table>
+              <tr>
+                <th class="col-1">朋友</th>
+                <th class="col-3">订单总额</th>
+                <th class="col-5">订单数</th>
+                <th class="col-5">最近购买</th>
+                <th class="col-5">首次购买</th>
               </tr>
-              <tr v-for="(bid, index) in bids" :key="index">
-                <td class="col-2" nowrap><img :src="getUserIcon(bid.icon)" class="thumbnail" />{{bid.userName || bid.userNameId}}</td>
-                <td class="col-3">{{bid.price | currency}}</td>
-                <td class="col-1"><span :class="{'highlight': bid.state !== '淘汰'}">{{bid.state}}</span></td>
-                <td class="col-4">{{bid.time | formatDate}}</td>
+              <tr v-for="(item, index) in buyers" :key="index">
+                <td class="col-1"><img :src="getUserIcon(item.icon)" class="thumbnail" />{{item.nickName}}</td>
+                <td class="col-3">{{item.totalFee | currency}}</td>
+                <td class="col-5">{{item.count}}</td>
+                <td class="col-5"><span v-if="item.latestTime">{{item.latestTime | formatDate}}</span></td>
+                <td class="col-5"><span v-if="item.firstTime">{{item.firstTime | formatDate}}</span></td>
               </tr>
             </table>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
-        <div class="no-bid" v-show="bids.length === 0">啊哦，还没有相关记录哦</div>
-        <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
+        <div class="no-buyers" v-show="buyers.length === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有记录哦&nbsp;&nbsp;———</div>
+        <gotop ref="top" @top="goTop" v-show="scrollY > winHeight"></gotop>
       </div>
     </div>
   </div>
@@ -40,15 +42,16 @@
   export default {
     data() {
       return {
-        bids: [],
+        buyers: [],
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         totalPages: 0,
         loadEnd: false,
         scroller: null,
         loading: false,
         lastExec: +new Date(),
-        scrollY: 0
+        scrollY: 0,
+        winHeight: document.documentElement.clientHeight
       };
     },
     activated() {
@@ -60,7 +63,7 @@
       this.hide();
     },
     mounted() {
-      this.scroller = this.$refs.bidlist;
+      this.scroller = this.$refs.buyersRef;
       window.onscroll = () => {
         this.scrollY = window.pageYOffset;
       };
@@ -75,20 +78,24 @@
           return;
         }
         this.loading = true;
-        let aid = this.$route.params.id;
-        api.getBidPrices({
-          paging: this.pageNumber,
+        let user = this.$store.getters.getUserInfo;
+        api.getYourBuyers({
+          currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          auctionProductId: aid
+          rid: user.userId || 0
         }).then(response => {
-          if (response.result === 0) {
-            if (response.info.apprList && response.info.apprList.length) {
-              response.info.apprList.forEach(item => {
-                item.userName = Base64.decode(item.userName);
-                this.bids.push(item);
+          if (response.code === 0) {
+            if (response.data && response.data.length) {
+              response.data.forEach(item => {
+                if (item.nickName) {
+                  item.nickName = Base64.decode(item.nickName);
+                } else {
+                  item.nickName = '匿名';
+                }
+                this.buyers.push(item);
               });
-              this.totalPages = response.info.total <= this.pageSize ? 1 : Math.ceil(response.info.total / this.pageSize);
             }
+            this.totalPages = response.totalPages || 1;
             this.pageNumber++;
             this.lastExec = +new Date();
             this.loading = false;
@@ -101,18 +108,10 @@
         });
       },
       _reset() {
-        this.bids = [];
+        this.buyers = [];
         this.pageNumber = 1;
         this.totalPages = 0;
         this.loadEnd = false;
-      },
-      getThumbnail(item) {
-        let icons = item.icons;
-        if (icons && icons.length) {
-          return api.CONFIG.psCtx + icons[0].id + '?w=228&h=228';
-        } else {
-          return api.CONFIG.defaultImg;
-        }
       },
       getUserIcon(icon) {
         if (!icon) {
@@ -120,33 +119,14 @@
         }
         return icon;
       },
-      showProductDetail(product) {
-        this.$router.push({name: 'good', params: {id: product.artworkId}});
-      },
-      removeItem(product) {
-        let user = this.$store.getters.getUserInfo;
-        api.removeCollect({
-          userId: user.userId || 0,
-          type: 1,
-          artworkId: product.artworkId
-        }).then(response => {
-          if (response.result === 0) {
-            this.$store.dispatch('openToast', '已取消收藏！');
-            let items = this.bids;
-            for (let i = 0; i < items.length; i++) {
-              if (items[i].id === product.id) {
-                items.splice(i, 1);
-              }
-            }
-            this.bids = items;
-          }
-        });
-      },
       show() {
         this.$store.commit('HIDE_FOOTER');
       },
       hide() {
         this.$store.commit('SHOW_FOOTER');
+      },
+      back() {
+        this.$router.back();
       },
       loadMore() {
         this.fetchData();
@@ -162,7 +142,7 @@
     filters: {
       formatDate(time) {
         let date = new Date(time);
-        return formatDate(date, 'yyyy-MM-dd hh:mm:ss');
+        return formatDate(date, 'yyyy-MM-dd');
       }
     }
   };
@@ -177,12 +157,12 @@
     height: 44px
     overflow: hidden
     z-index: 2
-  .bid
+  .buyers
     position: absolute
     top: 44px
     bottom: 0
     width: 100%
-    .bid-wrap
+    .buyers-wrap
       position: relative
       width: 100%
       .btn-red
@@ -221,15 +201,19 @@
         text-align: center
         font-size: 12px
         margin-bottom: 10px
-      .bid-container
+      .buyers-container
         position: relative
         width: 100%
+        padding-right: 5px
         display: flex
         flex-wrap: wrap
         overflow: auto
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
-        .auction-pricelist
+        .buyers-list
+          position: relative
+          width: 100%
+        table
           position: relative
           width: 100%
           font-size: 12px
@@ -237,45 +221,46 @@
           color: #666
           text-align: left
           tr
+            display: flex
             height: 40px
             line-height: 40px
-          >.head
+          th
             background-color: #fafafa
             font-size: 13px
-          .col-1
-            width: 15%
-            padding-left: 10px
-            box-sizing: border-box
-            span
-              display: inline-block
-              height: 15px
-              width: 30px
-              line-height: 15px
-              vertical-align: middle
-              text-align: center
-              color: #f1f1f1
-              background-color: #747474
-              border-radius: 1px
-              &.highlight
-                background-color: #00a0dc
-          .col-2
+          .col-1, .col-4
             flex: 1
             padding-left: 10px
             overflow: hidden
+            text-overflow: ellipsis
+            display: -webkit-box
+            -webkit-line-clamp: 1
+            -webkit-box-orient: vertical
+            word-wrap: break-word
+            word-break: break-all
             box-sizing: border-box
-          .col-3
-            width: 15%
-            padding-left: 10px
+          .col-2
+            flex: 1
+            width: 135px
+            padding-left: 8px
+            overflow: hidden
+            text-overflow: ellipsis
+            display: -webkit-box
+            -webkit-line-clamp: 1
+            -webkit-box-orient: vertical
+            word-wrap: break-word
+            word-break: break-all
+            box-sizing: border-box
+          .col-3, .col-4, .col-5
+            width: 18%
+            padding-left: 8px
             word-break: break-all
             overflow: hidden
             box-sizing: border-box
-          .col-4
-            flex: 1
-            padding-left: 10px
-            text-overflow: ellipsis
-            white-space: nowrap
-            overflow: hidden
-            box-sizing: border-box
+          .col-5
+            width: 19%
+          .highlight
+            font-weight: 700
+            color: #ff463c
           .thumbnail
             width: 32px
             height: 32px
@@ -284,12 +269,13 @@
             vertical-align: middle
             overflow: hidden
             box-sizing: border-box
-        .bid-list
-          position: relative
-          width: 100%
-      .no-bid
+      .no-buyers
         width: 100%
         padding: 40px 0
         text-align: center
         font-size: 14px
+        color: #ccc
+        img
+          width: 110px
+          height: 110px
 </style>

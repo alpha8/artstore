@@ -10,8 +10,8 @@
             </div>
             <div class="line">
               <div class="userName" v-show="!hasLogin()"><a :href="getLoginUrl()">点击登录</a></div>
-              <div class="userName" v-show="hasLogin()"><span class="svip" :class="getSVipIcon" v-if="userExt.spreadLevel"></span>{{user().nickName}}<span class="supplier" v-if="userExt.model === 2">(代理商)</span><span class="supplier" v-else-if="userExt.model === 0">(系统用户)</span></div>
-              <div class="info" v-show="hasLogin()"><span class="vip" :class="getVipIcon">{{getVipTitle}}</span></div>
+              <div class="userName" v-show="hasLogin()"><span class="svip" :class="getVipIcon"></span>{{user().nickName}}<span class="supplier" v-if="userExt.model === 2">(代理商)</span><span class="supplier" v-else-if="userExt.model === 0">(系统用户)</span></div>
+              <div class="info" v-show="hasLogin()" v-if="userExt.spreadLevel"><span class="vip" :class="getSVipIcon">{{getSVipTitle}}</span><span class="userflag" @click.stop.prevent="goYourFriends">[朋友:{{userExt.friendCount}}]</span><span class="userflag" @click.stop.prevent="goYourBuyers">[买家:{{userExt.friendOrderCount}}]</span></div>
             </div>
             <span class="setting" v-show="hasLogin()"><router-link to="/personInfo"><img src="../../common/images/settings.png"/><span>账号管理</span></router-link></span>
           </div>
@@ -153,13 +153,13 @@
     computed: {
       getVipTitle() {
         // let userLevel = {'lv0': '初级用户', 'lv1': 'VIP一钻', 'lv2': 'VIP二钻', 'lv3': 'VIP三钻', 'lv4': 'VIP四钻', 'lv5': 'VIP五钻'};
-        let agentLevel = {'lv0': '普通用户', 'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
+        let agentLevel = {'lv0': '初级', 'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
         let level = this.userExt.level || 'lv0';
         if (this.userExt.model === 1) {
-          // 普通用户
+          // 初级用户
           return agentLevel[level];
         } else if (this.userExt.model === 2) {
-          // 供应商
+          // 代理商
           return agentLevel[level];
         } else {
           return agentLevel[level];
@@ -170,6 +170,19 @@
       },
       getSVipIcon() {
         return this.userExt.spreadLevel || 'lv1';
+      },
+      getSVipTitle() {
+        let agentLevel = {'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
+        let level = this.userExt.spreadLevel || 'lv1';
+        if (this.userExt.model === 1) {
+          // 初级用户
+          return agentLevel[level];
+        } else if (this.userExt.model === 2) {
+          // 代理商
+          return agentLevel[level];
+        } else {
+          return agentLevel[level];
+        }
       },
       getUserIcon() {
         let user = this.$store.getters.getUserInfo;
@@ -231,6 +244,12 @@
         let redirect = 'http://' + location.host + location.pathname + '#/my';
         let anon = this.$store.getters.getAnonymous;
         return `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}&uid=${anon}`;
+      },
+      goYourFriends() {
+        this.$router.push({name: 'yourfriends'});
+      },
+      goYourBuyers() {
+        this.$router.push({name: 'yourbuyers'});
       }
     },
     components: {
@@ -388,6 +407,12 @@
                 background-position: 0 -125px
               &.lv7:before
                 background-position: 0 -150px
+            .userflag
+              padding: 2px 0 2px 5px
+              height: 16px
+              line-height: 16px
+              font-size: 10px
+              color: #e1e1e1
         .setting
           margin-left: 10px
           color: rgba(76,0,0,.7)

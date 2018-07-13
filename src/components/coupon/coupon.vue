@@ -183,10 +183,13 @@
           color: #333
           text-align: center
         .content-text
-          font-size: 12px
+          font-size: 13px
           line-height: 1.83em
           strong
+            margin-bottom: 7px
             font-weight: 700
+            font-size: 15px
+            color: #333
         .form-control
           display: flex
           position: relative

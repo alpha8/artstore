@@ -15,10 +15,6 @@
     activated() {
       this.$store.dispatch('reloadUserInfo');
     },
-    deactivated() {
-      this.isAutoLogin = false;
-      window.sessionStorage.removeItem(AUTO_LOGIN);
-    },
     mounted() {
       let user = this.$store.getters.getUserInfo;
       if (!user.userId) {

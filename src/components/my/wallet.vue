@@ -18,7 +18,7 @@
         <div class="wallet-content">
           <p class="content-title">账户余额是什么？</p>
           <p class="content-text">
-            当您出现退款失败等情况时会有账户余额，您可前往「个人中心 — 账户余额」中查看账户余额交易明细，账户余额可在 「实物商品」下单结算时最大化使用。
+            当您充值预存资金或购物出现退款失败等情况时会有账户余额，您可前往「个人中心 — 账户余额」中查看账户余额交易明细。购买商城商品时，账户余额自动被系统最大化使用。
           </p>
         </div>
       </div>
@@ -158,7 +158,7 @@
           font-size: 15px
           color: #333
         .content-text
-          font-size: 12px
+          font-size: 13px
           line-height: 1.83em
     .btns
       padding: 0 10px

@@ -13,7 +13,7 @@
                 <th class="col-4">备注</th>
               </tr>
               <tr v-for="(item, index) in cashbacks" :key="index">
-                <td class="col-1">{{item. createAt | formatDate}}</td>
+                <td class="col-1">{{item.createAt | formatDate}}</td>
                 <td class="col-3 highlight">{{item.value | currency}}</td>
                 <td class="col-3">{{statusDesc(item.status)}}</td>
                 <td class="col-4" @click.stop.prevent="goOrderDetail(item)"><span v-if="item.orderNo">订单号：{{item.orderNo}}</span></td>
@@ -75,6 +75,7 @@
         if (!force && now - this.lastExec <= 50) {
           return;
         }
+        this.loading = true;
         let user = this.$store.getters.getUserInfo;
         api.getRewards({
           currentPage: this.pageNumber,
@@ -112,9 +113,9 @@
       },
       statusDesc(status) {
         if (status === 1) {
-          return '已到账';
+          return '可提现';
         } else {
-          return '待返现';
+          return '待解冻';
         }
       },
       goOrderDetail(order) {

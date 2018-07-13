@@ -63,6 +63,8 @@ import signature from '@/components/common/signature';
 import notfound from '@/components/common/404';
 import info from '@/components/common/info';
 import visitlist from '@/components/sharepay/visitlist';
+import yourfriends from '@/components/user/your_friends';
+import yourbuyers from '@/components/user/your_buyers';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -134,6 +136,8 @@ export default new Router({
     {path: '/signature', component: signature, name: 'signature'},
     {path: '/404', component: notfound, name: 'notfound'},
     {path: '/info', component: info, name: 'info'},
+    {path: '/friends', component: yourfriends, name: 'yourfriends'},
+    {path: '/buyers', component: yourbuyers, name: 'yourbuyers'},
     {path: '/my', component: my}
   ]
   // ,scrollBehavior (to, from, savedPosition) {

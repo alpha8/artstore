@@ -92,6 +92,7 @@
         if (!force && now - this.lastExec <= 50) {
           return;
         }
+        this.loading = true;
         let user = this.$store.getters.getUserInfo;
         api.getCoupons({
           userId: user.userId || -1

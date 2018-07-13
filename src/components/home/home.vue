@@ -125,7 +125,8 @@
         }, {
           name: '3折拼团',
           url: '/tuan',
-          icon: 'icon-tuan big'
+          icon: 'icon-tuan big',
+          highlight: true
         }, {
           name: '4折秒杀',
           url: '/seckill',

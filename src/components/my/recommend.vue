@@ -148,6 +148,7 @@
         if (this.totalPages && this.pageNumber > this.totalPages) {
           return;
         }
+        this.loading = true;
         let user = this.$store.getters.getUserInfo;
         api.getCoupons({
           agentId: user.userId || -1,
@@ -211,7 +212,7 @@
     filters: {
       formatDate(time) {
         let date = new Date(time);
-        return formatDate(date, 'yyyy-MM-dd hh:mm');
+        return formatDate(date, 'yyyy-MM-dd hh:mm:ss');
       }
     }
   };

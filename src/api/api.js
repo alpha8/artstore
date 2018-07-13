@@ -645,5 +645,19 @@ export default {
    */
   getHomeList(params) {
     return doGet(this.CONFIG.cmsCtx + '/artwork/home', params);
+  },
+
+  /**
+   * 查询推荐的朋友
+   */
+  getYourFriends(params) {
+    return doGet(this.CONFIG.cmsCtx + '/user/friend/visit', params);
+  },
+
+  /**
+   * 查询推荐的朋友中，购买过的买家
+   */
+  getYourBuyers(params) {
+    return doGet(this.CONFIG.cmsCtx + '/user/friend/order', params);
   }
 };
