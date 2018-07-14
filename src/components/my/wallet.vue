@@ -149,11 +149,11 @@
           font-weight: lighter
           margin-top: 5px
       .wallet-content
-        padding: 13px 10px
+        padding: 0 10px 13px
         color: #666
         background: #fff
+        line-height: 1.83em
         .content-title
-          margin-bottom: 7px
           font-weight: 700
           font-size: 15px
           color: #333

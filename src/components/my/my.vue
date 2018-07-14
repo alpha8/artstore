@@ -10,7 +10,7 @@
             </div>
             <div class="line">
               <div class="userName" v-show="!hasLogin()"><a :href="getLoginUrl()">点击登录</a></div>
-              <div class="userName" v-show="hasLogin()"><span class="svip" :class="getVipIcon"></span>{{user().nickName}}<span class="supplier" v-if="userExt.model === 2">(代理商)</span><span class="supplier" v-else-if="userExt.model === 0">(系统用户)</span></div>
+              <div class="userName" v-show="hasLogin()"><span class="svip" :class="getVipIcon"></span>{{user().nickName}}<!-- <span class="supplier" v-if="userExt.model === 2">(代理商)</span><span class="supplier" v-else-if="userExt.model === 0">(系统用户)</span> --></div>
               <div class="info" v-show="hasLogin()" v-if="userExt.spreadLevel"><span class="vip" :class="getSVipIcon">{{getSVipTitle}}</span><span class="userflag" @click.stop.prevent="goYourFriends">[朋友:{{userExt.friendCount}}]</span><span class="userflag" @click.stop.prevent="goYourBuyers">[买家:{{userExt.friendOrderCount}}]</span></div>
             </div>
             <span class="setting" v-show="hasLogin()"><router-link to="/personInfo"><img src="../../common/images/settings.png"/><span>账号管理</span></router-link></span>
@@ -290,7 +290,7 @@
         padding: 0 15px
         .avatar
           position: relative
-          margin-right: 10px
+          margin-right: 7px
           width: 60px
           height: 60px
           border: 1px solid hsla(0,0%,100%,.4)
@@ -332,7 +332,9 @@
               font-size: 12px
               box-sizing: border-box
             .supplier
+              display: inline-block
               font-size: 10px
+              vertical-align: middle
             .svip
               position: relative
               display: block
@@ -408,12 +410,13 @@
               &.lv7:before
                 background-position: 0 -150px
             .userflag
-              padding: 2px 0 2px 5px
+              padding: 2px 0 2px 3px
               height: 16px
               line-height: 16px
               font-size: 10px
               color: #e1e1e1
         .setting
+          margin-top: -1px
           margin-left: 10px
           color: rgba(76,0,0,.7)
           a

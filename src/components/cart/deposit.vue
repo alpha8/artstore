@@ -212,7 +212,7 @@
       .btn-list
         position: relative
         display: flex
-        margin-top: 5px
+        margin-top: 10px
         padding-left: 4px
         padding-right: 3px
         box-sizing: border-box
@@ -222,7 +222,7 @@
           line-height: 26px
           margin-right: 10px
           text-align: center
-          font-size: 12px
+          font-size: 13px
           color: #fff
           border-radius: 2px
           &:last-child
@@ -264,7 +264,7 @@
             transform: translate(0, -50%)
             color: #828282
           .input-amount
-            padding: 4px 0 0
+            padding: 2px 0 0
             border: 0 none
             font-size: 14px
             width: 100%

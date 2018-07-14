@@ -8,12 +8,12 @@
           <p class="balance-num">
             <img v-show="icon" :src="getQrcodeSrc" width="260" height="260" border="0" class="qrcodeIcon" @click.stop.prevent="previewQrcode" />
           </p>
-          <div class="tips" v-if="qrcode.provideTotal - qrcode.receiveTotal <= 10">优惠券可领张数不足，仅有{{qrcode.provideTotal - qrcode.receiveTotal}}张，请联系管理员充值</div>
+          <div class="tips" v-if="qrcode.provideTotal - qrcode.receiveTotal <= 10">优惠券仅剩{{qrcode.provideTotal - qrcode.receiveTotal}}张，请联系管理员充值</div>
         </div>
         <div class="invitation-content">
           <div class="table-responsive">
             <table class="table">
-              <caption>---已邀请用户列表<span v-if="coupons.length">({{coupons.length}}人)</span>---</caption>
+              <caption>--- 已邀请用户列表<span v-if="coupons.length">({{coupons.length}}人)</span> ---</caption>
               <tr>
                 <th>用户</th>
                 <th>领取金额</th>

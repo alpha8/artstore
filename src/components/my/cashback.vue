@@ -25,12 +25,12 @@
         </ul>
         <div class="cashback-content">
           <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">奖金明细</span></div>
-          <p class="content-title">奖金余额是什么？</p>
-          <p class="content-text">
+          <div class="content-title">奖金余额是什么？</div>
+          <div class="content-text">
             <p>朋友通过您分享的商品链接，在商城上完成订单交易，系统将按照一定的额度赠送您奖金；</p>
             <p>您可前往「个人中心 — 奖金余额」中查看奖金信息及奖金对应的来源交易明细。</p>
             <p>奖金余额可提取现金，亦可在您购买商城商品时，自动被最大化使用。</p>
-          </p>
+          </div>
         </div>
       </div>
     </div>
@@ -158,7 +158,7 @@
       .itemList
         display: flex
         width: 100%
-        padding: 15px 0 3px
+        padding: 15px 0 0
         .item
           flex: 1
           text-align: center
@@ -179,18 +179,16 @@
         padding: 0 10px 13px
         color: #666
         background: #fff
+        line-height: 1.83em
         .content-title
-          margin-bottom: 7px
           font-weight: 700
           font-size: 15px
           color: #333
         .content-text
           font-size: 13px
           line-height: 1.83em
-        p
-          font-size: 13px
-          line-height: 1.4
-          margin-bottom: 3px
+          p
+            font-size: 13px
         .btn-green
           letter-spacing: 3px
 </style>
