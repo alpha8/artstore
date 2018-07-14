@@ -244,7 +244,7 @@
       getLoginUrl() {
         let redirect = 'http://' + location.host + location.pathname + '#/my';
         let anon = this.$store.getters.getAnonymous;
-        return `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}`;
+        return `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}&uid=${anon}`;
       },
       goYourFriends() {
         this.$router.push({name: 'yourfriends'});
