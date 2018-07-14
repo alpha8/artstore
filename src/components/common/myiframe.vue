@@ -46,7 +46,8 @@
           let anon = this.$store.getters.getAnonymous;
           let referee = this.$route.query.userId || 0;
           setTimeout(() => {
-            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}&uid=${anon}&userId=${referee}`;
+            // window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}&uid=${anon}&userId=${referee}`;
+            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}&userId=${referee}`;
           }, 50);
         }
       } else {

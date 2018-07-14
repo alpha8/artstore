@@ -7,6 +7,7 @@
             <div class="avatar">
               <a v-show="!hasLogin()" :href="getLoginUrl()"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
               <img :src="getUserIcon" alt="" class="pic" v-show="hasLogin()">
+              <span class="vipflag" v-if="userExt.model === 2">代理商</span>
             </div>
             <div class="line">
               <div class="userName" v-show="!hasLogin()"><a :href="getLoginUrl()">点击登录</a></div>
@@ -243,7 +244,7 @@
       getLoginUrl() {
         let redirect = 'http://' + location.host + location.pathname + '#/my';
         let anon = this.$store.getters.getAnonymous;
-        return `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}&uid=${anon}`;
+        return `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}`;
       },
       goYourFriends() {
         this.$router.push({name: 'yourfriends'});
@@ -296,13 +297,26 @@
           border: 1px solid hsla(0,0%,100%,.4)
           border-radius: 60px
           box-shadow: 0 2px 10px rgba(0,0,0,.15)
-          overflow: hidden
           img
             position: absolute
             top: 0
             left: 0
             width: 100%
             border-radius: 60px
+          .vipflag
+            position: absolute
+            top: -8px
+            left: 50%
+            transform: translate(-50%, 0)
+            display: block
+            width: 40px
+            text-align: center
+            font-size: 10px
+            color: #e1e1e1
+            border-radius: 10px
+            height: 16px
+            line-height: 16px
+            background: #9f3838
         .line
           position: relative
           flex: 1

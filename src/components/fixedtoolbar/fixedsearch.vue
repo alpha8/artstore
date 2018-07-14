@@ -67,7 +67,7 @@
       },
       getLoginUrl() {
         let anon = this.$store.getters.getAnonymous;
-        return `${api.CONFIG.wxCtx}/baseInfo?uid=${anon}`;
+        return `${api.CONFIG.wxCtx}/baseInfo`;
       }
     },
     activated() {
