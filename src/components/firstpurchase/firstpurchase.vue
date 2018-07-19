@@ -180,6 +180,12 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin'
+  .header
+    position: fixed
+    top: 0
+    width: 100%
+    height: 44px
+    z-index: 2
   .product-wrapper
     position: absolute
     top: 44px
@@ -190,7 +196,7 @@
       display: flex
       flex-wrap: wrap
       width: 100%
-      padding: 0 0 10px 5px
+      padding: 0 0 60px 5px
       overflow: auto
       box-sizing: border-box
       -webkit-overflow-scrolling: touch

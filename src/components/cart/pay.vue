@@ -191,15 +191,15 @@
         });
       },
       _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.pay, {
-              click: true
-            });
-          } else {
-            this.scroll.refresh();
-          }
-        });
+        // this.$nextTick(() => {
+        //   if (!this.scroll) {
+        //     this.scroll = new BScroll(this.$refs.pay, {
+        //       click: true
+        //     });
+        //   } else {
+        //     this.scroll.refresh();
+        //   }
+        // });
       },
       _totalPrice() {
         let total = 0;
@@ -551,13 +551,15 @@
       bottom: 0
       width: 100%
       background: #fff
-      overflow: hidden
+      overflow: auto
+      box-sizing: border-box
+      -webkit-overflow-scrolling: touch
       &.notop
         top: 44px
       .order-wrap
         position: relative
+        width: 100%
         padding-bottom: 60px
-        box-sizing: border-box
         .order-shop
           display: block
           height: 40px

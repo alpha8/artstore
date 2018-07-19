@@ -251,7 +251,7 @@
     height: 48px
     .content
       display: flex
-      background: rgba(61,61,63,.9)
+      background: rgba(61,61,63,1)
       font-size: 0
       color: rgba(255, 255, 255, 0.4)
       .content-left
