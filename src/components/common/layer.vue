@@ -101,7 +101,7 @@
           font-size: 14px
     .layer-content
       line-height: 1.3
-      padding: 10px 10px 16px 8px
+      padding: 10px 10px 13px 8px
       overflow: hidden
       font-size: 14px
       text-align: center

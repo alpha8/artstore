@@ -143,6 +143,7 @@
     deactivated() {
       this.stopTimer();
       this.hide();
+      this.guessGoods = [];
       this.marked = false;
       this.processing = false;
       this.lazyloaded = false;

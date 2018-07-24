@@ -871,6 +871,7 @@
       cleanup() {
         this.good.videoUrl = '';
         this.good.videos = [];
+        this.guessGoods = [];
         this.processing = false;
         this.lazyloaded = false;
         this.mutex = false;

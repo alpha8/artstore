@@ -43,7 +43,7 @@
             <li class="user_item" v-for="(item, index) in tuanData.teamOrders" :key="index" v-show="item.owner || item.status === 3">
               <span class="tips" v-show="item.owner">团长</span>
               <img :src="getUserIcon(item.userIcon)" :class="{'leader': item.owner}" alt="">
-              <em>{{getFriendlyUsername(item.userName)}}</em>
+              <div class="text"><em>{{getFriendlyUsername(item.userName)}}</em></div>
             </li>
           </ul>
         </div>
@@ -611,7 +611,8 @@
             position: relative
             display: block
             float: left
-            width: auto
+            min-width: 50px
+            max-width: 65px
             height: 70px
             margin-right: 15px
             &:last-child
@@ -636,18 +637,25 @@
               margin-left: -15px
               padding: 2px
               text-align: center
-            em
-              width: 65px
-              line-height: 1.3
+            .text
+              position: relative
+              display: block
+              width: 100%
               font-size: 12px
-              overflow: hidden
-              text-overflow: ellipsis
-              display: -webkit-box
-              -webkit-line-clamp: 1
-              -webkit-box-orient: vertical
-              word-wrap: break-word
-              word-break: break-all
-              box-sizing: border-box
+              text-align: center
+              line-height: 1.3
+              em
+                margin: 0 auto
+                position: relative
+                text-align: center
+                overflow: hidden
+                display: -webkit-box
+                word-wrap: break-word
+                word-break: break-all
+                text-overflow: ellipsis
+                -webkit-line-clamp: 1
+                -webkit-box-orient: vertical
+                max-width: 100%
       .rules-wrap
         position: relative
         width: 100%

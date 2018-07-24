@@ -155,6 +155,7 @@
     deactivated() {
       this.good.videoUrl = '';
       this.good.videos = [];
+      this.guessGoods = [];
       this.hide();
       this.processing = false;
       this.lazyloaded = false;

@@ -167,7 +167,7 @@
             font-size: 14px
             line-height: 1
             &.special
-              top: 18px
+              top: 16px
           input
             height: 20px
             line-height: normal

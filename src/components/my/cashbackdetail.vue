@@ -14,9 +14,9 @@
               </tr>
               <tr v-for="(item, index) in cashbacks" :key="index">
                 <td class="col-1">{{item.createAt | formatDate}}</td>
-                <td class="col-3 highlight">{{item.value | currency}}</td>
+                <td class="col-3 price">{{item.value | currency}}</td>
                 <td class="col-3">{{statusDesc(item.status)}}</td>
-                <td class="col-4" @click.stop.prevent="goOrderDetail(item)"><span v-if="item.orderNo">订单号：{{item.orderNo}}</span></td>
+                <td class="col-4" @click.stop.prevent="goOrderDetail(item)"><strong v-if="item.orderNo">订单号：{{item.orderNo}}</strong></td>
               </tr>
             </table>
           </mu-flexbox>
@@ -260,8 +260,7 @@
             box-sizing: border-box
           .col-4
             padding-left: 8px
-          .highlight
-            font-weight: 700
+          .price
             color: #ff463c
       .no-cashback
         width: 100%

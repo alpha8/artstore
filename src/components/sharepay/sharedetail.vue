@@ -218,6 +218,7 @@
       this.mutex = false;
       this.good.videoUrl = '';
       this.good.videos = [];
+      this.guessGoods = [];
       this.shareData = {};
       this.leftSeconds = 0;
       this.countdownStats = {};

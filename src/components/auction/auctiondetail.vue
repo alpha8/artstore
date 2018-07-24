@@ -171,6 +171,7 @@
     deactivated() {
       this.stopTimer();
       this.hide();
+      this.guessGoods = [];
       this.processing = false;
       this.higher = false;
       this.disconnect();

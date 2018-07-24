@@ -309,13 +309,13 @@
             left: 50%
             transform: translate(-50%, 0)
             display: block
-            width: 40px
+            width: 35px
             text-align: center
-            font-size: 10px
+            font-size: 9px
             color: #e1e1e1
             border-radius: 10px
-            height: 16px
-            line-height: 16px
+            height: 14px
+            line-height: 14px
             background: #9f3838
         .line
           position: relative

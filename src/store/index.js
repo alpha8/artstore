@@ -16,6 +16,12 @@ const KILL_PRODUCT = 'killProducts';
 const SEARCH_HISTORY = 'searchhistory';
 const USED_DISCOUNT = 'USED_DISCOUNT';
 const HISTORY_SIZE = 10;
+const CART_AMOUNT = 'cartAmount';
+const WX_USER = 'wxuser';
+const PRODUCTS_INDEX = 'products';
+const APP_CACHE = 'APP_CACHE';
+const CARTS_ADDED = 'cartAdded';
+const PAY_GOODS = 'payGoods';
 const ANONYMOUS = 'anonymous';
 const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
 
@@ -23,12 +29,12 @@ const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://
 export const state = {
   showFooter: true,
   showTop: false,
-  cartAmount: load('cartAmount', 0),
-  products: load('products', {}),
+  cartAmount: load(CART_AMOUNT, 0),
+  products: load(PRODUCTS_INDEX, {}),
   searchDialog: false,
   showSidebar: false,
   showSidebarMask: false,
-  userInfo: parseJson(loadCookie('wxuser', DEFAULT_USER), {}),
+  userInfo: parseJson(loadCookie(WX_USER, DEFAULT_USER), {}),
   addressList: load(ADDRESS_LIST, []),
   toastList: [],
   userProfile: load(USER_PROFILE, {}),
@@ -38,7 +44,8 @@ export const state = {
   killProducts: load(KILL_PRODUCT, []),  // 已参与的秒杀列表
   searchHistory: load(SEARCH_HISTORY, []),
   usedDiscount: load(USED_DISCOUNT, []),   // 已使用的折扣券
-  anonymous: load(ANONYMOUS, '')
+  anonymous: load(ANONYMOUS, ''),
+  appCache: load(APP_CACHE, {})  // 应用缓存
 };
 
 // getters
@@ -61,7 +68,7 @@ export const getters = {
     return state.toastList.length > 0 ? state.toastList[0].text : null;
   },
   checkLogined (state) {
-    state.userInfo = parseJson(loadCookie('wxuser', DEFAULT_USER), {});
+    state.userInfo = parseJson(loadCookie(WX_USER, DEFAULT_USER), {});
     return typeof state.userInfo.openid !== 'undefined';
   },
   getFooterState: state => state.showFooter,
@@ -79,13 +86,14 @@ export const getters = {
    } else {
     return state.cartAmount;
    }
-  }
+  },
+  loadAppCache: state => state.appCache
 };
 
 // actions
 export const actions = {
   reloadUserInfo({commit}) {
-    state.userInfo = parseJson(loadCookie('wxuser', DEFAULT_USER), {});
+    state.userInfo = parseJson(loadCookie(WX_USER, DEFAULT_USER), {});
   },
   setDefaultAddress({ commit }, address) {
     commit(types.SET_ADDRESS, {
@@ -137,9 +145,9 @@ export const actions = {
     state.cartAmount = amount <= 0 ? 0 : amount;
     state.products = goods;
     state.cart.added = added;
-    save('cartAdded', state.cart.added);
-    save('cartAmount', state.cartAmount);
-    save('products', state.products);
+    save(CARTS_ADDED, state.cart.added);
+    save(CART_AMOUNT, state.cartAmount);
+    save(PRODUCTS_INDEX, state.products);
   },
   addPayGoods({commit}, products) {
     if (!products || products.length === 0) {
@@ -197,6 +205,13 @@ export const actions = {
       state.anonymous = unlogin;
       save(ANONYMOUS, state.anonymous);
     }
+  },
+  /** Cache Pattern: {'home': {}} */
+  updateAppCache(context, cache) {
+    context.commit(types.UPDATE_APP_CACHE, cache);
+  },
+  cleanAppCache(context, cacheKey) {
+    context.commit(types.CLEAN_APP_CACHE, cacheKey);
   }
 };
 
@@ -237,8 +252,8 @@ export const mutations = {
     } else {
       state.products[sid]++;
     }
-    save('products', state.products);
-    save('cartAmount', state.cartAmount);
+    save(PRODUCTS_INDEX, state.products);
+    save(CART_AMOUNT, state.cartAmount);
   },
   [types.REDUCE_QUANTITY](state, id) {
     if (id.indexOf('_') === -1 && state.cartAmount > 0) {
@@ -269,17 +284,17 @@ export const mutations = {
     if (state.cartAmount <= 0) {
       state.cartAmount = 0;
     }
-    save('cartAdded', state.cart.added);
-    save('products', state.products);
-    save('cartAmount', state.cartAmount);
+    save(CARTS_ADDED, state.cart.added);
+    save(PRODUCTS_INDEX, state.products);
+    save(CART_AMOUNT, state.cartAmount);
   },
   [types.CLEAR_CART](state) {
     state.cartAmount = 0;
     state.products = {};
     state.cart.added = [];
-    save('products', state.products);
-    save('cartAdded', state.cart.added);
-    save('cartAmount', state.cartAmount);
+    save(PRODUCTS_INDEX, state.products);
+    save(CARTS_ADDED, state.cart.added);
+    save(CART_AMOUNT, state.cartAmount);
   },
   [types.REMOVE_SAMETYPE_GOODS](state, goods) {
     let arr = state.cart.added;
@@ -291,8 +306,8 @@ export const mutations = {
       }
       delete state.products[prefix + good.extendId];
     });
-    save('cartAdded', state.cart.added);
-    save('products', state.products);
+    save(CARTS_ADDED, state.cart.added);
+    save(PRODUCTS_INDEX, state.products);
   },
   [types.SET_ADDRESS](state, { address }) {
     state.addressList = address;
@@ -330,7 +345,7 @@ export const mutations = {
   },
   [types.ADD_PAYGOODS](state, {goods}) {
     state.cart.payGoods = goods;
-    save('payGoods', state.cart.payGoods);
+    save(PAY_GOODS, state.cart.payGoods);
   },
   [types.CLEAR_PAYGOODS](state) {
     let goods = state.cart.payGoods;
@@ -351,14 +366,14 @@ export const mutations = {
     });
     state.cart.added = cartGoods;
     state.cart.payGoods = [];
-    save('cartAdded', state.cart.added);
-    save('payGoods', state.cart.payGoods);
+    save(CARTS_ADDED, state.cart.added);
+    save(PAY_GOODS, state.cart.payGoods);
     state.products = goodCount;
-    save('products', state.products);
+    save(PRODUCTS_INDEX, state.products);
     if (state.cartAmount <= 0) {
       state.cartAmount = 0;
     }
-    save('cartAmount', state.cartAmount);
+    save(CART_AMOUNT, state.cartAmount);
   },
   [types.ADD_SEARCH_HISTORY] (state, keyword) {
     let exist = state.searchHistory.find(item => item === keyword);
@@ -419,6 +434,29 @@ export const mutations = {
   [types.CLEAN_USED_DISCOUNT] (state) {
     state.usedDiscount = [];
     save(USED_DISCOUNT, state.usedDiscount);
+  },
+  [types.UPDATE_APP_CACHE] (state, cache) {
+    let appCache = state.appCache;
+    if (cache) {
+      for (var key in cache) {
+        appCache[key] = cache[key] || {};
+      }
+    }
+    state.appCache = appCache;
+    save(APP_CACHE, state.appCache);
+  },
+  [types.CLEAN_APP_CACHE] (state, cacheKey) {
+    let appCache = state.appCache;
+    if (appCache && cacheKey) {
+      let val = appCache[cacheKey];
+      if (val) {
+        delete appCache[cacheKey];
+      }
+    } else {
+      appCache = {};
+    }
+    state.appCache = appCache;
+    save(APP_CACHE, state.appCache);
   }
 };
 

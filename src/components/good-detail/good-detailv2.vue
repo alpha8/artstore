@@ -63,7 +63,7 @@
         <div class="intro" v-show="good.content">
           <h1 class="title">商品介绍<span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span></h1>
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
-          <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
+          <div class="text goodsIntroHook" v-html="good.content" ref="goodContent" id="productIntro"></div>
         </div>
         <split v-if="good.parameter"></split>
         <div class="info" v-if="good.parameter">
@@ -167,6 +167,7 @@
     deactivated() {
       this.good.videoUrl = '';
       this.good.videos = [];
+      this.guessGoods = [];
       this.hide();
       this.processing = false;
       this.lazyloaded = false;
@@ -177,6 +178,7 @@
           if (to.params.id !== from.params.id) {
             this.good.videoUrl = '';
             this.good.videos = [];
+            this.guessGoods = [];
             this.lazyloaded = false;
             this.fetchData();
           }
@@ -320,7 +322,11 @@
             this.scroll = new BScroll(this.$refs.good, {
               click: true,
               bounce: false,
-              probeType: 3
+              probeType: 3,
+              preventDefaultException: {
+                className: /(^|\s)goodsIntroHook(\s|$)/,
+                tagName: /^(P|SPAN)$/
+              }
             });
           } else {
             this.scroll.refresh();
@@ -619,7 +625,7 @@
         }
         let vm = this;
         let shareData = {
-          title: this.good.name,
+          title: `${this.good.name}（¥${this.good.activityPrice || this.good.markPrice}）`,
           desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: img,

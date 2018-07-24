@@ -150,6 +150,7 @@
     },
     deactivated() {
       this.stopTimer();
+      this.guessGoods = [];
       this.hide();
       this.marked = false;
       this.processing = false;

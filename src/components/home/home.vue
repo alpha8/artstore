@@ -172,28 +172,25 @@
     },
     created() {
       this.wxReady();
-      // this.loadTencentPlayer();
-      let user = this.$store.getters.getUserInfo;
-      let anon = '';
-      if (!user.userId) {
-        this.$store.dispatch('setAnonymous');
-        anon = this.$store.getters.getAnonymous;
+      // 性能优化，增加首页本地缓存
+      let appCache = this.$store.getters.loadAppCache;
+      if (appCache.home) {
+        console.log('cache hit.');
+        let hitCache = appCache.home;
+        this.arts = hitCache.arts || [];
+        this.dearTeapots = hitCache.dearTeapots || [];
+        this.teaPots = hitCache.teaPots || [];
+        this.goodTeas = hitCache.goodTeas || [];
+        this.ya = hitCache.ya || [];
+        this.oldTeas = hitCache.oldTeas || [];
+        this.articles = hitCache.articles || [];
+        this.paints = hitCache.paints || [];
+        setTimeout(() => {
+          this.fetchData();
+        }, 5000);
+      } else {
+        this.fetchData();
       }
-      api.getHomeList({
-        type: 'home',
-        stat: 1,
-        unlogin: anon
-      }).then((response) => {
-        this.arts = response.arts || [];
-        this.dearTeapots = response.dearTeapots || [];
-        this.teaPots = response.teaPots || [];
-        this.goodTeas = response.goodTeas || [];
-        this.ya = response.ya || [];
-        this.oldTeas = response.oldTeas || [];
-        this.articles = response.articles || [];
-        this.paints = response.paints || [];
-      });
-      // this.getWXFollow();
     },
     mounted() {
       this._initScroll();
@@ -214,6 +211,38 @@
       }
     },
     methods: {
+      fetchData() {
+        let user = this.$store.getters.getUserInfo;
+        let anon = '';
+        if (!user.userId) {
+          this.$store.dispatch('setAnonymous');
+          anon = this.$store.getters.getAnonymous;
+        }
+        api.getHomeList({
+          type: 'home',
+          stat: 1,
+          unlogin: anon
+        }).then((response) => {
+          this.arts = response.arts || [];
+          this.dearTeapots = response.dearTeapots || [];
+          this.teaPots = response.teaPots || [];
+          this.goodTeas = response.goodTeas || [];
+          this.ya = response.ya || [];
+          this.oldTeas = response.oldTeas || [];
+          this.articles = response.articles || [];
+          this.paints = response.paints || [];
+          this.$store.dispatch('updateAppCache', {'home': {
+            arts: this.arts,
+            dearTeapots: this.dearTeapots,
+            teaPots: this.teaPots,
+            goodTeas: this.goodTeas,
+            ya: this.ya,
+            oldTeas: this.oldTeas,
+            articles: this.articles,
+            paints: this.paints
+          }});
+        });
+      },
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {

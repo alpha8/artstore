@@ -34,7 +34,7 @@
         </div>
       </div>
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
-      <frame></frame>
+      <quietlogin></quietlogin>
     </div>
   </div>
 </template>
@@ -44,7 +44,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import modalTitle from '@/components/modal-title/modal-title';
   import channel from '@/components/channel/channel';
-  import frame from '@/components/common/myiframe';
+  import quietlogin from '@/components/common/quietlogin';
   import gotop from '@/components/fixedtoolbar/gotop';
   import split from '@/components/split/split';
   // import {formatDate} from '@/common/js/date';
@@ -267,7 +267,7 @@
       }
     },
     components: {
-      gotop, fixedheader, split, modalTitle, channel, frame
+      gotop, fixedheader, split, modalTitle, channel, quietlogin
     },
     filters: {
       formatDate(time) {
