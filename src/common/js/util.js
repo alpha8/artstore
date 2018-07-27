@@ -108,6 +108,22 @@ export const formatDate = (str) => {
   }
 };
 
+/**
+ * 判断设备类型
+ * @return {Boolean} [description]
+ */
+export function Device() {
+  let ua = window.navigator.userAgent.toLowerCase();
+  let isWeixin = (ua.indexOf('micromessenger') !== -1 || ua.indexOf('micromessage') !== -1);
+  let isAndroid = ua.indexOf('android') !== -1;
+  let isIos = (ua.indexOf('iphone') !== -1 || ua.indexOf('ipad') !== -1);
+  return {
+    isWeixin: isWeixin,
+    isAndroid: isAndroid,
+    isIos: isIos
+  };
+};
+
 export function fixFontSize() {
   if (typeof WeixinJSBridge === 'undefined') {
    if (document.addEventListener) {

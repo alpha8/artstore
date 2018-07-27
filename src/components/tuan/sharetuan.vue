@@ -254,10 +254,7 @@
           this.$store.dispatch('openToast', '未登录!');
           return;
         }
-        let tuanId = this.$route.query.tuanId;
-        if (!tuanId) {
-          return;
-        }
+        let tuanId = this.$route.query.tuanId || '';
         api.createTuanOrder({
           fieldId: this.tuan.id,
           userId: user.userId,
@@ -370,15 +367,16 @@
           });
         });
         let redirect = 'http://' + location.host + '/weixin/tuan/' + this.tuan.id;
-        if (this.preOrderId) {
-          redirect += '?tuanId=' + this.preOrderId;
-        }
         let img = api.CONFIG.psCtx + '5959aca5e4b00faa50475a18?w=423&h=423';
         if (this.tuan.icon) {
           img = api.CONFIG.psCtx + this.tuan.icon;
         }
         let user = this.$store.getters.getUserInfo;
-        redirect += '&userId=' + user.userId;
+        if (this.preOrderId) {
+          redirect += '?tuanId=' + this.preOrderId + '&userId=' + user.userId;
+        } else {
+          redirect += '?userId=' + user.userId;
+        }
         let vm = this;
         this.shareData = {
           title: `[一虎一席.茶席艺术节]•[拼团.${this.tuan.buttomFee}元] ` + reduceGoodsName(this.tuan.name),
@@ -399,6 +397,8 @@
         let redirect = 'http://' + location.host + '/weixin/tuan/' + this.tuan.id;
         if (this.preOrderId) {
           redirect += '?tuanId=' + this.preOrderId + '&userId=' + user.userId;
+        } else {
+          redirect += '?userId=' + user.userId;
         }
         this.shareData.link = redirect;
       },

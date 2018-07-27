@@ -38,7 +38,7 @@
           <div class="duration" v-else>距秒杀结束还剩：<p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p></div>
         </div>
         <split v-show="good.content"></split>
-        <div class="info" v-show="good.content">
+        <div class="info goodsIntroHook" v-show="good.content">
           <h1 class="title">商品介绍</h1>
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
@@ -422,7 +422,11 @@
             this.scroll = new BScroll(this.$refs.seckillRef, {
               click: true,
               bounce: false,
-              probeType: 3
+              probeType: 3,
+              preventDefaultException: {
+                className: /(^|\s)goodsIntroHook(\s|$)/,
+                tagName: /^(P|SPAN)$/
+              }
             });
           } else {
             this.scroll.refresh();

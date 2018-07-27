@@ -4,6 +4,7 @@
 
 <script type="text/ecmascript-6">
   import api from '@/api/api';
+  import {Device} from '@/common/js/util';
   let AUTO_LOGIN = 'quiet_login';
   export default {
     data() {
@@ -16,6 +17,11 @@
       this.$store.dispatch('reloadUserInfo');
     },
     mounted() {
+      let isWeixin = Device().isWeixin;
+      if (!isWeixin) {
+        console.log('非微信平台，跳过授权认证！');
+        return;
+      }
       let user = this.$store.getters.getUserInfo;
       if (!user.userId) {
         this.isAutoLogin = window.sessionStorage.getItem(AUTO_LOGIN) || false;
@@ -26,7 +32,6 @@
           }
           this.isAutoLogin = true;
           window.sessionStorage.setItem(AUTO_LOGIN, true);
-          this.$store.dispatch('openToast', '正在登录中...');
           let referee = this.$route.query.userId || 0;
           setTimeout(() => {
             window.location.href = `${api.CONFIG.wxCtx}/wx/base?url=${escape(redirect)}&userId=${referee}`;

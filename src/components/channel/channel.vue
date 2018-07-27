@@ -79,7 +79,7 @@
         }
       },
       goGoodDetail(item) {
-        this.$router.push({name: 'good', params: {id: item.id}});
+        this.$router.push({name: 'good', params: {id: item.artworkId || item.id}});
       },
       favorited(good) {
         let uid = this.$store.getters.getUserInfo.userId;

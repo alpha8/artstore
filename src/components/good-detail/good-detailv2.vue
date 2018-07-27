@@ -60,13 +60,13 @@
           </div>
         </div>
         <split v-if="good.videoUrl"></split>
-        <div class="intro" v-show="good.content">
+        <div class="intro goodsIntroHook" v-show="good.content">
           <h1 class="title">商品介绍<span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span></h1>
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
-          <div class="text goodsIntroHook" v-html="good.content" ref="goodContent" id="productIntro"></div>
+          <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
         </div>
         <split v-if="good.parameter"></split>
-        <div class="info" v-if="good.parameter">
+        <div class="info goodsIntroHook" v-if="good.parameter">
           <h1 class="title">商品参数</h1>
           <div class="text">
             <table class="table">
@@ -625,6 +625,15 @@
         }
         let vm = this;
         let shareData = {
+          title: `${this.good.name}`,
+          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
+          link: redirect,
+          imgUrl: img,
+          success: function () {
+            vm.$refs.weixinShare.hideDialog();
+          }
+        };
+        let shareData2 = {
           title: `${this.good.name}（¥${this.good.activityPrice || this.good.markPrice}）`,
           desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
@@ -634,7 +643,7 @@
           }
         };
         wx.ready(function() {
-          wx.onMenuShareTimeline(shareData);
+          wx.onMenuShareTimeline(shareData2);
           wx.onMenuShareAppMessage(shareData);
         });
       },

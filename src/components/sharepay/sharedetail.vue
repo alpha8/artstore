@@ -73,13 +73,13 @@
           </div>
         </div>
         <split v-if="good.videoUrl"></split>
-        <div class="intro" v-show="good.content">
+        <div class="intro goodsIntroHook" v-show="good.content">
           <h1 class="title">商品介绍<span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span></h1>
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
         </div>
         <split v-if="good.parameter"></split>
-        <div class="info" v-if="good.parameter">
+        <div class="info goodsIntroHook" v-if="good.parameter">
           <h1 class="title">商品参数</h1>
           <div class="text">
             <table class="table">
@@ -637,7 +637,11 @@
             this.scroll = new BScroll(this.$refs.good, {
               click: true,
               bounce: false,
-              probeType: 3
+              probeType: 3,
+              preventDefaultException: {
+                className: /(^|\s)goodsIntroHook(\s|$)/,
+                tagName: /^(P|SPAN)$/
+              }
             });
           } else {
             this.scroll.refresh();
@@ -854,9 +858,6 @@
           });
         });
         let redirect = 'http://' + location.host + '/weixin/sp/' + this.sharepay.id;
-        if (this.preOrderId) {
-          redirect += '?shareId=' + this.preOrderId;
-        }
         let img = api.CONFIG.psCtx + '5959aca5e4b00faa50475a18?w=423&h=423';
         if (this.sharepay.icon) {
           img = api.CONFIG.psCtx + this.sharepay.icon;
@@ -864,7 +865,11 @@
           img = api.CONFIG.psCtx + this.good.pictures[0].id + '?w=423&h=423';
         }
         let user = this.$store.getters.getUserInfo;
-        redirect += '&userId=' + user.userId;
+        if (this.preOrderId) {
+          redirect += '?shareId=' + this.preOrderId + '&userId=' + user.userId;
+        } else {
+          redirect += '?userId=' + user.userId;
+        }
         let vm = this;
         this.shareData = {
           title: `[一虎一席.茶席艺术节]•[砍价至${this.sharepay.buttomFee}元] ` + reduceGoodsName(this.sharepay.name),
@@ -885,6 +890,8 @@
         let redirect = 'http://' + location.host + '/weixin/sp/' + this.sharepay.id;
         if (this.preOrderId) {
           redirect += '?shareId=' + this.preOrderId + '&userId=' + user.userId;
+        } else {
+          redirect += '?userId=' + user.userId;
         }
         this.shareData.link = redirect;
       },

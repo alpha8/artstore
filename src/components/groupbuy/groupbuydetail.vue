@@ -28,12 +28,12 @@
           <div class="duration" v-else>距团购结束还剩：<p class="countdown_nums"><span v-if="countdownStats.days"><span class="box">{{countdownStats.days}}</span>天</span><span v-if="countdownStats.hours"><span class="box">{{countdownStats.hours}}</span>:</span><span v-if="countdownStats.mins"><span class="box">{{countdownStats.mins}}</span>:</span><span v-if="countdownStats.seconds"><span class="box">{{countdownStats.seconds}}</span></span></p></div> 
         </div>
         <split v-show="good.artwork && good.artwork.content"></split>
-        <div class="info" v-show="good.artwork && good.artwork.content">
+        <div class="info goodsIntroHook" v-show="good.artwork && good.artwork.content">
           <h1 class="title">商品介绍</h1>
           <div class="sellpoint" v-if="good.artwork && good.artwork.sellPoint">{{good.artwork.sellPoint}}</div>
           <div class="text" v-html="good.artwork && good.artwork.content" ref="goodContent" id="productIntro"></div>
         </div>
-        <div class="info" v-show="good.rule">
+        <div class="info goodsIntroHook" v-show="good.rule">
           <h1 class="title">使用规则</h1>
           <div class="text" v-html="good.rule" ref="goodRule" id="rules"></div>
         </div>
@@ -250,7 +250,11 @@
             this.scroll = new BScroll(this.$refs.good, {
               click: true,
               bounce: false,
-              probeType: 3
+              probeType: 3,
+              preventDefaultException: {
+                className: /(^|\s)goodsIntroHook(\s|$)/,
+                tagName: /^(P|SPAN)$/
+              }
             });
           } else {
             this.scroll.refresh();

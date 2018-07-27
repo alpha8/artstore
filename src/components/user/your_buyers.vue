@@ -13,7 +13,7 @@
                 <th class="col-5">最近购买</th>
                 <th class="col-5">首次购买</th>
               </tr>
-              <tr v-for="(item, index) in buyers" :key="index">
+              <tr v-for="(item, index) in buyers" :key="index" @click.stop.prevent="showOrders(item)">
                 <td class="col-1"><img :src="getUserIcon(item.icon)" class="thumbnail" />{{item.nickName}}</td>
                 <td class="col-3">{{item.totalFee | currency}}</td>
                 <td class="col-5">{{item.count}}</td>
@@ -118,6 +118,9 @@
           return 'http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10';
         }
         return icon;
+      },
+      showOrders(item) {
+        this.$router.push({name: 'yourorders', params: {uid: item.userId}});
       },
       show() {
         this.$store.commit('HIDE_FOOTER');

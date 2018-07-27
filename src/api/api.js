@@ -659,5 +659,12 @@ export default {
    */
   getYourBuyers(params) {
     return doGet(this.CONFIG.cmsCtx + '/user/friend/order', params);
+  },
+
+  /**
+   * 查询推荐的朋友中，购买过的买家的订单列表
+   */
+  getYourBuyerOrders(params) {
+    return doGet(this.CONFIG.cmsCtx + '/front/order/list', params);
   }
 };

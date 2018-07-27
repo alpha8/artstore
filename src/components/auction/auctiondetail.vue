@@ -52,12 +52,12 @@
           </div>
         </div>
         <split v-show="auction.artwork && auction.artwork.content"></split>
-        <div class="info" v-show="auction.artwork && auction.artwork.content">
+        <div class="info goodsIntroHook" v-show="auction.artwork && auction.artwork.content">
           <h1 class="title">商品介绍</h1>
           <div class="sellpoint" v-if="auction.artwork && auction.artwork.sellPoint">{{auction.artwork.sellPoint}}</div>
           <div class="text" v-html="auction.artwork && auction.artwork.content" ref="goodContent" id="productIntro"></div>
         </div>
-        <div class="info" v-show="auction.rule">
+        <div class="info goodsIntroHook" v-show="auction.rule">
           <h1 class="title">使用规则</h1>
           <div class="text" v-html="auction.rule" ref="goodRule" id="rules"></div>
         </div>
@@ -498,7 +498,11 @@
             this.scroll = new BScroll(this.$refs.auctionRef, {
               click: true,
               bounce: false,
-              probeType: 3
+              probeType: 3,
+              preventDefaultException: {
+                className: /(^|\s)goodsIntroHook(\s|$)/,
+                tagName: /^(P|SPAN)$/
+              }
             });
           } else {
             this.scroll.refresh();

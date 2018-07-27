@@ -8,6 +8,11 @@
           <swipe :swiperSlides="swiperSlides"></swipe>
         </div>
         <topchanel :channels="channels"></topchanel>
+        <div v-for="(item, index) in channelGoods" :key="index">
+          <modal-title :title="item.title" moreText="更多" catKey="" catName="" price=""></modal-title>
+          <channel :items="item.goods" :cols="2" :section="item.key"></channel>
+          <split></split>
+        </div>
         <modal-title title="茶席套装.三百席" moreText="更多" catKey="art" catName="茶席套装.三百席"></modal-title>
         <channel :items="arts" :cols="2" section="teasuite"></channel>
         <split></split>
@@ -167,7 +172,8 @@
           'spring': 'http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5d37d4564972818869478170/v.f20.mp4'
         },
         showFollow: true,
-        wxqrcode: api.CONFIG.wxqrcode
+        wxqrcode: api.CONFIG.wxqrcode,
+        channelGoods: []
       };
     },
     created() {
@@ -185,6 +191,7 @@
         this.oldTeas = hitCache.oldTeas || [];
         this.articles = hitCache.articles || [];
         this.paints = hitCache.paints || [];
+        this.channelGoods = hitCache.channelGoods || [];
         setTimeout(() => {
           this.fetchData();
         }, 5000);
@@ -223,6 +230,14 @@
           stat: 1,
           unlogin: anon
         }).then((response) => {
+          this.channelGoods = [];
+          for (let key in response) {
+            if (key.length > 20) {
+              if (response[key] && response[key].goods && response[key].title) {
+                this.channelGoods.push({'key': key, 'title': response[key].title, 'goods': response[key].goods});
+              }
+            }
+          }
           this.arts = response.arts || [];
           this.dearTeapots = response.dearTeapots || [];
           this.teaPots = response.teaPots || [];
@@ -239,7 +254,8 @@
             ya: this.ya,
             oldTeas: this.oldTeas,
             articles: this.articles,
-            paints: this.paints
+            paints: this.paints,
+            channelGoods: this.channelGoods
           }});
         });
       },

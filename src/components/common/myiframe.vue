@@ -5,6 +5,7 @@
 
 <script type="text/ecmascript-6">
   import {removeCookie} from '@/common/js/store';
+  import {Device} from '@/common/js/util';
   import api from '@/api/api';
   let AUTO_LOGIN = 'auto_login';
   export default {
@@ -31,6 +32,11 @@
       window.sessionStorage.removeItem(AUTO_LOGIN);
     },
     mounted() {
+      let isWeixin = Device().isWeixin;
+      if (!isWeixin) {
+        console.log('非微信平台，跳过授权认证！');
+        return;
+      }
       let user = this.$store.getters.getUserInfo;
       if (!user.userId) {
         this.$store.dispatch('setAnonymous');

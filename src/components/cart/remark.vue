@@ -1,13 +1,13 @@
 <template>
   <div>
-    <fixedheader title="收货备注" ref="header"></fixedheader>
+    <fixedheader title="备注/重要留言" ref="header"></fixedheader>
     <div class="update-remark">
       <div class="add-address-wrap">
         <ul>
           <li>
             <p>
               <span class="title">备注:</span>
-              <textarea v-model="remarks" placeholder="收货备注" rows="4" required></textarea>
+              <textarea v-model="remarks" placeholder="重要留言" rows="4" required></textarea>
               <i class="icon-close" v-show="remarks.length" @click.stop.prevent="doClear"></i>
             </p>
           </li>

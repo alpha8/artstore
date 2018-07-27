@@ -343,7 +343,7 @@
         };
         if (this.selfservice) {
           params.express = {
-            expressAddress: '现场自提',
+            expressAddress: '线下自提',
             mobile: '',
             receiver: userInfo.nickName || ''
           };

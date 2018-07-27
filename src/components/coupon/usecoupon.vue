@@ -16,6 +16,8 @@
                   <i class="tag"><span class="text">{{getCouponType(coupon.type)}}</span></i>
                   <div class="dotbar"></div>
                 </div>
+                <div class="circle-tag circle-left"></div>
+                <div class="circle-tag circle-right"></div>
                 <div class="content">
                   <p class="line text" v-if="coupon.title">{{coupon.title}}</p>
                   <p class="line text" v-else>{{coupon.payValue}}元{{getCouponType(coupon.type)}}</p>
@@ -33,14 +35,15 @@
       </div>
     </div>
     <div class="fixed-foot">
-      <div class="content">
+      <div class="btns" @click.stop.prevent="ok"><span class="btn-red">确定<em v-if="count"> (已选{{count}}张)</em></span></div>
+      <!-- <div class="content">
         <div class="content-center">
           <span class="totalPrice">已选<span>{{count}}</span>张</span>
         </div>
         <div class="content-right" @click.stop.prevent="ok">
           <div class="pay activated">确定</div>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -147,6 +150,7 @@
             this.count = 0;
           }
         }
+        this.$store.dispatch('addUsedDiscount', this.usedDiscount);
       },
       _initCouponStatus(coupons) {
         this.count = 0;
@@ -179,7 +183,6 @@
         return formatDate(new Date(times), 'yyyy-MM-dd');
       },
       ok() {
-        this.$store.dispatch('addUsedDiscount', this.usedDiscount);
         this.$router.back();
       }
     },
@@ -194,7 +197,7 @@
   .coupon
     position: absolute
     top: 44px
-    bottom: 50px
+    bottom: 47px
     width: 100%
     .coupon-wrap
       position: relative
@@ -259,20 +262,29 @@
             &:last-child
               margin-bottom: 0
             .checkbox
+              position: relative
               height: 100px
               line-height: 100px
-              width: 25px
+              width: 30px
               color: #999
               &.on
                 color: #fb4741
+              .icon
+                position: absolute
+                left: 0
+                top: 50%
+                margin-top: -15px
+                width: 100%
+                float: left
+                font-size: 20px
+                text-align: center
             .item-content
               position: relative
               flex: 1
-              border-radius: 6px
               color: #53c7ca
-              border-top: 6px solid currentColor
               border-bottom: 10px solid #fff
               background: #fff
+              overflow: hidden
               &::before
                 content: ""
                 position: absolute
@@ -280,7 +292,6 @@
                 bottom: 4px
                 left: 10px
                 right: 10px
-                box-shadow: 0 2px 10px 10px rgba(0,0,0,.1)
                 z-index: -1
               &.expired
                 border-top: 6px solid #999
@@ -293,7 +304,8 @@
               float: left
               display: block
               width: 110px
-              color: #53c7ca
+              color: #fff
+              background: #00bb9c
               height: 100%
               .box
                 position: absolute
@@ -411,12 +423,19 @@
           height: 110px
   .fixed-foot
     position: fixed
-    left: 0
-    right: 0
     bottom: 0
-    height: 50px
-    z-index: 99
-    background: #fafafa
+    width: 100%
+    height: 47px
+    overflow: hidden
+    z-index: 2
+    .btns
+      margin: 0 auto
+      height: 47px
+      line-height: 47px
+      font-size: 14px
+      .btn-red
+        color: #e1e1e1
+        border-radius: 0
     .content
       display: flex
       font-size: 0

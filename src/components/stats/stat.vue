@@ -62,6 +62,10 @@
             <span class="nums">{{stats.alllogin || 0}}</span>
             <span class="label">授权总人数</span>
           </li>
+          <li>
+            <span class="nums">{{stats.allView || 0}}</span>
+            <span class="label">访客总人数</span>
+          </li>
         </ul>
         <split v-if="users.length"></split>
         <h1 class="title" v-if="users.length">访问详情</h1>
