@@ -44,7 +44,7 @@
         if (!this.isAutoLogin) {
           let redirect = window.location.href;
           if (redirect) {
-            redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
+            redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '').replace('&from=singlemessage&isappinstalled=0', '');
           }
           this.isAutoLogin = true;
           window.sessionStorage.setItem(AUTO_LOGIN, true);

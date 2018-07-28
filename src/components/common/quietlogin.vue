@@ -27,12 +27,21 @@
         this.isAutoLogin = window.sessionStorage.getItem(AUTO_LOGIN) || false;
         if (!this.isAutoLogin) {
           let redirect = window.location.href;
+          let userId = '';
+          let startPos = redirect.indexOf('userId=');
+          let endPos = redirect.indexOf('&', startPos);
+          if (startPos !== -1 && endPos !== -1) {
+            userId = redirect.substring(startPos + 7, endPos);
+          }
           if (redirect) {
-            redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '');
+            redirect = redirect.replace('?from=singlemessage&isappinstalled=0', '').replace('&from=singlemessage&isappinstalled=0', '');
           }
           this.isAutoLogin = true;
           window.sessionStorage.setItem(AUTO_LOGIN, true);
           let referee = this.$route.query.userId || 0;
+          if (!referee && userId) {
+            referee = userId;
+          }
           setTimeout(() => {
             window.location.href = `${api.CONFIG.wxCtx}/wx/base?url=${escape(redirect)}&userId=${referee}`;
           }, 50);
