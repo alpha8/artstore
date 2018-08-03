@@ -62,6 +62,7 @@
       };
     },
     activated() {
+      this.orders = [];
       this.fetchData(true);
       this.show();
     },
@@ -104,6 +105,7 @@
           this.loadEnd = false;
           this.loading = false;
           this.totalPages = 0;
+          this.lastExec = 0;
         });
       },
       _reset() {

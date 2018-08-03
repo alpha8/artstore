@@ -24,6 +24,7 @@
       }
       let user = this.$store.getters.getUserInfo;
       if (!user.userId) {
+        this.$store.dispatch('setAnonymous');
         this.isAutoLogin = window.sessionStorage.getItem(AUTO_LOGIN) || false;
         if (!this.isAutoLogin) {
           let redirect = window.location.href;
@@ -42,8 +43,9 @@
           if (!referee && userId) {
             referee = userId;
           }
+          let anon = this.$store.getters.getAnonymous;
           setTimeout(() => {
-            window.location.href = `${api.CONFIG.wxCtx}/wx/base?url=${escape(redirect)}&userId=${referee}`;
+            window.location.href = `${api.CONFIG.wxCtx}/wx/base?url=${escape(redirect)}&uid=${anon}&userId=${referee}`;
           }, 50);
         }
       } else {

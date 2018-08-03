@@ -4,6 +4,24 @@
     <div class="order">
       <div class="order-wrap">
         <div class="order-container" ref="orders" v-show="orders.length">
+          <div class="rules-wrap">
+            <div class="rule-title">"拼团" 简介：</div>
+            <div class="rule-button" @click.stop.prevent="showRuleDetail">规则</div>
+            <div class="rule-flow">
+              <div class="flow-item">
+                <i class="icon-tuan"></i>
+                <div class="text">开团/参团</div>
+              </div>
+              <div class="flow-item">
+                <i class="icon-dancers"></i>
+                <div class="text">邀请好友</div>
+              </div>
+              <div class="flow-item">
+                <i class="icon-express_vehicle"></i>
+                <div class="text">满员发货<br>(不满自动退款)</div>
+              </div>
+            </div>
+          </div>
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(item, index) in orders" :key="index">
               <div class="item-content">
@@ -32,6 +50,7 @@
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
+    <rules ref="rules" title="拼团规则"></rules>
   </div>
 </template>
 
@@ -39,6 +58,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import gotop from '@/components/fixedtoolbar/gotop';
   import {formatDate} from '@/common/js/date';
+  import rules from '@/components/tuan/rules';
   import {reduceGoodsName} from '@/common/js/util';
   import api from '@/api/api';
 
@@ -178,10 +198,13 @@
         }).catch(response => {
           window.location.href = 'http://' + location.host + '/weixin/order?type=1';
         });
+      },
+      showRuleDetail() {
+        this.$refs.rules.showDetail();
       }
     },
     components: {
-      fixedheader, gotop
+      fixedheader, gotop, rules
     },
     filters: {
       formatDate(time) {
@@ -253,6 +276,54 @@
         overflow: auto
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
+        .rules-wrap
+          position: relative
+          width: 100%
+          background: #e45050
+          padding-bottom: 15px
+          .rule-title
+            width: 100%
+            font-size: 14px
+            padding: 10px
+            color: #eee
+            box-sizing: border-box
+          .rule-button
+            width: 36px
+            height: 30px
+            line-height: 30px
+            position: absolute
+            top: 0
+            right: 10px
+            border-bottom-left-radius: 18px
+            border-bottom-right-radius: 18px
+            background: #e4c017
+            color: #a17400
+            font-size: 11px
+            text-align: center
+          .rule-flow
+            position: relative
+            display: flex
+            .flow-item
+              position: relative
+              flex: 1
+              text-align: center
+              color: #eee
+              &:not(:first-child)::after
+                display: block
+                position: absolute
+                width: 50px
+                height: 2px
+                border-top: 1px dashed #eee
+                top: 50%
+                left: -25px
+                margin-top: -10px
+                content: ' '
+              i
+                display: block
+                font-size: 36px
+                padding: 10px 15px
+              .text
+                font-size: 14px
         .order-list
           position: relative
           width: 100%

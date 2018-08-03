@@ -66,6 +66,7 @@ import visitlist from '@/components/sharepay/visitlist';
 import yourfriends from '@/components/user/your_friends';
 import yourbuyers from '@/components/user/your_buyers';
 import yourorders from '@/components/user/your_orders';
+import task from '@/components/common/task';
 // import citychoose from '@/components/my/citychoose';
 
 import '@/common/stylus/index.styl';
@@ -140,6 +141,7 @@ export default new Router({
     {path: '/friends', component: yourfriends, name: 'yourfriends'},
     {path: '/buyers', component: yourbuyers, name: 'yourbuyers'},
     {path: '/buyers/:uid', component: yourorders, name: 'yourorders'},
+    {path: '/task', component: task, name: 'task'},
     {path: '/my', component: my}
   ]
   // ,scrollBehavior (to, from, savedPosition) {

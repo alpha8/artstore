@@ -6,11 +6,11 @@
           <div class="top_item" v-for="channel in currentPageItems(page)" :class="channel.css">
             <div v-if="!channel.url" class="top_url" @click.stop.prevent="doAction(channel)">
               <i :class="channel.icon" class="top_icon"></i>
-              <h3 class="top_name"><div class="text">{{channel.name}}<i class="highlight" v-if="channel.highlight"></i></div></h3>
+              <h3 class="top_name"><div class="text" :class="{'highlight': channel.highlight}">{{channel.name}}<i></i></div></h3>
             </div>
             <router-link v-else :to="channel.url" class="top_url">
               <i :class="channel.icon" class="top_icon"></i>
-              <h3 class="top_name"><div class="text">{{channel.name}}<i class="highlight" v-if="channel.highlight"></i></div></h3>
+              <h3 class="top_name"><div class="text" :class="{'highlight': channel.highlight}">{{channel.name}}<i></i></div></h3>
             </router-link>
           </div>
         </div>
@@ -174,7 +174,6 @@
               margin: 0 auto
               position: relative
               text-align: center
-              padding-right: 9px
               overflow: hidden
               display: inline-block
               word-wrap: break-word
@@ -183,12 +182,14 @@
               -webkit-line-clamp: 1
               -webkit-box-orient: vertical
               max-width: 85%
-              .highlight
-                position: absolute
-                width: 6px
-                height: 6px
-                border-radius: 50%
-                background: #ff463c
-                right: 0
-                top: 0
+              &.highlight
+                padding-right: 9px
+                > i
+                  position: absolute
+                  width: 6px
+                  height: 6px
+                  border-radius: 50%
+                  background: #ff463c
+                  right: 0
+                  top: 0
 </style>

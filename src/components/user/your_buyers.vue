@@ -45,7 +45,7 @@
         buyers: [],
         pageNumber: 1,
         pageSize: 20,
-        totalPages: 0,
+        totalPages: -1,
         loadEnd: false,
         scroller: null,
         loading: false,
@@ -70,7 +70,7 @@
     },
     methods: {
       fetchData(force) {
-        if (this.totalPages && this.pageNumber > this.totalPages) {
+        if (this.totalPages > -1 && this.pageNumber > this.totalPages) {
           return;
         }
         let now = +new Date();
@@ -110,8 +110,9 @@
       _reset() {
         this.buyers = [];
         this.pageNumber = 1;
-        this.totalPages = 0;
+        this.totalPages = -1;
         this.loadEnd = false;
+        this.lastExec = 0;
       },
       getUserIcon(icon) {
         if (!icon) {

@@ -644,7 +644,7 @@ export default {
    * 查询首页栏目列表数据
    */
   getHomeList(params) {
-    return doGet(this.CONFIG.cmsCtx + '/artwork/home', params);
+    return doGet(this.CONFIG.cmsCtx + '/artwork/home/v2', params);
   },
 
   /**
@@ -666,5 +666,12 @@ export default {
    */
   getYourBuyerOrders(params) {
     return doGet(this.CONFIG.cmsCtx + '/front/order/list', params);
+  },
+
+  /**
+   * TODO待办项列表
+   */
+  getTodoList(uid, params) {
+    return doGet(this.CONFIG.webspreadCtx + '/user/schedule/' + uid, params);
   }
 };

@@ -10,7 +10,7 @@
                 <th class="col-1">朋友</th>
                 <th class="col-4">最近来访</th>
                 <th class="col-4">首次来访</th>
-                <th class="col-3">访问量</th>
+                <th class="col-3">PV</th>
               </tr>
               <tr v-for="(item, index) in friends" :key="index">
                 <td class="col-1"><img :src="getUserIcon(item.icon)" class="thumbnail" />{{item.nickName}}</td>
@@ -43,7 +43,7 @@
         friends: [],
         pageNumber: 1,
         pageSize: 20,
-        totalPages: 0,
+        totalPages: -1,
         loadEnd: false,
         scroller: null,
         loading: false,
@@ -68,7 +68,7 @@
     },
     methods: {
       fetchData(force) {
-        if (this.totalPages && this.pageNumber > this.totalPages) {
+        if (this.totalPages > -1 && this.pageNumber > this.totalPages) {
           return;
         }
         let now = +new Date();
@@ -108,7 +108,7 @@
       _reset() {
         this.friends = [];
         this.pageNumber = 1;
-        this.totalPages = 0;
+        this.totalPages = -1;
         this.loadEnd = false;
       },
       getUserIcon(icon) {
@@ -249,13 +249,13 @@
             word-break: break-all
             box-sizing: border-box
           .col-3, .col-5
-            width: 15%
-            padding-left: 8px
+            width: 10%
+            padding-left: 5px
             word-break: break-all
             overflow: hidden
             box-sizing: border-box
           .col-4
-            padding-left: 8px
+            padding-left: 5px
           .col-5
             width: 20%
           .highlight

@@ -170,6 +170,7 @@
           this.loading = false;
           this.loadEnd = this.pageNumber > this.totalPages;
         }).catch(response => {
+          this.products = [];
           this.loadEnd = false;
           this.loading = false;
           this.totalPages = 0;

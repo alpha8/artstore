@@ -16,7 +16,7 @@
         <modal-title title="茶席套装.三百席" moreText="更多" catKey="art" catName="茶席套装.三百席"></modal-title>
         <channel :items="arts" :cols="2" section="teasuite"></channel>
         <split></split>
-        <modal-title title="一虎一席茶室艺术空间"></modal-title>
+        <modal-title title="一虎一席茶室艺术空间 (30秒大片)"></modal-title>
         <div class="vipmovie">
           <div id="vip_video_player" :style="getVideoWidth">
             <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5db404564972818869478317/snapshot/1514945837_2671344614.100_0.jpg" id="vipvideo" :src="videos.vip">
@@ -194,7 +194,7 @@
         this.channelGoods = hitCache.channelGoods || [];
         setTimeout(() => {
           this.fetchData();
-        }, 5000);
+        }, 3000);
       } else {
         this.fetchData();
       }

@@ -115,8 +115,11 @@
       },
       loadUserProfile() {
         let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
+          return;
+        }
         api.getProfile({
-          userId: user.userId || 0
+          userId: user.userId
         }).then(response => {
           if (response.result === 0) {
             this.$store.dispatch('updateUserProfile', response);

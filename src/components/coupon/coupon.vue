@@ -11,7 +11,7 @@
       <div class="wallet-wrapper">
         <div class="wallet-heading">
           <p class="balance-name">优惠券余额（元）</p>
-          <p class="balance-num">{{balance | currency}}</p>
+          <p class="balance-num"><i class="symbol">¥</i>{{balance | currency('')}}</p>
         </div>
         <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">优惠券明细</span></div>
         <split></split>
@@ -167,6 +167,9 @@
           line-height:1
           font-weight: lighter
           margin-top: 5px
+          .symbol
+            font-size: 32px
+            margin-right: 1px
       >.btns
         padding: 0 10px
         box-sizing: border-box
