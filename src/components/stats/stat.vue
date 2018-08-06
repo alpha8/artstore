@@ -66,11 +66,11 @@
             <span class="nums">{{stats.allView || 0}}</span>
             <span class="label">访客总人数</span>
           </li>
-          <li>
+          <li @click.stop.prevent="openMyDetail('wipbargain')">
             <span class="nums">{{stats.sharecount || 0}}</span>
             <span class="label">正在砍价数</span>
           </li>
-          <li>
+          <li @click.stop.prevent="openMyDetail('wiptuan')">
             <span class="nums">{{stats.tuancount || 0}}</span>
             <span class="label">正在拼团数</span>
           </li>
@@ -268,6 +268,9 @@
           this.users = this.stats[key] || [];
           this._initScroll();
         }
+      },
+      openMyDetail(uri) {
+        this.$router.push({name: uri});
       },
       openGoodDetail(item) {
         this.$router.push({name: 'good', params: {id: item.pid}});

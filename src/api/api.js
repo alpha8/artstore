@@ -669,9 +669,23 @@ export default {
   },
 
   /**
-   * TODO待办项列表
+   * 待办项列表
    */
   getTodoList(uid, params) {
     return doGet(this.CONFIG.webspreadCtx + '/user/schedule/' + uid, params);
+  },
+
+  /**
+   * 所有拼砍中的订单
+   */
+  getWIPBargains(params) {
+    return doGet(this.CONFIG.webspreadCtx + '/spreadcut/list', params);
+  },
+
+  /**
+   * 所有拼团中的订单
+   */
+  getWIPTuans(params) {
+    return doGet(this.CONFIG.webspreadCtx + '/spreadteam/listcreate', params);
   }
 };

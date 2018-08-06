@@ -7,7 +7,7 @@
     <loading :show="loading.show" :text="loading.text"></loading>
     <toast v-show="toast.show" :text="toast.text"></toast>
     <gohome></gohome>
-    <!-- <task></task> -->
+    <task></task>
   </div>
 </template>
 

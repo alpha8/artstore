@@ -284,6 +284,8 @@
                     background: #fff
                     border: 1px solid rgba(7, 17, 27, 0.1)
       .no-order
+        position: relative
+        top: 44px
         width: 100%
         padding: 40px 0
         text-align: center

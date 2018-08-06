@@ -49,6 +49,7 @@
   import BScroll from 'better-scroll';
   import {mapGetters} from 'vuex';
   import api from '@/api/api';
+  const CONST_SHOW_ONCE = 'SHOW_ONCE';
 
   export default {
     data() {
@@ -61,23 +62,47 @@
           { key: 'cutCount', icon: 'icon-cutingprice', text: '正在砍价订单', desc: '您有正在进行中的砍价，点击可前往', link: '/myshare' }
         ],
         stats: {},
-        isShow: true
+        isShow: false,
+        showOnce: window.sessionStorage.getItem(CONST_SHOW_ONCE) || false
       };
     },
+    watch: {
+      $route (to, from) {
+        if (from && to && from.name !== to.name) {
+          let canShownPages = ['home', 'good', 'auctiondetail', 'seckillDetail', 'groupbuyDetail', 'articledetail', 'firstdetail', 'sharedetail', 'tuandetail', 'sharetuan'];
+          let found = canShownPages.find(page => page === to.name);
+          if (found) {
+            this.isShow = true;
+          } else {
+            this.isShow = false;
+          }
+        } else {
+          this.isShow = false;
+        }
+        this.showOnce = window.sessionStorage.getItem(CONST_SHOW_ONCE) || false;
+      }
+    },
     activated() {
-      this.getTodoList();
       this.refreshData();
+      setTimeout(() => {
+        this.getTodoList();
+      }, 2500);
     },
     deactivated() {
-      this.isShow = true;
+      this.isShow = false;
       this.stats = {};
     },
     mounted() {
-      this.getTodoList();
       this.refreshData();
+      setTimeout(() => {
+        this.getTodoList();
+      }, 2500);
     },
     computed: {
       showDialog() {
+        if (this.showOnce) {
+          return false;
+        }
         if (this.stats.total) {
           return true;
         }
@@ -192,6 +217,8 @@
       },
       hideDialog() {
         this.isShow = false;
+        this.showOnce = true;
+        window.sessionStorage.setItem(CONST_SHOW_ONCE, true);
       }
     },
     components: {
@@ -207,7 +234,7 @@
     top: auto
     bottom: 0
     width: 100%
-    z-index: 42
+    z-index: 99
     max-height: 500px
     background: #fff
     transform: translate3d(0, 0, 0)

@@ -74,8 +74,11 @@
         if (!force && now - this.lastExec <= 50) {
           return;
         }
+        let aid = this.$route.params.id || 0;
+        if (!aid) {
+          return;
+        }
         this.loading = true;
-        let aid = this.$route.params.id;
         api.getBidPrices({
           paging: this.pageNumber,
           pageSize: this.pageSize,

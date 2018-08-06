@@ -50,7 +50,7 @@
         </div>
         <split v-if="good.videoUrl"></split>
         <div class="intro" v-show="good.content">
-          <h1 class="title">商品介绍<span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span></h1>
+          <h1 class="title">商品介绍<!-- <span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span> --></h1>
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
         </div>
