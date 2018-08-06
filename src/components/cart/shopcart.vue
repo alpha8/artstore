@@ -4,7 +4,7 @@
     <div class="cart-wrapper" ref="cart">
       <div>
         <div class="toolbars">
-          <div class="delivery"><span class="icon-address"></span><span v-show="defaultAddress" class="address">{{defaultAddress.address}}</span></div>
+          <div class="delivery"><span class="icon-address"></span><span v-show="defaultAddress" class="gpsaddress">{{defaultAddress.address}}</span></div>
           <div class="edit" @click.stop.prevent="editProduct">{{editDesc}}</div>
         </div>
         <ul class="good-list" v-show="cartProducts && cartProducts.length > 0">
@@ -254,7 +254,7 @@
           padding-right: 3px
           padding-left: 10px
           overflow: hidden
-        .address
+        .gpsaddress
           max-width: 80%
           white-space: nowrap
           overflow: hidden

@@ -1,47 +1,53 @@
 <template>
-  <div class="task" ref="task" v-show="showDialog && isShow">
-    <div class="task-wrapper">
-      <div class="header-wrapper">
-        <div class="box">
-          <div class="box-container">
-            <div class="avatar">
-              <img :src="getUserIcon" alt="" class="pic">
-              <span class="vipflag" v-if="userExt.model === 2">代理商</span>
-            </div>
-            <div class="line">
-              <div class="userName"><span class="svip" :class="getVipIcon"></span>{{user().nickName}}
-                <div class="info" v-if="userExt.spreadLevel"><span class="vip" :class="getSVipIcon">{{getSVipTitle}}</span><span class="userflag" @click.stop.prevent="goYourFriends">[朋友:{{userExt.friendCount}}]</span><span class="userflag" @click.stop.prevent="goYourBuyers">[买家:{{userExt.friendOrderCount}}]</span></div>
+  <div v-show="showDialog && isShow">
+    <transition name="move">
+      <div class="task" ref="task">        
+        <div class="task-wrapper">
+          <div class="header-wrapper">
+            <div class="box">
+              <div class="box-container">
+                <div class="avatar">
+                  <img :src="getUserIcon" alt="" class="pic">
+                  <span class="vipflag" v-if="userExt.model === 2">代理商</span>
+                </div>
+                <div class="line">
+                  <div class="userName"><span class="svip" :class="getVipIcon"></span>{{user().nickName}}
+                    <div class="info" v-if="userExt.spreadLevel"><span class="vip" :class="getSVipIcon">{{getSVipTitle}}</span><span class="userflag" @click.stop.prevent="goYourFriends">[朋友:{{userExt.friendCount}}]</span><span class="userflag" @click.stop.prevent="goYourBuyers">[买家:{{userExt.friendOrderCount}}]</span></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          <div class="tasks-wrapper">
+            <div class="title border-1px">
+              待办事项
+            </div>
+            <div class="task-list">
+              <router-link :to="todo.link" class="task-item border-1px" v-for='(todo, index) in todos' :key="index" v-show="hasData(todo.key)">
+                <i :class="todo.icon"></i>
+                <span class="task-text">
+                  <div class="task-name">{{todo.text}}</div>
+                  <div class="task-desc">{{todo.desc}}</div>
+                </span>
+                <span class="task-ops"><i class="icon-keyboard_arrow_right"></i></span>
+              </router-link>
+            </div>
+          </div>
+          <div class="task-footer">
+            <div class="btns"><span class="btn-red" @click.stop.prevent="hideDialog">我知道了</span></div>
+          </div>
         </div>
       </div>
-      <div class="tasks-wrapper">
-        <div class="title border-1px">
-          待办事项
-        </div>
-        <div class="task-list">
-          <router-link :to="todo.link" class="task-item border-1px" v-for='(todo, index) in todos' :key="index" v-show="hasData(todo.key)">
-            <i :class="todo.icon"></i>
-            <span class="task-text">
-              <div class="task-name">{{todo.text}}</div>
-              <div class="task-desc">{{todo.desc}}</div>
-            </span>
-            <span class="task-ops"><i class="icon-keyboard_arrow_right"></i></span>
-          </router-link>
-        </div>
-      </div>
-      <div class="task-footer">
-        <div class="btns"><span class="btn-red" @click.stop.prevent="hideDialog">我知道了</span></div>
-      </div>
-    </div>
+    </transition>
+    <transition name="fade">
+      <div class="todo-mask"></div>
+    </transition>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import BScroll from 'better-scroll';
   import {mapGetters} from 'vuex';
-  import {removeCookie} from '@/common/js/store';
   import api from '@/api/api';
 
   export default {
@@ -61,15 +67,14 @@
     activated() {
       this.getTodoList();
       this.refreshData();
-      this.show();
     },
     deactivated() {
-      this.hide();
       this.isShow = true;
       this.stats = {};
     },
     mounted() {
-      this._initScroll();
+      this.getTodoList();
+      this.refreshData();
     },
     computed: {
       showDialog() {
@@ -149,7 +154,9 @@
         if (!user.userId) {
           return;
         }
-        api.getTodoList(user.userId).then(response => {
+        api.getTodoList(user.userId, {
+          front: true
+        }).then(response => {
           if (response.result === 0) {
             this.stats = response.data;
           }
@@ -195,8 +202,21 @@
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin';
   .task
-    position: relative
+    position: absolute
+    left: 0
+    top: auto
+    bottom: 0
+    width: 100%
+    z-index: 42
+    max-height: 500px
+    background: #fff
+    transform: translate3d(0, 0, 0)
     overflow: hidden
+    &.move-enter-active, &.move-leave-active
+      transform: translate3d(0, 0, 0)
+      transition: all 0.5s
+    &.move-enter, &.move-leave-active
+      transform: translate3d(0, 100%, 0)
   .header-wrapper
     position: relative
     width: 100%
@@ -422,4 +442,23 @@
           font-size: 22px
   .task-footer
     padding: 0 10px
+  .todo-mask
+    position: fixed
+    top: 0
+    left: 0
+    width: 100%
+    bottom: 0
+    z-index: 40
+    transition: all 0.5s
+    background: rgba(7, 17, 27, 0.6)
+    &.fade-transition
+      transition: all 0.5s
+      opacity: 1
+      background: rgba(7, 17, 27, 0.6)
+    &.fade-enter-active, &.fade-leave-active
+      opacity: 1
+      background: rgba(7, 17, 27, 0.6)
+    &.fade-enter, &.fade-leave-active
+      opacity: 0
+      background: rgba(7, 17, 27, 0)
 </style>

@@ -134,6 +134,7 @@
   @import '../../common/stylus/mixin';
   .address
     position: relative
+    top: 44px
     overflow: hidden
     >.address-wrap
       position: relative

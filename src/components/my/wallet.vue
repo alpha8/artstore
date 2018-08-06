@@ -11,7 +11,7 @@
       <div class="wallet-wrapper">
         <div class="wallet-heading">
           <p class="balance-name">账户余额（元）</p>
-          <p class="balance-num"><i class="symbol">¥</i>{{balance | currency('')}}</p>
+          <p class="balance-num"><i class="symbol">¥</i><span>{{balance | currency('')}}</span></p>
         </div>
         <div class="btns"><span class="btn-green" @click.stop.prevent="deposit">充值</span></div>
         <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">交易明细</span></div>
@@ -146,11 +146,13 @@
         .balance-num
           font-size: 40px
           line-height:1
-          font-weight: lighter
           margin-top: 5px
           .symbol
+            font-weight: lighter
             font-size: 32px
             margin-right: 1px
+          span
+            font-weight: lighter
       .wallet-content
         padding: 0 10px 13px
         color: #666

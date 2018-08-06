@@ -74,10 +74,11 @@
           pageSize: this.pageSize,
           type: 1,
           status: 1,
-          categoryId: this.$route.query.cid || ''
+          categoryId: this.$route.query.cid || '',
+          front: true
         }).then(response => {
           if (response.result === 0) {
-            let list = response.articles;
+            let list = response.data;
             if (list && list.length) {
               list.forEach(item => {
                 this.articles.push(item);
@@ -152,6 +153,8 @@
     font-size: 12px
     margin-bottom: 10px
   .no-order
+    position: relative
+    top: 44px
     width: 100%
     padding: 40px 0
     text-align: center
@@ -159,6 +162,7 @@
     color: #ccc
   .article-wrap
     position: relative
+    top: 44px
     width: 100%
     display: flex
     flex-wrap: wrap

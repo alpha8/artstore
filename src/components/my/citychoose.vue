@@ -35,6 +35,7 @@
     background: rgba(0, 0, 0, 0.5)
   .address
     position: absolute
+    top: auto
     bottom:  0
     left: 0
     z-index: 121

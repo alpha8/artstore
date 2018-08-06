@@ -83,13 +83,15 @@
   @import '../../common/stylus/mixin'
 
   .header
-    position: relative
+    position: fixed
+    width: 100%
     display: flex
     background: #f2f2f2    
     height: 44px
     line-height: 44px
     text-align: center
     color: #9B9B9B
+    z-index: 2
     .left
       flex: 30px 0 0
       padding-left: 8px

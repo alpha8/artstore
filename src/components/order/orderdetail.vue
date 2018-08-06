@@ -155,7 +155,8 @@
         let status = this.order.status;
         let canShowStatus = [0, 1, 2, 5];
         let isOwner = this.loginUser && this.loginUser.userId === this.order.userId;
-        return canShowStatus.filter(o => o === status).length && isOwner;
+        let ignoreOrderType = this.order.type === 8 || this.order.type === 6;
+        return canShowStatus.filter(o => o === status).length && isOwner && !ignoreOrderType;
       },
       totalPrice() {
         if (this.order && this.order.type === 6) {

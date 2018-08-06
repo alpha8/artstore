@@ -95,6 +95,7 @@
   @import '../../common/stylus/mixin';
   .refund
     position: relative
+    top: 44px
     overflow: hidden
     >.refund-wrap
       position: relative

@@ -234,6 +234,12 @@
         return sliders;
       }
     },
+    mounted() {
+      this.scroller = this.$refs.auctionRef;
+      window.onscroll = () => {
+        this.scrollY = window.pageYOffset;
+      };
+    },
     methods: {
       fetchAuction() {
         let id = this.$route.params.id;
@@ -304,7 +310,7 @@
         api.getBidPrices({
           paging: 1,
           pageSize: 5,
-          auctionProductId: this.auction.id || ''
+          auctionProductId: this.auction.id || 0
         }).then(response => {
           if (response.result === 0) {
             if (response.info.apprList && response.info.apprList.length) {
@@ -493,27 +499,27 @@
         socket.emit('disconnect', '');
       },
       _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.auctionRef, {
-              click: true,
-              bounce: false,
-              probeType: 3,
-              preventDefaultException: {
-                className: /(^|\s)goodsIntroHook(\s|$)/,
-                tagName: /^(P|SPAN)$/
-              }
-            });
-          } else {
-            this.scroll.refresh();
-          }
-          this.scroll.on('scroll', (pos) => {
-            let offset = Math.abs(Math.round(pos.y));
-            if (this.scrollY !== offset) {
-              this.scrollY = offset;
-            }
-          });
-        });
+        // this.$nextTick(() => {
+        //   if (!this.scroll) {
+        //     this.scroll = new BScroll(this.$refs.auctionRef, {
+        //       click: true,
+        //       bounce: false,
+        //       probeType: 3,
+        //       preventDefaultException: {
+        //         className: /(^|\s)goodsIntroHook(\s|$)/,
+        //         tagName: /^(P|SPAN)$/
+        //       }
+        //     });
+        //   } else {
+        //     this.scroll.refresh();
+        //   }
+        //   this.scroll.on('scroll', (pos) => {
+        //     let offset = Math.abs(Math.round(pos.y));
+        //     if (this.scrollY !== offset) {
+        //       this.scrollY = offset;
+        //     }
+        //   });
+        // });
       },
       getWXFollow() {
         let user = this.$store.getters.getUserInfo;
@@ -724,8 +730,8 @@
         this.auction.artwork.content = html;
       },
       goTop() {
-        let goodWrapper = this.$refs.auctionRef.getElementsByClassName('good-content')[0];
-        this.scroll.scrollToElement(goodWrapper, 300);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
       }
     },
     filters: {
@@ -758,7 +764,6 @@
     bottom: 50px
     width: 100%
     background: #fff
-    overflow: hidden
     &.move-enter-active, &.move-leave-active
       transition: all 0.2s linear
       transform: translate3d(0, 0, 0)
@@ -789,7 +794,9 @@
     .good-content
       position: relative
       width: 100%
-      padding-bottom: 30px
+      padding-bottom: 80px
+      overflow: auto
+      -webkit-overflow-scrolling: touch
     .detail
       position: relative
       z-index: 5

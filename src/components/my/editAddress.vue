@@ -118,6 +118,13 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin';
+  .addAddress
+    position: absolute
+    left: 0
+    top: 44px
+    bottom: 0
+    width: 100%
+    overflow: hidden
   .add-address-wrap
     position: relative
     background: #fff

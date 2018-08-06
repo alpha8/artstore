@@ -262,6 +262,12 @@
         }
       }
     },
+    mounted() {
+      this.scroller = this.$refs.good;
+      window.onscroll = () => {
+        this.scrollY = window.pageYOffset;
+      };
+    },
     methods: {
       fetchData() {
         let id = this.$route.params.id;
@@ -317,27 +323,27 @@
         });
       },
       _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.good, {
-              click: true,
-              bounce: false,
-              probeType: 3,
-              preventDefaultException: {
-                className: /(^|\s)goodsIntroHook(\s|$)/,
-                tagName: /^(P|SPAN)$/
-              }
-            });
-          } else {
-            this.scroll.refresh();
-          }
-          this.scroll.on('scroll', (pos) => {
-            let offset = Math.abs(Math.round(pos.y));
-            if (this.scrollY !== offset) {
-              this.scrollY = offset;
-            }
-          });
-        });
+        // this.$nextTick(() => {
+        //   if (!this.scroll) {
+        //     this.scroll = new BScroll(this.$refs.good, {
+        //       click: true,
+        //       bounce: false,
+        //       probeType: 3,
+        //       preventDefaultException: {
+        //         className: /(^|\s)goodsIntroHook(\s|$)/,
+        //         tagName: /^(P|SPAN)$/
+        //       }
+        //     });
+        //   } else {
+        //     this.scroll.refresh();
+        //   }
+        //   this.scroll.on('scroll', (pos) => {
+        //     let offset = Math.abs(Math.round(pos.y));
+        //     if (this.scrollY !== offset) {
+        //       this.scrollY = offset;
+        //     }
+        //   });
+        // });
       },
       bindPictureEvent() {
         if (!this.previewImgList.length) {
@@ -721,8 +727,8 @@
         this.good.content = html;
       },
       goTop() {
-        let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
-        this.scroll.scrollToElement(goodWrapper, 300);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
       }
     },
     filters: {
@@ -748,7 +754,6 @@
     bottom: 50px
     width: 100%
     background: #fff
-    overflow: hidden
     &.move-enter-active, &.move-leave-active
       transition: all 0.2s linear
       transform: translate3d(0, 0, 0)
@@ -779,7 +784,9 @@
     .good-content
       position: relative
       width: 100%
-      padding-bottom: 30px
+      padding-bottom: 80px
+      overflow: auto
+      -webkit-overflow-scrolling: touch
       .channel
         display: flex
         flex-wrap: wrap

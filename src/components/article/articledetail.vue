@@ -78,6 +78,12 @@
       }
       this._initScroll();
     },
+    mounted() {
+      this.scroller = this.$refs.article;
+      window.onscroll = () => {
+        this.scrollY = window.pageYOffset;
+      };
+    },
     methods: {
       fetchData() {
         let id = this.$route.params.id;
@@ -107,27 +113,27 @@
         });
       },
       _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.article, {
-              click: true,
-              bounce: false,
-              probeType: 3,
-              preventDefaultException: {
-                className: /(^|\s)articleContentHook(\s|$)/,
-                tagName: /^(P|SPAN)$/
-              }
-            });
-          } else {
-            this.scroll.refresh();
-          }
-          this.scroll.on('scroll', (pos) => {
-            let offset = Math.abs(Math.round(pos.y));
-            if (this.scrollY !== offset) {
-              this.scrollY = offset;
-            }
-          });
-        });
+        // this.$nextTick(() => {
+        //   if (!this.scroll) {
+        //     this.scroll = new BScroll(this.$refs.article, {
+        //       click: true,
+        //       bounce: false,
+        //       probeType: 3,
+        //       preventDefaultException: {
+        //         className: /(^|\s)articleContentHook(\s|$)/,
+        //         tagName: /^(P|SPAN)$/
+        //       }
+        //     });
+        //   } else {
+        //     this.scroll.refresh();
+        //   }
+        //   this.scroll.on('scroll', (pos) => {
+        //     let offset = Math.abs(Math.round(pos.y));
+        //     if (this.scrollY !== offset) {
+        //       this.scrollY = offset;
+        //     }
+        //   });
+        // });
       },
       bindPictureEvent() {
         if (!this.previewImgList.length) {
@@ -249,8 +255,8 @@
         this.$router.push({name: 'articles'});
       },
       goTop() {
-        let hook = this.$refs.article.getElementsByClassName('article-hook')[0];
-        this.scroll.scrollToElement(hook, 300);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -288,12 +294,13 @@
     bottom: 0
     width: 100%
     background: #fff
-    overflow: hidden
   .article
     position: relative
     width: 100%
     padding: 10px 0
     box-sizing: border-box
+    overflow: auto
+    -webkit-overflow-scrolling: touch
     .article-title
       padding: 0 8px 2px
       line-height: 1.3

@@ -11,7 +11,7 @@
       <div class="cashback-wrapper">
         <div class="cashback-heading">
           <p class="balance-name">奖金余额(元)</p>
-          <p class="balance-num"><i class="symbol">¥</i>{{balance | currency('')}}</p>
+          <p class="balance-num"><i class="symbol">¥</i><span>{{balance | currency('')}}</span></p>
         </div>
         <ul class="itemList">
           <li class="item border-1px">
@@ -153,11 +153,13 @@
         .balance-num
           font-size: 40px
           line-height:1
-          font-weight: lighter
           margin-top: 5px
           .symbol
+            font-weight: lighter
             font-size: 32px
             margin-right: 1px
+          span
+            font-weight: lighter
       .itemList
         display: flex
         width: 100%

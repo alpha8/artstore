@@ -180,7 +180,7 @@
       this.wxReady();
       // 性能优化，增加首页本地缓存
       let appCache = this.$store.getters.loadAppCache;
-      if (appCache.home) {
+      if (appCache.home && appCache.home.arts && appCache.home.arts.length) {
         console.log('cache hit.');
         let hitCache = appCache.home;
         this.arts = hitCache.arts || [];
@@ -246,17 +246,19 @@
           this.oldTeas = response.oldTeas || [];
           this.articles = response.articles || [];
           this.paints = response.paints || [];
-          this.$store.dispatch('updateAppCache', {'home': {
-            arts: this.arts,
-            dearTeapots: this.dearTeapots,
-            teaPots: this.teaPots,
-            goodTeas: this.goodTeas,
-            ya: this.ya,
-            oldTeas: this.oldTeas,
-            articles: this.articles,
-            paints: this.paints,
-            channelGoods: this.channelGoods
-          }});
+          if (this.arts.length && this.teaPots.length) {
+            this.$store.dispatch('updateAppCache', {'home': {
+              arts: this.arts,
+              dearTeapots: this.dearTeapots,
+              teaPots: this.teaPots,
+              goodTeas: this.goodTeas,
+              ya: this.ya,
+              oldTeas: this.oldTeas,
+              articles: this.articles,
+              paints: this.paints,
+              channelGoods: this.channelGoods
+            }});
+          }
         });
       },
       _initScroll() {

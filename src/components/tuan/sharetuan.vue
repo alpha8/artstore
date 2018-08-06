@@ -68,7 +68,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import BScroll from 'better-scroll';
+  // import BScroll from 'better-scroll';
   import {reduceGoodsName} from '@/common/js/util';
   import {countdown} from '@/common/js/date';
   import share from '@/components/tuan/share';
@@ -131,18 +131,24 @@
         return this.tuanData.owner;
       }
     },
+    mounted() {
+      this.scroller = this.$refs.tuan;
+      window.onscroll = () => {
+        this.scrollY = window.pageYOffset;
+      };
+    },
     methods: {
       _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.tuan, {
-              click: true,
-              bounce: false
-            });
-          } else {
-            this.scroll.refresh();
-          }
-        });
+        // this.$nextTick(() => {
+        //   if (!this.scroll) {
+        //     this.scroll = new BScroll(this.$refs.tuan, {
+        //       click: true,
+        //       bounce: false
+        //     });
+        //   } else {
+        //     this.scroll.refresh();
+        //   }
+        // });
       },
       fetchData() {
         let id = this.$route.params.id;
@@ -411,6 +417,10 @@
       },
       hide() {
         this.$store.commit('SHOW_FOOTER');
+      },
+      goTop() {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
       }
     },
     components: {
@@ -427,7 +437,6 @@
     bottom: 0
     width: 100%
     background: #fff
-    overflow: hidden
     &.move-enter-active, &.move-leave-active
       transition: all 0.2s linear
       transform: translate3d(0, 0, 0)
@@ -446,6 +455,8 @@
       position: relative
       width: 100%
       padding-bottom: 30px
+      overflow: auto
+      -webkit-overflow-scrolling: touch
       .tuan_wrap
         position: relative
         display: flex
