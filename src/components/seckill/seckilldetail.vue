@@ -43,6 +43,18 @@
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
         </div>
+        <split v-if="good.parameter"></split>
+        <div class="info goodsIntroHook" v-if="good.parameter">
+          <h1 class="title">商品参数</h1>
+          <div class="text">
+            <table class="table">
+              <tr v-for="p in good.parameter" v-if="p.value">
+                <td>{{p.text}}</td>
+                <td class="adjustText"><pre v-html="p.value"></pre></td>
+              </tr>
+            </table>
+          </div>
+        </div>
         <split></split>
         <div class="rating">
           <h1 class="title">商品评论</h1>
@@ -981,6 +993,27 @@
         padding-right: 10px
         box-sizing: border-box
         overflow-x: hidden
+      .table
+        width: 100%
+        max-width: 100%
+        order-spacing: 0
+        border-collapse: collapse
+        border-bottom: solid 1px #e7e7e7
+        border-left: solid 1px #e7e7e7
+        word-wrap: break-word
+        word-break: break-all
+        tr
+          display: flex
+        td, th
+          border-top: solid 1px #e7e7e7
+          border-right: solid 1px #e7e7e7
+          padding: 10px 5px 10px 8px
+          color: #848689
+          font-size: 12px
+          &:first-child
+            width: 80px
+        .adjustText
+          flex: 1
     .rating
       position: relative
       .title

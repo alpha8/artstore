@@ -56,7 +56,7 @@
           }, 50);
         }
       } else {
-        window.sessionStorage.clear();
+        window.sessionStorage.removeItem(AUTO_LOGIN);
       }
     }
   };

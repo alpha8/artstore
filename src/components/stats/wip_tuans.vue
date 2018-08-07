@@ -20,7 +20,7 @@
               <div class="col-2">{{item.createAt | formatDate}}</div>
             </mu-flexbox-item>
           </mu-flexbox>
-          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
+          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
         <div class="no-stats" v-show="orders.length === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
@@ -49,7 +49,7 @@
         loadEnd: false,
         scroller: null,
         loading: false,
-        lastExec: +new Date(),
+        lastExec: 0,
         orders: [],
         states: {
           0: '正在拼团',
@@ -61,7 +61,7 @@
       };
     },
     activated() {
-      this.orders = [];
+      this.loadEnd = false;
       this.fetchData(true);
       this.show();
     },
@@ -96,7 +96,7 @@
               this.orders.push(item);
             });
           }
-          this.totalPages = response.pages;
+          this.totalPages = response.pages || 1;
           this.pageNumber++;
           this.lastExec = +new Date();
           this.loading = false;
@@ -111,7 +111,7 @@
         this.orders = [];
         this.pageNumber = 1;
         this.totalPages = -1;
-        this.loadEnd = false;
+        this.lastExec = 0;
       },
       getThumbnail(item) {
         let icon = item.icon;

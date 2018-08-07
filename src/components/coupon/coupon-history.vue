@@ -25,7 +25,7 @@
               </div>
             </mu-flexbox-item>
           </mu-flexbox>
-          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
+          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
         <div class="no-coupon" v-show="coupons.length === 0">
@@ -70,6 +70,7 @@
       }
     },
     activated() {
+      this.loadEnd = false;
       this.fetchData(true);
       this.show();
     },
@@ -143,7 +144,6 @@
         this.coupons = [];
         this.pageNumber = 1;
         this.totalPages = 0;
-        this.loadEnd = false;
       },
       show() {
         this.$store.commit('HIDE_FOOTER');

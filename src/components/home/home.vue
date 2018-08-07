@@ -200,13 +200,19 @@
       }
     },
     mounted() {
-      this._initScroll();
+      this.scroller = this.$refs.mainWrapper;
+      window.addEventListener('scroll', this._handleScroll);
+    },
+    deactivated() {
+      window.removeEventListener('scroll', this._handleScroll);
     },
     updated() {
       this._initScroll();
     },
     activated() {
       this._initScroll();
+      window.removeEventListener('scroll', this._handleScroll);
+      window.addEventListener('scroll', this._handleScroll);
     },
     computed: {
       showFixed() {
@@ -262,25 +268,27 @@
         });
       },
       _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.mainWrapper, {
-              click: true,
-              probeType: 3,
-              bounce: false
-            });
-            let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
-            this.swipeHeight = swipe.clientHeight;
-            this.scroll.on('scroll', (pos) => {
-              let offset = Math.abs(Math.round(pos.y));
-              if (this.scrollY !== offset) {
-                this.scrollY = offset;
-              }
-            });
-          } else {
-            this.scroll.refresh();
-          }
-        });
+        let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
+        this.swipeHeight = swipe.clientHeight;
+        // this.$nextTick(() => {
+        //   if (!this.scroll) {
+        //     this.scroll = new BScroll(this.$refs.mainWrapper, {
+        //       click: true,
+        //       probeType: 3,
+        //       bounce: false
+        //     });
+        //     let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
+        //     this.swipeHeight = swipe.clientHeight;
+        //     this.scroll.on('scroll', (pos) => {
+        //       let offset = Math.abs(Math.round(pos.y));
+        //       if (this.scrollY !== offset) {
+        //         this.scrollY = offset;
+        //       }
+        //     });
+        //   } else {
+        //     this.scroll.refresh();
+        //   }
+        // });
       },
       selectGood(good) {
         this.selectedGood = good;
@@ -294,8 +302,11 @@
         this.$router.push({name: 'articles'});
       },
       goTop() {
-        let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
-        this.scroll.scrollToElement(swipe, 300);
+        this.scrollY = 0;
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        // let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
+        // this.scroll.scrollToElement(swipe, 300);
       },
       wxReady() {
         api.wxsignature(encodeURIComponent(location.href.split('#')[0])).then(response => {
@@ -343,6 +354,9 @@
           current: this.wxqrcode,
           urls: [this.wxqrcode]
         });
+      },
+      _handleScroll(e) {
+        this.scrollY = window.pageYOffset;
       }
     },
     components: {
@@ -368,10 +382,12 @@
     top: 0
     bottom: 50px
     width: 100%
-    overflow: hidden
     .mainContent
       position: relative
-      padding-bottom: 20px
+      padding-bottom: 80px
+      overflow: auto
+      box-sizing: border-box
+      -webkit-overflow-scrolling: touch
       #tencent_video_player, #vip_video_player
         position: relative
         width: 100%

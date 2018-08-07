@@ -37,7 +37,7 @@
             </div>
           </mu-flexbox-item>
         </mu-flexbox>
-        <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
+        <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
         <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;千款精品库每周上新，敬请饱览美物&nbsp;&nbsp;———</div>
       </div>
     </div>

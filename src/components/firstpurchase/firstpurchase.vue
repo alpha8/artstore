@@ -15,7 +15,7 @@
             </div>
           </mu-flexbox-item>
         </mu-flexbox>
-        <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
+        <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
         <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
@@ -67,6 +67,7 @@
       }
     },
     activated() {
+      this.loadEnd = false;
       this.show();
       this.fetchData(true);
       this.loadUserProfile();
@@ -132,7 +133,6 @@
         this.products = [];
         this.pageNumber = 1;
         this.totalPages = -1;
-        this.loadEnd = false;
       },
       fillName(name) {
         return reduceGoodsName(name);

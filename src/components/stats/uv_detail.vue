@@ -20,7 +20,7 @@
               <div class="col-5">{{item.pv}}</div>
             </mu-flexbox-item>
           </mu-flexbox>
-          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
+          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
         <div class="no-stats" v-show="pvs.length === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
@@ -70,7 +70,7 @@
       };
     },
     activated() {
-      this.pvs = [];
+      this.loadEnd = false;
       this.fetchData(true);
       this.show();
     },
@@ -128,7 +128,6 @@
         this.pvs = [];
         this.pageNumber = 1;
         this.totalPages = -1;
-        this.loadEnd = false;
       },
       getThumbnail(item) {
         let icon = item.user && item.user.icon;

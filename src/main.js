@@ -5,13 +5,11 @@ import Vue from 'vue';
 import axios from 'axios';
 import VueAxios from 'vue-axios';
 import VueAwesomeSwiper from 'vue-awesome-swiper';
+Vue.use(VueAxios, axios);
+Vue.use(VueAwesomeSwiper);
 
 import VueLazyload from 'vue-lazyload';
 Vue.use(VueLazyload);
-
-// import AlloyFinger from 'alloyfinger/alloy_finger';
-// import AlloyFingerVue from 'alloyfinger/vue/alloy_finger.vue';
-// Vue.use(AlloyFingerVue, {AlloyFinger});
 
 import App from './App';
 // import App from '@/components/xmas/App';
@@ -19,16 +17,22 @@ import router from './router';
 import store from './store';
 import { currency } from '@/common/js/util';
 
-import MuseUI from 'muse-ui';
-import 'muse-ui/dist/muse-ui.css';
+// import MuseUI from 'muse-ui';
+// import 'muse-ui/dist/muse-ui.css';
+// Vue.use(MuseUI);
+import '@/components/common/styles/base.less';
+import infiniteScroll from '@/components/common/infiniteScroll';
+import * as flexbox from '@/components/common/flexbox';
+const modules = {
+  infiniteScroll,
+  ...flexbox
+};
+Object.keys(modules).forEach((key) => {
+  Vue.component(modules[key].name, modules[key]);
+});
 
 Vue.filter('currency', currency);
 Vue.config.productionTip = false;
-
-Vue.use(VueAxios, axios);
-Vue.use(VueAwesomeSwiper);
-Vue.use(MuseUI);
-
 import wx from 'weixin-js-sdk';
 
 /** 全局守卫 */

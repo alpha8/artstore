@@ -41,7 +41,7 @@
               </div>
             </mu-flexbox-item>
           </mu-flexbox>
-          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
+          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
         <div class="no-order" v-show="showRecords === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
@@ -82,6 +82,7 @@
       };
     },
     activated() {
+      this.loadEnd = false;
       let type = this.$route.query.type;
       if (typeof type === 'undefined') {
         this.activeItem = -1;
@@ -149,7 +150,6 @@
         this.orders = [];
         this.pageNumber = 1;
         this.totalPages = -1;
-        this.loadEnd = false;
       },
       getThumbnail(item) {
         let icon = item.icon;

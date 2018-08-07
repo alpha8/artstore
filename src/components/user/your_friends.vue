@@ -20,7 +20,7 @@
               </tr>
             </table>
           </mu-flexbox>
-          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore"/>
+          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
         <div class="no-friends" v-show="friends.length === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有记录哦&nbsp;&nbsp;———</div>
@@ -53,6 +53,7 @@
       };
     },
     activated() {
+      this.loadEnd = false;
       this.fetchData(true);
       this.show();
     },
@@ -80,7 +81,7 @@
         api.getYourFriends({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          rid: user.userId || 0
+          rid: user.userId || -1
         }).then(response => {
           if (response.code === 0) {
             if (response.data && response.data.length) {
@@ -109,7 +110,6 @@
         this.friends = [];
         this.pageNumber = 1;
         this.totalPages = -1;
-        this.loadEnd = false;
       },
       getUserIcon(icon) {
         if (!icon) {

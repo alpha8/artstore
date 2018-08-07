@@ -20,7 +20,7 @@
           </div>
           <div class="tasks-wrapper">
             <div class="title border-1px">
-              待办事项
+              <b>待办事项</b> (您可前往「个人中心」查看)
             </div>
             <div class="task-list">
               <router-link :to="todo.link" class="task-item border-1px" v-for='(todo, index) in todos' :key="index" v-show="hasData(todo.key)">
@@ -62,8 +62,8 @@
           { key: 'cutCount', icon: 'icon-cutingprice', text: '正在砍价订单', desc: '您有正在进行中的砍价，点击可前往', link: '/myshare' }
         ],
         stats: {},
-        isShow: false,
-        showOnce: window.sessionStorage.getItem(CONST_SHOW_ONCE) || false
+        isShow: true,
+        showOnce: window.localStorage.getItem(CONST_SHOW_ONCE) || 0
       };
     },
     watch: {
@@ -79,7 +79,7 @@
         } else {
           this.isShow = false;
         }
-        this.showOnce = window.sessionStorage.getItem(CONST_SHOW_ONCE) || false;
+        this.showOnce = window.localStorage.getItem(CONST_SHOW_ONCE) || 0;
       }
     },
     activated() {
@@ -100,7 +100,10 @@
     },
     computed: {
       showDialog() {
-        if (this.showOnce) {
+        // 一天只弹出一次
+        let lastDay = this.showOnce;
+        let today = (new Date().getMonth() + 1) + '-' + new Date().getDate();
+        if (lastDay === today) {
           return false;
         }
         if (this.stats.total) {
@@ -217,8 +220,8 @@
       },
       hideDialog() {
         this.isShow = false;
-        this.showOnce = true;
-        window.sessionStorage.setItem(CONST_SHOW_ONCE, true);
+        this.showOnce = (new Date().getMonth() + 1) + '-' + new Date().getDate();
+        window.localStorage.setItem(CONST_SHOW_ONCE, this.showOnce);
       }
     },
     components: {
@@ -229,7 +232,7 @@
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin';
   .task
-    position: absolute
+    position: fixed
     left: 0
     top: auto
     bottom: 0
@@ -417,6 +420,9 @@
       box-sizing: border-box
       i
         padding-right: 3px
+      b
+        font-weight: 700
+        color: #000
     .task-list
       position: relative
       width: 100%
