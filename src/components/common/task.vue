@@ -421,7 +421,6 @@
       i
         padding-right: 3px
       b
-        font-weight: 700
         color: #000
     .task-list
       position: relative

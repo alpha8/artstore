@@ -39,7 +39,7 @@
         </div>
         <split v-show="good.content"></split>
         <div class="info goodsIntroHook" v-show="good.content">
-          <h1 class="title">商品介绍</h1>
+          <h1 class="title">商品介绍<span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span></h1>
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
         </div>
@@ -130,6 +130,7 @@
     </div>
     <frame></frame>
     <share ref="weixinShare"></share>
+    <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
@@ -152,6 +153,7 @@
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   import share from '@/components/good-detail/share';
+  import layer from '@/components/common/layer';
 
   const ALL = 2;
   // const ERR_OK = 0;
@@ -193,6 +195,12 @@
           common: '中评',
           negative: '差评'
         },
+        layer: {
+          title: '快速检索，扫码定位商品',
+          button: {
+            text: '知道了!'
+          }
+        },
         psCtx: api.CONFIG.psCtx,
         balls: [{show: false}, {show: false}, {show: false}, {show: false}, {show: false}],
         dropBalls: [],
@@ -233,6 +241,17 @@
         }
         this.marked = false;
         return 'icon-heart';
+      },
+      getQrcode() {
+        if (this.seckill.seckillId) {
+          let uid = this.$store.getters.getUserInfo.userId;
+          if (uid) {
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.seckill.seckillId}&userId=${uid}&type=3" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+          } else {
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.seckill.seckillId}" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+          }
+        }
+        return '';
       }
     },
     mounted() {
@@ -481,6 +500,9 @@
       back() {
         this.$router.back();
       },
+      showQrcode() {
+        this.$refs.layerWin.show();
+      },
       selectRating(type) {
         this.selectType = type;
         this.$nextTick(() => {
@@ -714,7 +736,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, modalTitle, channel, share, gotop
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, modalTitle, channel, share, gotop, layer
     }
   };
 </script>
@@ -975,6 +997,20 @@
         line-height: 14px
         font-size: 14px
         color: rgb(7, 17, 27)
+        .toolbar
+          position: absolute
+          display: inline-block
+          right: 0
+          top: 0
+          width: auto
+          height: 34px
+          line-height: 34px
+          padding-right: 8px
+          box-sizing: border-box
+          i
+            font-size: 20px
+            vertical-align: middle
+            color: #666
       .sellpoint
         padding: 0 10px 3px 14px
         font-size: 13px

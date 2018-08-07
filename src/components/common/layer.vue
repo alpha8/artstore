@@ -53,7 +53,7 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   .layer
-    position: absolute
+    position: fixed
     top: 50%
     left: 50%
     width: 300px
@@ -125,7 +125,7 @@
         color: #fff
         border-radius: 3px
   .mask
-    position: absolute
+    position: fixed
     top: 0
     left: 0
     right: 0

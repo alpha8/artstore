@@ -242,7 +242,12 @@
       },
       getQrcode() {
         if (this.good.id) {
-          return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+          let uid = this.$store.getters.getUserInfo.userId;
+          if (uid) {
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&userId=${uid}" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+          } else {
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+          }
         }
         return '';
       },

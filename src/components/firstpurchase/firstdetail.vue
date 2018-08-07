@@ -50,7 +50,7 @@
         </div>
         <split v-if="good.videoUrl"></split>
         <div class="intro" v-show="good.content">
-          <h1 class="title">商品介绍<!-- <span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span> --></h1>
+          <h1 class="title">商品介绍<span class="toolbar" @click.stop.prevent="showQrcode"><i class="icon-qrcode"></i></span></h1>
           <div class="sellpoint" v-if="good.sellPoint">{{good.sellPoint}}</div>
           <div class="text" v-html="good.content" ref="goodContent" id="productIntro"></div>
         </div>
@@ -218,7 +218,12 @@
       },
       getQrcode() {
         if (this.good.id) {
-          return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+          let uid = this.$store.getters.getUserInfo.userId;
+          if (uid) {
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&userId=${uid}&type=7" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+          } else {
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+          }
         }
         return '';
       },
