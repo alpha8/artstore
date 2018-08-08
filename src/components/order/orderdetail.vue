@@ -246,16 +246,46 @@
         }
       },
       cancelOrder() {
-        api.cancelOrder({
-          orderNo: this.order.orderNo
-        }).then(response => {
-          if (response.result === 0) {
-            this.$store.dispatch('openToast', '订单已取消！');
-            this.$router.push('/order');
-          } else {
-            this.$store.dispatch('openToast', '订单取消失败！');
+        // 如果是秒杀订单，先调秒杀接口取消秒杀成功数据，并退回商品库存。
+        if (this.order.type === 3) {
+          let userId = this.$store.getters.getUserInfo.userId;
+          let seckillId = 0;
+          let products = this.order.products || [];
+          if (products.length) {
+            seckillId = products[0].id;
           }
-        });
+          api.cancelSeckillOrder({
+            seckillId: seckillId,
+            userId: userId
+          }).then(response => {
+            if (response.success) {
+              this.$store.dispatch('removeKillProduct', seckillId);
+              api.cancelOrder({
+                orderNo: this.order.orderNo
+              }).then(res => {
+                if (res.result === 0) {
+                  this.$store.dispatch('openToast', '订单已取消！');
+                  this.$router.push('/order');
+                } else {
+                  this.$store.dispatch('openToast', '订单取消失败！');
+                }
+              });
+            } else {
+              this.$store.dispatch('openToast', '服务器忙，请稍候重试！');
+            }
+          });
+        } else {
+          api.cancelOrder({
+            orderNo: this.order.orderNo
+          }).then(response => {
+            if (response.result === 0) {
+              this.$store.dispatch('openToast', '订单已取消！');
+              this.$router.push('/order');
+            } else {
+              this.$store.dispatch('openToast', '服务器忙，请稍候重试！');
+            }
+          });
+        }
       },
       trackExpress() {
         this.$router.push({name: 'expresslog', params: {expressNo: this.order.express.expressNo, expressCode: this.order.express.expressCode || 'unknown'}});

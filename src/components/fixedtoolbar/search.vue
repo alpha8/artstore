@@ -33,16 +33,23 @@
       return {
         showBox: false,
         hotSearch: [
-          {text: '绿茶', pv: 500},
-          {text: '铁观音', pv: 2000},
-          {text: '乔木生普', pv: 2000},
-          {text: '茶仓', pv: 2000},
-          {text: '红泥小火炉', pv: 2000},
-          {text: '鸣雀杯', pv: 2000},
+          {text: '紫砂壶', pv: 500},
           {text: '品茗杯', pv: 2000},
-          {text: '闲云野鹤杯', pv: 2000},
-          {text: '马蹄杯', pv: 2000},
-          {text: '瓷雕', pv: 2000}
+          {text: '茶壶', pv: 2000},
+          {text: '壶承', pv: 2000},
+          {text: '茶盘', pv: 2000},
+          {text: '茶叶罐', pv: 2000},
+          {text: '水盂', pv: 2000},
+          {text: '铜雕', pv: 2000},
+          {text: '武夷', pv: 500},
+          {text: '肉桂', pv: 500},
+          {text: '单枞', pv: 500},
+          {text: '红茶', pv: 2000},
+          {text: '生普', pv: 2000},
+          {text: '铁观音', pv: 2000},
+          {text: '版画', pv: 2000},
+          {text: '毛贞元', pv: 2000},
+          {text: '董俊良', pv: 2000}
         ],
         keyword: ''
       };

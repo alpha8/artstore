@@ -113,6 +113,7 @@
                 let addr = addressList[i];
                 if (item.id === addr.id) {
                   addressList.splice(i, 1);
+                  i--;
                 }
               };
               vm.$store.dispatch('setDefaultAddress', vm.addressList);

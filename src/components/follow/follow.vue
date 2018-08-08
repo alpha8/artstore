@@ -127,6 +127,7 @@
             for (let i = 0; i < items.length; i++) {
               if (items[i].id === product.id) {
                 items.splice(i, 1);
+                i--;
               }
             }
             this.follows = items;
@@ -290,7 +291,6 @@
                     border: 1px solid rgba(7, 17, 27, 0.1)
       .no-follow
         position: relative
-        top: 44px
         width: 100%
         padding: 40px 0
         text-align: center

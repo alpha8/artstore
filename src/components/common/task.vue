@@ -178,6 +178,12 @@
         });
       },
       getTodoList() {
+        // 一天只弹出一次
+        let lastDay = this.showOnce;
+        let today = (new Date().getMonth() + 1) + '-' + new Date().getDate();
+        if (lastDay === today) {
+          return;
+        }
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
           return;

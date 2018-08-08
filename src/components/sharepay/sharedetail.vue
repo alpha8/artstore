@@ -37,7 +37,7 @@
         <split v-if="cuttingData && cuttingData.cutInfos"></split>
         <div class="info" v-if="cuttingData && cuttingData.cutInfos">
           <h1 class="title" v-if="isOwner">好友助力砍价 <span v-if="cuttingData.leftEndTimes && cuttingData.cutOrder.status <= 2">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.days">{{countdownStats.days}}天</span><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
-          <h1 class="title" v-else>您的朋友获得助力： <span v-if="cuttingData.leftEndTimes && cuttingData.cutOrder.status <= 2">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.days">{{countdownStats.days}}天</span><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
+          <h1 class="title" v-else>朋友获得助力 <span v-if="cuttingData.leftEndTimes && cuttingData.cutOrder.status <= 2">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.days">{{countdownStats.days}}天</span><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
           <table class="tablist">
             <tr class="head">
               <td class="col-2" nowrap>好友名称 <span class="moreuv" v-if="cuttingData.count" @click.stop.prevent="goVisitList">[{{cuttingData.count}}人..]</span></td>
@@ -307,7 +307,7 @@
           if (uid) {
             return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&userId=${uid}&type=9" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
           } else {
-            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&type=9" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
           }
         }
         return '';
@@ -1222,6 +1222,8 @@
         line-height: 14px
         font-size: 14px
         color: rgb(7, 17, 27)
+        overflow: hidden
+        text-overflow: ellipsis
         .toolbar
           position: absolute
           display: inline-block

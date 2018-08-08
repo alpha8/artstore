@@ -137,6 +137,7 @@ export const actions = {
         let item = added[i];
         if (item.id === p.id) {
           added.splice(i, 1);
+          i--;
           amount -= item.count;
           delete goods['p' + p.id];
         }
@@ -270,6 +271,7 @@ export const mutations = {
         for (let i = 0; i < arr.length; i++) {
           if (arr[i].id === id || arr[i].extendId === id) {
             state.cart.added.splice(i, 1);
+            i--;
           }
         }
       } else {
@@ -302,6 +304,7 @@ export const mutations = {
       for (let i = 0; i < arr.length; i++) {
         if (arr[i].id === good.id || arr[i].extendId === good.id) {
           state.cart.added.splice(i, 1);
+          i--;
         }
       }
       delete state.products[prefix + good.extendId];
@@ -339,6 +342,7 @@ export const mutations = {
       let address = addressList[i];
       if (address.id === id) {
         addressList.splice(i, 1);
+        i--;
       }
     }
     save(ADDRESS_LIST, addressList);
@@ -355,6 +359,7 @@ export const mutations = {
       for (let i = 0; i < cartGoods.length; i++) {
         if (cartGoods[i].id === good.id) {
           cartGoods.splice(i, 1);
+          i--;
           if (!good.extendId) {
             delete goodCount['p' + good.id];
           } else {
@@ -422,6 +427,7 @@ export const mutations = {
     for (let i = 0; i < killList.length; i++) {
       if (killList[i] === seckillId) {
         killList.splice(i, 1);
+        i--;
       }
     }
     state.killProducts = killList;

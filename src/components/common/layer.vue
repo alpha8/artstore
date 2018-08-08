@@ -101,7 +101,7 @@
           font-size: 14px
     .layer-content
       line-height: 1.3
-      padding: 10px 10px 13px 8px
+      padding: 10px 10px 13px 7px
       overflow: hidden
       font-size: 14px
       text-align: center
@@ -116,7 +116,7 @@
       height: 32px
       line-height: 32px
       text-align: center
-      padding-bottom: 15px
+      padding-bottom: 17px
       span
         padding: 8px 25px
         background: #1ab394

@@ -16,8 +16,8 @@
                       <p class="line">时间：{{item.createTime | formatDate}}</p>
                     </div>
                     <div class="item-ops">
-                      <span class="btn" v-show="item.status === 0" @click.stop.prevent="pay">去付款</span>
-                      <span class="btn white" v-show="item.status === 1" @click.stop.prevent="showOrders()">我的订单</span>
+                      <span class="btn" v-show="item.status === 0" @click.stop.prevent="showOrders(item)">去付款</span>
+                      <span class="btn white" v-show="item.status === 1" @click.stop.prevent="showOrders(item)">我的订单</span>
                     </div>
                   </div>
                 </div>
@@ -91,6 +91,7 @@
               this.seckills.push(item);
             });
           }
+          this.cleanCancelGoods(response.list || []);
           this.totalPages = response.pages;
           this.pageNumber++;
           this.lastExec = +new Date();
@@ -106,6 +107,17 @@
         this.seckills = [];
         this.pageNumber = 1;
         this.totalPages = -1;
+      },
+      cleanCancelGoods(items) {
+        let killList = this.$store.getters.getKilledProduct || [];
+        for (let i = 0; i < killList.length; i++) {
+          let found = items.find(item => item.seckillId === killList[i]);
+          if (!found) {
+            this.$store.dispatch('removeKillProduct', killList[i]);
+            killList.splice(i, 1);
+            i--;
+          }
+        }
       },
       getThumbnail(item) {
         let icon = item.icon;
@@ -134,11 +146,59 @@
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
       },
-      showOrders() {
-        window.location.href = 'http://' + location.host + '/weixin/order?type=-1';
+      showOrders(item) {
+        let uid = this.$store.getters.getUserInfo.userId || -1;
+        api.getCmsOrderInfo({
+          type: 3,
+          userId: uid,
+          productId: item.seckillId
+        }).then(response => {
+          if (response && response.data) {
+            let order = response.data;
+            if (order.status === 0) {
+              window.location.href = 'http://' + location.host + '/weixin/order?type=0';
+            } else if (item.status === 0) {
+              // 取消订单重新秒杀，未创建订单，可继续支付
+              this.pay(item);
+            } else if (order.status === 4) {
+              api.cancelSeckillOrder({
+                seckillId: item.seckillId,
+                userId: uid
+              }).then(response => {
+                if (response.success) {
+                  this.$store.dispatch('removeKillProduct', item.seckillId);
+                  this.$store.dispatch('openToast', '付款超时，秒杀订单已取消!');
+                }
+              window.location.href = 'http://' + location.host + '/weixin/order/' + order.orderNo;
+              });
+            } else {
+              window.location.href = 'http://' + location.host + '/weixin/order/' + order.orderNo;
+            }
+          } else {
+            // 未创建订单，可继续支付
+            this.pay(item);
+          }
+        }).catch(response => {
+          this.$store.dispatch('openToast', '服务器忙，请稍候重试！');
+        });
       },
-      pay() {
-        window.location.href = 'http://' + location.host + '/weixin/order?type=0';
+      pay(item) {
+        let good = {
+          id: item.seckillId,
+          name: item.name,
+          pictures: [item.icon ? api.CONFIG.psCtx + item.icon + '?w=750&h=500' : api.CONFIG.defaultImg],
+          src: item.icon ? api.CONFIG.psCtx + item.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
+          content: '',
+          price: item.killPrice,
+          oldPrice: item.price,
+          count: 1,
+          icon: item.icon ? api.CONFIG.psCtx + item.icon + '?w=750&h=500' : api.CONFIG.defaultImg,
+          checked: false,
+          createTime: item.createTime
+        };
+        this.$store.dispatch('addPayGoods', [good]);
+        this.$store.dispatch('addKillProduct', item.seckillId);
+        window.location.href = 'http://' + location.host + '/weixin/pay?orderType=3';
       }
     },
     components: {
@@ -285,7 +345,6 @@
                     border: 1px solid rgba(7, 17, 27, 0.1)
       .no-order
         position: relative
-        top: 44px
         width: 100%
         padding: 40px 0
         text-align: center

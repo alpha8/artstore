@@ -38,10 +38,18 @@
       return {
         isOpen: false,
         words: [
-          '床前明月光，{name}成功帮好友砍价{amount}元。',
-          '高阁建础立丹崖，{name}成功帮好友砍价{amount}元。',
-          '小舟轻荡春山雨，{name}成功帮好友砍价{amount}元。',
-          '横笛晚唱清音邈，{name}成功帮好友砍价{amount}元。'
+          '床前明月光，{name}成功帮好友砍价{amount}元～',
+          '高阁建础立丹崖，{name}成功帮好友砍价{amount}元～',
+          '小舟轻荡春山雨，{name}成功帮好友砍价{amount}元～',
+          '心悦君兮君不知，{name}成功帮好友砍价{amount}元～',
+          '小苑蒲萄花满枝，{name}成功帮好友砍价{amount}元～',
+          '横笛晚唱清音邈，{name}成功帮好友砍价{amount}元～',
+          '桃源深处，小桥流水人家。{name}成功帮好友砍价{amount}元～',
+          '清晨入古寺，初日照高林。{name}成功帮好友砍价{amount}元～',
+          '敬亭白云气，秀色连苍梧。{name}成功帮好友砍价{amount}元～',
+          '水调歌归去，洞天隐苍崖。{name}成功帮好友砍价{amount}元～',
+          '谩将无孔笛，吹出凤游云。{name}成功帮好友砍价{amount}元～',
+          '君住长江头，我住长江尾。{name}成功帮好友砍价{amount}元～'
         ]
       };
     },
@@ -126,7 +134,7 @@
               width: 80px
               height: 80px
           .footer
-            padding: 0 15px 21px
+            padding: 2px 15px 23px
             text-align: center
             box-sizing: border-box
             .btn-group

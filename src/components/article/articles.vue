@@ -154,7 +154,6 @@
     margin-bottom: 10px
   .no-order
     position: relative
-    top: 44px
     width: 100%
     padding: 40px 0
     text-align: center

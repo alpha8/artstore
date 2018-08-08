@@ -177,13 +177,6 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin'
-  .header
-    position: fixed
-    top: 0
-    width: 100%
-    height: 44px
-    overflow: hidden
-    z-index: 2
   .order
     position: absolute
     top: 44px
@@ -420,7 +413,6 @@
                         background-color: #b9b8b8
       .no-order
         position: relative
-        top: 44px
         width: 100%
         padding: 40px 0
         text-align: center

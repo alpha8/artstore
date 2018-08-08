@@ -126,25 +126,6 @@
       showProductDetail(product) {
         this.$router.push({name: 'good', params: {id: product.artworkId}});
       },
-      removeItem(product) {
-        let user = this.$store.getters.getUserInfo;
-        api.removeCollect({
-          userId: user.userId || 0,
-          type: 1,
-          artworkId: product.artworkId
-        }).then(response => {
-          if (response.result === 0) {
-            this.$store.dispatch('openToast', '已取消收藏！');
-            let items = this.bids;
-            for (let i = 0; i < items.length; i++) {
-              if (items[i].id === product.id) {
-                items.splice(i, 1);
-              }
-            }
-            this.bids = items;
-          }
-        });
-      },
       show() {
         this.$store.commit('HIDE_FOOTER');
       },

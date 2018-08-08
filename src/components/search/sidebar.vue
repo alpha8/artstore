@@ -218,6 +218,7 @@
             for (let i = 0; i < items.length; i++) {
               if (items[i].id === o.id) {
                 items.splice(i, 1);
+                i--;
               }
             }
           });
@@ -264,6 +265,7 @@
             for (let i = 0; i < items.length; i++) {
               if (items[i].id === o.id) {
                 items.splice(i, 1);
+                i--;
               }
             }
           });

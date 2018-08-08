@@ -222,7 +222,7 @@
           if (uid) {
             return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&userId=${uid}&type=7" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
           } else {
-            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&type=7" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
           }
         }
         return '';

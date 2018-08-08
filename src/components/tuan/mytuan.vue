@@ -500,7 +500,6 @@
                       color: #f15353
       .no-order
         position: relative
-        top: 44px
         width: 100%
         padding: 40px 0
         text-align: center
