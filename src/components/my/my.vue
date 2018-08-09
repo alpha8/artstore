@@ -5,7 +5,7 @@
         <div class="box">
           <div class="box-container">
             <div class="avatar">
-              <a v-show="!hasLogin()" :href="getLoginUrl()"><img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10?w=80&h=80" alt="" class="pic"></a>
+              <a v-show="!hasLogin()" :href="getLoginUrl()"><img :src="getDefaultAvatar" alt="" class="pic"></a>
               <img :src="getUserIcon" alt="" class="pic" v-show="hasLogin()">
               <span class="vipflag" v-if="userExt.model === 2">代理商</span>
             </div>
@@ -191,6 +191,9 @@
           return user.icon;
         }
         return this.profile.user && this.profile.user.icon;
+      },
+      getDefaultAvatar() {
+        return `${api.CONFIG.userAvatar}?w=80&h=80`;
       }
     },
     updated() {

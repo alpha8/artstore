@@ -87,6 +87,7 @@
         padding-bottom: 64px
         .title
           color: #fff
+          background-color: transparent
         .bulletin
           width: 100%
           margin: 0 auto

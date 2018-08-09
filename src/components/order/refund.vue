@@ -6,7 +6,7 @@
         <ul>
           <li class="border-1px">
             <p>
-              <span class="title">退款原因</span>
+              <span class="title">退款原因:</span>
               <textarea v-model="refund.reason" placeholder="申请退款的理由" rows="3" required></textarea>
               <i class="icon-close" v-show="refund.reason" @click.stop.prevent="doClear"></i>
             </p>
@@ -119,7 +119,7 @@
               padding-right: 20px
               text-align: right
               font-size: 14px
-              line-height: 1
+              line-height: 1.5
             input
               height: 20px
               line-height: normal

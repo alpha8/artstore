@@ -159,9 +159,9 @@
           icon: 'icon-file'
         }],
         swiperSlides: [
-          'http://www.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=500',
-          'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?h=500',
-          'http://www.yihuyixi.com/ps/download/5959aca5e4b00faa50475a19?h=500'
+          'http://imgcdn.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=500',
+          'http://imgcdn.yihuyixi.com/ps/download/5959aca5e4b00faa50475a18?h=500',
+          'http://imgcdn.yihuyixi.com/ps/download/5959aca5e4b00faa50475a19?h=500'
         ],
         selectedGood: {},
         showTop: false,

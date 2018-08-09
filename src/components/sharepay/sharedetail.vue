@@ -910,7 +910,7 @@
         let w = window.innerWidth;
         let picImgList = [];
         let imgs = this.$refs.goodContent.getElementsByTagName('img');
-        let prefix = 'http://www.yihuyixi.com';
+        let prefix = api.CONFIG.cdnCtx;
         let html = this.good.content;
         for (let i = 0; i < imgs.length; i++) {
           let img = imgs[i];
@@ -930,6 +930,8 @@
             key += suffix;
             if (src.indexOf('http:') < 0) {
               src = prefix + src;
+            } else {
+              src = src.replace('http://www.yihuyixi.com', prefix);
             }
             if (src.lastIndexOf('?') < 0) {
               src += '?1';
@@ -959,6 +961,8 @@
             let p2 = suffix + ' src="' + pic + '"';
             if (pic.indexOf('http:') < 0) {
               pic = prefix + pic;
+            } else {
+              pic = pic.replace('http://www.yihuyixi.com', prefix);
             }
             if (pic.lastIndexOf('?') < 0) {
               pic += '?1';

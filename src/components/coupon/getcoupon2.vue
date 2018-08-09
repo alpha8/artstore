@@ -11,8 +11,8 @@
           <div class="rule-title">————  活动规则 ———— </div>
           <div class="rule-content">
             <ol v-if="!qrcode.content">
-              <li>优惠券可叠加使用，订单支付时系统将自动抵扣</li>
-              <li>如有其它疑问，请咨询一虎一席艺术平台客服</li>
+              <li>优惠券可叠加使用，订单支付时系统将自动抵扣。</li>
+              <li>如有其它问题，请咨询一虎一席茶席艺术商城客服。</li>
             </ol>
             <div v-html="qrcode.content"></div>
           </div>
@@ -146,7 +146,7 @@
           type: this.qrcode.type
         }).then(response => {
           if (response.result === 0) {
-            this.layer.text = '优惠券领取成功，您可前往一虎一席商城「个人中心 — 优惠券余额」中查看明细';
+            this.layer.text = '<p style="text-align:left">优惠券领取成功，您可前往一虎一席商城「个人中心 — 优惠券余额」中查看明细。</p>';
             this.$refs.layerWin.show();
           } else if (response.code === 1001) {
             this.layer.text = '您已领取过此优惠券';
@@ -253,7 +253,7 @@
           padding-top: 40px
       .coupon-rules
         position: relative
-        padding: 10px 20px
+        padding: 10px 0 0 15px
         .rule-title
           color: #ccc
           height: 40px
@@ -265,4 +265,6 @@
           font-size: 14px
           line-height: 1.5
           color: #ccc
+          li
+            list-style: disc
 </style>

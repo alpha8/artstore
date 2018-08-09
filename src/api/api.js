@@ -92,10 +92,12 @@ export default {
    webspreadCtx: '/webspread',
    auctionCtx: '/cmsAuction',
    seckillCtx: '/goodsKill',
-   psCtx: 'http://www.yihuyixi.com/ps/download/',
+   psCtx: 'http://imgcdn.yihuyixi.com/ps/download/',
+   cdnCtx: 'http://imgcdn.yihuyixi.com',
    defaultImg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAAMFBMVEX///+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpufk+pAAAAD3RSTlMAESIzRFVmd4iZqrvM3e5GKvWZAAABv0lEQVRoge2YP1ICMRSH2R0UYZiRwlI5glfAylZP4G5twxGwt0BPgKVDs44XAFsbqW32CFTCiEAkhF3235DJyxud0d9XZRLyTXjJe9ndUgkAAAAAAAAAAADgx3DfhI5nI2Fd6xNfRsJDvVAYCt/7uwlNhQ+aXwQQ/hmhc/14xiq8EmLWYBTuyYx4yoydN+jCphRO0kNl8UIXelI4Tw+dqLJAE3alcJkOYqCCwCasrHpmZGE7/5dbsuvOalOmyQEnlF2fVOG+nD1MDlRVcb2hHuzOqtSnQugp4ZQqdG9fL5P97nhT/32m4hBfXh89HmE3Ei557pSyxa1XKGwmfEsO4YBFeBSfm4rNRR8LnXAYNVsswnpcEFXaWQsDsdi0aikfNYYyeX3VbAuOFa6yWYzWrTjtrITra0oFMfvMSBOuN1YFscchdNXG+tFarYXHaq4M4imLMFBzZRAHHMKDzdxFNu2owvjk+aULDuG2/I0yaUcUbvdhUsv5CEJn+zo173AIC1ZlJyxYlZWwvNtnLsylhq1Q94ZrKqxqfMZCj1l4P2YW9nU+U6F2gaZCPb8rZP8qwv7dBgAAAAAAAAAAAP+Lb4Qtq0R4e5WOAAAAAElFTkSuQmCC',
-   wxqrcode: 'http://www.yihuyixi.com/ps/download/5b41b508e4b0a730427414b5',
-   usericon: 'http://www.yihuyixi.com/ps/download/5ac3557de4b05b85527caee3'
+   wxqrcode: 'http://imgcdn.yihuyixi.com/ps/download/5b41b508e4b0a730427414b5',
+   usericon: 'http://imgcdn.yihuyixi.com/ps/download/5ac3557de4b05b85527caee3',
+   userAvatar: 'http://imgcdn.yihuyixi.com/ps/download/5959abcae4b00faa50475a10'
   },
 
   /**
