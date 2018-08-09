@@ -911,6 +911,7 @@
         line-height: 14px
         font-size: 14px
         color: rgb(7, 17, 27)
+        background-color: #fff
       .sellpoint
         padding: 0 10px 3px 14px
         font-size: 13px
@@ -929,6 +930,7 @@
         padding-right: 10px
         box-sizing: border-box
         overflow-x: hidden
+        background-color: #fff
     .rating
       position: relative
       .title
@@ -936,9 +938,11 @@
         padding: 10px 14px
         font-size: 14px
         color: rgb(7, 17, 27)
+        background-color: #fff
       .rating-wrapper
         position: relative
         padding: 0 14px
+        background-color: #fff
         .rating-item
           position: relative
           padding: 16px 0

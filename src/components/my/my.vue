@@ -269,6 +269,10 @@
     bottom: 50px
     width: 100%
     overflow: hidden
+    .my-wrapper
+      position: relative
+      width: 100%
+      background-color: #fff
   .header-wrapper
     position: relative
     width: 100%

@@ -457,6 +457,7 @@
       padding-bottom: 30px
       overflow: auto
       -webkit-overflow-scrolling: touch
+      background-color: #fff
       .tuan_wrap
         position: relative
         display: flex

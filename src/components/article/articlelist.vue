@@ -85,6 +85,7 @@
   .article-list
     position: relative
     display: block
+    background-color: #fff
     .article-item
       display: flex
       width: 100%

@@ -122,6 +122,7 @@
     height: auto
     white-space: nowrap
     overflow: hidden
+    background-color: #fff
     .top_list
       position: relative
       display: flex

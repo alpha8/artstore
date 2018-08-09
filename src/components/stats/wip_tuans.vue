@@ -194,6 +194,7 @@
       overflow: auto
       box-sizing: border-box
       -webkit-overflow-scrolling: touch
+      background-color: #fff
       .detail_list
         position: relative
         width: 100%

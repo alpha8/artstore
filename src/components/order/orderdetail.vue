@@ -404,6 +404,7 @@
     bottom: 50px
     width: 100%
     overflow: hidden
+    background-color: #fff
     &.nofooter
       bottom: 0
     .detail-wrap

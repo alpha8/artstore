@@ -48,6 +48,7 @@
     width: 100%
     padding: 14px 18px 12px 14px
     box-sizing: border-box
+    background-color: #fff
     &:after
       position: absolute
       display: block

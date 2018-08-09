@@ -327,6 +327,7 @@
       padding-bottom: 20px
       box-sizing: border-box
       overflow: hidden
+      background-color: #fff
       .title
         position: relative
         padding: 10px

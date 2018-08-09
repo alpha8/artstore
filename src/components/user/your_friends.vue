@@ -208,6 +208,7 @@
         overflow: auto
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
+        background-color: #fff
         .friends-list
           position: relative
           width: 100%

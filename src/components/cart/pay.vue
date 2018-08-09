@@ -473,9 +473,9 @@
       height: 70px
       top: 44px
       z-index: 8
+      background: #fff
       .addressNull
         position: relative
-        background: #fff
         padding: 0 10px
         h3
           position: relative

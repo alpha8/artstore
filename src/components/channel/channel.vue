@@ -152,6 +152,7 @@
     display: flex
     flex-wrap: wrap
     margin-left: 5px
+    background-color: #fff
     .chanel-item
       position: relative
       width: 33.3%

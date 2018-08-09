@@ -414,6 +414,7 @@
         display: flex
         flex-wrap: wrap
         width: 100%
+        background-color: #fff
         >li
           position: relative
           width: 50%

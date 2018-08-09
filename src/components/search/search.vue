@@ -520,6 +520,7 @@
       width: 100%
       padding: 10px 0 10px 5px
       overflow: auto
+      background-color: #fff
       box-sizing: border-box
       -webkit-overflow-scrolling: touch
       .mu-flexbox

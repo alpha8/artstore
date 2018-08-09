@@ -880,6 +880,7 @@
         line-height: 14px
         font-size: 14px
         color: rgb(7, 17, 27)
+        background-color: #fff
         .toolbar
           position: absolute
           display: inline-block
@@ -900,6 +901,7 @@
         line-height: 1.3
         box-sizing: border-box
         overflow-x: hidden
+        background-color: #fff
       #tencent_video_player
         width: 100%
         height: auto
@@ -963,9 +965,11 @@
         padding: 10px 14px
         font-size: 14px
         color: rgb(7, 17, 27)
+        background-color: #fff
       .rating-wrapper
         position: relative
         padding: 0 14px
+        background-color: #fff
         .rating-item
           position: relative
           padding: 16px 0

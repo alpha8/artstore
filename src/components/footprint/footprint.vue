@@ -213,6 +213,7 @@
     .footprint-wrap
       position: relative
       width: 100%
+      background-color: #fff
       .btn-red
         background: #d05148
         color: #fff

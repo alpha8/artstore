@@ -274,6 +274,7 @@
         overflow: auto
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
+        background-color: #fff
         .order-list
           position: relative
           width: 100%

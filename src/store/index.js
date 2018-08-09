@@ -23,7 +23,7 @@ const APP_CACHE = 'APP_CACHE';
 const CARTS_ADDED = 'cartAdded';
 const PAY_GOODS = 'payGoods';
 const ANONYMOUS = 'anonymous';
-const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
+const DEFAULT_USER = '{}';
 
 // states
 export const state = {

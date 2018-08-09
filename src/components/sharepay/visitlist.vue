@@ -204,6 +204,7 @@
         overflow: auto
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
+        background-color: #fff
         .tablist
           position: relative
           width: 100%

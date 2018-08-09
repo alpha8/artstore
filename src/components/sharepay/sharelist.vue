@@ -229,6 +229,7 @@
         overflow: auto
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
+        background-color: #fff
         .rules-wrap
           position: relative
           width: 100%

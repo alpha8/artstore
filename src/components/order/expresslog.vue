@@ -160,6 +160,7 @@
         font-size: 12px
         line-height: 1.5
         box-sizing: border-box
+        background-color: #fff
         .expressLog-list
           position: relative
           .expressLog-item
