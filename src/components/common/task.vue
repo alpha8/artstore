@@ -20,17 +20,17 @@
           </div>
           <div class="tasks-wrapper">
             <div class="title border-1px">
-              <b>待办事项</b> (您可前往「个人中心」查看)
+              <b>待办事项:</b> (您可前往「个人中心」查看)
             </div>
             <div class="task-list">
-              <router-link :to="todo.link" class="task-item border-1px" v-for='(todo, index) in todos' :key="index" v-show="hasData(todo.key)">
+              <div class="task-item border-1px" v-for='(todo, index) in todos' :key="index" v-show="hasData(todo.key)" @click.stop.prevent="goUrl(todo.link)">
                 <i :class="todo.icon"></i>
                 <span class="task-text">
                   <div class="task-name">{{todo.text}}</div>
                   <div class="task-desc">{{todo.desc}}</div>
                 </span>
                 <span class="task-ops"><i class="icon-keyboard_arrow_right"></i></span>
-              </router-link>
+              </div>
             </div>
           </div>
           <div class="task-footer">
@@ -86,7 +86,7 @@
       this.refreshData();
       setTimeout(() => {
         this.getTodoList();
-      }, 2500);
+      }, 1500);
     },
     deactivated() {
       this.isShow = false;
@@ -96,7 +96,7 @@
       this.refreshData();
       setTimeout(() => {
         this.getTodoList();
-      }, 2500);
+      }, 1500);
     },
     computed: {
       showDialog() {
@@ -179,11 +179,11 @@
       },
       getTodoList() {
         // 一天只弹出一次
-        let lastDay = this.showOnce;
-        let today = (new Date().getMonth() + 1) + '-' + new Date().getDate();
-        if (lastDay === today) {
-          return;
-        }
+        // let lastDay = this.showOnce;
+        // let today = (new Date().getMonth() + 1) + '-' + new Date().getDate();
+        // if (lastDay === today) {
+        //   return;
+        // }
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
           return;
@@ -193,6 +193,9 @@
         }).then(response => {
           if (response.result === 0) {
             this.stats = response.data;
+            this.$store.dispatch('updateAppCache', {'TodoList': {
+              data: this.stats
+            }});
           }
         }).catch(response => {
           console.error(response);
@@ -228,6 +231,10 @@
         this.isShow = false;
         this.showOnce = (new Date().getMonth() + 1) + '-' + new Date().getDate();
         window.localStorage.setItem(CONST_SHOW_ONCE, this.showOnce);
+      },
+      goUrl(link) {
+        this.$router.push(link);
+        this.hideDialog();
       }
     },
     components: {
@@ -437,6 +444,7 @@
         font-size: 14px
         padding: 10px
         height: 36px
+        color: #666
         border-1px(rgba(7, 17, 27, 0.1))
         &:last-child
           border-none()

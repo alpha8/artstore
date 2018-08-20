@@ -45,7 +45,7 @@
         <ul class="itemList">
           <li class="item border-1px" v-for="item in wallet">
             <router-link :to="item.link">
-              <div class="amount">{{item.amount | currency}}</div>
+              <div class="amount"><i class="symbol">¥</i><span>{{item.amount | currency('')}}</span></div>
               <div class="text">{{item.text}}</div>
             </router-link>
           </li>
@@ -74,6 +74,7 @@
             <i :class="item.icon"></i>
             <span class="text" v-if="!item.callable">{{item.text}}<i class="dot" v-if="item.highlight"></i></span>
             <span class="text" v-else @click.stop.prevent="item.callable">{{item.text}}</span>
+            <em class="count" v-if="getWIPCount(item)">({{getWIPCount(item)}})</em>
             <span class="more" v-show="!item.noPage"><i class="icon-keyboard_arrow_right"></i></span>
           </router-link>
         </div>
@@ -107,8 +108,8 @@
           { amount: 0, text: '奖金余额', link: '/cashback' }
         ],
         others: [
-          { icon: 'icon-tuan', text: '我的拼团', link: '/mytuan', highlight: true },
-          { icon: 'icon-cutingprice', text: '我的砍价', link: '/myshare', highlight: true },
+          { icon: 'icon-tuan', text: '我的拼团', link: '/mytuan', key: 'teamCount' },
+          { icon: 'icon-cutingprice', text: '我的砍价', link: '/myshare', key: 'cutCount' },
           { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
           { icon: 'icon-group_purchase', text: '我的团购', link: '/mygroupbuy' },
           { icon: 'icon-auction', text: '我的拍卖', link: '/myauction' },
@@ -254,6 +255,14 @@
       },
       goYourBuyers() {
         this.$router.push({name: 'yourbuyers'});
+      },
+      getWIPCount(item) {
+        if (!item.key) {
+          return 0;
+        }
+        let appCache = this.$store.getters.loadAppCache;
+        let cacheData = appCache.TodoList && appCache.TodoList.data || {};
+        return cacheData[item.key] || 0;
       }
     },
     components: {
@@ -488,7 +497,11 @@
           font-size: 22px
           color: rgb(255, 95, 62)
           line-height: 1 
-          margin-bottom: 2px       
+          margin-bottom: 2px
+          .symbol
+            font-size: 19px
+            margin-right: 1px
+            vertical-align: bottom
         .text
           padding-top: 5px
           line-height: 1
@@ -538,6 +551,16 @@
             background: #ff463c
             right: 0
             top: 1px
+        .count
+          position: relative
+          display: inline-block
+          text-align: center
+          color: #f23030
+          height: 16px
+          line-height: 16px
+          font-size: 13px
+          margin-left: -9px
+          vertical-align: top
         .more
           float: right
           font-size: 18px

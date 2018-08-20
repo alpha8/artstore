@@ -380,6 +380,13 @@ export default {
   },
 
    /**
+    * 秒杀单品详情及用户是否参与秒杀
+    */
+  getSeckillDetailAndUser(id, userId, params) {
+    return doGet(`${this.CONFIG.seckillCtx}/seckill/${id}/detail/${userId}`, params);
+  },
+
+   /**
     * 获取秒杀URL
     */
   getSeckillUrl(seckillId) {
@@ -410,8 +417,8 @@ export default {
   /**
    * 结束秒杀订单
    */
-  finishSeckill(seckillId) {
-    return doPost(this.CONFIG.seckillCtx + '/seckill/' + seckillId + '/finish');
+  finishSeckill(seckillId, orderNo) {
+    return doPost(`${this.CONFIG.seckillCtx}/seckill/${seckillId}/finish/v2?orderNo=${orderNo}`);
   },
 
    /**

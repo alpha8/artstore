@@ -182,8 +182,10 @@
             this.lazyloaded = false;
             this.fetchData();
           }
-          let goodWrapper = this.$refs.good.getElementsByClassName('good-content')[0];
-          this.scroll.scrollToElement(goodWrapper, 300);
+        }
+        if (to && to.name === 'good') {
+          document.body.scrollTop = 0;
+          document.documentElement.scrollTop = 0;
         }
       }
     },

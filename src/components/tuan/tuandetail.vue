@@ -193,6 +193,7 @@
 
   export default {
     activated() {
+      this.$store.dispatch('reloadUserInfo');
       this.fetchData();
     },
     deactivated() {
@@ -774,7 +775,11 @@
       joinTuan() {
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
-          this.$store.dispatch('openToast', '您尚未登录，请至「个人中心 」点击登录。');
+          let tuanId = this.$route.query.tuanId || '';
+          setTimeout(() => {
+            let redirect = 'http://' + location.host + '/weixin/tuandetail/' + this.tuan.id + '?tuanId=' + tuanId;
+            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+          }, 1500);
           return;
         }
         let tuanId = this.$route.query.tuanId;
@@ -790,6 +795,10 @@
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
+            if (response.code === 2001) {
+              this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
+              return;
+            }
             let good = {
               id: this.tuan.id,
               name: this.tuan.name,
@@ -806,7 +815,7 @@
             this.$store.dispatch('addPayGoods', [good]);
             window.location.href = 'http://' + location.host + '/weixin/pay?orderType=8';
           } else if (response.code === 2001) {
-            this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
+            this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
             console.log(response);
           } else if (response.code === 1006) {
             this.$store.dispatch('openToast', '活动已结束!');
@@ -826,7 +835,11 @@
       createTuan() {
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
-          this.$store.dispatch('openToast', '您尚未登录，请至「个人中心 」点击登录。');
+          let tuanId = this.$route.query.tuanId || '';
+          setTimeout(() => {
+            let redirect = 'http://' + location.host + '/weixin/tuandetail/' + this.tuan.id + '?tuanId=' + tuanId;
+            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+          }, 1500);
           return;
         }
         api.createTuanOrder({
@@ -838,6 +851,10 @@
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
+            if (response.code === 2001) {
+              this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
+              return;
+            }
             this.preOrderId = response.data.infoOrderId;
             this.updateShareData();
             let good = {

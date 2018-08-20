@@ -355,6 +355,7 @@
           };
         }
         let goodsId = '';
+        let seckillId = 0;
         if (orderType === '8' || orderType === '9') {
           // 拼团订单和分享订单采用预订单ID作为产品ID给后台
           let items = [];
@@ -364,7 +365,6 @@
           });
           params.products = items;
         } else {
-          let seckillId = 0;
           let items = [];
           this.products.forEach(product => {
             seckillId = product.id;
@@ -391,9 +391,6 @@
             this.$store.dispatch('openToast', '生成订单失败！');
             this.paying = false;
             return;
-          }
-          if (params.type === 3) {
-            api.finishSeckill(seckillId);
           }
           let order = response.order;
           let payParams = {
@@ -425,6 +422,8 @@
                   } else if (orderType === '9') {
                     that.$router.replace('myshare');
                     return;
+                  } else if (orderType === '3') {
+                    api.finishSeckill(seckillId, order.orderNo);
                   }
                 } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
                   that.$store.dispatch('openToast', '取消支付！');

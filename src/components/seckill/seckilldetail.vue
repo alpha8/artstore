@@ -160,6 +160,7 @@
 
   export default {
     activated() {
+      this.$store.dispatch('reloadUserInfo');
       this.fetchData();
     },
     deactivated() {
@@ -269,11 +270,7 @@
         if (!user.userId) {
           anon = this.$store.getters.getAnonymous;
         }
-        api.getSeckillDetail(id, {
-          type: 'seckilldetail',
-          stat: 1,
-          unlogin: anon
-        }).then(res => {
+        api.getSeckillDetailAndUser(id, user.userId).then(res => {
           if (!res.success) {
             this.$store.dispatch('closeLoading');
             return;
@@ -593,7 +590,8 @@
         });
       },
       existKilled() {
-        return !!this.$store.getters.getKilledProduct.find(id => id === this.seckill.seckillId);
+        // return !!this.$store.getters.getKilledProduct.find(id => id === this.seckill.seckillId);
+        return this.seckill.sk && this.seckill.sk.seckillId || false;
       },
       killNotify() {
         let openid = this.$store.getters.getUserInfo.openid;

@@ -8,9 +8,9 @@
             <table>
               <tr>
                 <th class="col-1">朋友</th>
-                <th class="col-4">最近来访</th>
-                <th class="col-4">首次来访</th>
-                <th class="col-3">PV</th>
+                <th class="col-4" @click.stop.prevent="fireSort('latestTime')"><span class="sort">最近来访<i class="arrow_up" :class="{'on': sort.latestTime === -1}"></i><i class="arrow_down" :class="{'on': sort.latestTime === 1}"></i></span></th>
+                <th class="col-4" @click.stop.prevent="fireSort('firstTime')"><span class="sort">首次来访<i class="arrow_up" :class="{'on': sort.firstTime === -1}"></i><i class="arrow_down" :class="{'on': sort.firstTime === 1}"></i></span></th>
+                <th class="col-3" @click.stop.prevent="fireSort('pv')"><span class="sort">PV<i class="arrow_up" :class="{'on': sort.pv === -1}"></i><i class="arrow_down" :class="{'on': sort.pv === 1}"></i></span></th>
               </tr>
               <tr v-for="(item, index) in friends" :key="index">
                 <td class="col-1"><img :src="getUserIcon(item.icon)" class="thumbnail" />{{item.nickName}}</td>
@@ -49,7 +49,12 @@
         loading: false,
         lastExec: +new Date(),
         scrollY: 0,
-        winHeight: document.documentElement.clientHeight
+        winHeight: document.documentElement.clientHeight,
+        sort: {
+          latestTime: 0,
+          firstTime: 0,
+          pv: 0
+        }
       };
     },
     activated() {
@@ -132,6 +137,60 @@
       goTop() {
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
+      },
+      fireSort(sortKey) {
+        if (!this.friends.length) {
+          return;
+        }
+        let sortKeys = ['latestTime', 'firstTime', 'pv'];
+        let lastSort = this.sort[sortKey];
+        if (lastSort === 1) {
+          this.sort[sortKey] = -1;
+        } else {
+          this.sort[sortKey] = 1;
+        }
+        for (let i = 0; i < sortKeys.length; i++) {
+          if (sortKeys[i] !== sortKey) {
+            this.sort[sortKeys[i]] = 0;
+          }
+        }
+        if (this.sort[sortKey] === 1) {
+          this.friends.sort(this.sortAsc(this.friends, sortKey));
+        } else {
+          this.friends.sort(this.sortDesc(this.friends, sortKey));
+        }
+      },
+      sortDesc(data, field) {
+        var f = data[0][field] || 0;
+        if (typeof f !== 'number') {
+          return function(o1, o2) {
+            var v1 = o1[field] || '';
+            var v2 = o2[field] || '';
+            return v1.localeCompare(v2);
+          };
+        } else {
+          return function(o1, o2) {
+            var v1 = o1[field] || 0;
+            var v2 = o2[field] || 0;
+            return v1 - v2;
+          };
+        }
+      },
+      sortAsc(data, field) {
+        var f = data[0][field] || 0;
+        if (typeof f !== 'number') {
+          return function(o1, o2) {
+            var v1 = o1[field] || '';
+            var v2 = o2[field] || '';
+            return v2.localeCompare(v1);
+          };
+        } else {
+          return function(o1, o2) {
+            var v1 = o1[field] || 0;
+            var v2 = o2[field] || 0;
+            return v2 - v1;
+          };
+        }
       }
     },
     components: {
@@ -270,6 +329,32 @@
             vertical-align: middle
             overflow: hidden
             box-sizing: border-box
+          .sort
+            position: relative
+            display: inline-block
+            padding-right: 10px
+            .arrow_up, .arrow_down
+              position: absolute
+              display: inline-block
+              right: 0
+              width: 0
+              height: 0
+              font-size: 0
+              line-height: 0
+              border-color: transparent transparent #777f86 transparent
+              border-width: 0 3px 3px
+              border-style: solid
+              vertical-align: middle
+            .arrow_up
+              top: 16px
+              &.on
+                border-color: transparent transparent #ff463c transparent
+            .arrow_down
+              border-color: #777f86 transparent transparent transparent
+              border-width: 3px 3px 0
+              bottom: 16px
+              &.on
+                border-color: #ff463c transparent transparent transparent
       .no-friends
         width: 100%
         padding: 40px 0

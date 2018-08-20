@@ -1,5 +1,6 @@
 <template>
   <div>
+      <frame></frame>
     <fixedheader title="砍价商品详情" right-icon="icon-more"></fixedheader>
     <div class="good" ref="good">
       <div class="good-content">
@@ -49,7 +50,7 @@
               <td class="col-4">{{cuttingData.enterInfo.createAt | formatDate}}</td>
               <td class="col-3 text-center">已至底价</td>
             </tr>
-            <tr v-for="(item, index) in cuttingData.cutInfos" :key="index">
+            <tr v-for="(item, index) in showTopTen" :key="index">
               <td class="col-2" nowrap><img :src="getUserIcon(item.userIcon)" class="thumbnail">{{getFriendlyUsername(item.userName)}}</td>
               <td class="col-4">{{item.createAt | formatDate}}</td>
               <td class="col-3 text-center">{{item.cutFee | currency}}</td>
@@ -143,7 +144,6 @@
       </div>
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
-    <frame></frame>
     <share ref="weixinShare" :needPayTips="needPayTips"></share>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <div class="fixed-foot">
@@ -158,20 +158,27 @@
           <span class="button-lg orange" v-if="hasProgressOrder || GotAndPay">去付款</span>
           <span class="button-lg orange" v-else>立即购买</span>
         </div>
+        <div class="foot-item btn-share" v-else-if="sharepay.stock <= 0">
+          <span class="button-lg gray">已售罄</span>
+        </div>
         <div class="foot-item btn-share" v-else @click.stop.prevent="viewMime">
           <span class="button-lg orange">我也要砍价</span>
         </div>
-        <div class="foot-item" @click.stop.prevent="reshare" v-if="isOwner && cutStatus >= 3">
-          <span class="button-lg darkred">好友重新助力砍价</span>
+        <div class="foot-item" @click.stop.prevent="reshare" v-if="isOwner && cutStatus >= 3 && sharepay.stock > 0">
+          <span class="button-lg darkred">重新发起砍价</span>
         </div>
         <div class="foot-item" v-else-if="isOwner && getCutPrice <= sharepay.buttomFee">
           <span class="button-lg gray">到达底价</span>
+        </div>
+        <div class="foot-item" @click.stop.prevent="wxshare" v-else-if="sharepay.stock > 0 && !isOwner && !cuttingData.cutOrder && !cuttingData.cut">
+          <span class="button-lg darkred" :class="{'gray': getCutPrice <= sharepay.buttomFee}">发起砍价</span>
         </div>
         <div class="foot-item" @click.stop.prevent="wxshare" v-else-if="isOwner || !cuttingData.cutOrder">
           <span class="button-lg darkred" :class="{'gray': getCutPrice <= sharepay.buttomFee}">好友助力砍价</span>
         </div>
         <div class="foot-item" @click.stop.prevent="wxshare" v-else>
-          <span class="button-lg darkred" :class="{'gray': getCutPrice <= sharepay.buttomFee}">帮好友助力砍价</span>
+          <span class="button-lg gray" v-if="sharepay.stock <= 0">已售罄</span>
+          <span class="button-lg darkred" v-else :class="{'gray': getCutPrice <= sharepay.buttomFee}">帮好友助力砍价</span>
         </div>
       </div>
     </div>
@@ -210,6 +217,7 @@
 
   export default {
     activated() {
+      this.$store.dispatch('reloadUserInfo');
       this.fetchData();
     },
     deactivated() {
@@ -281,7 +289,9 @@
           4: '付款超时',
           5: '付款超时'
         },
-        needPayTips: true
+        needPayTips: true,
+        loopFetchLoginData: 100,
+        loopTimer: null
       };
     },
     computed: {
@@ -359,6 +369,17 @@
         }
         return 0;
       },
+      showTopTen() {
+        let arr = (this.cuttingData && this.cuttingData.cutInfos) || [];
+        if (arr.length > 25) {
+          if (this.cuttingData.enterInfo) {
+            return arr.slice(0, 24);
+          } else {
+            return arr.slice(0, 25);
+          }
+        }
+        return arr;
+      },
       GotAndPay() {
         if (this.cuttingData) {
           return this.cuttingData.owner && (this.cuttingData.leftEndTimes <= 0 || this.cuttingData.cutOrder.status === 1);
@@ -389,6 +410,27 @@
       };
     },
     methods: {
+      lazyStartBargain() {
+        while (--this.loopFetchLoginData > 0) {
+          if (this.$store.getters.checkLogined) {
+            clearTimeout(this.loopTimer);
+            break;
+          }
+          this.loopTimer = setTimeout(this.lazyStartBargain, 30);
+        }
+        if (this.loopFetchLoginData <= 0) {
+          if (this.loopTimer) {
+            clearTimeout(this.loopTimer);
+          }
+          if (!this.$store.getters.getUserInfo.userId) {
+            this.$store.dispatch('openToast', '当前网络速度慢，正加速中，请您重新进入一次砍价页面。');
+            return;
+          }
+        }
+        if (this.$store.getters.getUserInfo.userId) {
+          this.fetchCuttingData();
+        }
+      },
       fetchData() {
         let id = this.$route.params.id;
         if (!id) {
@@ -420,7 +462,7 @@
             this.processing = false;
             this.$store.dispatch('closeLoading');
             this.wxReady();
-            this.fetchCuttingData();
+            this.lazyStartBargain();
             // this.fetchComments();
             this.getRelatedGoods();
             this.getLikeGoods();
@@ -455,6 +497,10 @@
         if (this.timer) {
           clearTimeout(this.timer);
         }
+        if (this.loopTimer) {
+          clearTimeout(this.loopTimer);
+        }
+        this.loopFetchLoginData = 100;
       },
       showRules() {
         this.$refs.rules.showDetail();
@@ -472,10 +518,18 @@
         return '匿名';
       },
       viewMime() {
+        let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
+          let shareId = this.$route.query.shareId || '';
+          setTimeout(() => {
+            let redirect = 'http://' + location.host + '/weixin/sp/' + this.sharepay.id + '?shareId=' + shareId;
+            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
+          }, 1500);
+          return;
+        }
         this.stopTimer();
         this.preOrderId = '';
         this.updateShareData();
-        let user = this.$store.getters.getUserInfo;
         api.createSharePreOrder({
           fieldId: this.sharepay.id,
           userId: user.userId,
@@ -489,7 +543,7 @@
           if (response.code === 1005) {
             this.mutex = true;
           } else if (response.code === 2001) {
-            this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
+            this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
             this.mutex = true;
             return;
           } else if (response.result !== 0 || response.code) {
@@ -529,7 +583,7 @@
           this.$store.dispatch('openToast', '正在登录中...');
           let shareId = this.$route.query.shareId || '';
           setTimeout(() => {
-            let redirect = 'http://' + location.host + location.pathname + '#/sharepay/' + this.sharepay.id + '?shareId=' + shareId;
+            let redirect = 'http://' + location.host + '/weixin/sp/' + this.sharepay.id + '?shareId=' + shareId;
             window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
           }, 1500);
           return;
@@ -548,7 +602,7 @@
             this.mutex = true;
             return;
           } else if (response.code === 2001) {
-            this.$store.dispatch('openToast', '你来得太晚了，都卖完了!');
+            this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
             this.mutex = true;
             return;
           } else if (response.result !== 0 || response.code) {
@@ -581,6 +635,10 @@
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
+            if (response.code === 2001) {
+              this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
+              return;
+            }
             this.cuttingData = response.data;
             if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
               this.hasProgressOrder = true;
@@ -609,6 +667,10 @@
           userIcon: user.icon || ''
         }).then(response => {
           if (response.result === 0) {
+            if (response.code === 2001) {
+              this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
+              return;
+            }
             this.cuttingData = response.data;
             if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
               this.hasProgressOrder = true;

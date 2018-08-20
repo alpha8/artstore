@@ -150,6 +150,7 @@
 
   export default {
     activated() {
+      this.$store.dispatch('reloadUserInfo');
       this.fetchData();
     },
     deactivated() {
