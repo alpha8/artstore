@@ -38,7 +38,7 @@
         <div class="tuan_list">
           <div class="tuan_stat" v-if="tuanData.status === 4">该团未能按时凑齐人数，拼团失败</div>
           <div class="tuan_stat" v-else-if="tuanData.status === 3">团长人气太高，已经拼团成功啦</div>
-          <div class="tuan_stat">限时<span class="text-red">{{leftPerson}}人</span>拼团成功，剩余<span class="countdown"><i>{{countdownStats.days}}</i>天<i v-if="countdownStats.hours">{{countdownStats.hours}}</i>:<i v-if="countdownStats.mins">{{countdownStats.mins}}</i>:<i v-if="countdownStats.seconds">{{countdownStats.seconds}}</i></span></div>
+          <div class="tuan_stat">限时<span class="text-red">{{leftPerson}}人</span>拼团，剩余<span class="countdown"><i>{{countdownStats.days}}</i>天<i v-if="countdownStats.hours">{{countdownStats.hours}}</i>:<i v-if="countdownStats.mins">{{countdownStats.mins}}</i>:<i v-if="countdownStats.seconds">{{countdownStats.seconds}}</i></span></div>
           <ul class="tuan_users">
             <li class="user_item" v-for="(item, index) in tuanData.teamOrders" :key="index" v-show="item.owner || item.status === 3">
               <span class="tips" v-show="item.owner">团长</span>
@@ -48,7 +48,9 @@
           </ul>
         </div>
         <div class="ops">
-          <div class="btns btn-gray" v-if="tuan.leftEndTimes <= 0"><span>拼团已结束</span></div>
+          <div class="btns btn-gray" v-if="tuan.status === 3"><span>已下架</span></div>
+          <div class="btns btn-gray" v-else-if="tuan.stock <= 0"><span>已售罄</span></div>
+          <div class="btns btn-gray" v-else-if="tuan.leftEndTimes <= 0"><span>拼团已结束</span></div>
           <div class="btns btn-red" v-else-if="(tuanData.owner && tuanData.status <= 2)" @click.stop.prevent="wxshare"><span>邀请好友参团</span></div>
           <div class="btns btn-red" v-else-if="!tuanData.join && tuanData.status <= 2" @click.stop.prevent="joinTuan"><span>我要参团</span></div>
           <div class="btns btn-red" v-else-if="!tuanData.owner && tuanData.status >= 3" @click.stop.prevent="createTuan"><span>我也要开团</span></div>

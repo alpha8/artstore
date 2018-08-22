@@ -17,6 +17,15 @@
             </p>
           </li>
           <li class="border-1px">
+            <p>
+              <span class="title">选择国家：</span>
+              <select class="country" v-model="user.country" placeholder="选择国家" required @change="changeCountry">
+                <option value="中国">中国</option>
+                <option value="国外">国外</option>
+              </select>
+            </p>
+          </li>
+          <li class="border-1px" v-show="!noCity">
             <p class="more">
               <span class="title">所在地区：</span>
               <div class="text-control" v-if="city" @click.stop.prevent="openCityChoose">{{city}}</div>
@@ -53,9 +62,11 @@
           name: '',
           mobile: '',
           address: '',
+          country: '中国',
           default: false
         },
-        city: ''
+        city: '',
+        noCity: false
       };
     },
     computed: {
@@ -71,6 +82,7 @@
     },
     deactivated() {
       this.hide();
+      this.noCity = false;
     },
     methods: {
       addAddress() {
@@ -96,6 +108,13 @@
       openCityChoose() {
         this.$refs.city.choseAdd();
       },
+      changeCountry() {
+        if (this.user.country === '国外') {
+          this.noCity = true;
+        } else {
+          this.noCity = false;
+        }
+      },
       cityChosed(city) {
         if (city && city.city) {
           this.city = city.province + city.city + (city.district || '');
@@ -106,6 +125,7 @@
           name: '',
           mobile: '',
           address: '',
+          country: '中国',
           default: false
         };
       },
@@ -175,7 +195,7 @@
             line-height: 1
             &.special
               top: 16px
-          input
+          input, select
             height: 20px
             line-height: normal
             border: 0 none

@@ -45,7 +45,7 @@
         <ul class="itemList">
           <li class="item border-1px" v-for="item in wallet">
             <router-link :to="item.link">
-              <div class="amount"><i class="symbol">¥</i><span>{{item.amount | currency('')}}</span></div>
+              <div class="amount">{{item.amount | currency}}</div>
               <div class="text">{{item.text}}</div>
             </router-link>
           </li>
@@ -558,9 +558,8 @@
           color: #f23030
           height: 16px
           line-height: 16px
-          font-size: 13px
           margin-left: -9px
-          vertical-align: top
+          vertical-align: middle
         .more
           float: right
           font-size: 18px

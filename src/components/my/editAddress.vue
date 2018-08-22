@@ -17,6 +17,15 @@
             </p>
           </li>
           <li class="border-1px">
+            <p>
+              <span class="title">选择国家：</span>
+              <select class="country" v-model="user.country" placeholder="选择国家" required @change="changeCountry">
+                <option value="中国">中国</option>
+                <option value="国外">国外</option>
+              </select>
+            </p>
+          </li>
+          <li class="border-1px" v-show="!noCity">
             <p class="more">
               <span class="title">所在地区：</span>
               <div class="text-control" v-if="city" @click.stop.prevent="openCityChoose">{{city}}</div>
@@ -53,9 +62,11 @@
           name: '',
           mobile: '',
           address: '',
+          country: '中国',
           default: false
         },
-        city: ''
+        city: '',
+        noCity: false
       };
     },
     activated() {
@@ -65,10 +76,17 @@
         return;
       }
       this.user = this.$store.getters.getAddressList.find((addr) => addr.id === id);
+      if (!this.user.country) {
+        this.user.country = '中国';
+      }
+      if (this.user.country === '国外') {
+        this.noCity = true;
+      }
       this.city = this.user.city || '';
     },
     deactivated() {
       this.hide();
+      this.noCity = false;
     },
     computed: {
       clearAddress() {
@@ -84,7 +102,11 @@
           return;
         }
         this.user.userId = this.$store.getters.getUserInfo.userId;
-        this.user.city = this.city;
+        if (this.noCity) {
+          this.user.city = '';
+        } else {
+          this.user.city = this.city;
+        }
         api.updateAddress(this.user).then(response => {
           if (response.result === RESPONSE_OK) {
             this.$store.dispatch('updateAddress', this.user);
@@ -102,6 +124,13 @@
       },
       doClearAddr() {
         this.user.address = '';
+      },
+      changeCountry() {
+        if (this.user.country === '国外') {
+          this.noCity = true;
+        } else {
+          this.noCity = false;
+        }
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -165,7 +194,7 @@
             line-height: 1
             &.special
               top: 16px
-          input
+          input, select
             height: 20px
             line-height: normal
             border: 0 none

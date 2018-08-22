@@ -303,7 +303,7 @@
           this.$store.dispatch('closeLoading');
           this.wxReady();
           this.getRelatedGoods();
-          this.fetchComments();
+          // this.fetchComments();
           this.getLikeGoods();
           // this.getWXFollow();
         }).catch(response => {

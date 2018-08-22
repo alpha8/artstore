@@ -156,7 +156,9 @@
           <span class="button-lg orange"><span class="line">¥<strong>{{tuan.fieldPrice}}</strong></span>单独购买</span>
         </div>
         <div class="foot-item">
-          <span class="button-lg gray big" v-if="tuan.leftEndTimes <= 0">已结束</span>
+          <span class="button-lg gray big" v-if="tuan.status === 3">已下架</span>
+          <span class="button-lg gray big" v-else-if="tuan.stock <= 0">已售罄</span>
+          <span class="button-lg gray big" v-else-if="tuan.leftEndTimes <= 0">已结束</span>
           <span class="button-lg darkred big" v-else-if="tuanData.owner && tuanData.status <= 2" @click.stop.prevent="wxshare">邀请好友参团</span>
           <span class="button-lg darkred big" v-else-if="!tuanData.join && tuanData.status <= 2" @click.stop.prevent="joinTuan">我要参团</span>
           <span class="button-lg darkred" v-else @click.stop.prevent="createTuan"><span class="line">¥<strong>{{getGoodPrice}}</strong></span>我要开团</span>
@@ -653,7 +655,7 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone']
           });
         });
-        let redirect = 'http://' + location.host + '/weixin/tuan/' + this.tuan.id;
+        let redirect = 'http://' + location.host + '/weixin/tuandetail/' + this.tuan.id;
         let img = api.CONFIG.psCtx + '5959aca5e4b00faa50475a18?w=423&h=423';
         if (this.tuan.icon) {
           img = api.CONFIG.psCtx + this.tuan.icon;
@@ -683,7 +685,7 @@
       },
       updateShareData() {
         let user = this.$store.getters.getUserInfo;
-        let redirect = 'http://' + location.host + '/weixin/tuan/' + this.tuan.id;
+        let redirect = 'http://' + location.host + '/weixin/tuandetail/' + this.tuan.id;
         if (this.preOrderId) {
           redirect += '?tuanId=' + this.preOrderId + '&userId=' + user.userId;
         } else {

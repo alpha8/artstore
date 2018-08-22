@@ -93,6 +93,9 @@
             <div class="more-rating" v-show="good.ratings && good.ratings.length" @click.stop.prevent="viewMore">———— 查看更多评论 ————</div>
           </div>
         </div>
+        <split v-show="good.relates && good.relates.length"></split>
+        <modal-title title="相关商品" moreText="更多" catKey="" catName="" v-show="good.relates && good.relates.length"></modal-title>
+        <channel v-show="good.relates && good.relates.length" :items="good.relates || []" :cols="2" module="productdetail" section="relatedGoods"></channel>
         <split v-show="guessGoods.length"></split>
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
@@ -286,6 +289,7 @@
             this.processing = false;
             this.$store.dispatch('closeLoading');
             this.wxReady();
+            this.getRelatedGoods();
             // this.fetchComments();
             this.getLikeGoods();
             // this.getWXFollow();
@@ -345,11 +349,46 @@
           pid: this.good.id,
           commodityStatesId: 2
         }).then((response) => {
-          this.guessGoods = response.artworks;
+          let list = response.artworks;
+          this.removeDups(list, this.good.relates || []);
+          this.guessGoods = list;
           setTimeout(() => {
             this._initScroll();
           }, 800);
         });
+      },
+      getRelatedGoods() {
+        let ids = [];
+        if (this.good.relates && this.good.relates.length) {
+          this.good.relates.forEach((item) => {
+            ids.push(item.id);
+          });
+        }
+        if (!ids.length) {
+          return;
+        }
+        api.GetRelatedGoods({
+          relatedid: ids.join(',')
+        }).then((response) => {
+          this.good.relates = response || [];
+          setTimeout(() => {
+            this._initScroll();
+          }, 800);
+        });
+      },
+      removeDups(goods, relates) {
+        if (!goods.length || !relates.length) {
+          return;
+        }
+        for (let i = 0; i < goods.length; i++) {
+          let good = goods[i];
+          relates.forEach((item) => {
+            if (good.id === item.id) {
+              goods.splice(i, 1);
+              i--;
+            }
+          });
+        }
       },
       getThumbnail(id) {
         if (id) {

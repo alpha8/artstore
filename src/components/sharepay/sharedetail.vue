@@ -20,7 +20,7 @@
             <div class="label">砍价优惠：</div>  
             <div class="desc fixedheight"><div class="box"><em>好友助力<strong>{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</strong></em><em class="rules" @click.stop.prevent="showRules"><strong>[砍价规则]</strong></em></div></div>
           </div>
-          <div v-if="sharepay.stock">
+          <div>
             <div class="row">
               <div class="label">商品库存：</div>
               <div class="desc">{{sharepay.stock || 0}}</div>
@@ -158,6 +158,9 @@
           <span class="button-lg orange" v-if="hasProgressOrder || GotAndPay">去付款</span>
           <span class="button-lg orange" v-else>立即购买</span>
         </div>
+        <div class="foot-item btn-share" v-else-if="sharepay.status === 3">
+          <span class="button-lg gray">已下架</span>
+        </div>
         <div class="foot-item btn-share" v-else-if="sharepay.stock <= 0">
           <span class="button-lg gray">已售罄</span>
         </div>
@@ -170,15 +173,16 @@
         <div class="foot-item" v-else-if="isOwner && getCutPrice <= sharepay.buttomFee">
           <span class="button-lg gray">到达底价</span>
         </div>
-        <div class="foot-item" @click.stop.prevent="wxshare" v-else-if="sharepay.stock > 0 && !isOwner && !cuttingData.cutOrder && !cuttingData.cut">
-          <span class="button-lg darkred" :class="{'gray': getCutPrice <= sharepay.buttomFee}">发起砍价</span>
+        <div class="foot-item" v-else-if="!isOwner && !cuttingData.cutOrder && !cuttingData.cut">
+          <span class="button-lg gray" v-if="sharepay.status === 3">已下架</span>
+          <span class="button-lg gray" v-else-if="sharepay.stock <= 0">已售罄</span>
+          <span class="button-lg darkred" v-else :class="{'gray': getCutPrice <= sharepay.buttomFee}" @click.stop.prevent="wxshare">发起砍价</span>
         </div>
         <div class="foot-item" @click.stop.prevent="wxshare" v-else-if="isOwner || !cuttingData.cutOrder">
           <span class="button-lg darkred" :class="{'gray': getCutPrice <= sharepay.buttomFee}">好友助力砍价</span>
         </div>
         <div class="foot-item" @click.stop.prevent="wxshare" v-else>
-          <span class="button-lg gray" v-if="sharepay.stock <= 0">已售罄</span>
-          <span class="button-lg darkred" v-else :class="{'gray': getCutPrice <= sharepay.buttomFee}">帮好友助力砍价</span>
+          <span class="button-lg darkred" :class="{'gray': getCutPrice <= sharepay.buttomFee}">帮好友助力砍价</span>
         </div>
       </div>
     </div>
