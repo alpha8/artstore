@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="toast">
-      <p class="toast_content">{{text}}</p>
+      <p class="toast_content" v-html="text"></p>
     </div>
   </div>
 </template>
