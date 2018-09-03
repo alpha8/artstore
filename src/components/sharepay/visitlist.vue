@@ -51,6 +51,8 @@
       };
     },
     activated() {
+      this.totalPages = 0;
+      this.pageNumber = 1;
       this.loadEnd = false;
       this.fetchData(true);
       this.show();

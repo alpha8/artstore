@@ -10,6 +10,7 @@
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.status === 4}"><span class="text" v-if="item.status !== 4" :class="{'whitetext': item.status === 1, 'success': item.status === 3}">{{stateDesc(item.status)}}</span></i></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}</h3>
+                  <div class="sellpoint" v-if="item.sellPoint">{{item.sellPoint}}</div>
                   <div class="extra-wrap">
                     <div class="price-wrap">
                       <span class="price">{{item.dealFee | currency}}</span>
@@ -322,19 +323,31 @@
                 overflow: hidden
                 >.title
                   position: relative
+                  color: #000
                   padding-top: 5px
                   font-size: 14px
-                  height: 32px
-                  line-height: 16px
+                  line-height: 1.2
                   overflow: hidden
                   text-overflow: ellipsis
                   display: -webkit-box
-                  -webkit-line-clamp: 2
+                  -webkit-line-clamp: 1
                   -webkit-box-orient: vertical
                   .resultFlag
                     margin-left: 5px
                     font-size: 12px
                     color: #999
+                .sellpoint
+                  display: block
+                  font-size: 12px
+                  color: #7f7f7f
+                  margin-top: 2px
+                  height: 17px
+                  line-height: 17px
+                  overflow: hidden
+                  text-overflow: ellipsis
+                  display: -webkit-box
+                  -webkit-line-clamp: 1
+                  -webkit-box-orient: vertical
                 .extra-wrap
                   position: absolute
                   display: flex
@@ -394,7 +407,7 @@
                   .btn-buy
                     position: relative
                     display: inline-block
-                    padding: 0 10px
+                    padding: 0 6px
                     height: 25px
                     line-height: 25px
                     text-align: center
@@ -402,6 +415,8 @@
                     background: #e4393c
                     color: #fff
                     border-radius: 2px
+                    min-width: 56px
+                    box-sizing: border-box
                     &.disabled
                       background: #999
                     &.orange

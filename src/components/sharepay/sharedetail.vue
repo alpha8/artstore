@@ -21,18 +21,14 @@
             <div class="desc fixedheight"><div class="box"><em>好友助力<strong>{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</strong></em><em class="rules" @click.stop.prevent="showRules"><strong>[砍价规则]</strong></em></div></div>
           </div>
           <div>
-            <div class="row">
+            <div class="row"  v-show="sharepay.stock > 0">
               <div class="label">商品库存：</div>
-              <div class="desc">{{sharepay.stock || 0}}</div>
+              <div class="desc" :class="{'text-red': sharepay.stock <= 3}">{{sharepay.stock || 0}} <span class="lesstock" v-if="sharepay.stock <= 5">(库存紧张)</span></div>
             </div>
             <div class="row" v-if="good.deliveryDays">
               <div class="label">预计发货：</div>
               <div class="desc">{{good.deliveryDays}}天</div>
             </div>
-          </div>
-          <div class="row">
-            <div class="label">优惠活动：</div>
-            <div class="desc">不支持优惠券</div>
           </div>
         </div>
         <split v-if="cuttingData && cuttingData.cutInfos"></split>
@@ -56,7 +52,10 @@
               <td class="col-3 text-center">{{item.cutFee | currency}}</td>
             </tr>
           </table>
+          <div class="more_bargains" v-show="cuttingData.count > 25" @click.stop.prevent="goVisitList"><span>———— 查看全部助力好友(<em class="totalBargains">{{cuttingData.count}}人</em>) ————</span></div>
         </div>
+        <split v-show="sharepay.relates && sharepay.relates.length"></split>
+        <relatedBargains :items="sharepay.relates" :cols="2" :pageSize="4" title="最热砍价" v-show="sharepay.relates && sharepay.relates.length"></relatedBargains>
         <split v-show="good.content"></split>
         <div class="info" v-if="good.videoUrl || (good.videos && good.videos.length)">
           <h1 class="title">商品视频</h1>
@@ -151,21 +150,18 @@
         <div class="foot-item btn-share" v-if="isOwner && cutStatus >= 3">
           <span class="button-lg gray">{{stateDesc}}</span>
         </div>
-        <div class="foot-item btn-share" v-else-if="!cuttingData.cutOrder" @click.stop.prevent="showRules">
-          <span class="button-lg orange">砍价规则</span>
-        </div>
         <div class="foot-item btn-share" v-else-if="isOwner" @click.stop.prevent="pay">
           <span class="button-lg orange" v-if="hasProgressOrder || GotAndPay">去付款</span>
           <span class="button-lg orange" v-else>立即购买</span>
         </div>
+        <div class="foot-item btn-share" v-else-if="!cuttingData.cutOrder || sharepay.stock <= 0" @click.stop.prevent="showRules">
+          <span class="button-lg orange">砍价规则</span>
+        </div>
         <div class="foot-item btn-share" v-else-if="sharepay.status === 3">
           <span class="button-lg gray">已下架</span>
         </div>
-        <div class="foot-item btn-share" v-else-if="sharepay.stock <= 0">
-          <span class="button-lg gray">已售罄</span>
-        </div>
         <div class="foot-item btn-share" v-else @click.stop.prevent="viewMime">
-          <span class="button-lg orange">我也要砍价</span>
+          <span class="button-lg orange">发起我的砍价</span>
         </div>
         <div class="foot-item" @click.stop.prevent="reshare" v-if="isOwner && cutStatus >= 3 && sharepay.stock > 0">
           <span class="button-lg darkred">重新发起砍价</span>
@@ -214,6 +210,7 @@
   import share from '@/components/sharepay/share';
   import rules from '@/components/sharepay/rules';
   import bargainshow from '@/components/sharepay/bargainshow';
+  import relatedBargains from '@/components/sharepay/related_bargains';
   let Base64 = require('js-base64').Base64;
 
   const ALL = 3;
@@ -225,21 +222,18 @@
       this.fetchData();
     },
     deactivated() {
-      this.cuttingData = {};
-      this.hasProgressOrder = false;
-      this.mutex = false;
-      this.good.videoUrl = '';
-      this.good.videos = [];
-      this.guessGoods = [];
-      this.shareData = {};
-      this.leftSeconds = 0;
-      this.countdownStats = {};
-      this.preOrderId = '';
-      this.needPayTips = true;
-      this.processing = false;
-      this.lazyloaded = false;
-      this.hide();
-      this.stopTimer();
+      this.cleanup();
+    },
+    watch: {
+      $route (to, from) {
+        if (to.name === from.name && to.name === 'sharedetail') {
+          if (to.params.id !== from.params.id) {
+            this.cleanup();
+            document.body.scrollTop = document.documentElement.scrollTop = 0;
+            this.fetchData();
+          }
+        }
+      }
     },
     updated() {
       if (this.good.content && !this.processing) {
@@ -413,6 +407,14 @@
         this.scrollY = window.pageYOffset;
       };
     },
+    created() {
+      document.body.scrollTop = document.documentElement.scrollTop = 0;
+      this.$store.dispatch('reloadUserInfo');
+      this.fetchData();
+    },
+    beforeDestroy() {
+      this.cleanup();
+    },
     methods: {
       lazyStartBargain() {
         while (--this.loopFetchLoginData > 0) {
@@ -427,7 +429,7 @@
             clearTimeout(this.loopTimer);
           }
           if (!this.$store.getters.getUserInfo.userId) {
-            this.$store.dispatch('openToast', '当前网络速度慢，正加速中，请您重新进入一次砍价页面。');
+            // this.$store.dispatch('openToast', '当前网络速度慢，正加速中，请您重新进入一次砍价页面。');
             return;
           }
         }
@@ -461,7 +463,6 @@
           api.GetGood(sharepay.artworkId).then(response => {
             let good = response;
             this.good = good;
-            Object.assign(this.good, sharepay);
             this.show();
             this.processing = false;
             this.$store.dispatch('closeLoading');
@@ -521,6 +522,23 @@
         }
         return '匿名';
       },
+      cleanup() {
+        this.cuttingData = {};
+        this.hasProgressOrder = false;
+        this.mutex = false;
+        this.good.videoUrl = '';
+        this.good.videos = [];
+        this.guessGoods = [];
+        this.shareData = {};
+        this.leftSeconds = 0;
+        this.countdownStats = {};
+        this.preOrderId = '';
+        this.needPayTips = true;
+        this.processing = false;
+        this.lazyloaded = false;
+        this.hide();
+        this.stopTimer();
+      },
       viewMime() {
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
@@ -555,9 +573,14 @@
             return;
           }
           this.mutex = true;
-          this.firstCut();
+          if (this.preOrderId) {
+            this.$router.replace({name: 'sharedetail', params: {id: this.sharepay.id}, query: {shareId: preOrderId, userId: user.userId || 0}});
+          } else {
+            this.$router.replace({name: 'sharedetail', params: {id: this.sharepay.id}});
+          }
+          // this.firstCut();
           // 显示分享指引页
-          this.$refs.weixinShare.show();
+          // this.$refs.weixinShare.show();
         }).catch(response => {
           this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
           console.error(response);
@@ -629,6 +652,7 @@
           return;
         }
         let shareId = this.$route.query.shareId || '';
+        let noAction = this.$route.query.noAction || false;
         this.preOrderId = shareId;
         this.updateShareData();
         api.getShareCuttings({
@@ -636,7 +660,8 @@
           preOrderId: shareId,
           fieldId: this.sharepay.id,
           userName: user.nickName || '匿名',
-          userIcon: user.icon || ''
+          userIcon: user.icon || '',
+          noAction: noAction
         }).then(response => {
           if (response.result === 0) {
             if (response.code === 2001) {
@@ -646,7 +671,8 @@
             this.cuttingData = response.data;
             if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
               this.hasProgressOrder = true;
-            } else if (response.data.cutOrder && response.code !== 1007) {
+            } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004 && !noAction) {
+              // 1004: 到达底价, 1007： 已经砍过价了
               this.$refs.bargainShow.show();
             }
             let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
@@ -678,7 +704,7 @@
             this.cuttingData = response.data;
             if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
               this.hasProgressOrder = true;
-            } else if (response.data.cutOrder && response.code !== 1007) {
+            } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004) {
               this.$refs.bargainShow.show();
             }
             let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
@@ -736,7 +762,7 @@
           return;
         }
         if (this.lazyloaded) {
-          let imgs = this.$refs.goodContent.getElementsByTagName('img');
+          let imgs = this.$refs.goodContent && this.$refs.goodContent.getElementsByTagName('img') || [];
           for (let j = 0; j < imgs.length; j++) {
             imgs[j].addEventListener('click',
               (e) => {
@@ -975,7 +1001,7 @@
       lazyload() {
         let w = window.innerWidth;
         let picImgList = [];
-        let imgs = this.$refs.goodContent.getElementsByTagName('img');
+        let imgs = this.$refs.goodContent && this.$refs.goodContent.getElementsByTagName('img') || [];
         let prefix = api.CONFIG.cdnCtx;
         let html = this.good.content;
         for (let i = 0; i < imgs.length; i++) {
@@ -1091,7 +1117,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, rules, bargainshow
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, rules, bargainshow, relatedBargains
     }
   };
 </script>
@@ -1429,6 +1455,16 @@
       .moreuv
         font-weight: 700
         color: #07111b
+    .more_bargains
+      width: 100%
+      padding: 8px 0
+      text-align: center
+      font-size: 12px
+      color: #07111b
+      >span
+        display: block
+      .totalBargains
+        font-size: 11px
     .intro
       margin-bottom: 5px
     .row
@@ -1447,6 +1483,9 @@
         &.fixedheight
           height: 13px
         &.oldPrice
+          color: #07111b
+          font-weight: 700
+        .lesstock
           color: #07111b
           font-weight: 700
         .box

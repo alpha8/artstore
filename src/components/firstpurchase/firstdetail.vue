@@ -21,10 +21,6 @@
               <div class="desc">{{good.deliveryDays}}天</div>
             </div>
           </div>
-          <div class="row">
-            <div class="label">优惠活动：</div>
-            <div class="desc">不支持优惠券</div>
-          </div>
           <div class="cartcontrol-wrapper" v-if="userProfile.hasFirst && firstpay.count">
             <cartcontrol @add="addGood" :good="firstpay" :maxCount="1" :stock="firstpay.stock"></cartcontrol>
           </div>
@@ -292,7 +288,6 @@
           api.GetGood(firstpay.artworkId).then(response => {
             let good = response;
             this.good = good;
-            Object.assign(this.good, firstpay);
             this.extendedGoodsAttrs(good);
             this.show();
             this.processing = false;

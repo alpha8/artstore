@@ -45,6 +45,9 @@ router.beforeEach((to, from, next) => {
   };
   wx.onMenuShareTimeline(shareData);
   wx.onMenuShareAppMessage(shareData);
+  // if (to && (to.name === 'sharedetail' || to.name === 'firstdetail' || to.name === 'tuandetail' || to.name === 'articledetail' || to.name === 'good' || to.name === 'seckillDetail')) {
+  //   document.body.scrollTop = document.documentElement.scrollTop = 0;
+  // }
   next();
 });
 

@@ -307,6 +307,7 @@
                   width: 95%
                   margin-right: 10px
                   overflow: hidden
+                  min-height: 68px
               .item-info
                 flex: 1
                 position: relative

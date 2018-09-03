@@ -234,6 +234,7 @@
           position: relative
           width: 100%
           padding: 0 3px
+          min-height: 51px
           box-sizing: border-box
         .product-title
           overflow: hidden

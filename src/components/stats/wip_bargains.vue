@@ -16,7 +16,7 @@
             <mu-flexbox-item basis="100%" class="newitem border-1px" v-for="(item, idx) in orders" :key="idx">
               <div class="col-2" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" class="thumbnail" />{{getFriendlyUsername(item.userName)}}</div>
               <div class="col-2" @click.stop.prevent="showDetail(item)">{{item.name}}</div>
-              <div class="col-5">{{(item.dealFee || 0) | currency}}</div>
+              <div class="col-5">{{(item.dealFee || 0) | currency}}<i class="times" :class="{'blue': item.times >= 2 && item.times <= 5, 'red': item.times > 5}">（{{item.times}}）</i></div>
               <div class="col-5">{{(item.buttomFee || 0) | currency}}</div>
               <div class="col-5">{{states[item.status]}}</div>
               <div class="col-2">{{item.createAt | formatDate}}</div>
@@ -126,7 +126,7 @@
         return '匿名';
       },
       showDetail(item) {
-        this.$router.push({name: 'sharedetail', params: {id: item.fieldId}, query: {shareId: item.id}});
+        this.$router.push({name: 'sharedetail', params: {id: item.fieldId}, query: {shareId: item.id, noAction: true}});
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -237,6 +237,14 @@
             vertical-align: middle
             box-sizing: border-box
             overflow: hidden
+          .times
+            color: #666
+            &.blue
+              color: #00a0dc
+              font-weight: 700
+            &.red
+              color: #e4393c
+              font-weight: 700
     .no-stats
       width: 100%
       padding: 40px 0

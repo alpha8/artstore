@@ -23,16 +23,12 @@
           <div v-if="tuan.stock">
             <div class="row">
               <div class="label">商品库存：</div>
-              <div class="desc">{{tuan.stock || 0}}</div>
+              <div class="desc" :class="{'text-red': tuan.stock <= 3}">{{tuan.stock || 0}} <span v-if="tuan.stock === 0">(已被抢光)</span><span class="lesstock" v-else-if="tuan.stock <= 5">(库存紧张)</span></div>
             </div>
             <div class="row" v-if="good.deliveryDays">
               <div class="label">预计发货：</div>
               <div class="desc">{{good.deliveryDays}}天</div>
             </div>
-          </div>
-          <div class="row">
-            <div class="label">优惠活动：</div>
-            <div class="desc">不支持优惠券</div>
           </div>
           <div class="row">
             <div class="label">拼团时间：</div>
@@ -337,7 +333,6 @@
           api.GetGood(tuan.artworkId).then(response => {
             let good = response;
             this.good = good;
-            Object.assign(this.good, tuan);
             this.show();
             this.processing = false;
             this.$store.dispatch('closeLoading');
@@ -1399,6 +1394,9 @@
         flex: 1
         font-size: 13px
         oveflow: hidden
+        .lesstock
+          color: #07111b
+          font-weight: 700
       .icon-question_mark
         padding-left: 20px
         color: #666

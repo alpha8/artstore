@@ -26,7 +26,7 @@
               <div class="label">预订库存：</div>
               <div class="desc">{{good.stock && good.stock.bookTotal || 0}}</div>
             </div>
-            <div class="row">
+            <div class="row highlight">
               <div class="label">预计到货：</div>
               <div class="desc">{{good.stock && good.stock.bookDay || 0}}天</div>
             </div>
@@ -172,6 +172,18 @@
       this.processing = false;
       this.lazyloaded = false;
     },
+    created() {
+      document.body.scrollTop = document.documentElement.scrollTop = 0;
+      this.fetchData();
+    },
+    beforeDestroy() {
+      this.good.videoUrl = '';
+      this.good.videos = [];
+      this.guessGoods = [];
+      this.hide();
+      this.processing = false;
+      this.lazyloaded = false;
+    },
     watch: {
       $route (to, from) {
         if (to.name === from.name && to.name === 'good') {
@@ -180,12 +192,9 @@
             this.good.videos = [];
             this.guessGoods = [];
             this.lazyloaded = false;
+            document.body.scrollTop = document.documentElement.scrollTop = 0;
             this.fetchData();
           }
-        }
-        if (to && to.name === 'good') {
-          document.body.scrollTop = 0;
-          document.documentElement.scrollTop = 0;
         }
       }
     },
@@ -357,7 +366,7 @@
           return;
         }
         if (this.lazyloaded) {
-          let imgs = this.$refs.goodContent.getElementsByTagName('img');
+          let imgs = this.$refs.goodContent && this.$refs.goodContent.getElementsByTagName('img') || [];
           for (let j = 0; j < imgs.length; j++) {
             imgs[j].addEventListener('click',
               (e) => {
@@ -663,7 +672,7 @@
       lazyload() {
         let w = window.innerWidth;
         let picImgList = [];
-        let imgs = this.$refs.goodContent.getElementsByTagName('img');
+        let imgs = this.$refs.goodContent && this.$refs.goodContent.getElementsByTagName('img') || [];
         let prefix = api.CONFIG.cdnCtx;
         let html = this.good.content;
         for (let i = 0; i < imgs.length; i++) {
@@ -1022,6 +1031,10 @@
       display: flex
       margin-top: 5px
       color: #666
+      &.highlight
+        color: #07111b
+        .label, .desc
+          font-weight: 700
       .label
         display: block
         float: left

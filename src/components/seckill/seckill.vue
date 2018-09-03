@@ -10,6 +10,7 @@
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}</h3>
+                  <div class="sellpoint" v-if="item.sellPoint">{{item.sellPoint}}</div>
                   <div class="extra-wrap">
                     <div class="price-wrap">
                       <div class="countdowntips" v-if="item.leftStartTimes" v-html="countdownTips(item.countdownStats, true)"></div>
@@ -310,6 +311,7 @@
                   width: 95%
                   margin-right: 10px
                   overflow: hidden
+                  min-height: 68px
               .item-info
                 flex: 1
                 position: relative
@@ -318,10 +320,23 @@
                 >.title
                   position: relative
                   padding-top: 5px
+                  line-height: 1.2
                   overflow: hidden
                   text-overflow: ellipsis
                   display: -webkit-box
-                  -webkit-line-clamp: 2
+                  -webkit-line-clamp: 1
+                  -webkit-box-orient: vertical
+                .sellpoint
+                  display: block
+                  font-size: 12px
+                  color: #7f7f7f
+                  margin-top: 2px
+                  height: 17px
+                  line-height: 17px
+                  overflow: hidden
+                  text-overflow: ellipsis
+                  display: -webkit-box
+                  -webkit-line-clamp: 1
                   -webkit-box-orient: vertical
                 .extra-wrap
                   position: absolute

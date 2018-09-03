@@ -31,7 +31,16 @@
           <h1 class="title">{{good.name}}</h1>
           <div class="price">
             <span class="now">¥{{good.killPrice}}</span><span class="old" v-show="good.price">¥{{good.price}}</span>
-            <span class="stock">库存：{{good.number}}</span>
+          </div>
+          <div v-if="seckill.number">
+            <div class="row">
+              <div class="label">商品库存：</div>
+              <div class="desc" :class="{'text-red': seckill.number <= 3}">{{seckill.number || 0}} <span v-if="seckill.number === 0">(已被抢光)</span><span class="lesstock" v-else-if="seckill.number <= 5">(库存紧张)</span></div>
+            </div>
+            <div class="row" v-if="good.deliveryDays">
+              <div class="label">预计发货：</div>
+              <div class="desc">{{good.deliveryDays}}天</div>
+            </div>
           </div>
           <div class="duration">秒杀时间：{{good.startTime | formatDate2}} ~ {{good.endTime | formatDate2}}</div>
           <div class="duration" v-if="seckill.leftStartTimes > 0" v-html="countdownTips()"></div>
@@ -276,6 +285,7 @@
         api.getSeckillDetailAndUser(id, user.userId).then(res => {
           if (!res.success) {
             this.$store.dispatch('closeLoading');
+            this.$router.replace('/404');
             return;
           }
           let seckill = res.data;
@@ -990,6 +1000,22 @@
             color:#fff
             background:#e4393c
             background-size:13px
+      .row
+        position: relative
+        display: flex
+        margin-top: 5px
+        color: #666
+        .label
+          display: block
+          float: left
+          font-size: 13px
+        .desc
+          position: relative
+          flex: 1
+          font-size: 13px
+          .lesstock
+            color: #07111b
+            font-weight: 700
       .cartcontrol-wrapper
         position: absolute
         right: 12px

@@ -336,10 +336,14 @@
                   float: right
                   height: 25px
                   line-height: 25px
-                  padding: 0 10px
+                  padding: 0 6px
                   background: #d05148
                   color: #fff
                   border-radius: 2px
+                  text-align: center
+                  min-width: 56px
+                  font-size: 11px
+                  box-sizing: border-box
                   &.white
                     color: #000
                     background: #fff

@@ -28,6 +28,7 @@
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""><i class="tag" :class="{'expired': item.teamStatus === '4'}"><span class="text" :class="{'success': item.teamStatus === '3'}">{{stateDesc(item.teamStatus)}}</span></i></div>
                 <div class="item-info">
                   <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}</h3>
+                  <div class="sellpoint" v-if="item.sellPoint">{{item.sellPoint}}</div>
                   <div class="extra-wrap">
                     <div class="price-wrap">
                       <div class="countdowntips">{{tuanResult(item)}}</div>
@@ -388,19 +389,31 @@
                 overflow: hidden
                 >.title
                   position: relative
+                  color: #000
                   padding-top: 5px
                   font-size: 14px
-                  height: 32px
-                  line-height: 16px
+                  line-height: 1.2
                   overflow: hidden
                   text-overflow: ellipsis
                   display: -webkit-box
-                  -webkit-line-clamp: 2
+                  -webkit-line-clamp: 1
                   -webkit-box-orient: vertical
                   .resultFlag
                     margin-left: 5px
                     font-size: 12px
                     color: #999
+                .sellpoint
+                  display: block
+                  font-size: 12px
+                  color: #7f7f7f
+                  margin-top: 2px
+                  height: 17px
+                  line-height: 17px
+                  overflow: hidden
+                  text-overflow: ellipsis
+                  display: -webkit-box
+                  -webkit-line-clamp: 1
+                  -webkit-box-orient: vertical
                 .extra-wrap
                   position: absolute
                   display: flex
