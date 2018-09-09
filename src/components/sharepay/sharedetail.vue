@@ -20,15 +20,21 @@
             <div class="label">砍价优惠：</div>  
             <div class="desc fixedheight"><div class="box"><em>好友助力<strong>{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</strong></em><em class="rules" @click.stop.prevent="showRules"><strong>[砍价规则]</strong></em></div></div>
           </div>
-          <div>
-            <div class="row"  v-show="sharepay.stock > 0">
-              <div class="label">商品库存：</div>
-              <div class="desc" :class="{'text-red': sharepay.stock <= 3}">{{sharepay.stock || 0}} <span class="lesstock" v-if="sharepay.stock <= 5">(库存紧张)</span></div>
-            </div>
-            <div class="row" v-if="good.deliveryDays">
-              <div class="label">预计发货：</div>
-              <div class="desc">{{good.deliveryDays}}天</div>
-            </div>
+          <div class="row"  v-show="sharepay.stock > 0">
+            <div class="label">商品库存：</div>
+            <div class="desc" :class="{'text-red': sharepay.stock <= 3}">{{sharepay.stock || 0}} <span class="lesstock" v-if="sharepay.stock <= 5">(库存紧张)</span></div>
+          </div>
+          <div class="row" v-if="good.deliveryDays">
+            <div class="label">预计发货：</div>
+            <div class="desc">{{good.deliveryDays}}天</div>
+          </div>
+          <div class="row" v-show="sharepay.difficulty">
+            <div class="label">难度系数：</div>
+            <div class="desc">{{sharepay.difficulty}}</div>
+          </div>
+          <div class="row" v-show="sharepay.secret">
+            <div class="label">砍价秘诀：</div>
+            <div class="desc">{{sharepay.secret}}</div>
           </div>
         </div>
         <split v-if="cuttingData && cuttingData.cutInfos"></split>
@@ -143,7 +149,7 @@
       </div>
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
-    <share ref="weixinShare" :needPayTips="needPayTips"></share>
+    <share ref="weixinShare" :needPayTips="needPayTips" @hideShareFired="fireHideShare"></share>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
     <div class="fixed-foot">
       <div class="foot-wrapper">
@@ -184,7 +190,7 @@
     </div>
     <!-- 活动规则 -->
     <rules ref="rules" title="砍价活动规则"></rules>
-    <bargainshow ref="bargainShow" :amount="sharepay.forwardFee" :isOwner="isOwner"></bargainshow>
+    <bargainshow ref="bargainShow" :amount="sharepay.forwardFee" :isOwner="isOwner" :showTips="showShareTips"></bargainshow>
   </div>
 </template>
 
@@ -289,7 +295,8 @@
         },
         needPayTips: true,
         loopFetchLoginData: 100,
-        loopTimer: null
+        loopTimer: null,
+        showShareTips: false
       };
     },
     computed: {
@@ -310,12 +317,12 @@
         return sliders;
       },
       getQrcode() {
-        if (this.good.id) {
+        if (this.sharepay.id) {
           let uid = this.$store.getters.getUserInfo.userId;
           if (uid) {
-            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&userId=${uid}&type=9" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.sharepay.id}&userId=${uid}&type=9" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
           } else {
-            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&type=9" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.sharepay.id}&type=9" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
           }
         }
         return '';
@@ -536,6 +543,7 @@
         this.needPayTips = true;
         this.processing = false;
         this.lazyloaded = false;
+        this.showShareTips = false;
         this.hide();
         this.stopTimer();
       },
@@ -566,6 +574,10 @@
             this.mutex = true;
           } else if (response.code === 2001) {
             this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
+            this.mutex = true;
+            return;
+          } else if (response.code === 2005) {
+            this.$store.dispatch('openToast', '抱歉，您本月的砍价次数已用完!');
             this.mutex = true;
             return;
           } else if (response.result !== 0 || response.code) {
@@ -632,6 +644,10 @@
             this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
             this.mutex = true;
             return;
+          } else if (response.code === 2005) {
+            this.$store.dispatch('openToast', '抱歉，您本月的砍价次数已用完!');
+            this.mutex = true;
+            return;
           } else if (response.result !== 0 || response.code) {
             this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
             return;
@@ -667,6 +683,9 @@
             if (response.code === 2001) {
               this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
               return;
+            } else if (response.code === 2005) {
+              this.$store.dispatch('openToast', '抱歉，您本月的砍价次数已用完!');
+              return;
             }
             this.cuttingData = response.data;
             if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
@@ -674,6 +693,9 @@
             } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004 && !noAction) {
               // 1004: 到达底价, 1007： 已经砍过价了
               this.$refs.bargainShow.show();
+              if (response.data.owner) {
+                this.$refs.weixinShare.show();
+              }
             }
             let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
             if (preOrderId) {
@@ -699,6 +721,9 @@
           if (response.result === 0) {
             if (response.code === 2001) {
               this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
+              return;
+            } else if (response.code === 2005) {
+              this.$store.dispatch('openToast', '抱歉，您本月的砍价次数已用完!');
               return;
             }
             this.cuttingData = response.data;
@@ -866,6 +891,9 @@
       },
       showQrcode() {
         this.$refs.layerWin.show();
+      },
+      fireHideShare(target) {
+        this.showShareTips = true;
       },
       addFirst(event) {
         Vue.set(this.sharepay, 'count', 1);
@@ -1382,7 +1410,7 @@
           color: #848689
           font-size: 12px
           &:first-child
-            width: 80px
+            width: 75px
         .adjustText
           flex: 1
     .tablist

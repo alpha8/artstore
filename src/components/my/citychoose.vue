@@ -10,7 +10,7 @@
       <section class="title selectline">
         <div class="area" @click.stop.prevent="provinceSelected()" :class="Province ? '' : 'active'" >{{Province ? Province : '选择省份'}}</div>
         <div class="area" @click.stop.prevent="citySelected()" :class="City ? '' : 'active'" v-show="Province">{{City ? City: '选择城市'}}</div>
-        <div class="area" @click.stop.prevent="districtSelected()" :class="District ? '' : 'active'" v-show="City">{{District ? District: '选择区县'}}</div>
+        <div class="area" @click.stop.prevent="districtSelected()" :class="District ? '' : 'active'" v-show="showDistrict">{{District ? District: '选择区县'}}</div>
       </section>
       <ul class="border-1px">
         <li class="addList" v-for="(v,k) in info" @click.stop.prevent="getProvinceId(v.id, v.name, k)" v-show="showProvince" :class="v.selected ? 'active' : ''">{{v.name}}</li>
@@ -13140,14 +13140,15 @@
         } else if (!this.City) {
           this.$store.dispatch('openToast', '请选择城市!');
           return;
-        } else if (!this.District) {
-          this.$store.dispatch('openToast', '请选择区县!');
-          return;
         }
+        //  else if (!this.District) {
+        //   this.$store.dispatch('openToast', '请选择区县!');
+        //   return;
+        // }
         this.$emit('selectCity', {
           province: this.Province,
           city: this.City,
-          district: this.District
+          district: this.District || ''
         });
         this.showChose = false;
       },
@@ -13190,9 +13191,13 @@
         this.city = code;
         this.City = input;
         this.showProvince = false;
-        this.showCity = false;
-        this.showDistrict = true;
         this.showDistrictList = this._filter(this.showCityList, 'district', this.city);
+        if (this.showDistrictList.length) {
+          this.showDistrict = true;
+        } else {
+          this.showDistrict = false;
+        }
+        this.showCity = false;
         // 选择当前添加active
         this.showCityList.map(a => {
           a.selected = false;
@@ -13202,10 +13207,10 @@
       citySelected() {
         this.showProvince = false;
         this.showCity = true;
-        this.showDistrict = false;
         this.City = false;
         this.District = false;
-        this.showDistrictList = false;
+        // this.showDistrictList = false;
+        this.showDistrict = false;
       },
       getDistrictId(code, input, index) {
         this.district = code;
@@ -13221,7 +13226,11 @@
       districtSelected() {
         this.showProvince = false;
         this.showCity = false;
-        this.showDistrict = true;
+        if (this.showDistrictList.length) {
+          this.showDistrict = true;
+        } else {
+          this.showDistrict = false;
+        }
       }
     }
   };

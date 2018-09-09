@@ -69,6 +69,8 @@ import yourorders from '@/components/user/your_orders';
 import task from '@/components/common/task';
 import wipbargain from '@/components/stats/wip_bargains';
 import wiptuan from '@/components/stats/wip_tuans';
+import withdraw from '@/components/my/withdraw';
+import withdrawdetail from '@/components/my/withdrawdetail';
 
 // import citychoose from '@/components/my/citychoose';
 
@@ -147,6 +149,8 @@ export default new Router({
     {path: '/task', component: task, name: 'task', meta: {keepAlive: true}},
     {path: '/wip_bargain', component: wipbargain, name: 'wipbargain', meta: {keepAlive: true}},
     {path: '/wip_tuan', component: wiptuan, name: 'wiptuan', meta: {keepAlive: true}},
+    {path: '/withdraw', component: withdraw, name: 'withdraw', meta: {keepAlive: true}},
+    {path: '/withdrawdetail', component: withdrawdetail, name: 'withdrawdetail', meta: {keepAlive: true}},
     {path: '/my', component: my, meta: {keepAlive: true}}
   ]
 });

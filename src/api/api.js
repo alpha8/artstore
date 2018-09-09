@@ -3,7 +3,7 @@ import axios from 'axios';
 import {reportTrackEvent} from '@/common/js/util';
 
 // axios 配置
-axios.defaults.timeout = 60000;
+axios.defaults.timeout = 90000;
 axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 // axios.defaults.baseURL = '';
 
@@ -696,5 +696,19 @@ export default {
    */
   getWIPTuans(params) {
     return doGet(this.CONFIG.webspreadCtx + '/spreadteam/listcreate', params);
+  },
+
+  /**
+   * 奖金提现
+   */
+  withdraw(params) {
+    return doPost(this.CONFIG.cmsCtx + '/sendRedPack', params);
+  },
+
+  /**
+   * 奖金提现记录
+   */
+  withdrawLog(params) {
+    return doGet(this.CONFIG.cmsCtx + '/redPack/list', params);
   }
 };

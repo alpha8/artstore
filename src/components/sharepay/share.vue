@@ -36,6 +36,7 @@
     methods: {
       hideDialog() {
         this.isShow = false;
+        this.$emit('hideShareFired', event.target);
       },
       show() {
         this.isShow = true;

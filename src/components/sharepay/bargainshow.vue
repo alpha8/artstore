@@ -5,8 +5,11 @@
         <div class="detail-main">
           <div class="main-content">
             <img class="icon" src="../../common/images/bargain.png" alt="">
-            <div class="text">{{getRandText}}</div>
-            <div class="coin"><img src="../../common/images/bargain_coin.png" alt=""></div>
+            <div class="text">
+              <p>{{getRandText}}</p>
+              <p v-show="showTips" class="tips">请记得将本商品页面转发，这样您的朋友们才能看到并进入帮您轻松砍价。</p>
+            </div>
+            <div class="coin" v-show="!showTips"><img src="../../common/images/bargain_coin.png" alt=""></div>
             <div class="footer">
               <div class="btn-group"><span>我知道了</span></div>
             </div>
@@ -28,6 +31,12 @@
         }
       },
       isOwner: {
+        type: Boolean,
+        default() {
+          return false;
+        }
+      },
+      showTips: {
         type: Boolean,
         default() {
           return false;
@@ -130,6 +139,9 @@
             font-size: 14px
             line-height: 1.4
             box-sizing: border-box
+          .tips
+            padding-top: 8px
+            padding-bottom: 12px
           .coin
             width: 100%
             padding-bottom: 12px

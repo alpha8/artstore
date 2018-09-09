@@ -214,12 +214,12 @@
         return sliders;
       },
       getQrcode() {
-        if (this.good.id) {
+        if (this.firstpay.id) {
           let uid = this.$store.getters.getUserInfo.userId;
           if (uid) {
-            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&userId=${uid}&type=7" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.firstpay.id}&userId=${uid}&type=7" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
           } else {
-            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&type=7" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.firstpay.id}&type=7" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
           }
         }
         return '';
@@ -938,7 +938,7 @@
           color: #848689
           font-size: 12px
           &:first-child
-            width: 80px
+            width: 75px
         .adjustText
           flex: 1
     .intro

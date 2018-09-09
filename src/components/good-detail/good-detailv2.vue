@@ -1021,7 +1021,7 @@
           color: #848689
           font-size: 12px
           &:first-child
-            width: 80px
+            width: 75px
         .adjustText
           flex: 1
     .intro

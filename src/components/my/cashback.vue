@@ -19,11 +19,16 @@
             <div class="amount">{{PaidIn | currency}}</div>
           </li>
           <li class="item border-1px">
+            <div class="text">已提现(元)</div>
+            <div class="amount">{{PaidOut | currency}}</div>
+          </li>
+          <li class="item border-1px">
             <div class="text">待解冻(元)</div>
             <div class="amount">{{UnPaid | currency}}</div>
           </li>
         </ul>
         <div class="cashback-content">
+          <div class="btns"><span class="btn-green" @click.stop.prevent="openWithdraw">奖金提现</span></div>
           <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">奖金明细</span></div>
           <div class="content-title">奖金余额是什么？</div>
           <div class="content-text">
@@ -59,6 +64,10 @@
         let profile = this.$store.getters.getUserProfile;
         return profile && profile.wallet && profile.wallet.alreadyReward || 0;
       },
+      PaidOut() {
+        let profile = this.$store.getters.getUserProfile;
+        return profile && profile.wallet && profile.wallet.redpackValue || 0;
+      },
       UnPaid() {
         let profile = this.$store.getters.getUserProfile;
         return profile && profile.wallet && profile.wallet.notReward || 0;
@@ -81,6 +90,9 @@
       },
       detail() {
         this.$router.push('/cashbackdetail');
+      },
+      openWithdraw() {
+        this.$router.push('/withdraw');
       },
       back() {
         this.$router.back();
@@ -197,7 +209,5 @@
           em
             color: #333
             font-weight: 700
-        .btn-green
-          letter-spacing: 3px
 </style>
 

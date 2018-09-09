@@ -17,7 +17,7 @@
     position: fixed
     z-index: 10000
     min-width: 100px
-    max-width: 210px
+    max-width: 220px
     top: 50%
     left: 50%
     transform: translate(-50%, -50%)
