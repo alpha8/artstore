@@ -39,7 +39,7 @@
                     </div>
                     <div class="more-ops">
                       <span class="btn-buy disabled" v-if="item.status === 3">已下架</span>
-                      <span class="btn-buy disabled" v-else-if="item.stock <= 0">已售罄</span>
+                      <span class="btn-buy disabled" v-else-if="item.stock <= 0 || item.status === 1">已售罄</span>
                       <span class="btn-buy" v-else-if="item.status === 0" @click.stop.prevent="goGoodDetail(item)">砍价</span>
                     </div>
                   </div>

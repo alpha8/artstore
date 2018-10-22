@@ -5,7 +5,7 @@
         <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
       </div>
       <div class="title">奖金提现</div>
-      <div class="right"></div>
+      <div class="right" @click.stop.prevent="detail">提现记录</div>
     </div>
     <div class="wallet" ref="wallet">
       <div class="wallet-wrapper">
@@ -21,12 +21,13 @@
           <div class="btns">
             <span class="btn-green" :class="{'btn-gray': amount.length === 0}" @click.stop.prevent="withdrawCash">提现</span>
           </div>
-          <div class="btns">
+          <!-- <div class="btns">
             <span class="btn-orange" @click.stop.prevent="detail">提现记录</span>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
+    <layer :title="layer.title" :text="layer.text" :btn="layer.button" ref="layerWin"></layer>
   </div>
 </template>
 
@@ -35,6 +36,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import api from '@/api/api';
   import {pay} from '@/common/js/pay';
+  import layer from '@/components/common/layer';
 
   export default {
     data() {
@@ -51,7 +53,14 @@
         }, {
           text: '200元', value: 200
         }],
-        paying: false
+        paying: false,
+        layer: {
+          title: '系统提示',
+          text: '',
+          button: {
+            text: '知道了!'
+          }
+        }
       };
     },
     computed: {
@@ -109,22 +118,56 @@
         api.withdraw({
           payValue: this.amount,
           wish: '传播奖金红包',
-          sendName: '一虎一席茶席艺术商城',
+          sendName: '一虎一席茶生活美学商城',
           actName: '奖金提现.专用红包',
           sence_id: 0,
           userId: user.userId || 0,
           openid: user.openid
         }).then(response => {
           if (response.result === 0) {
-            this.$store.dispatch('openToast', '提现成功! 去拆微信红包吧!');
             this.refreshData();
+            this.layer.text = '<p style="text-align:left">提现成功! 去拆微信红包吧!</p>';
+            this.$refs.layerWin.show();
+            this.amount = '';
           } else if (response.err_info && response.err_info.err_code === 'NOTENOUGH') {
-            this.$store.dispatch('openToast', '请联系管理员充值商户账户!');
+            this.layer.text = '<p style="text-align:left">请联系客服检查商户账户~</p>';
+            this.$refs.layerWin.show();
+          } else if (response.result === 1 && response.data.code) {
+            let wxcode = response.data.code;
+            switch (wxcode) {
+              case 'MONEY_LIMIT':
+                this.layer.text = '<p style="text-align:left">提现金额必须在1.00元到200.00元之间</p>';
+                this.$refs.layerWin.show();
+                break;
+              case 'NOTENOUGH':
+                this.layer.text = '<p style="text-align:left">请联系客服检查商户账户~</p>';
+                this.$refs.layerWin.show();
+                break;
+              default:
+                this.layer.text = `<p style="text-align:left">${response.data.message}</p>`;
+                this.$refs.layerWin.show();
+                break;
+            }
           } else {
-            this.$store.dispatch('openToast', '网络繁忙，请稍候再试下!');
+            let code = response.code;
+            switch (code) {
+              case 8004:
+                this.refreshData();
+                this.layer.text = `<p style="text-align:left">部分提现成功! 成功提现: ${(response.data && response.data.sent || 0)}元</p>`;
+                this.$refs.layerWin.show();
+                break;
+              case 8002:
+                this.$store.dispatch('openToast', '输入错误, 超出可提现额度');
+                break;
+              case 8003:
+                this.$store.dispatch('openToast', '非法操作！');
+                break;
+              default:
+                this.$store.dispatch('openToast', '网络繁忙，请稍候再试下!');
+                break;
+            }
           }
           this.paying = false;
-          this.amount = '';
         }).catch(response => {
           this.paying = false;
         });
@@ -150,7 +193,7 @@
       }
     },
     components: {
-      fixedheader
+      fixedheader, layer
     }
   };
 </script>
@@ -179,7 +222,7 @@
       flex: 1
       padding: 0 10px
     .right
-      width: 30px
+      width: auto
       font-size: 14px
       i
         font-size: 18px

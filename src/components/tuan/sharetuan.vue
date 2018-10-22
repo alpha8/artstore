@@ -57,13 +57,15 @@
           <div class="btns btn-red" v-else @click.stop.prevent="createTuan"><span>我要开团</span></div>
         </div>
         <split></split>
-        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName=""></modal-title>
+        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName=""></modal-title>
         <div class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
       </div>
     </div>
     <rules ref="rules" title="拼团规则"></rules>
+    <!-- <layer :title="layer.title" :text="layer.text" :btn="layer.button" ref="tipsLayer"></layer> -->
+    <nicelayer :text="layer.text" ref="tipsLayer"></nicelayer>
     <share ref="weixinShare"></share>
     <frame></frame>
   </div>
@@ -79,6 +81,8 @@
   import rules from '@/components/tuan/rules';
   import frame from '@/components/common/myiframe';
   import modalTitle from '@/components/modal-title/modal-title';
+  import layer from '@/components/common/layer';
+  import nicelayer from '@/components/common/nicelayer';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   let Base64 = require('js-base64').Base64;
@@ -100,7 +104,14 @@
         timer: null,
         preOrderId: '',
         shareData: {},
-        wxqrcode: api.CONFIG.wxqrcode
+        wxqrcode: api.CONFIG.wxqrcode,
+        layer: {
+          title: '温馨提示',
+          text: '',
+          button: {
+            text: '知道了!'
+          }
+        }
       };
     },
     computed: {
@@ -310,6 +321,10 @@
           } else if (response.code === 1005) {
             this.$store.dispatch('openToast', '你有一单未完成的订单，请前往「个人中心」→「我的拼团」查看!');
             console.log(response);
+          } else if (response.code === 2005) {
+            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicTuan || 0;
+            this.layer.text = `<p style="text-align:left">您 “开团或参团” 的权益配额合计为 [每周${leftTimes}次], 本周已用完。您下周可继续 “拼团” 购物。</p>`;
+            this.$refs.tipsLayer.show();
           } else {
             this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
             console.error(response);
@@ -368,6 +383,10 @@
           } else if (response.code === 1005) {
             this.$store.dispatch('openToast', '你有一单未完成的订单，请前往「个人中心」→「我的拼团」查看!');
             console.log(response);
+          } else if (response.code === 2005) {
+            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicTuan || 0;
+            this.layer.text = `<p style="text-align:left">您 “开团或参团” 的权益配额合计为 [每周${leftTimes}次], 本周已用完。您下周可继续 “拼团” 购物。</p>`;
+            this.$refs.tipsLayer.show();
           } else {
             this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
             console.error(response);
@@ -408,7 +427,7 @@
         let vm = this;
         this.shareData = {
           title: `[一虎一席.茶席艺术节]•[拼团.${this.tuan.buttomFee}元] ` + reduceGoodsName(this.tuan.name),
-          desc: `拼团价：¥${this.tuan.buttomFee}, 单买价：¥${this.tuan.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
+          desc: `拼团价：¥${this.tuan.buttomFee}, 单买价：¥${this.tuan.fieldPrice}.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
           success: function () {
@@ -446,7 +465,7 @@
       }
     },
     components: {
-      share, fixedheader, split, rules, frame, modalTitle
+      share, fixedheader, split, rules, frame, modalTitle, layer, nicelayer
     }
   };
 </script>

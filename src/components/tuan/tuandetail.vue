@@ -136,7 +136,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2" module="tuandetail" section="guessGoods"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -145,7 +145,9 @@
     </div>
     <frame></frame>
     <share ref="weixinShare"></share>
-    <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
+    <layer title="快速检索，扫码定位商品" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
+    <!-- <layer :title="layer.title" :text="layer.text" :btn="layer.button" ref="tipsLayer"></layer> -->
+    <nicelayer :text="layer.text" ref="tipsLayer"></nicelayer>
     <div class="fixed-foot">
       <div class="foot-wrapper">
         <div class="foot-item btn-share" @click.stop.prevent="pay">
@@ -184,6 +186,7 @@
   import wx from 'weixin-js-sdk';
   import share from '@/components/tuan/share';
   import layer from '@/components/common/layer';
+  import nicelayer from '@/components/common/nicelayer';
   let Base64 = require('js-base64').Base64;
 
   const ALL = 3;
@@ -227,7 +230,8 @@
         psCtx: api.CONFIG.psCtx,
         addedProducts: this.$store.getters.addedProducts,
         layer: {
-          title: '快速检索，扫码定位商品',
+          title: '温馨提示',
+          text: '',
           button: {
             text: '知道了!'
           }
@@ -263,7 +267,10 @@
       getQrcode() {
         if (this.tuan.id) {
           let uid = this.$store.getters.getUserInfo.userId;
-          if (uid) {
+          if (this.preOrderId) {
+            let shareId = this.preOrderId;
+            return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.tuan.id}&userId=${uid}&shareId=${shareId}&type=8" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+          } else if (uid) {
             return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.tuan.id}&userId=${uid}&type=8" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
           } else {
             return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.tuan.id}&type=8" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
@@ -665,8 +672,8 @@
         }
         let vm = this;
         this.shareData = {
-          title: `[一虎一席.茶席艺术节]•[拼团.${this.tuan.buttomFee}元] ` + reduceGoodsName(this.tuan.name),
-          desc: `拼团价：¥${this.tuan.buttomFee}, 单买价：¥${this.tuan.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
+          title: `[一虎一席.拼团价${this.tuan.buttomFee}元] ` + reduceGoodsName(this.tuan.name),
+          desc: `拼团价：¥${this.tuan.buttomFee}, 单买价：¥${this.tuan.fieldPrice}.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
           success: function () {
@@ -820,6 +827,10 @@
           } else if (response.code === 1005) {
             this.$store.dispatch('openToast', '你有一单未完成的订单，请前往「个人中心」→「我的拼团」查看!');
             console.log(response);
+          } else if (response.code === 2005) {
+            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicTuan || 0;
+            this.layer.text = `<p style="text-align:left">您 “开团或参团” 的权益配额合计为 [每周${leftTimes}次], 本周已用完。您下周可继续 “拼团” 购物。</p>`;
+            this.$refs.tipsLayer.show();
           } else {
             this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
             console.error(response);
@@ -878,6 +889,10 @@
           } else if (response.code === 1005) {
             this.$store.dispatch('openToast', '你有一单未完成的订单，请前往「个人中心」→「我的拼团」查看!');
             console.log(response);
+          } else if (response.code === 2005) {
+            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicTuan || 0;
+            this.layer.text = `<p style="text-align:left">您 “开团或参团” 的权益配额合计为 [每周${leftTimes}次], 本周已用完。您下周可继续 “拼团” 购物。</p>`;
+            this.$refs.tipsLayer.show();
           } else {
             this.$store.dispatch('openToast', '活动太过火爆,请稍候再来!');
             console.error(response);
@@ -925,7 +940,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, nicelayer
     }
   };
 </script>

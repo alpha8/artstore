@@ -12,7 +12,7 @@
           <div class="rule-content">
             <ol v-if="!qrcode.content">
               <li>优惠券可叠加使用，订单支付时系统将自动抵扣。</li>
-              <li>如有其它问题，请咨询一虎一席茶席艺术商城客服。</li>
+              <li>如有其它问题，请咨询一虎一席茶生活美学商城客服。</li>
             </ol>
             <div v-html="qrcode.content"></div>
           </div>

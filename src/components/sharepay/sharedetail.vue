@@ -20,7 +20,7 @@
             <div class="label">砍价优惠：</div>  
             <div class="desc fixedheight"><div class="box"><em>好友助力<strong>{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</strong></em><em class="rules" @click.stop.prevent="showRules"><strong>[砍价规则]</strong></em></div></div>
           </div>
-          <div class="row"  v-show="sharepay.stock > 0">
+          <div class="row"  v-show="sharepay.stock > 0 && sharepay.status !== 1">
             <div class="label">商品库存：</div>
             <div class="desc" :class="{'text-red': sharepay.stock <= 3}">{{sharepay.stock || 0}} <span class="lesstock" v-if="sharepay.stock <= 5">(库存紧张)</span></div>
           </div>
@@ -142,7 +142,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2" module="sharedetail" section="guessGoods"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -150,7 +150,9 @@
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
     <share ref="weixinShare" :needPayTips="needPayTips" @hideShareFired="fireHideShare"></share>
-    <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
+    <layer title="快速检索，扫码定位商品" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
+    <!-- <layer :title="layer.title" :text="layer.text" :btn="layer.button" ref="tipsLayer"></layer> -->
+    <nicelayer :text="layer.text" ref="tipsLayer"></nicelayer>
     <div class="fixed-foot">
       <div class="foot-wrapper">
         <div class="foot-item btn-share" v-if="isOwner && cutStatus >= 3">
@@ -158,7 +160,8 @@
         </div>
         <div class="foot-item btn-share" v-else-if="isOwner" @click.stop.prevent="pay">
           <span class="button-lg orange" v-if="hasProgressOrder || GotAndPay">去付款</span>
-          <span class="button-lg orange" v-else>立即购买</span>
+         <!--  <span class="button-lg orange twoline" v-else><span class="line">¥<strong>{{getCutPrice}}</strong></span>立即购买</span> -->
+         <span class="button-lg orange" v-else>立即购买(¥{{getCutPrice}})</span>
         </div>
         <div class="foot-item btn-share" v-else-if="!cuttingData.cutOrder || sharepay.stock <= 0" @click.stop.prevent="showRules">
           <span class="button-lg orange">砍价规则</span>
@@ -177,7 +180,7 @@
         </div>
         <div class="foot-item" v-else-if="!isOwner && !cuttingData.cutOrder && !cuttingData.cut">
           <span class="button-lg gray" v-if="sharepay.status === 3">已下架</span>
-          <span class="button-lg gray" v-else-if="sharepay.stock <= 0">已售罄</span>
+          <span class="button-lg gray" v-else-if="sharepay.stock <= 0 || sharepay.status === 1">已售罄</span>
           <span class="button-lg darkred" v-else :class="{'gray': getCutPrice <= sharepay.buttomFee}" @click.stop.prevent="wxshare">发起砍价</span>
         </div>
         <div class="foot-item" @click.stop.prevent="wxshare" v-else-if="isOwner || !cuttingData.cutOrder">
@@ -213,6 +216,7 @@
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   import layer from '@/components/common/layer';
+  import nicelayer from '@/components/common/nicelayer';
   import share from '@/components/sharepay/share';
   import rules from '@/components/sharepay/rules';
   import bargainshow from '@/components/sharepay/bargainshow';
@@ -269,7 +273,8 @@
         psCtx: api.CONFIG.psCtx,
         addedProducts: this.$store.getters.addedProducts,
         layer: {
-          title: '快速检索，扫码定位商品',
+          title: '温馨提示',
+          text: '',
           button: {
             text: '知道了!'
           }
@@ -319,7 +324,10 @@
       getQrcode() {
         if (this.sharepay.id) {
           let uid = this.$store.getters.getUserInfo.userId;
-          if (uid) {
+          if (this.preOrderId) {
+            let shareId = this.preOrderId;
+             return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.sharepay.id}&userId=${uid}&shareId=${shareId}&type=9" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
+          } else if (uid) {
             return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.sharepay.id}&userId=${uid}&type=9" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
           } else {
             return `<img src="${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.sharepay.id}&type=9" border="0" width="180" height="180" style="text-align: center; margin: -7px auto; display: block;"></img>`;
@@ -577,7 +585,9 @@
             this.mutex = true;
             return;
           } else if (response.code === 2005) {
-            this.$store.dispatch('openToast', '抱歉，您本月的砍价次数已用完!');
+            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicAssist || 0;
+            this.layer.text = `<p style="text-align:left">您帮朋友 “砍价” 的权益配额为 [每周${leftTimes}次], 本周已用完。您下周可继续帮朋友 “砍价”。</p>`;
+            this.$refs.tipsLayer.show();
             this.mutex = true;
             return;
           } else if (response.result !== 0 || response.code) {
@@ -645,7 +655,9 @@
             this.mutex = true;
             return;
           } else if (response.code === 2005) {
-            this.$store.dispatch('openToast', '抱歉，您本月的砍价次数已用完!');
+            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicAssist || 0;
+            this.layer.text = `<p style="text-align:left">您帮朋友 “砍价” 的权益配额为 [每周${leftTimes}次], 本周已用完。您下周可继续帮朋友 “砍价”。</p>`;
+            this.$refs.tipsLayer.show();
             this.mutex = true;
             return;
           } else if (response.result !== 0 || response.code) {
@@ -679,32 +691,33 @@
           userIcon: user.icon || '',
           noAction: noAction
         }).then(response => {
-          if (response.result === 0) {
-            if (response.code === 2001) {
-              this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
-              return;
-            } else if (response.code === 2005) {
-              this.$store.dispatch('openToast', '抱歉，您本月的砍价次数已用完!');
-              return;
-            }
-            this.cuttingData = response.data;
-            if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
-              this.hasProgressOrder = true;
-            } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004 && !noAction) {
-              // 1004: 到达底价, 1007： 已经砍过价了
-              this.$refs.bargainShow.show();
-              if (response.data.owner) {
-                this.$refs.weixinShare.show();
-              }
-            }
-            let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
-            if (preOrderId) {
-              this.preOrderId = preOrderId;
-              this.updateShareData();
+          if (response.code === 2001) {
+            this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
+            return;
+          } else if (response.code === 2005) {
+            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicAssist || 0;
+            this.layer.text = `<p style="text-align:left">您帮朋友 “砍价” 的权益配额为 [每周${leftTimes}次], 本周已用完。您下周可继续帮朋友 “砍价”。</p>`;
+            this.$refs.tipsLayer.show();
+          }
+          this.cuttingData = response.data;
+          if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
+            this.hasProgressOrder = true;
+          } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004 && response.code !== 2005 && !noAction) {
+            // 1004: 到达底价, 1007： 已经砍过价了
+            this.$refs.bargainShow.show();
+            if (response.data.owner) {
+              this.$refs.weixinShare.show();
             }
           }
+          let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
+          if (preOrderId) {
+            this.preOrderId = preOrderId;
+            this.updateShareData();
+          }
           this._initScroll();
-          this.timerLoop();
+          if (response.result === 0) {
+            this.timerLoop();
+          }
         }).catch(response => {
           console.error(response);
         });
@@ -718,33 +731,35 @@
           userName: user.nickName || '匿名',
           userIcon: user.icon || ''
         }).then(response => {
-          if (response.result === 0) {
-            if (response.code === 2001) {
-              this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
-              return;
-            } else if (response.code === 2005) {
-              this.$store.dispatch('openToast', '抱歉，您本月的砍价次数已用完!');
-              return;
-            }
-            this.cuttingData = response.data;
-            if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
-              this.hasProgressOrder = true;
-            } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004) {
-              this.$refs.bargainShow.show();
-            }
-            let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
-            if (preOrderId) {
-              this.preOrderId = preOrderId;
-              this.updateShareData();
-            }
-            if (this.cuttingData.owner) {
-              this.needPayTips = true;
-            } else {
-              this.needPayTips = false;
-            }
+          if (response.code === 2001) {
+            this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
+            return;
+          } else if (response.code === 2005) {
+            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicAssist || 0;
+            this.layer.text = `<p style="text-align:left">您帮朋友 “砍价” 的权益配额为 [每周${leftTimes}次], 本周已用完。您下周可继续帮朋友 “砍价”。</p>`;
+            this.$refs.tipsLayer.show();
+            return;
+          }
+          this.cuttingData = response.data;
+          if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
+            this.hasProgressOrder = true;
+          } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004) {
+            this.$refs.bargainShow.show();
+          }
+          let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
+          if (preOrderId) {
+            this.preOrderId = preOrderId;
+            this.updateShareData();
+          }
+          if (this.cuttingData.owner) {
+            this.needPayTips = true;
+          } else {
+            this.needPayTips = false;
           }
           this._initScroll();
-          this.timerLoop();
+          if (response.result === 0) {
+            this.timerLoop();
+          }
         }).catch(response => {
           console.error(response);
         });
@@ -1003,8 +1018,8 @@
         }
         let vm = this;
         this.shareData = {
-          title: `[一虎一席.茶席艺术节]•[砍价至${this.sharepay.buttomFee}元] ` + reduceGoodsName(this.sharepay.name),
-          desc: `砍到底：¥${this.sharepay.buttomFee}, 单买价：¥${this.sharepay.fieldPrice}.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】`,
+          title: `[一虎一席.砍价至${this.sharepay.buttomFee}元] ` + reduceGoodsName(this.sharepay.name),
+          desc: `砍到底：¥${this.sharepay.buttomFee}, 单买价：¥${this.sharepay.fieldPrice}.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
           success: function () {
@@ -1145,7 +1160,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, rules, bargainshow, relatedBargains
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, rules, bargainshow, relatedBargains, nicelayer
     }
   };
 </script>
@@ -1680,6 +1695,8 @@
           &.gray
             background: #999
             color: #fff
+          &.twoline
+            font-size: 12px
           .icon-favorite
             color: #ff463c
           .line

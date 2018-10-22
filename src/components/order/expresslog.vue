@@ -7,7 +7,7 @@
           <div class="expressLog-list">
             <div class="expressLog-item" v-for="(expressLog, index) in expressLogs" :key="index">
               <i></i>
-              <div class="msg-box">{{expressLog.status}}</div>
+              <div class="msg-box">{{expressLog.content}}</div>
               <small>{{expressLog.time}}</small>
             </div>
           </div>
@@ -64,12 +64,13 @@
           return;
         }
         let code = this.$route.params.expressCode;
-        let expressNo = this.$route.params.expressNo;
+        let expressNo = this.$route.params.expressNo || '';
         api.trackingGoods(expressNo, code).then(response => {
-          if (response.status === '0') {
-            this.expressLogs = response.result.list;
+          if (response.list) {
+            this.expressLogs = response.list;
           } else {
-            this.errorTips = response.msg;
+            this.errorTips = `抱歉，未查询此运单${expressNo}信息。`;
+            console.log(response.msg);
           }
           this.totalPages = 0;
           this.pageNumber++;
@@ -83,15 +84,15 @@
         });
       },
       _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.expressLog, {
-              click: true
-            });
-          } else {
-            this.scroll.refresh();
-          }
-        });
+        // this.$nextTick(() => {
+        //   if (!this.scroll) {
+        //     this.scroll = new BScroll(this.$refs.expressLog, {
+        //       click: true
+        //     });
+        //   } else {
+        //     this.scroll.refresh();
+        //   }
+        // });
       },
       _reset() {
         this.expressLogs = [];
@@ -130,7 +131,8 @@
     top: 44px
     bottom: 0
     width: 100%
-    overflow: hidden
+    overflow: auto
+    -webkit-overflow-scrolling: touch
     .expressLog-wrap
       position: relative
       width: 100%

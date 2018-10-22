@@ -12,10 +12,10 @@
         <div class="article-content articleContentHook" v-html="article.content" ref="articleContent"></div>
         <split v-show="article.videos && article.videos.length"></split>
         <div class="article-content" v-show="article.videos && article.videos.length">
-          <h1 class="title">文章视频</h1>
+          <h1 class="title">{{article.videoTitle || '文章视频'}}</h1>
           <div class="player">
             <div id="tencent_video_player">
-              <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://www.yihuyixi.com/ps/download/5a4c7ceae4b065c96d6562dc" v-for="v in article.videos">
+              <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://www.yihuyixi.com/ps/download/5a4c7ceae4b065c96d6562dc" v-for="v in article.videos" loop="loop">
                 <source :src="v.url" type="video/mp4">
               </video>
             </div>
@@ -28,7 +28,7 @@
         <modal-title :title="article.relateTile || '猜你喜欢'" moreText="更多" catKey="" catName="" v-show="article.relates && article.relates.length"></modal-title>
         <channel :items="article.relates" :cols="2" v-show="article.relates && article.relates.length"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -180,8 +180,12 @@
         if (this.article.wxSharePic) {
           icon = api.CONFIG.psCtx + this.article.wxSharePic + '?w=423&h=423';
         }
+        let shareTitle = this.article.title || '';
+        if (shareTitle && shareTitle.indexOf('一虎一席') < 0) {
+          shareTitle = '[一虎一席] ' + shareTitle;
+        }
         let shareData = {
-          title: '[一虎一席] ' + this.article.title,
+          title: shareTitle,
           desc: this.article.summary,
           link: redirect,
           imgUrl: icon,
@@ -337,7 +341,7 @@
       .pv
         padding-left: 4px
     .article-content
-      padding: 0 8px
+      padding: 0 8px 9px
       font-size: 16px
       color: #4d555d
       line-height: 1.45
@@ -348,6 +352,7 @@
         padding: 10px 7px
         font-size: 14px
         color: #07111b
+        font-weight: 700
       #tencent_video_player
           width: 100%
           height: auto

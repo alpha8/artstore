@@ -56,6 +56,16 @@
       this.hide();
     },
     methods: {
+      refreshData() {
+        api.getUserProfile(user.userId || 0).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('updateUserProfile', response);
+          }
+          this._initScroll();
+        }).catch(response => {
+          console.error(response);
+        });
+      },
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
@@ -74,6 +84,11 @@
         }
         this.paying = true;
         let userInfo = this.$store.getters.getUserInfo;
+        if (!userInfo.userId) {
+          this.$store.dispatch('openToast', '未登录!');
+          this.paying = false;
+          return;
+        }
         let params = {
           openid: userInfo.openid,
           userId: userInfo.userId,
@@ -110,6 +125,7 @@
                 // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
                 if (res.err_msg === 'get_brand_wcpay_request:ok') {
                   that.$store.dispatch('openToast', '充值成功！');
+                  that.refreshData();
                 } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
                   that.$store.dispatch('openToast', '取消充值！');
                 } else if (res.err_msg === 'get_brand_wcpay_request:fail') {

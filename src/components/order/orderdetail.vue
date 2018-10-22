@@ -64,8 +64,8 @@
       <div class="btn-group" v-show="loginUser && loginUser.userId === order.userId">
        <div class="button" v-if="order.status === 0 && !order.express && order.type !== 6" @click.stop.prevent="goFillAddress"><span class="btn-red">填写收货地址</span></div>
         <div class="button" v-else-if="order.status === 0" @click.stop.prevent="weixinPay"><span class="btn-red">支付</span></div>
-        <div class="button" v-if="order.status === 0" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
-        <div class="button" v-if="(order.status === 1 || order.status === 8) && order.type !== 8 && order.type !== 6" @click.stop.prevent="showRefund"><span class="btn-red">申请退款</span></div>
+        <div class="button" v-if="order.status === 0 && !rejectCancelOrder" @click.stop.prevent="cancelOrder"><span class="btn-white">取消订单</span></div>
+        <div class="button" v-if="(order.status === 1 || order.status === 8) && !rejectCancelOrder" @click.stop.prevent="showRefund"><span class="btn-red">申请退款</span></div>
         <div class="button" v-if="order.status === 5" @click.stop.prevent="cancelRefund"><span class="btn-red">取消退款申请</span></div>
         <div class="button" v-if="order.status === 2" @click.stop.prevent="trackExpress"><span class="btn-white">查看物流</span></div>
         <div class="button" v-if="order.status === 2" @click.stop.prevent="confirmDelivery"><span class="btn-green">确认收货</span></div>
@@ -151,11 +151,15 @@
         }
         return '';
       },
+      rejectCancelOrder() {
+        let orderTypes = [6, 8];
+        return orderTypes.filter(o => o === this.order.type).length;
+      },
       canShowFooter() {
         let status = this.order.status;
         let canShowStatus = [0, 1, 2, 5];
         let isOwner = this.loginUser && this.loginUser.userId === this.order.userId;
-        let ignoreOrderType = this.order.type === 8 || this.order.type === 6;
+        let ignoreOrderType = (this.order.type === 8 || this.order.type === 6) && this.order.status === 1;
         return canShowStatus.filter(o => o === status).length && isOwner && !ignoreOrderType;
       },
       totalPrice() {
@@ -201,15 +205,15 @@
         });
       },
       _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.orderdetail, {
-              click: true
-            });
-          } else {
-            this.scroll.refresh();
-          }
-        });
+        // this.$nextTick(() => {
+        //   if (!this.scroll) {
+        //     this.scroll = new BScroll(this.$refs.orderdetail, {
+        //       click: true
+        //     });
+        //   } else {
+        //     this.scroll.refresh();
+        //   }
+        // });
       },
       showProductDetail(product) {
         if (this.order.type === 3) { // 秒杀
@@ -406,7 +410,8 @@
     top: 44px
     bottom: 50px
     width: 100%
-    overflow: hidden
+    overflow: auto
+    -webkit-overflow-scrolling: touch
     background-color: #fff
     &.nofooter
       bottom: 0

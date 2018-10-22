@@ -430,6 +430,8 @@
                     text-align: right
                     font-size: 11px
                     color: #a9a9a9
+                    padding-right: 2px
+                    box-sizing: border-box
                     i
                       color: #f15353
       .no-order

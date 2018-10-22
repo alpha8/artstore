@@ -48,12 +48,12 @@
           <h1 class="title">商品视频</h1>
           <div class="player">
             <div id="tencent_video_player" v-if="good.videos && good.videos.length">
-              <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://www.yihuyixi.com/ps/download/5a4c7ceae4b065c96d6562dc" v-for="v in good.videos">
+              <video oncontextmenu="return false;" controls="controls" loop="loop" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://www.yihuyixi.com/ps/download/5a4c7ceae4b065c96d6562dc" v-for="v in good.videos">
                 <source :src="v.url" type="video/mp4">
               </video>
             </div>
             <div id="tencent_video_player" v-else-if="good.videoUrl">
-              <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://www.yihuyixi.com/ps/download/5a4c7ceae4b065c96d6562dc">
+              <video oncontextmenu="return false;" controls="controls" loop="loop" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://www.yihuyixi.com/ps/download/5a4c7ceae4b065c96d6562dc">
                 <source :src="good.videoUrl" type="video/mp4">
               </video>
             </div>
@@ -123,7 +123,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2" module="productdetail" section="guessGoods"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -648,7 +648,7 @@
         let vm = this;
         let shareData = {
           title: `${this.good.name}`,
-          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
+          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: img,
           success: function () {
@@ -657,7 +657,7 @@
         };
         let shareData2 = {
           title: `${this.good.name}（¥${this.good.activityPrice || this.good.markPrice}）`,
-          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
+          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: img,
           success: function () {

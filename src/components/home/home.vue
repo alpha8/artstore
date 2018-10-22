@@ -19,7 +19,7 @@
         <modal-title title="一虎一席茶室艺术空间 (30秒大片)"></modal-title>
         <div class="vipmovie">
           <div id="vip_video_player" :style="getVideoWidth">
-            <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5db404564972818869478317/snapshot/1514945837_2671344614.100_0.jpg" id="vipvideo" :src="videos.vip">
+            <video oncontextmenu="return false;" controls="controls" loop="loop" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5db404564972818869478317/snapshot/1514945837_2671344614.100_0.jpg" id="vipvideo" :src="videos.vip">
             </video>
           </div>
           <div class="slogan">[深圳国际艺术博览会] VIP室：一虎一席茶室艺术</div>
@@ -49,13 +49,13 @@
         <modal-title title='关于 "一虎一席"'></modal-title>
         <div class="aboutus">
           <div id="tencent_video_player" :style="getVideoWidth">
-            <video oncontextmenu="return false;" controls="controls" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5d37d4564972818869478170/snapshot/1514945818_4129077795.100_0.jpg" id="springvideo" :src="videos.spring">
+            <video oncontextmenu="return false;" controls="controls" loop="loop" x-webkit-airplay="true" webkit-playsinline="true" playsinline="" width="100%" height="100%" poster="http://1252423336.vod2.myqcloud.com/950efb46vodtransgzp1252423336/85f5d37d4564972818869478170/snapshot/1514945818_4129077795.100_0.jpg" id="springvideo" :src="videos.spring">
             </video>
           </div>
           <div class="slogan">一虎一席东方生活美学雅集《春风十里》</div>
         </div>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -325,7 +325,7 @@
           redirect += '?userId=' + (uid || 0);
         }
         let shareData = {
-          title: '[一虎一席茶席艺术商城] 一站式优品商城，品味脱凡',
+          title: '[一虎一席茶生活美学商城] 一站式优品商城，品味脱凡',
           desc: '1200款精美茶器、300套茶席佳作、茶室专业配画、200款好茶老茶.【每年递增100%】',
           link: redirect,
           imgUrl: 'http://www.yihuyixi.com/ps/download/5a60046ae4b0a5130574a5fc'

@@ -103,7 +103,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -646,8 +646,8 @@
           redirect += '?userId=' + uid;
         }
         let shareData = {
-          title: `[一虎一席][拍卖.${this.auction.startPrice}元] ` + reduceGoodsName(this.auction.name),
-          desc: '起拍价：¥' + this.auction.startPrice + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
+          title: `[一虎一席.拍卖.${this.auction.startPrice}元] ` + reduceGoodsName(this.auction.name),
+          desc: '起拍价：¥' + this.auction.startPrice + '.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: icon
         };

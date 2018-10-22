@@ -109,7 +109,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶席艺术商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -142,7 +142,9 @@
     </div>
     <frame></frame>
     <share ref="weixinShare"></share>
-    <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
+    <layer title="快速检索，扫码定位商品" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
+    <!-- <layer :title="layer.title" :text="layer.text" :btn="layer.button" ref="tipsLayer"></layer> -->
+    <nicelayer :text="layer.text" ref="tipsLayer"></nicelayer>
     <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
@@ -166,6 +168,7 @@
   import wx from 'weixin-js-sdk';
   import share from '@/components/good-detail/share';
   import layer from '@/components/common/layer';
+  import nicelayer from '@/components/common/nicelayer';
 
   const ALL = 2;
   // const ERR_OK = 0;
@@ -209,7 +212,8 @@
           negative: '差评'
         },
         layer: {
-          title: '快速检索，扫码定位商品',
+          title: '温馨提示',
+          text: '',
           button: {
             text: '知道了!'
           }
@@ -580,9 +584,18 @@
               this.$store.dispatch('openToast', '秒杀活动未开始或已结束！');
               return;
             }
-            api.killGoods(this.seckill.seckillId, md5).then(res => {
+            let profile = this.$store.getters.getUserProfile;
+            let level = (profile.user && profile.user.level) || 'lv0';
+            api.killGoods(this.seckill.seckillId, md5, level).then(res => {
               if (!res.success) {
-                this.$store.dispatch('openToast', res.error || killResult[res.data.statEnum]);
+                let state = res.data.statEnum;
+                if (state === 'EXCEED_QUOTA') {
+                  let leftTimes = 2;
+                  this.layer.text = `<p style="text-align:left">${res.error}</p>`;
+                  this.$refs.tipsLayer.show();
+                } else {
+                  this.$store.dispatch('openToast', res.error || killResult[res.data.statEnum]);
+                }
                 return;
               }
               let good = {
@@ -676,8 +689,8 @@
         }
         let vm = this;
         let shareData = {
-          title: `[一虎一席.茶席艺术节]•[秒杀价.${this.good.killPrice}元] ` + reduceGoodsName(this.good.name),
-          desc: '秒杀价：¥' + this.good.killPrice + '.「一虎一席茶席艺术商城」精品.【一站式优品商城，品味脱凡】',
+          title: `[一虎一席.秒杀${this.good.killPrice}元] ` + reduceGoodsName(this.good.name),
+          desc: '秒杀价：¥' + this.good.killPrice + '.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】',
           link: redirect,
           imgUrl: icon,
           success: function () {
@@ -787,7 +800,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, modalTitle, channel, share, gotop, layer
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, modalTitle, channel, share, gotop, layer, nicelayer
     }
   };
 </script>

@@ -5,7 +5,7 @@
         <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
       </div>
       <div class="title">奖金账户</div>
-      <div class="right"></div>
+      <div class="right" @click.stop.prevent="detail">奖金明细</div>
     </div>
     <div class="cashback" ref="cashback">
       <div class="cashback-wrapper">
@@ -28,11 +28,13 @@
           </li>
         </ul>
         <div class="cashback-content">
-          <div class="btns"><span class="btn-green" @click.stop.prevent="openWithdraw">奖金提现</span></div>
-          <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">奖金明细</span></div>
+          <div class="btns">
+            <span class="btn-green" @click.stop.prevent="openWithdraw">奖金提现</span>
+            <!-- <span class="btn-orange" @click.stop.prevent="detail">奖金明细</span> -->
+          </div>
           <div class="content-title">奖金余额是什么？</div>
           <div class="content-text">
-            <p><em>[分享一次，受益三年]</em> 某朋友如果第一次进入审美品味出众的一虎一席商城，是通过您分享的商品链接（或商城里的文章链接）进入的，则之后的<em>3年内</em>，该朋友在商城里完成的所有商品交易，系统都将按照一定的额度（比如：<em>“皇冠一星” 10%</em>）赠送给您奖金。</p>
+            <p><em>[分享一次，受益三年]</em> 某朋友如果第一次进入审美品味出众的一虎一席商城，是通过您分享的商城链接或二维码进入的（比如：首页、商品、文章），则之后的<em>3年内</em>，该朋友在商城里完成的所有商品交易，系统都将按照一定的额度（比如：<em>“皇冠一星” 10%</em>）赠送给您奖金。</p>
             <p>您可前往「个人中心 — 奖金余额」中查看奖金信息及奖金对应的来源交易明细。</p>
             <p><em>奖金余额可提取现金</em>，亦可在您购买商城商品时，自动被最大化使用。</p>
           </div>
@@ -136,7 +138,7 @@
       flex: 1
       padding: 0 10px
     .right
-      width: 30px
+      width: auto
       font-size: 14px
       i
         font-size: 18px

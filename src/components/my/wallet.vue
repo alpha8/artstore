@@ -34,7 +34,7 @@
 
   export default {
     activated() {
-      this.refreshData();
+      this._initScroll();
       this.show();
     },
     deactivated() {
@@ -47,17 +47,17 @@
       }
     },
     methods: {
-      refreshData() {
-        let user = this.$store.getters.getUserInfo;
-        api.getUserProfile(user.userId || 0).then(response => {
-          if (response.result === 0) {
-            this.$store.dispatch('updateUserProfile', response);
-          }
-          this._initScroll();
-        }).catch(response => {
-          console.error(response);
-        });
-      },
+      // refreshData() {
+      //   let user = this.$store.getters.getUserInfo;
+      //   api.getUserProfile(user.userId || 0).then(response => {
+      //     if (response.result === 0) {
+      //       this.$store.dispatch('updateUserProfile', response);
+      //     }
+      //     this._initScroll();
+      //   }).catch(response => {
+      //     console.error(response);
+      //   });
+      // },
       _initScroll() {
         this.$nextTick(() => {
           if (!this.scroll) {
