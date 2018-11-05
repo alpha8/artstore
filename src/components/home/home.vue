@@ -177,7 +177,6 @@
       };
     },
     created() {
-      this.wxReady();
       // 性能优化，增加首页本地缓存
       let appCache = this.$store.getters.loadAppCache;
       if (appCache.home && appCache.home.arts && appCache.home.arts.length) {
@@ -198,6 +197,7 @@
       } else {
         this.fetchData();
       }
+      this.wxReady();
     },
     mounted() {
       this.scroller = this.$refs.mainWrapper;

@@ -35,6 +35,7 @@
                       <div class="price">
                         <span>{{item.buttomFee | currency}}</span>
                         <del>{{item.fieldPrice | currency}}</del>
+                        <em class="bargain-person">{{bargainPerson(item)}}</em>
                       </div>
                     </div>
                     <div class="more-ops">
@@ -131,6 +132,13 @@
         this.products = [];
         this.pageNumber = 1;
         this.totalPages = -1;
+      },
+      bargainPerson(item) {
+        let persons = Math.ceil(item.fieldPrice / item.buttomFee);
+        if (persons > 1) {
+          return `1-${persons}人`;
+        }
+        return '1人';
       },
       fillName(name) {
         name = name || '';
@@ -351,6 +359,15 @@
                     display: inline-block
                     color: #999
                     font-size: 12px
+                  .bargain-person
+                    display: inline-block
+                    font-size: 12px
+                    margin-left: 5px
+                    padding: 1px 5px
+                    background: #e1e1e1
+                    color: #999
+                    border-radius: 7px
+                    vertical-align: bottom
                 .more-ops
                   position: relative
                   display: block

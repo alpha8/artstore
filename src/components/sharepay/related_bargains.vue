@@ -15,7 +15,7 @@
           <div class="item-info">
             <h3>{{fillName(item)}}</h3>
             <div class="sellpoint" v-if="item.sellPoint">{{item.sellPoint}}</div>
-            <div class="price"><div class="num">{{item.buttomFee | currency}}</div><div class="salesCount" v-if="item.fieldPrice">{{item.fieldPrice | currency}}</div></div>
+            <div class="price"><div class="num">{{item.buttomFee | currency}}</div><div class="salesCount" v-if="item.fieldPrice">{{item.fieldPrice | currency}}</div><em class="bargain-person">{{bargainPerson(item)}}</em></div>
           </div>
         </div>
       </div>
@@ -92,6 +92,13 @@
       fillName(item) {
         let name = item.name || '';
         return reduceGoodsName(name);
+      },
+      bargainPerson(item) {
+        let persons = Math.ceil(item.fieldPrice / item.buttomFee);
+        if (persons > 1) {
+          return `1-${persons}人`;
+        }
+        return '1人';
       },
       getThumbnail(item) {
         let pic = item.icon;
@@ -259,9 +266,19 @@
             color: $color-gray
             margin-left: 6px
             font-size: 11px
-            float: left;
-            margin-top: 1.5px
+            float: left
+            margin-top: 3px
             text-decoration: line-through
+          .bargain-person
+            display: block
+            float: left
+            font-size: 11px
+            margin-left: 5px
+            margin-top: 1px
+            padding: 1px 5px
+            background: #e1e1e1
+            color: #999
+            border-radius: 7px
         .icon
           position: absolute
           top: 50%

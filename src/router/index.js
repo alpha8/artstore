@@ -127,7 +127,7 @@ export default new Router({
     {path: '/cashbackdetail', component: cashbackdetail, meta: {keepAlive: true}},
     {path: '/bindphone', component: bindphone, name: 'bindphone', meta: {keepAlive: true}},
     {path: '/articles', component: articles, name: 'articles', meta: {keepAlive: true}},
-    {path: '/article/:id', component: articledetail, name: 'articledetail', meta: {keepAlive: true}},
+    {path: '/article/:id', component: articledetail, name: 'articledetail', meta: {keepAlive: false}},
     {path: '/stat', component: stat, name: 'stat', meta: {keepAlive: true}},
     {path: '/uvdetail', component: uvdetail, name: 'uvdetail', meta: {keepAlive: true}},
     {path: '/firstpurchase', component: firstpurchase, name: 'firstpurchase', meta: {keepAlive: true}},

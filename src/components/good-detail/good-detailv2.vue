@@ -77,12 +77,12 @@
             </table>
           </div>
         </div>
-        <split></split>
-        <div class="rating">
+        <split v-if="good.ratings && good.ratings.length"></split>
+        <div class="rating" v-if="good.ratings && good.ratings.length">
           <h1 class="title">商品评论</h1>
           <!--<ratingselect @select="selectRating" @toggle="toggleContent" :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="good.ratings"></ratingselect> -->
           <div class="rating-wrapper">
-            <ul v-if="good.ratings && good.ratings.length">
+            <ul>
               <li class="rating-item" v-for="rating in good.ratings" v-show="needShow(rating.score, rating.content)">
                 <div class="user">
                   <img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10" width="20" height="20" alt="" class="avatar">
@@ -199,12 +199,7 @@
       }
     },
     updated() {
-      if (this.good.content && !this.processing) {
-        this.processing = true;
-        this.lazyload();
-        this.bindPictureEvent();
-      }
-      this._initScroll();
+      this.processLoading();
     },
     data() {
       return {
@@ -311,6 +306,7 @@
           // this.loadTencentPlayer();
           this.$store.dispatch('closeLoading');
           this.wxReady();
+          // this.processLoading();
           this.getRelatedGoods();
           // this.fetchComments();
           this.getLikeGoods();
@@ -319,6 +315,14 @@
           this.$store.dispatch('closeLoading');
           this.$router.replace('/404');
         });
+      },
+      processLoading() {
+        if (this.good.content && !this.processing) {
+          this.processing = true;
+          this.lazyload();
+          this.bindPictureEvent();
+        }
+        this._initScroll();
       },
       loadTencentPlayer() {
         if (!this.good.videoUrl) {
@@ -744,7 +748,9 @@
           this.lazyloaded = true;
           this.processing = false;
         }
-        this.good.content = html;
+        this.$nextTick(() => {
+          this.good.content = html;
+        });
       },
       goTop() {
         document.body.scrollTop = 0;
@@ -977,7 +983,7 @@
             vertical-align: middle
             color: #666
       .text, .player
-        font-size: 13px
+        font-size: 14px
         color: rgb(77, 85, 93)
         line-height: 1.3
         box-sizing: border-box
@@ -994,7 +1000,7 @@
         padding-right: 10px
       .sellpoint
         padding: 0 10px 0 14px
-        font-size: 13px
+        font-size: 14px
         color: #4d555d
         overflow: hidden
         text-overflow: ellipsis
@@ -1019,7 +1025,7 @@
           border-right: solid 1px #e7e7e7
           padding: 10px 5px 10px 8px
           color: #848689
-          font-size: 12px
+          font-size: 13px
           &:first-child
             width: 75px
         .adjustText

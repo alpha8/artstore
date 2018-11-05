@@ -70,13 +70,17 @@
       this.processing = false;
       this.lazyloaded = false;
     },
+    created() {
+      document.body.scrollTop = document.documentElement.scrollTop = 0;
+      this.fetchData();
+    },
+    beforeDestroy() {
+      this.hide();
+      this.processing = false;
+      this.lazyloaded = false;
+    },
     updated() {
-      if (!this.processing && this.article.content) {
-        this.processing = true;
-        this.lazyload();
-        this.bindPictureEvent();
-      }
-      this._initScroll();
+      this.processLoading();
     },
     mounted() {
       this.scroller = this.$refs.article;
@@ -100,6 +104,7 @@
         }).then(res => {
           if (res.result === 1) {
             this.$store.dispatch('closeLoading');
+            this.$router.replace('/404');
             return;
           }
           this.article = res;
@@ -107,10 +112,19 @@
           this.processing = false;
           this.$store.dispatch('closeLoading');
           this.wxReady();
+          // this.processLoading();
           // this.getWXFollow();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
         });
+      },
+      processLoading() {
+        if (!this.processing && this.article.content) {
+          this.processing = true;
+          this.lazyload();
+          this.bindPictureEvent();
+        }
+        this._initScroll();
       },
       _initScroll() {
         // this.$nextTick(() => {
@@ -140,7 +154,7 @@
           return;
         }
         if (this.lazyloaded) {
-          let imgs = this.$refs.articleContent.getElementsByTagName('img');
+          let imgs = this.$refs.articleContent && this.$refs.articleContent.getElementsByTagName('img') || [];
           for (let j = 0; j < imgs.length; j++) {
             imgs[j].addEventListener('click',
               (e) => {
@@ -167,11 +181,7 @@
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage']
           });
         });
-        let redirect = 'http://' + location.host + location.pathname + '#/article/' + this.article.id;
-        let ios = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent);
-        if (!ios) {
-          redirect = 'http://' + location.host + '/weixin/t/' + this.article.id;
-        }
+        let redirect = 'http://' + location.host + '/weixin/t/' + this.article.id;
         let uid = this.$store.getters.getUserInfo.userId;
         if (uid) {
           redirect += '?userId=' + uid;
@@ -200,7 +210,7 @@
       lazyload() {
         let w = window.innerWidth;
         let picImgList = [];
-        let imgs = this.$refs.articleContent.getElementsByTagName('img');
+        let imgs = this.$refs.articleContent && this.$refs.articleContent.getElementsByTagName('img') || [];
         let prefix = api.CONFIG.cdnCtx;
         let html = this.article.content;
         for (let i = 0; i < imgs.length; i++) {
@@ -234,6 +244,37 @@
             } else if (width === null) {
               picImgList.push(src.substring(0, src.lastIndexOf('?')));
             }
+          } else {
+            if (!picImgList.length) {
+              return;
+            }
+            let pic = img.getAttribute('src');
+            let width = img.getAttribute('width');
+            let height = img.getAttribute('height');
+            let suffix = '';
+            if (width) {
+              suffix += ' width="' + width + '"';
+            }
+            if (height) {
+              suffix += ' height="' + height + '"';
+            }
+            let p1 = suffix + ' alt="" src="' + pic + '"';
+            let p2 = suffix + ' src="' + pic + '"';
+            if (pic.indexOf('http:') < 0 && pic.indexOf('https:') < 0) {
+              pic = prefix + pic;
+            } else {
+              pic = pic.replace('http://www.yihuyixi.com', prefix);
+            }
+            if (pic.lastIndexOf('?') < 0) {
+              pic += '?1';
+            }
+            pic = pic + '&w=750';
+            html = html.replace(p1, ' src="' + pic + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"').replace(p2, 'img src="' + pic + '" width="' + w + '" style="margin-left: -14px; margin-bottom: 3px;"');
+            if (width && width > 100) {
+              picImgList.push(pic.substring(0, pic.lastIndexOf('?')));
+            } else if (width === null) {
+              picImgList.push(pic.substring(0, pic.lastIndexOf('?')));
+            }
           }
         }
         if (picImgList.length) {
@@ -241,7 +282,9 @@
           this.lazyloaded = true;
           this.processing = false;
         }
-        this.article.content = html;
+        this.$nextTick(() => {
+          this.article.content = html;
+        });
       },
       getWXFollow() {
         let user = this.$store.getters.getUserInfo;

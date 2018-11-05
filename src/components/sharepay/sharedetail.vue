@@ -14,7 +14,7 @@
           </div>
           <div class="row">
             <div class="label">商品底价：</div>
-            <div class="desc oldPrice">{{sharepay.buttomFee | currency}}</div>
+            <div class="desc oldPrice">{{sharepay.buttomFee | currency}}<span class="paytips" v-if="getCuttingUsers > 0">(砍价过程随时可购买)</span></div>
           </div>
           <div class="row">
             <div class="label">砍价优惠：</div>  
@@ -96,12 +96,12 @@
             </table>
           </div>
         </div>
-        <split></split>
-        <div class="rating">
+        <split v-if="good.ratings && good.ratings.length"></split>
+        <div class="rating" v-if="good.ratings && good.ratings.length">
           <h1 class="title">商品评论</h1>
           <!--<ratingselect @select="selectRating" @toggle="toggleContent" :select-type="selectType" :only-content="onlyContent" :desc="desc" :ratings="good.ratings"></ratingselect> -->
           <div class="rating-wrapper">
-            <ul v-if="good.ratings && good.ratings.length">
+            <ul>
               <li class="rating-item" v-for="rating in good.ratings" v-show="needShow(rating.score, rating.content)">
                 <div class="user">
                   <img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10" width="20" height="20" alt="" class="avatar">
@@ -160,8 +160,7 @@
         </div>
         <div class="foot-item btn-share" v-else-if="isOwner" @click.stop.prevent="pay">
           <span class="button-lg orange" v-if="hasProgressOrder || GotAndPay">去付款</span>
-         <!--  <span class="button-lg orange twoline" v-else><span class="line">¥<strong>{{getCutPrice}}</strong></span>立即购买</span> -->
-         <span class="button-lg orange" v-else>立即购买(¥{{getCutPrice}})</span>
+         <span class="button-lg orange" v-else>现在买(只需¥{{getCutPrice}}元)</span>
         </div>
         <div class="foot-item btn-share" v-else-if="!cuttingData.cutOrder || sharepay.stock <= 0" @click.stop.prevent="showRules">
           <span class="button-lg orange">砍价规则</span>
@@ -585,8 +584,7 @@
             this.mutex = true;
             return;
           } else if (response.code === 2005) {
-            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicAssist || 0;
-            this.layer.text = `<p style="text-align:left">您帮朋友 “砍价” 的权益配额为 [每周${leftTimes}次], 本周已用完。您下周可继续帮朋友 “砍价”。</p>`;
+            this.layer.text = `<p style="text-align:left">${response.msg}</p>`;
             this.$refs.tipsLayer.show();
             this.mutex = true;
             return;
@@ -655,10 +653,9 @@
             this.mutex = true;
             return;
           } else if (response.code === 2005) {
-            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicAssist || 0;
-            this.layer.text = `<p style="text-align:left">您帮朋友 “砍价” 的权益配额为 [每周${leftTimes}次], 本周已用完。您下周可继续帮朋友 “砍价”。</p>`;
+            this.layer.text = `<p style="text-align:left">${response.msg}</p>`;
             this.$refs.tipsLayer.show();
-            this.mutex = true;
+            this.mutex = false;
             return;
           } else if (response.result !== 0 || response.code) {
             this.$store.dispatch('openToast', '活动太过火爆，请稍候再来!');
@@ -735,8 +732,7 @@
             this.$store.dispatch('openToast', '太火爆了，商品已售罄!');
             return;
           } else if (response.code === 2005) {
-            let leftTimes = this.$store.getters.getUserProfile.cutTimes && this.$store.getters.getUserProfile.cutTimes.dicAssist || 0;
-            this.layer.text = `<p style="text-align:left">您帮朋友 “砍价” 的权益配额为 [每周${leftTimes}次], 本周已用完。您下周可继续帮朋友 “砍价”。</p>`;
+            this.layer.text = `<p style="text-align:left">${response.msg}</p>`;
             this.$refs.tipsLayer.show();
             return;
           }
@@ -1379,7 +1375,7 @@
             vertical-align: middle
             color: #666
       .text, .player
-        font-size: 13px
+        font-size: 14px
         color: rgb(77, 85, 93)
         line-height: 1.3
         box-sizing: border-box
@@ -1398,7 +1394,7 @@
         color: #f01414
       .sellpoint
         padding: 0 10px 0 14px
-        font-size: 13px
+        font-size: 14px
         color: #4d555d
         overflow: hidden
         text-overflow: ellipsis
@@ -1423,7 +1419,7 @@
           border-right: solid 1px #e7e7e7
           padding: 10px 5px 10px 8px
           color: #848689
-          font-size: 12px
+          font-size: 13px
           &:first-child
             width: 75px
         .adjustText
@@ -1528,6 +1524,10 @@
         &.oldPrice
           color: #07111b
           font-weight: 700
+          .paytips
+            font-weight: 400
+            color: #000
+            padding-left: 4px
         .lesstock
           color: #07111b
           font-weight: 700

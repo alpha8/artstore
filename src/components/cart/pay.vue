@@ -16,7 +16,7 @@
     <div class="pay" ref="pay" :class="{'notop': selfservice}">
       <div class="order-wrap">
         <split v-if="!selfservice"></split>
-        <div class="order-shop border-1px">一虎一席茶席艺术平台</div>
+        <div class="order-shop border-1px">一虎一席茶生活美学商城</div>
         <ul class="orderlist">
           <li class="product border-1px" v-for="product in products">
             <div class="thumbnail">

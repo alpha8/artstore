@@ -917,7 +917,7 @@
         background-color: #fff
       .sellpoint
         padding: 0 10px 3px 14px
-        font-size: 13px
+        font-size: 14px
         color: #07111b
         line-height: 17px
         overflow: hidden
@@ -926,7 +926,7 @@
         -webkit-line-clamp: 2
         -webkit-box-orient: vertical
       .text
-        font-size: 13px
+        font-size: 14px
         color: rgb(77, 85, 93)
         line-height: 1.3
         padding-left: 14px

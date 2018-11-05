@@ -61,11 +61,11 @@
           <h1 class="title">使用规则</h1>
           <div class="text" v-html="auction.rule" ref="goodRule" id="rules"></div>
         </div>
-        <split></split>
-        <div class="rating">
+        <split v-if="auction.ratings && auction.ratings.length"></split>
+        <div class="rating" v-if="auction.ratings && auction.ratings.length">
           <h1 class="title">商品评论</h1>
           <div class="rating-wrapper">
-            <ul v-if="auction.ratings && auction.ratings.length">
+            <ul>
               <li class="rating-item" v-for="rating in auction.ratings" v-show="needShow(rating.score, rating.content)">
                 <div class="user">
                   <img src="http://www.yihuyixi.com/ps/download/5959abcae4b00faa50475a10" width="20" height="20" alt="" class="avatar">
@@ -1018,7 +1018,7 @@
             transform: rotate(-45deg)
       .sellpoint
         padding: 0 10px 3px 14px
-        font-size: 13px
+        font-size: 14px
         color: #07111b
         line-height: 17px
         overflow: hidden
@@ -1027,7 +1027,7 @@
         -webkit-line-clamp: 2
         -webkit-box-orient: vertical
       .text
-        font-size: 13px
+        font-size: 14px
         color: rgb(77, 85, 93)
         line-height: 1.3
         box-sizing: border-box
