@@ -134,7 +134,7 @@
         this.totalPages = -1;
       },
       bargainPerson(item) {
-        let persons = Math.ceil(item.fieldPrice / item.buttomFee);
+        let persons = Math.floor((item.fieldPrice - item.buttomFee) / item.forwardFee);
         if (persons > 1) {
           return `1-${persons}人`;
         }
@@ -366,7 +366,7 @@
                     padding: 1px 5px
                     background: #e1e1e1
                     color: #999
-                    border-radius: 7px
+                    border-radius: 8px
                     vertical-align: bottom
                 .more-ops
                   position: relative

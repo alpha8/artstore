@@ -94,7 +94,7 @@
         return reduceGoodsName(name);
       },
       bargainPerson(item) {
-        let persons = Math.ceil(item.fieldPrice / item.buttomFee);
+        let persons = Math.floor((item.fieldPrice - item.buttomFee) / item.forwardFee);
         if (persons > 1) {
           return `1-${persons}人`;
         }
@@ -272,10 +272,11 @@
           .bargain-person
             display: block
             float: left
-            font-size: 11px
+            font-size: 12px
             margin-left: 5px
-            margin-top: 1px
-            padding: 1px 5px
+            padding: 0 5px
+            height: 15px
+            line-height: 15px
             background: #e1e1e1
             color: #999
             border-radius: 7px

@@ -10,11 +10,11 @@
         <div class="content">
           <h1 class="title">{{sharepay.name}}</h1>
           <div class="price">
-            <span class="now">¥{{getCutPrice}}</span><span class="old" v-if="sharepay.fieldPrice !== getCutPrice">¥{{sharepay.fieldPrice}}</span>
+            <span class="now">¥{{getCutPrice}}</span><span class="old" v-if="sharepay.fieldPrice !== getCutPrice">¥{{sharepay.fieldPrice}}</span><em class="bargain-person">{{bargainPerson}}</em>
           </div>
           <div class="row">
             <div class="label">商品底价：</div>
-            <div class="desc oldPrice">{{sharepay.buttomFee | currency}}<span class="paytips" v-if="getCuttingUsers > 0">(砍价过程随时可购买)</span></div>
+            <div class="desc oldPrice">{{sharepay.buttomFee | currency}}<span class="paytips" v-if="getCuttingUsers > 0">(中间价亦随时可购买)</span></div>
           </div>
           <div class="row">
             <div class="label">砍价优惠：</div>  
@@ -59,6 +59,11 @@
             </tr>
           </table>
           <div class="more_bargains" v-show="cuttingData.count > 25" @click.stop.prevent="goVisitList"><span>———— 查看全部助力好友(<em class="totalBargains">{{cuttingData.count}}人</em>) ————</span></div>
+        </div>
+        <split></split>
+        <div class="info">
+          <h1 class="title">砍价流程(极简)：</h1>
+          <timeflow></timeflow>
         </div>
         <split v-show="sharepay.relates && sharepay.relates.length"></split>
         <relatedBargains :items="sharepay.relates" :cols="2" :pageSize="4" title="最热砍价" v-show="sharepay.relates && sharepay.relates.length"></relatedBargains>
@@ -220,6 +225,7 @@
   import rules from '@/components/sharepay/rules';
   import bargainshow from '@/components/sharepay/bargainshow';
   import relatedBargains from '@/components/sharepay/related_bargains';
+  import timeflow from '@/components/common/timeflow';
   let Base64 = require('js-base64').Base64;
 
   const ALL = 3;
@@ -413,6 +419,13 @@
           return true;
         }
         return false;
+      },
+      bargainPerson() {
+        let persons = Math.floor((this.sharepay.fieldPrice - this.sharepay.buttomFee) / this.sharepay.forwardFee);
+        if (persons > 1) {
+          return `1-${persons}人`;
+        }
+        return '1人';
       }
     },
     mounted() {
@@ -712,9 +725,7 @@
             this.updateShareData();
           }
           this._initScroll();
-          if (response.result === 0) {
-            this.timerLoop();
-          }
+          this.timerLoop();
         }).catch(response => {
           console.error(response);
         });
@@ -1156,7 +1167,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, rules, bargainshow, relatedBargains, nicelayer
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, frame, gotop, layer, share, rules, bargainshow, relatedBargains, nicelayer, timeflow
     }
   };
 </script>
@@ -1293,6 +1304,7 @@
       .price
         font-weight: 700
         line-height: 18px
+        padding-bottom: 1px
         .now
           margin-right: 6px
           font-size: 14px
@@ -1302,6 +1314,16 @@
           text-decoration: line-through
           font-size: 15px
           color: rgb(147, 153, 159)
+        .bargain-person
+          display: inline-block
+          font-size: 14px
+          margin-left: 5px
+          height: 16px
+          line-height: 16px
+          padding: 0 5px
+          background: #e1e1e1
+          color: #999
+          border-radius: 8px
       .delivery-annouce
         font-size: 12px
         color: rgb(147, 153, 159)
