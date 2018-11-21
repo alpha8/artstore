@@ -20,10 +20,10 @@
           <div class="price">
             <span class="now">¥{{tuan.buttomFee}}</span><span class="old" v-show="tuan.fieldPrice">¥{{tuan.fieldPrice}}</span><span class="tuanPerson" v-if="tuanData.order && tuanData.order.joinCount">(已拼{{tuanData.order.joinCount}}人 • {{tuan.limitCount}}人拼)</span><span class="tuanPerson" v-else>({{tuan.limitCount}}人拼)</span>
           </div>
-          <div v-if="tuan.stock">
+          <div>
             <div class="row">
               <div class="label">商品库存：</div>
-              <div class="desc" :class="{'text-red': tuan.stock <= 3}">{{tuan.stock || 0}} <span v-if="tuan.stock === 0">(已被抢光)</span><span class="lesstock" v-else-if="tuan.stock <= 5">(库存紧张)</span></div>
+              <div class="desc">{{tuan.stock || 0}} <span v-if="tuan.stock === 0">(已售罄)</span><span class="lesstock" v-else-if="tuan.stock <= 5">(库存紧张)</span></div>
             </div>
             <div class="row" v-if="good.deliveryDays">
               <div class="label">预计发货：</div>

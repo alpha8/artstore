@@ -198,7 +198,7 @@
       }
     },
     updated() {
-      this._initScroll();
+      // this._initScroll();
     },
     methods: {
       ...mapGetters({
@@ -236,13 +236,13 @@
       },
       _initScroll() {
         this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.my, {
-              click: true
-            });
-          } else {
-            this.scroll.refresh();
-          }
+          // if (!this.scroll) {
+          //   this.scroll = new BScroll(this.$refs.my, {
+          //     click: true
+          //   });
+          // } else {
+          //   this.scroll.refresh();
+          // }
         });
       },
       getLoginUrl() {
@@ -280,11 +280,14 @@
     top: 0
     bottom: 50px
     width: 100%
-    overflow: hidden
     .my-wrapper
       position: relative
       width: 100%
+      padding-bottom: 60px
       background-color: #fff
+      overflow: auto
+      box-sizing: border-box
+      -webkit-overflow-scrolling: touch
   .header-wrapper
     position: relative
     width: 100%

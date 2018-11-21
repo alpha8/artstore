@@ -55,6 +55,7 @@
       </div>
     </div>
     <mydialog :text="dialog.text" :btns="dialog.btns" ref="dialogWin"></mydialog>
+    <frame></frame>
   </div>
 </template>
 
@@ -63,6 +64,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import mydialog from '@/components/common/mydialog';
+  import frame from '@/components/common/myiframe';
 
   export default {
     data() {
@@ -222,7 +224,7 @@
       }
     },
     components: {
-      fixedheader, cartcontrol, mydialog
+      fixedheader, cartcontrol, mydialog, frame
     }
   };
 </script>

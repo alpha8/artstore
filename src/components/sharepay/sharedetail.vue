@@ -14,15 +14,15 @@
           </div>
           <div class="row">
             <div class="label">商品底价：</div>
-            <div class="desc oldPrice">{{sharepay.buttomFee | currency}}<span class="paytips" v-if="getCuttingUsers > 0">(中间价亦随时可购买)</span></div>
+            <div class="desc oldPrice">{{sharepay.buttomFee | currency}}<span class="paytips">(中间价亦随时可购买)</span></div>
           </div>
           <div class="row">
             <div class="label">砍价优惠：</div>  
             <div class="desc fixedheight"><div class="box"><em>好友助力<strong>{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</strong></em><em class="rules" @click.stop.prevent="showRules"><strong>[砍价规则]</strong></em></div></div>
           </div>
-          <div class="row"  v-show="sharepay.stock > 0 && sharepay.status !== 1">
+          <div class="row">
             <div class="label">商品库存：</div>
-            <div class="desc" :class="{'text-red': sharepay.stock <= 3}">{{sharepay.stock || 0}} <span class="lesstock" v-if="sharepay.stock <= 5">(库存紧张)</span></div>
+            <div class="desc">{{sharepay.stock || 0}} <span class="lesstock" v-if="sharepay.stock <= 0">(已售罄)</span><span class="lesstock" v-else-if="sharepay.stock <= 10">(库存紧张，先买先得)</span><span class="lesstock" v-else>(先买先得)</span></div>
           </div>
           <div class="row" v-if="good.deliveryDays">
             <div class="label">预计发货：</div>
@@ -37,8 +37,8 @@
             <div class="desc">{{sharepay.secret}}</div>
           </div>
         </div>
-        <split v-if="cuttingData && cuttingData.cutInfos"></split>
-        <div class="info" v-if="cuttingData && cuttingData.cutInfos">
+        <split v-if="cuttingData && cuttingData.cutInfos && cuttingData.cutInfos.length"></split>
+        <div class="info" v-if="cuttingData && cuttingData.cutInfos && cuttingData.cutInfos.length">
           <h1 class="title" v-if="isOwner">好友助力砍价 <span v-if="cuttingData.leftEndTimes && cuttingData.cutOrder.status <= 2">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.days">{{countdownStats.days}}天</span><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
           <h1 class="title" v-else>朋友获得助力 <span v-if="cuttingData.leftEndTimes && cuttingData.cutOrder.status <= 2">(离优惠清零只剩: <span  class="countdownStats"><span v-if="countdownStats.days">{{countdownStats.days}}天</span><span v-if="countdownStats.hours">{{countdownStats.hours}}小时</span><span v-if="countdownStats.mins">{{countdownStats.mins}}分</span></span>)</span></h1>
           <table class="tablist">
@@ -62,8 +62,9 @@
         </div>
         <split></split>
         <div class="info">
-          <h1 class="title">砍价流程(极简)：</h1>
-          <timeflow></timeflow>
+          <h1 class="title flowTitle" v-if="isOwner || !cuttingData.cutOrder">砍价流程(<b>极简</b>)：</h1>
+          <h1 class="title flowTitle" v-else>如何发起您自己的砍价(<b>极简</b>)：</h1>
+          <timeflow :items="flowItems"></timeflow>
         </div>
         <split v-show="sharepay.relates && sharepay.relates.length"></split>
         <relatedBargains :items="sharepay.relates" :cols="2" :pageSize="4" title="最热砍价" v-show="sharepay.relates && sharepay.relates.length"></relatedBargains>
@@ -306,7 +307,8 @@
         needPayTips: true,
         loopFetchLoginData: 100,
         loopTimer: null,
-        showShareTips: false
+        showShareTips: false,
+        flowItems: [{text: '发起砍价'}, {text: '分享到<br/>朋友圈或朋友'}, {text: '朋友进入<br/>即自动砍价N元', inActive: true}]
       };
     },
     computed: {
@@ -449,18 +451,18 @@
             clearTimeout(this.loopTimer);
             break;
           }
-          this.loopTimer = setTimeout(this.lazyStartBargain, 30);
+          this.loopTimer = setTimeout(this.lazyStartBargain, 50);
         }
         if (this.loopFetchLoginData <= 0) {
           if (this.loopTimer) {
             clearTimeout(this.loopTimer);
           }
-          if (!this.$store.getters.getUserInfo.userId) {
+          if (!this.$store.getters.getCookieUserInfo.userId) {
             // this.$store.dispatch('openToast', '当前网络速度慢，正加速中，请您重新进入一次砍价页面。');
             return;
           }
         }
-        if (this.$store.getters.getUserInfo.userId) {
+        if (this.$store.getters.getCookieUserInfo.userId) {
           this.fetchCuttingData();
         }
       },
@@ -685,7 +687,7 @@
         });
       },
       fetchCuttingData() {
-        let user = this.$store.getters.getUserInfo;
+        let user = this.$store.getters.getCookieUserInfo;
         if (!user.userId) {
           return;
         }
@@ -712,7 +714,7 @@
           this.cuttingData = response.data;
           if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
             this.hasProgressOrder = true;
-          } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004 && response.code !== 2005 && !noAction) {
+          } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004 && response.code !== 2004 && response.code !== 2005 && !noAction) {
             // 1004: 到达底价, 1007： 已经砍过价了
             this.$refs.bargainShow.show();
             if (response.data.owner) {
@@ -750,7 +752,7 @@
           this.cuttingData = response.data;
           if (response.data.cutOrder && response.data.cutOrder.status >= 2) {
             this.hasProgressOrder = true;
-          } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004) {
+          } else if (response.data.cutOrder && response.code !== 1007 && response.code !== 1004 && response.code !== 2004) {
             this.$refs.bargainShow.show();
           }
           let preOrderId = this.cuttingData && this.cuttingData.cutOrder && this.cuttingData.cutOrder.id || 0;
@@ -782,27 +784,6 @@
         });
       },
       _initScroll() {
-        // this.$nextTick(() => {
-        //   if (!this.scroll) {
-        //     this.scroll = new BScroll(this.$refs.good, {
-        //       click: true,
-        //       bounce: false,
-        //       probeType: 3,
-        //       preventDefaultException: {
-        //         className: /(^|\s)goodsIntroHook(\s|$)/,
-        //         tagName: /^(P|SPAN)$/
-        //       }
-        //     });
-        //   } else {
-        //     this.scroll.refresh();
-        //   }
-        //   this.scroll.on('scroll', (pos) => {
-        //     let offset = Math.abs(Math.round(pos.y));
-        //     if (this.scrollY !== offset) {
-        //       this.scrollY = offset;
-        //     }
-        //   });
-        // });
       },
       bindPictureEvent() {
         if (!this.previewImgList.length) {
@@ -1302,17 +1283,22 @@
           display: inline-block
           font-size: 12px
       .price
+        position: relative
         font-weight: 700
         line-height: 18px
         padding-bottom: 1px
         .now
+          display: inline-block
           margin-right: 6px
+          margin-top: 1px
           font-size: 14px
           font-weight: 700
           color: rgb(240, 20, 20)
         .old
+          display: inline-block
           text-decoration: line-through
           font-size: 15px
+          margin-top: 1px
           color: rgb(147, 153, 159)
         .bargain-person
           display: inline-block
@@ -1322,7 +1308,7 @@
           line-height: 16px
           padding: 0 5px
           background: #e1e1e1
-          color: #999
+          color: #666
           border-radius: 8px
       .delivery-annouce
         font-size: 12px
@@ -1382,6 +1368,10 @@
         background-color: #fff
         overflow: hidden
         text-overflow: ellipsis
+        &.flowTitle
+          padding-bottom: 13px
+          b
+            font-weight: 700
         .toolbar
           position: absolute
           display: inline-block
@@ -1548,8 +1538,8 @@
           font-weight: 700
           .paytips
             font-weight: 400
-            color: #000
             padding-left: 4px
+            color: #666
         .lesstock
           color: #07111b
           font-weight: 700

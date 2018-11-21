@@ -23,7 +23,7 @@ const APP_CACHE = 'APP_CACHE';
 const CARTS_ADDED = 'cartAdded';
 const PAY_GOODS = 'payGoods';
 const ANONYMOUS = 'anonymous';
-const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":95}';
+const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
 
 // states
 export const state = {
@@ -70,6 +70,9 @@ export const getters = {
   checkLogined (state) {
     state.userInfo = parseJson(loadCookie(WX_USER, DEFAULT_USER), {});
     return typeof state.userInfo.openid !== 'undefined';
+  },
+  getCookieUserInfo () {
+    return parseJson(loadCookie(WX_USER, DEFAULT_USER), {});
   },
   getFooterState: state => state.showFooter,
   getUserAmount: state => state.userAmount,

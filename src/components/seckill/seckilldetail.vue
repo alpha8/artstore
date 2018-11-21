@@ -35,7 +35,7 @@
           <div v-if="seckill.number">
             <div class="row">
               <div class="label">商品库存：</div>
-              <div class="desc" :class="{'text-red': seckill.number <= 3}">{{seckill.number || 0}} <span v-if="seckill.number === 0">(已被抢光)</span><span class="lesstock" v-else-if="seckill.number <= 5">(库存紧张)</span></div>
+              <div class="desc" :class="{'text-red': seckill.number <= 3}">{{seckill.number || 0}} <span v-if="seckill.number === 0">(已售罄)</span><span class="lesstock" v-else-if="seckill.number <= 5">(库存紧张)</span></div>
             </div>
             <div class="row" v-if="good.deliveryDays">
               <div class="label">预计发货：</div>

@@ -135,7 +135,7 @@
             height: 64px
             margin-left: -32px
           .text
-            padding: 43px 20px 3px
+            padding: 43px 20px 6px
             font-size: 14px
             line-height: 1.4
             box-sizing: border-box
@@ -150,7 +150,7 @@
               width: 80px
               height: 80px
           .footer
-            padding: 2px 15px 23px
+            padding: 2px 15px 26px
             text-align: center
             box-sizing: border-box
             .btn-group

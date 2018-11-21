@@ -710,5 +710,12 @@ export default {
    */
   withdrawLog(params) {
     return doGet(this.CONFIG.cmsCtx + '/redPack/list', params);
+  },
+
+  /**
+   * 发货日志
+   */
+  getDeliveryLog(params) {
+    return doGet(this.CONFIG.cmsCtx + '/deliverlog/list', params);
   }
 };

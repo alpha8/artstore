@@ -47,9 +47,7 @@
         <split></split>
         <div class="auction-flow">
           <h1 class="title">拍卖流程</h1>
-          <div>
-            <img src="../../common/images/auction-step.png" alt="">
-          </div>
+          <timeflow :items="flowItems"></timeflow>
         </div>
         <split v-show="auction.artwork && auction.artwork.content"></split>
         <div class="info goodsIntroHook" v-show="auction.artwork && auction.artwork.content">
@@ -160,6 +158,7 @@
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   import share from '@/components/good-detail/share';
+  import timeflow from '@/components/common/timeflow';
 
   const ALL = 2;
   // const ERR_OK = 0;
@@ -213,7 +212,18 @@
         nowTimes: +new Date(),
         countdownStats: {},
         showFollow: true,
-        wxqrcode: api.CONFIG.wxqrcode
+        wxqrcode: api.CONFIG.wxqrcode,
+        flowItems: [{
+          text: '交保证金'
+        }, {
+          text: '出价竞拍'
+        }, {
+          text: '竞拍成功'
+        }, {
+          text: '支付货款'
+        }, {
+          text: '交易成功'
+        }]
       };
     },
     computed: {
@@ -754,7 +764,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, gotop, modalTitle, channel, share
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, gotop, modalTitle, channel, share, timeflow
     }
   };
 </script>

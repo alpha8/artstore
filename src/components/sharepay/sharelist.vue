@@ -365,7 +365,7 @@
                     margin-left: 5px
                     padding: 1px 5px
                     background: #e1e1e1
-                    color: #999
+                    color: #666
                     border-radius: 8px
                     vertical-align: bottom
                 .more-ops

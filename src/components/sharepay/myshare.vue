@@ -15,6 +15,7 @@
                     <div class="price-wrap">
                       <span class="price">{{item.dealFee | currency}}</span>
                       <del class="oldprice" v-show="item.originalFee !== item.dealFee">{{item.originalFee | currency}}</del>
+                      <em class="bargain-person">{{bargainPerson(item)}}</em>
                     </div>
                     <div class="more-ops">
                       <span class="btn-buy red" v-if="item.status <= 2" @click.stop.prevent="pay(item)">去付款</span>
@@ -124,6 +125,13 @@
         } else {
           return api.CONFIG.defaultImg;
         }
+      },
+      bargainPerson(item) {
+        let persons = Math.floor((item.originalFee - item.buttomFee) / item.cutFee);
+        if (persons > 1) {
+          return `1-${persons}人`;
+        }
+        return '1人';
       },
       reduceName(name) {
         return reduceGoodsName(name);
@@ -374,6 +382,14 @@
                     font-weight: 400
                     color: #666
                     padding-left: 5px
+                  .bargain-person
+                    display: inline-block
+                    font-size: 12px
+                    margin-left: 5px
+                    padding: 1px 5px
+                    background: #e1e1e1
+                    color: #666
+                    border-radius: 8px
                   .state
                     display: inline-block
                     height: 25px

@@ -25,11 +25,21 @@
           <p><label>收货地址：</label><span>{{order.express.expressAddress}}</span></p>
           <p><label>收货人：</label><span>{{order.express.receiver}}</span></p>
           <p><label>联系方式：</label><span>{{order.express.mobile}}</span></p>
+          <p v-if="order.remarks"><label>用户留言：</label><span>{{order.remarks}}</span></p>
           <p v-if="order.express.expressNo"><label>快递单号：</label><span>{{order.express.expressNo}}</span></p>
           <p v-if="order.express.expressCompany"><label>快递公司：</label><span>{{order.express.expressCompany}}</span></p>
           <p v-if="order.express.deliverAt"><label>发货时间：</label><span>{{order.express.deliverAt | formatDate}}</span></p>
           <p><label>支付方式：</label><span>在线支付</span></p>
           <!-- <p><label>发票信息：</label><span>普通发票</span></p> -->
+        </div>
+        <split v-show="deliveryLog.length"></split>
+        <div class="title" v-show="deliveryLog.length">发货记录</div>
+        <div class="expressLog-list" v-show="deliveryLog.length">
+          <div class="expressLog-item" v-for="(expressLog, index) in deliveryLog" :key="index">
+            <i></i>
+            <div class="msg-box">{{expressLog.remark}} <span v-if="expressLog.deliverNo">({{expressLog.deliverCompany}}单号：{{expressLog.deliverNo}})</span></div>
+            <small>{{expressLog.operateTime | formatDate}}</small>
+          </div>
         </div>
         <split v-show="order.type !== 6"></split>
         <div class="title" v-show="order.type !== 6">商品列表</div>
@@ -52,6 +62,7 @@
             <li>运费<span class="text-red">+ {{order.shipFee || 0 | currency}}</span></li>
             <li>优惠券<span class="text-red">- {{order.couponFee || 0 | currency}}</span></li>
             <li>折扣券<span class="text-red">- {{discountFee | currency}}</span></li>
+            <li>金币抵扣<span class="text-red">- {{order.coinValue || 0 | currency}}</span></li>
             <li>商家折扣<span class="text-red">- {{order.discount || 0 | currency}}</span></li>
           </ul>
           <p class="total">
@@ -102,16 +113,19 @@
         },
         mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消', '退款申请中', '退款中', '已退款', '退款失败'],
         paying: false,
+        deliveryLog: [],
         loginUser: this.$store.getters.getUserInfo
       };
     },
     activated() {
+      this.deliveryLog = [];
       this.fetchData();
       this.show();
     },
     deactivated() {
       this.hide();
       this.paying = false;
+      this.deliveryLog = [];
     },
     updated() {
       setTimeout(() => {
@@ -123,7 +137,15 @@
     },
     computed: {
       statusDesc() {
-        return this.mapStatus[this.order.status];
+        let todo = '';
+        if (this.order.status === 1 || this.order.status === 2) {
+          if (this.order.deliverStatus === 1) {
+            todo = ' (部分发货)';
+          } else if (this.order.deliverStatus === 2) {
+            todo = ' (延迟发货)';
+          }
+        }
+        return this.mapStatus[this.order.status] + todo;
       },
       trackExpressState() {
         if (this.order.status === 2) {
@@ -198,10 +220,22 @@
         api.getOrderDetail({ orderNo: id }).then(response => {
           this.order = response;
           this._initScroll();
+          this._getDeliveryLog();
         }).catch(response => {
           this.$store.dispatch('openToast', '网络太忙，请稍候再试！');
           this.$router.back();
           return;
+        });
+      },
+      _getDeliveryLog() {
+        api.getDeliveryLog({
+          orderNo: this.order.orderNo
+        }).then(response => {
+          if (response.result === 0) {
+            this.deliveryLog = response.data;
+          }
+        }).catch((response) => {
+          console.error(response);
         });
       },
       _initScroll() {
@@ -427,6 +461,61 @@
         font-size: 14px
         padding: 0 8px
         box-sizing: border-box
+      .expressLog-list
+        position: relative
+        width: 100%
+        padding: 0 15px 0 38px
+        font-size: 12px
+        line-height: 1.5
+        box-sizing: border-box
+        .expressLog-item
+          position: relative
+          padding: 10px 0
+          color: #999
+          &:after
+            content: "\20"
+            display: block
+            width: 1px
+            height: 100%
+            background: #999
+            position: absolute
+            left: -20px
+            top: 20px
+          &:first-child
+            color: #333
+            i
+              border-color: #fb8a00
+              &:after
+                background-color: #fb8a00
+          &:last-child:after
+            background: none
+          i
+            position: absolute
+            left: -24px
+            top: 13px
+            display: block
+            width: 8px
+            height: 8px
+            background: #fff
+            border-radius: 8px
+            border: 1px solid #999
+            z-index: 1
+            &:after
+              position: absolute
+              top: 50%
+              left: 50%
+              margin: -3px 0 0 -3px
+              content: "\20"
+              display: block
+              width: 6px
+              height: 6px
+              background: #999
+              border-radius: 6px
+          .msg-box
+            position: relative
+          small
+            font-size: 10px
+            color: #999
       .order-info, .delivery-info, .goods-info, .price-summary
         padding: 10px 8px
         p

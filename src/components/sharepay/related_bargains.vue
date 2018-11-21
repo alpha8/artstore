@@ -278,7 +278,7 @@
             height: 15px
             line-height: 15px
             background: #e1e1e1
-            color: #999
+            color: #666
             border-radius: 7px
         .icon
           position: absolute

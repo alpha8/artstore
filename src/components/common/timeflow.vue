@@ -1,23 +1,22 @@
 <template>
   <ul class="timeflow">
-    <li class="flowitem">
-      <i class="number-item">1</i>
-      <div class="text">发起砍价</div>
-    </li>
-    <li class="flowitem">
-      <i class="number-item">2</i>
-      <div class="text">分享到<br/>朋友圈或朋友</div>
-    </li>
-    <li class="flowitem">
-      <i class="number-item gray">3</i>
-      <div class="text">朋友进入<br/>即自动砍价一次</div>
+    <li class="flowitem" v-for="(item, index) in items">
+      <i class="number-item" :class="{'gray': item.inActive}">{{index+1}}</i>
+      <div class="text" v-html="item.text"></div>
     </li>
   </ul>
 </template>
 
 <script type="text/ecmascript-6">
   export default {
-
+    props: {
+      items: {
+        type: Array,
+        default() {
+          return [];
+        }
+      }
+    }
   };
 </script>
 
@@ -36,20 +35,19 @@
         position: absolute
         display: inline-block
         margin-left: -12px
-        width: 23px
-        height: 23px
-        line-height: 23px
+        width: 22px
+        height: 22px
+        line-height: 22px
         font-size: 16px
-        font-weight: 400
         border-radius: 50%
         text-align: center
         background: rgba(250,180,90,0.93)
         color: #fff
         &.gray
-          background: #999
+          background: #aeadad
       .text
         padding-top: 29px
-        padding-bottom: 1px
+        padding-bottom: 3px
         font-size: 14px
         overflow: hidden
         text-overflow: ellipsis

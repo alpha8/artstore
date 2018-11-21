@@ -16,7 +16,7 @@
               </div>
               <div class="item-summary border-top-1px border-1px">
                 <div class="summary">
-                  <p class="status"><label>状&nbsp;&nbsp;&nbsp;&nbsp;态：</label><span class="text">{{statusDesc(order.status)}}</span></p>
+                  <p class="status"><label>状&nbsp;&nbsp;&nbsp;&nbsp;态：</label><span class="text">{{statusDesc(order)}}</span></p>
                   <p class="price"><label>总&nbsp;&nbsp;&nbsp;&nbsp;价：</label><span class="text">{{order.totalFee | currency}}</span></p>
                 </div>
                 <div class="ops">
@@ -159,8 +159,16 @@
           return api.CONFIG.defaultImg;
         }
       },
-      statusDesc(status) {
-        return this.mapStatus[status];
+      statusDesc(order) {
+        let todo = '';
+        if (order.status === 1 || order.status === 2) {
+          if (order.deliverStatus === 1) {
+            todo = ' (部分发货)';
+          } else if (order.deliverStatus === 2) {
+            todo = ' (延迟发货)';
+          }
+        }
+        return this.mapStatus[order.status] + todo;
       },
       orderTypeDesc(item) {
         if (item.type === 3) {

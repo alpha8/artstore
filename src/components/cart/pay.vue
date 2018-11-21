@@ -38,6 +38,10 @@
             <span v-if="availCoupons.length">{{usedDiscount}}</span>
             <span v-else class="disabled">无可用</span>
           </li>
+          <li class="coin">
+            <strong>金币：</strong>
+            <span><input type="text" v-enterNumber v-model="coin" class="coinNum" :placeholder="coinTips"/><i class="tips_dou"></i></span>
+          </li>
           <li>
             <strong>是否自提：</strong>
             <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span>线下自提</span>
@@ -75,9 +79,13 @@
             <span class="label">折扣券抵扣：</span>
             <span class="totalPrice">{{discount | currency}}</span>
           </p>
+          <p class="price" v-show="coin > 0">
+            <span class="label">金币抵扣：</span>
+            <span class="totalPrice">{{coinValue | currency}}</span>
+          </p>
           <p class="price">
             <span class="label">应付金额：</span>
-            <span class="totalPrice"><strong>{{totalFee - couponValue - discount | currency}}</strong></span>
+            <span class="totalPrice"><strong>{{totalFee - couponValue - discount - coinValue | currency}}</strong></span>
           </p>
           <div class="payBtnList">
             <div class="btns btn-green" :class="{'btn-gray': paying}" @click.stop.prevent="weixinPay"><span>微信支付</span></div>
@@ -97,6 +105,7 @@
     <transition name="fade">
       <div class="list-mask" @click.stop.prevent="hideAddressList" v-show="showBox"></div>
     </transition>
+    <layer :title="layer.title" :text="layer.text" :btn="layer.button" ref="tipsLayer"></layer>
   </div>
 </template>
 
@@ -109,6 +118,7 @@
   import api from '@/api/api';
   import {pay} from '@/common/js/pay';
   import {countdown} from '@/common/js/date';
+  import layer from '@/components/common/layer';
 
   export default {
     data() {
@@ -124,7 +134,16 @@
         selfservice: false,
         coupons: [],
         discount: 0,
-        discountTickets: []
+        discountTickets: [],
+        assets: {},
+        coin: '',
+        layer: {
+          title: '温馨提示',
+          text: '',
+          button: {
+            text: '知道了!'
+          }
+        }
       };
     },
     computed: {
@@ -152,6 +171,23 @@
         return this.coupons && this.coupons.filter(o => {
           return o.status === 0;
         });
+      },
+      totalCoin() {
+        let profile = this.$store.getters.getUserProfile;
+        return profile.wallet && profile.wallet.coinValue || 0;
+      },
+      availCoin() {
+        return this.assets.coin && this.assets.coin.useCoin || 0;
+      },
+      coinTips() {
+        return `共${this.totalCoin}个，可用${this.availCoin}个`;
+      },
+      coinValue() {
+        if (this.coin) {
+          let rate = this.assets.coin && this.assets.coin.rate || 100;
+          return this.coin / rate;
+        }
+        return 0;
       }
     },
     activated() {
@@ -176,6 +212,8 @@
       }
       this.discount = 0;
       this.coupons = [];
+      this.assets = {};
+      this.coin = '';
     },
     mounted() {
       this._initScroll();
@@ -225,6 +263,7 @@
           userId: user.userId || 0,
           products: items
         }).then(response => {
+          this.assets = response;
           this.couponValue = response.couponFee || 0;
           if (response.oldTotalFee) {
             this.totalFee = response.oldTotalFee;
@@ -339,7 +378,8 @@
           userId: userInfo.userId,
           totalPrice: this.totalFee,
           remarks: this.remarks,
-          type: orderType
+          type: orderType,
+          coinCount: (isNaN(this.coin) ? 0 : this.coin) || 0
         };
         if (this.selfservice) {
           params.express = {
@@ -386,6 +426,10 @@
               } else {
                 this.$store.dispatch('openToast', '你已经参加过首单优惠了! 看看其他的吧!');
               }
+              return;
+            } else if (orderType === '9' && response.code === 100001) {
+              this.layer.text = `<p style="text-align:left">抱歉，您来晚了，商品抢光了！</p>`;
+              this.$refs.tipsLayer.show();
               return;
             }
             this.$store.dispatch('openToast', '生成订单失败！');
@@ -452,7 +496,25 @@
       }
     },
     components: {
-      split, fixedheader, addressList, usecoupon
+      split, fixedheader, addressList, usecoupon, layer
+    },
+    directives: {
+      enterNumber: {
+        inserted: function (el) {
+          el.addEventListener('keypress', function(e) {
+            e = e || window.event;
+            let charcode = typeof e.charCode === 'number' ? e.charCode : e.keyCode;
+            let re = /\d/;
+            if (!re.test(String.fromCharCode(charcode)) && charcode > 9 && !e.ctrlKey) {
+              if (e.preventDefault) {
+                e.preventDefault();
+              } else {
+                e.returnValue = false;
+              }
+            }
+          });
+        }
+      }
     }
   };
 </script>
@@ -666,6 +728,28 @@
             color: #e4393c
             &.disabled
               color: #999
+          &.coin > span
+            position: relative
+            font-size: 0
+            padding-right: 25px
+            .coinNum
+              width: 100%
+              height: 100%
+              text-align: left
+              font-size: 12px
+              border: 1px dashed #ccc
+            .tips_dou
+              content: ""
+              position: absolute
+              top: 50%
+              -webkit-transform: translateY(-50%)
+              transform: translateY(-50%)
+              right: 0px
+              width: 20px
+              height: 24px
+              display: block
+              background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeBAMAAADJHrORAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAnUExURZmZmUxpcZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmendggUAAAANdFJOU/8Axuk8BZIUf1dMZq39oAmJAAAAyElEQVQY02MQBALRZcoMRlmBICYDEIs3M4CARSGUP5nBzD20JJnBEsIPY1ABqRR0YkgF8UUPcAtCwAaeQCBfjNkRyhcxSATyJ7AIwoADpyCDuMFGEFMJREgzFzJIMAnC7BUUVGhkCIYoV4JoMGVYoCiIAEJcDAmNSHwJNgYFRyT1IkwMBoVI5okzMzAEIvFFGTD46Oqh5jHAzIPaxwCzD+oeBph7oO5lgLkX3T/o/kUPD4zwQg9P9PAGxYcaMD6SYPGBEV/I8QkAgrM0iLHbr7EAAAAASUVORK5CYII=") no-repeat 50%
+              background-size: 15px 15px
         >.payArea
           position: relative
           text-align: left
