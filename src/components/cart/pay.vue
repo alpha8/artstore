@@ -39,8 +39,11 @@
             <span v-else class="disabled">无可用</span>
           </li>
           <li class="coin">
-            <strong>金币：</strong>
-            <span><input type="text" v-enterNumber v-model="coin" class="coinNum" :placeholder="coinTips"/><i class="tips_dou"></i></span>
+            <strong>金币：<i class="coin-tips">{{coinTips}}</i></strong>
+            <em @click.stop.prevent="toggleUseCoin">
+              <i class="icon icon-check_circle" :class="{'on': useCoin}"></i>使用金币</i>
+              <!-- <input type="text" v-enterNumber v-model="coin" class="coinNum" :placeholder="coinTips"/><i class="tips_dou"> -->
+            </em>
           </li>
           <li>
             <strong>是否自提：</strong>
@@ -79,7 +82,7 @@
             <span class="label">折扣券抵扣：</span>
             <span class="totalPrice">{{discount | currency}}</span>
           </p>
-          <p class="price" v-show="coin > 0">
+          <p class="price" v-show="useCoin">
             <span class="label">金币抵扣：</span>
             <span class="totalPrice">{{coinValue | currency}}</span>
           </p>
@@ -136,7 +139,7 @@
         discount: 0,
         discountTickets: [],
         assets: {},
-        coin: '',
+        useCoin: true,
         layer: {
           title: '温馨提示',
           text: '',
@@ -183,9 +186,10 @@
         return `共${this.totalCoin}个，可用${this.availCoin}个`;
       },
       coinValue() {
-        if (this.coin) {
+        if (this.useCoin) {
           let rate = this.assets.coin && this.assets.coin.rate || 100;
-          return this.coin / rate;
+          let maxUseCoin = this.assets.coin && this.assets.coin.useCoin || 0;
+          return maxUseCoin / rate;
         }
         return 0;
       }
@@ -213,7 +217,7 @@
       this.discount = 0;
       this.coupons = [];
       this.assets = {};
-      this.coin = '';
+      this.useCoin = true;
     },
     mounted() {
       this._initScroll();
@@ -248,6 +252,9 @@
       },
       delivery() {
         this.selfservice = !this.selfservice;
+      },
+      toggleUseCoin() {
+        this.useCoin = !this.useCoin;
       },
       computeCouponValue() {
         let type = this.$route.query.orderType || 0;
@@ -373,13 +380,14 @@
           return;
         }
         this.$store.dispatch('cleanUsedDiscount');
+        let maxUseCoin = this.assets.coin && this.assets.coin.useCoin || 0;
         let params = {
           openid: userInfo.openid,
           userId: userInfo.userId,
           totalPrice: this.totalFee,
           remarks: this.remarks,
           type: orderType,
-          coinCount: (isNaN(this.coin) ? 0 : this.coin) || 0
+          coinCount: this.useCoin ? maxUseCoin : 0
         };
         if (this.selfservice) {
           params.express = {
@@ -675,10 +683,12 @@
           position: relative        
           padding: 10px
           font-size: 14px
-          li
+          >li
             position: relative
             display: flex
-            padding: 10px 30px 10px 0
+            height: 35px
+            line-height: 35px
+            align-items: center
             strong
               flex: 1
               font-weight: 400
@@ -686,7 +696,11 @@
               font-size: 20px
               color: #d3d3d3
               margin-right: 2px
-              text-align: center
+              text-align: center              
+              height: 35px
+              line-height: 35px
+              display: inline-block
+              vertical-align: middle
               &.on
                 color: #fb4741
             .remark
@@ -728,10 +742,12 @@
             color: #e4393c
             &.disabled
               color: #999
+          .coin-tips
+            font-size: 12px
+            color: #999
           &.coin > span
             position: relative
-            font-size: 0
-            padding-right: 25px
+            padding-right: 25px            
             .coinNum
               width: 100%
               height: 100%

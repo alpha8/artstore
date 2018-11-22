@@ -24,6 +24,7 @@
         <div class="article-footer">
           <span class="pv">[ 阅读: {{article.pv}} ]</span>
         </div>
+        <coin ref="coin"></coin>
         <split v-show="article.relates && article.relates.length"></split>
         <modal-title :title="article.relateTile || '猜你喜欢'" moreText="更多" catKey="" catName="" v-show="article.relates && article.relates.length"></modal-title>
         <channel :items="article.relates" :cols="2" v-show="article.relates && article.relates.length"></channel>
@@ -35,6 +36,7 @@
       </div>
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       <quietlogin></quietlogin>
+      <coinshow :coin="coins.coin" :yourCoin="coins.yourCoin" ref="coinShow"></coinshow>
     </div>
   </div>
 </template>
@@ -47,6 +49,8 @@
   import quietlogin from '@/components/common/quietlogin';
   import gotop from '@/components/fixedtoolbar/gotop';
   import split from '@/components/split/split';
+  import coin from '@/components/coin/coin';
+  import coinshow from '@/components/coin/coinshow';
   // import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
@@ -59,7 +63,11 @@
         processing: false,
         previewImgList: [],
         showFollow: true,
-        wxqrcode: api.CONFIG.wxqrcode
+        wxqrcode: api.CONFIG.wxqrcode,
+        coins: {
+          coin: 0,
+          yourCoin: 0
+        }
       };
     },
     activated() {
@@ -112,6 +120,7 @@
           this.processing = false;
           this.$store.dispatch('closeLoading');
           this.wxReady();
+          this.getCoin();
           // this.processLoading();
           // this.getWXFollow();
         }).catch(response => {
@@ -148,6 +157,62 @@
         //     }
         //   });
         // });
+      },
+      getCoin() {
+        let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
+          this.$refs.coinShow.show();
+          return;
+        }
+        let referee = this.$route.query.userId || 0;
+        if (!referee) {
+          return;
+        }
+        api.getCoin({
+          userId: referee,
+          friendId: user.userId,
+          nickName: user.nickName,
+          icon: user.icon,
+          type: 'article'
+        }).then(response => {
+          if (response.result === 0) {
+            let data = response.data;
+            let older = {code: data.oldsharecode, count: data.oldsharecount};
+            let friends = {code: data.newsharecode, count: data.newsharecount};
+            let your = {code: data.newusercode, count: data.newusercount};
+            if (older.code) {
+              // 老用户
+              this.coins.coin = older.count || 0;
+              this.$refs.coinShow.show();
+              this.loadUserProfile();
+              this.$refs.coin.fetchData();
+            } else if (your.code || friends.code) {
+              // 新用户
+              this.coins.coin = friends.count || 0;
+              this.coins.yourCoin = your.count || 0;
+              this.$refs.coinShow.show();
+              this.loadUserProfile();
+              this.$refs.coin.fetchData();
+            }
+          }
+        }).catch(response => {
+          console.error(response);
+        });
+      },
+      loadUserProfile() {
+        let user = this.$store.getters.getUserInfo;
+        if (!user.userId) {
+          return;
+        }
+        api.getProfile({
+          userId: user.userId
+        }).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('updateUserProfile', response);
+          }
+        }).catch(response => {
+          console.error(response);
+        });
       },
       bindPictureEvent() {
         if (!this.previewImgList.length) {
@@ -322,7 +387,7 @@
       }
     },
     components: {
-      gotop, fixedheader, split, modalTitle, channel, quietlogin
+      gotop, fixedheader, split, modalTitle, channel, quietlogin, coin, coinshow
     },
     filters: {
       formatDate(time) {
