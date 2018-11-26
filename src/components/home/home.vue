@@ -173,7 +173,11 @@
         },
         showFollow: true,
         wxqrcode: api.CONFIG.wxqrcode,
-        channelGoods: []
+        channelGoods: [],
+        coins: {
+          coin: 0,
+          yourCoin: 0
+        }
       };
     },
     created() {
@@ -205,6 +209,10 @@
     },
     deactivated() {
       window.removeEventListener('scroll', this._handleScroll);
+      this.coins = {
+        coin: 0,
+        yourCoin: 0
+      };
     },
     updated() {
       this._initScroll();

@@ -21,10 +21,10 @@
             </div>
           </div>
         </div>
-        <div class="article-footer">
+        <div class="article-footer" :id="'coin-tag'">
           <span class="pv">[ 阅读: {{article.pv}} ]</span>
         </div>
-        <coin ref="coin"></coin>
+        <coin ref="coin" @ready="myCoinReady"></coin>
         <split v-show="article.relates && article.relates.length"></split>
         <modal-title :title="article.relateTile || '猜你喜欢'" moreText="更多" catKey="" catName="" v-show="article.relates && article.relates.length"></modal-title>
         <channel :items="article.relates" :cols="2" v-show="article.relates && article.relates.length"></channel>
@@ -37,6 +37,20 @@
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       <quietlogin></quietlogin>
       <coinshow :coin="coins.coin" :yourCoin="coins.yourCoin" ref="coinShow"></coinshow>
+    </div>
+    <share ref="weixinShare"></share>
+    <div class="fixed-foot" v-show="isLogin">
+      <div class="foot-wrapper">
+        <div class="foot-item" v-if="isReady" @click.stop.prevent="goAnchor('#coin-tag')">
+          <span class="button-lg orange">我的朋友</span>
+        </div>
+        <div class="foot-item" v-else>
+          <span class="button-lg gray">我的朋友</span>
+        </div>     
+        <div class="foot-item" @click.stop.prevent="showShareWin">
+          <span class="button-lg darkred">分享美文得{{getCoinName}}</span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -51,6 +65,7 @@
   import split from '@/components/split/split';
   import coin from '@/components/coin/coin';
   import coinshow from '@/components/coin/coinshow';
+  import share from '@/components/coin/share';
   // import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
@@ -67,7 +82,8 @@
         coins: {
           coin: 0,
           yourCoin: 0
-        }
+        },
+        isReady: false
       };
     },
     activated() {
@@ -77,15 +93,26 @@
       this.hide();
       this.processing = false;
       this.lazyloaded = false;
+      this.coins = {
+        coin: 0,
+        yourCoin: 0
+      };
+      this.isReady = false;
     },
     created() {
       document.body.scrollTop = document.documentElement.scrollTop = 0;
       this.fetchData();
+      this.loadUserProfile();
     },
     beforeDestroy() {
       this.hide();
       this.processing = false;
       this.lazyloaded = false;
+      this.coins = {
+        coin: 0,
+        yourCoin: 0
+      };
+      this.isReady = false;
     },
     updated() {
       this.processLoading();
@@ -95,6 +122,15 @@
       window.onscroll = () => {
         this.scrollY = window.pageYOffset;
       };
+    },
+    computed: {
+      getCoinName() {
+        let config = this.$store.getters.getCoinConfig;
+        return config.name || '金币';
+      },
+      isLogin() {
+        return this.$store.getters.checkLogined;
+      }
     },
     methods: {
       fetchData() {
@@ -136,31 +172,11 @@
         this._initScroll();
       },
       _initScroll() {
-        // this.$nextTick(() => {
-        //   if (!this.scroll) {
-        //     this.scroll = new BScroll(this.$refs.article, {
-        //       click: true,
-        //       bounce: false,
-        //       probeType: 3,
-        //       preventDefaultException: {
-        //         className: /(^|\s)articleContentHook(\s|$)/,
-        //         tagName: /^(P|SPAN)$/
-        //       }
-        //     });
-        //   } else {
-        //     this.scroll.refresh();
-        //   }
-        //   this.scroll.on('scroll', (pos) => {
-        //     let offset = Math.abs(Math.round(pos.y));
-        //     if (this.scrollY !== offset) {
-        //       this.scrollY = offset;
-        //     }
-        //   });
-        // });
       },
       getCoin() {
         let user = this.$store.getters.getUserInfo;
-        if (!user.userId) {
+        let isAutoLogin = window.sessionStorage.getItem('quiet_login') || false;
+        if (!user.userId && isAutoLogin) {
           this.$refs.coinShow.show();
           return;
         }
@@ -199,13 +215,13 @@
           console.error(response);
         });
       },
+      myCoinReady() {
+        this.isReady = true;
+      },
       loadUserProfile() {
         let user = this.$store.getters.getUserInfo;
-        if (!user.userId) {
-          return;
-        }
         api.getProfile({
-          userId: user.userId
+          userId: user.userId || 0
         }).then(response => {
           if (response.result === 0) {
             this.$store.dispatch('updateUserProfile', response);
@@ -384,10 +400,16 @@
           current: this.wxqrcode,
           urls: [this.wxqrcode]
         });
+      },
+      showShareWin() {
+        this.$refs.weixinShare.show();
+      },
+      goAnchor(selector) {
+        this.$el.querySelector(selector).scrollIntoView();
       }
     },
     components: {
-      gotop, fixedheader, split, modalTitle, channel, quietlogin, coin, coinshow
+      gotop, fixedheader, split, modalTitle, channel, quietlogin, coin, coinshow, share
     },
     filters: {
       formatDate(time) {
@@ -405,13 +427,13 @@
   .article-wrap
     position: absolute
     top: 44px
-    bottom: 0
+    bottom: 50px
     width: 100%
     background: #fff
   .article
     position: relative
     width: 100%
-    padding: 10px 0
+    padding: 10px 0 60px
     box-sizing: border-box
     overflow: auto
     -webkit-overflow-scrolling: touch
@@ -476,4 +498,76 @@
         position: relative
         width: 100%
         height: auto
+  .fixed-foot
+    position: fixed
+    left: 0
+    right: 0
+    bottom: 0
+    height: 50px
+    z-index: 80
+    background: #fafafa
+    .foot-wrapper
+      display: flex
+      height: 100%
+      .foot-item
+        flex: 1
+        position: relative
+        height: 100%
+        font-size: 12px
+        text-align: center
+        color: #666
+        &.active
+          color: #00bb9c
+        .icon
+          display: block
+          line-height: 1
+          padding-top: 5px
+          i
+            display: inline-block
+            width: 20px
+            height: 20px
+            font-size: 16px
+        .text
+          display: block
+          line-height: 1
+          font-size: 10px
+        .button-lg
+          display: block
+          line-height: 50px
+          font-size: 14px
+          i
+            font-size: 22px
+          &.green
+            background: #44b549
+            color: #fff
+          &.orange
+            background: rgba(250,180,90,0.93)
+            color: #fff
+          &.red
+            background: #ff463c
+            color: #fff
+          &.darkred
+            background: #d05148
+            color: #fff
+          &.blue
+            background: #00a0dc
+            color: #fff
+          &.gray
+            background: #999
+            color: #fff
+          &.twoline
+            font-size: 12px
+          .icon-favorite
+            color: #ff463c
+          .line
+            display:block
+            font-size: 12px
+            line-height: 12px
+            color: #fff
+            padding-top: 10px
+            margin-bottom: -14px
+            strong
+              font-size: 18px
+              font-weight: 400
+              margin-left: 2px
 </style>

@@ -2,7 +2,7 @@
   <div class="coin">
     <split v-show="totals > 0"></split>
     <div class="coin-wrap" v-show="totals > 0">
-      <h1 class="section-title dot"><div class="title">我的朋友</div><span class="more" @click.stop.prevent="toggleShow">如何获取金币</span></h1>
+      <h1 class="section-title"><div class="title">我的朋友：</div><span class="more" @click.stop.prevent="toggleShow">如何获取{{getCoinName}}<i class="icon" :class="{'icon-arrow_down': !up, 'icon-arrow_up': up}"></i></span></h1>
       <div class="friends-wrap">
         <ul class="friends-list">
           <li v-for="item in items"><img :src="getUserIcon(item.icon)" width="32" height="32" alt=""></li>
@@ -12,12 +12,12 @@
     </div>
     <split v-show="showGetCoin"></split>
     <div class="get-coin" v-show="showGetCoin">
-      <h1 class="section-title"><div class="title">如何使用金币(<b>极简</b>)：<i>{{totalCoin}}枚</i></div><span class="more" @click.stop.prevent="openRules">细则<i class="icon-question_mark"></i></span></h1>
+      <h1 class="section-title"><div class="title">如何获取{{getCoinName}}(<b>极简</b>)：<i @click.stop.prevent="goMyCoin">[{{totalCoin}}枚]</i></div><span class="more" @click.stop.prevent="openRules">细则<i class="icon icon-question_mark"></i></span></h1>
       <div class="get-wrapper">
         <timeflow :items="flowItems"></timeflow>
         <div class="get-rules">
-          <p>* 如：100个新用户进入，您将获赠5000枚(50元)。</p>
-          <p>* 好友第一次进入商城，TA将获赠金币1000枚(10元)。</p>
+          <div class="pline"><span class="line-left">*</span><div class="line-right">如：100个新用户进入，您将获赠{{coinW}}枚({{coinConfig.newshare * 100 / 100}}元).</div></div>
+          <div class="pline"><span class="line-left">*</span><div class="line-right">好友第一次进入商城，Ta将获赠{{getCoinName}}{{coinConfig.newuser}}枚({{coinConfig.newuser / 100}}元).</div></div>
         </div>
       </div>
     </div>
@@ -36,12 +36,12 @@
         flowItems: [{
           text: '分享，<br/>朋友进入'
         }, {
-          text: '老用户2枚<br/>新用户50枚'
+          text: '新用户100枚<br/>老用户每天10枚'
         }, {
-          text: '金币购物<br/>可抵至5折'
+          text: '金币购物<em style="color: rgba(250,180,90,0.93);position: absolute;font-size: 20px;margin-top: -3px;">*</em><br/>可抵至5折'
         }],
         layer: {
-          title: '金币细则',
+          title: '细则',
           text: '',
           button: {
             text: '知道了!'
@@ -49,13 +49,35 @@
         },
         items: [],
         totals: 0,
-        showGetCoin: true
+        showGetCoin: true,
+        up: true
       };
     },
     computed: {
       totalCoin() {
         let profile = this.$store.getters.getUserProfile;
         return profile.wallet && profile.wallet.coinValue || 0;
+      },
+      getCoinName() {
+        let config = this.$store.getters.getCoinConfig;
+        let coinName = config.name || '金币';
+        if (coinName !== '金币') {
+          if (this.flowItems && this.flowItems.length === 3) {
+            this.flowItems[1].text = `新用户${config.newshare}枚<br/>老用户每天${config.oldshare}枚`;
+            this.flowItems[2].text = `${coinName}购物<em style="color: rgba(250,180,90,0.93);position: absolute;font-size: 20px;margin-top: -3px;">*</em><br/>可抵至5折`;
+          }
+        }
+        return coinName;
+      },
+      coinConfig() {
+        return this.$store.getters.getCoinConfig;
+      },
+      coinW() {
+        let num = this.$store.getters.getCoinConfig.newshare * 100;
+        if (num >= 10000) {
+          return '1万';
+        }
+        return num;
       }
     },
     created() {
@@ -68,6 +90,7 @@
       this.items = [];
       this.totals = 0;
       this.showGetCoin = true;
+      this.up = true;
     },
     methods: {
       fetchData() {
@@ -80,6 +103,9 @@
           if (response.result === 0) {
             this.items = response.data || [];
             this.totals = response.totalRecords || 0;
+            if (this.totals) {
+              this.$emit('ready');
+            }
           }
         }).catch(response => {
           console.error(response);
@@ -96,13 +122,17 @@
       },
       toggleShow() {
         this.showGetCoin = !this.showGetCoin;
+        this.up = !this.up;
       },
       openRules() {
-        this.layer.text = '<p style="text-align: left">* 1枚金币等价于人民币0.01元。</p><p style="text-align: left">* 在购买常规商品时，金币可自动被最大化抵扣至商品原价的5折。已特惠的商品(首单特惠/拼团/秒杀/砍价/团购/拍卖)，不能用金币抵扣商品价格。</p>';
+        let config = this.$store.getters.getCoinConfig;
+        let coinName = config.name || '金币';
+        this.layer.text = `<div style="display:flex;position:relative;padding-bottom: 3px;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">1枚${coinName}等价于人民币0.01元。</div></div><div style="display:flex;position:relative;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">在购买常规商品时，${coinName}可自动被最大化抵扣至商品原价的5折。已特惠的商品(首单特惠/拼团/秒杀/砍价/团购/拍卖)，不能用${coinName}抵扣商品价格。</div></div>`;
         this.$refs.tipsLayer.show();
       },
       hideGetArea() {
         this.showGetCoin = false;
+        this.up = false;
       }
     },
     components: {
@@ -119,7 +149,7 @@
     .section-title
       position: relative
       display: flex
-      padding: 10px 18px 10px 14px
+      padding: 10px 13px 10px 14px
       line-height: 14px
       font-size: 14px
       color: rgb(7, 17, 27)
@@ -132,9 +162,10 @@
           color: #666
       >.more
         display: inline-block
-        .icon-question_mark
+        color: #666
+        .icon
           margin-left: 1px
-          color: #999
+          color: #999          
       &.dot > span
         padding-right: 3px
       &.dot:after
@@ -154,7 +185,7 @@
         margin-top: -4px
     .friends-wrap
       position: relative
-      padding: 0 14px
+      padding: 0 13px 0 14px
       .friends-list
         position: relative
         display: block
@@ -165,7 +196,7 @@
         li
           float: left
           height: 35px
-          padding-right: 10px
+          padding-right: 9.5px
           padding-bottom: 5px
           img
             border-radius: 50%
@@ -182,17 +213,24 @@
     width: 100%
     .get-wrapper
       flex: 1
-      padding-top: 9px
+      padding-top: 7px
       margin-bottom: 10px
       .get-rules
-        margin-top: 8px
+        margin-top: 10px
         font-size: 14px
         padding: 0 14px
         color: #999
-        p
+        .pline
+          position: relative
+          display: flex
           padding-bottom: 3px
           &:last-child
             padding-bottom: 0
+          .line-left
+            text-align: right
+            padding-right: 3px
+          .line-right
+            flex: 1
     b
       font-weight: 700
 </style>

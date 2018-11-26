@@ -33,7 +33,7 @@
           </div>
           <div class="row">
             <div class="label">优惠活动：</div>
-            <div class="desc" v-if="good.useCoupon">优惠券可抵<span v-if="good.couponPercent">{{good.couponPercent * 100}}%</span><span v-if="!good.couponPercent">30%</span></div>
+            <div class="desc" v-if="good.useCoupon">优惠券可抵<span v-if="good.couponPercent">{{good.couponPercent * 100}}%</span><span v-if="!good.couponPercent">30%</span><span>，金币50%</span><i class="icon icon-exclamation_mark2" @click.stop.prevent="openRules"></i></div>
             <div class="desc" v-else>不支持优惠券</div>
           </div>
           <div class="cartcontrol-wrapper" v-if="good.count">
@@ -43,6 +43,7 @@
             <div @click.stop.prevent="addFirst" class="buy" v-if="good.stock && (good.stock.total > 0 || good.stock.bookTotal > 0) && !good.count">加入购物车</div>
           </transition>
         </div>
+        <coin ref="coin"></coin>
         <split v-show="good.content"></split>
         <div class="info" v-if="good.videoUrl || (good.videos && good.videos.length)">
           <h1 class="title">商品视频</h1>
@@ -132,8 +133,10 @@
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
+    <layer title="金币使用细则" :text="layer.text" :btn="layer.button" ref="tipsLayer"></layer>
     <share ref="weixinShare"></share>
     <quietlogin></quietlogin>
+    <coinshow :coin="coins.coin" :yourCoin="coins.yourCoin" ref="coinShow"></coinshow>
   </div>
 </template>
 
@@ -155,7 +158,9 @@
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   import layer from '@/components/common/layer';
-  import share from '@/components/good-detail/share';
+  import share from '@/components/coin/share';
+  import coin from '@/components/coin/coin';
+  import coinshow from '@/components/coin/coinshow';
 
   const ALL = 3;
   // const ERR_OK = 0;
@@ -165,33 +170,23 @@
       this.fetchData();
     },
     deactivated() {
-      this.good.videoUrl = '';
-      this.good.videos = [];
-      this.guessGoods = [];
+      this._reset();
       this.hide();
-      this.processing = false;
-      this.lazyloaded = false;
     },
     created() {
       document.body.scrollTop = document.documentElement.scrollTop = 0;
       this.fetchData();
+      this.loadUserProfile();
     },
     beforeDestroy() {
-      this.good.videoUrl = '';
-      this.good.videos = [];
-      this.guessGoods = [];
+      this._reset();
       this.hide();
-      this.processing = false;
-      this.lazyloaded = false;
     },
     watch: {
       $route (to, from) {
         if (to.name === from.name && to.name === 'good') {
           if (to.params.id !== from.params.id) {
-            this.good.videoUrl = '';
-            this.good.videos = [];
-            this.guessGoods = [];
-            this.lazyloaded = false;
+            this._reset();
             document.body.scrollTop = document.documentElement.scrollTop = 0;
             this.fetchData();
           }
@@ -221,12 +216,17 @@
         addedProducts: this.$store.getters.addedProducts,
         layer: {
           title: '快速检索，扫码定位商品',
+          text: '',
           button: {
             text: '知道了!'
           }
         },
         showFollow: true,
-        wxqrcode: api.CONFIG.wxqrcode
+        wxqrcode: api.CONFIG.wxqrcode,
+        coins: {
+          coin: 0,
+          yourCoin: 0
+        }
       };
     },
     computed: {
@@ -310,6 +310,7 @@
           this.getRelatedGoods();
           // this.fetchComments();
           this.getLikeGoods();
+          this.getCoin();
           // this.getWXFollow();
         }).catch(response => {
           this.$store.dispatch('closeLoading');
@@ -323,6 +324,12 @@
           this.bindPictureEvent();
         }
         this._initScroll();
+      },
+      openRules() {
+        let config = this.$store.getters.getCoinConfig;
+        let coinName = config.name || '金币';
+        this.layer.text = `<div style="display:flex;position:relative;padding-bottom: 3px;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">1枚${coinName}等价于人民币0.01元。</div></div><div style="display:flex;position:relative;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">在购买常规商品时，${coinName}可自动被最大化抵扣至商品原价的5折。已特惠的商品(首单特惠/拼团/秒杀/砍价/团购/拍卖)，不能用${coinName}抵扣商品价格。</div></div>`;
+        this.$refs.tipsLayer.show();
       },
       loadTencentPlayer() {
         if (!this.good.videoUrl) {
@@ -343,27 +350,6 @@
         });
       },
       _initScroll() {
-        // this.$nextTick(() => {
-        //   if (!this.scroll) {
-        //     this.scroll = new BScroll(this.$refs.good, {
-        //       click: true,
-        //       bounce: false,
-        //       probeType: 3,
-        //       preventDefaultException: {
-        //         className: /(^|\s)goodsIntroHook(\s|$)/,
-        //         tagName: /^(P|SPAN)$/
-        //       }
-        //     });
-        //   } else {
-        //     this.scroll.refresh();
-        //   }
-        //   this.scroll.on('scroll', (pos) => {
-        //     let offset = Math.abs(Math.round(pos.y));
-        //     if (this.scrollY !== offset) {
-        //       this.scrollY = offset;
-        //     }
-        //   });
-        // });
       },
       bindPictureEvent() {
         if (!this.previewImgList.length) {
@@ -755,6 +741,72 @@
       goTop() {
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
+      },
+      _reset() {
+        this.good.videoUrl = '';
+        this.good.videos = [];
+        this.guessGoods = [];
+        this.processing = false;
+        this.lazyloaded = false;
+        this.coins = {
+          coin: 0,
+          yourCoin: 0
+        };
+      },
+      getCoin() {
+        this.$refs.coin.hideGetArea();
+        let user = this.$store.getters.getUserInfo;
+        let isAutoLogin = window.sessionStorage.getItem('quiet_login') || false;
+        if (!user.userId && isAutoLogin) {
+          this.$refs.coinShow.show();
+          return;
+        }
+        let referee = this.$route.query.userId || 0;
+        if (!referee) {
+          return;
+        }
+        api.getCoin({
+          userId: referee,
+          friendId: user.userId,
+          nickName: user.nickName,
+          icon: user.icon,
+          type: 'product'
+        }).then(response => {
+          if (response.result === 0) {
+            let data = response.data;
+            let older = {code: data.oldsharecode, count: data.oldsharecount};
+            let friends = {code: data.newsharecode, count: data.newsharecount};
+            let your = {code: data.newusercode, count: data.newusercount};
+            if (older.code) {
+              // 老用户
+              this.coins.coin = older.count || 0;
+              this.$refs.coinShow.show();
+              this.loadUserProfile();
+              this.$refs.coin.fetchData();
+            } else if (your.code || friends.code) {
+              // 新用户
+              this.coins.coin = friends.count || 0;
+              this.coins.yourCoin = your.count || 0;
+              this.$refs.coinShow.show();
+              this.loadUserProfile();
+              this.$refs.coin.fetchData();
+            }
+          }
+        }).catch(response => {
+          console.error(response);
+        });
+      },
+      loadUserProfile() {
+        let user = this.$store.getters.getUserInfo;
+        api.getProfile({
+          userId: user.userId || 0
+        }).then(response => {
+          if (response.result === 0) {
+            this.$store.dispatch('updateUserProfile', response);
+          }
+        }).catch(response => {
+          console.error(response);
+        });
       }
     },
     filters: {
@@ -766,7 +818,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, quietlogin, gotop, layer, share
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, quietlogin, gotop, layer, share, coin, coinshow
     }
   };
 </script>
@@ -1046,9 +1098,17 @@
         float: left
         font-size: 13px
       .desc
+        position: relative
         flex: 1
         font-size: 13px
         oveflow: hidden
+        .icon-exclamation_mark2
+          display: inline-block
+          margin-top: -3px
+          padding-left: 5px
+          font-size: 13px
+          color: #999
+          vertical-align: middle
     .rating
       position: relative
       .title

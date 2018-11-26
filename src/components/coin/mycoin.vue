@@ -1,6 +1,6 @@
 <template>
   <div>
-    <fixedheader title="我的朋友/我的金币"></fixedheader>
+    <fixedheader :title="getCoinTitle"></fixedheader>
     <div class="visit">
       <div class="visit-wrap">
         <div class="visit-container" ref="visitlist" v-show="visiters.length">
@@ -9,7 +9,7 @@
               <tr class="head">
                 <td class="col-2" nowrap>朋友</td>
                 <td class="col-4">访问时间</td>
-                <td class="col-3">金币</td>
+                <td class="col-3">{{getCoinName}}</td>
                 <td class="col-3">来源</td>
               </tr>
               <tr v-for="(user, index) in visiters" :key="index">
@@ -68,6 +68,15 @@
         this.scrollY = window.pageYOffset;
       };
     },
+    computed: {
+      getCoinName() {
+        let config = this.$store.getters.getCoinConfig;
+        return config.name || '金币';
+      },
+      getCoinTitle() {
+        return `我的朋友 / 我的${this.getCoinName}`;
+      }
+    },
     methods: {
       fetchData(force) {
         if (this.totalPages && this.pageNumber > this.totalPages) {
@@ -90,7 +99,7 @@
               this.visiters.push(item);
             });
           }
-          this.totalPages = response.pages;
+          this.totalPages = response.totalPages;
           this.pageNumber++;
           this.lastExec = +new Date();
           this.loading = false;
@@ -209,7 +218,7 @@
         .tablist
           position: relative
           width: 100%
-          font-size: 12px
+          font-size: 13px
           background-color: #fff
           color: #666
           text-align: left
@@ -218,7 +227,7 @@
             line-height: 40px
           >.head
             background-color: #fafafa
-            font-size: 13px
+            font-size: 14px
           .col-1
             width: 15%
             padding-left: 10px

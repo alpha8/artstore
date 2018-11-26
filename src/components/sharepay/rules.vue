@@ -6,20 +6,20 @@
           <modal-title :title="title"></modal-title>
           <div class="bulletin">
             <ul class="content">
-              <li>第1步：点击页面底部的“发起砍价”按钮。</li>
-              <li>第2步：然后将本页面转发分享给朋友们。</li>
-              <li>第3步：朋友们进入您所转发分享的本页面，即自动帮您完成了一次砍价。</li>
+              <li class="pline"><span class="line-left">第1步：</span><div class="line-right">点击页面底部的“发起砍价”按钮。</div></li>
+              <li class="pline"><span class="line-left">第2步：</span><div class="line-right">然后将本页面转发分享给朋友们。</div></li>
+              <li class="pline"><span class="line-left">第3步：</span><div class="line-right">朋友们进入您所转发分享的本页面，即自动帮您完成了一次砍价。</div></li>
             </ul>
           </div>
           <modal-title title="注意事项"></modal-title>
           <div class="bulletin">
             <ul class="content">
-              <li>· 若达到商品底价或者砍价时间结束，系统将不再接受用户砍价操作。您可随时进入“砍价商品详情页”完成订单付款。</li>
-              <li>· 当库存临近售罄时，按“先买先得”的原则，敬请留意您的下单速度。</li>
-              <li>· 同一设备、微信号、手机号码视为同一用户。</li>
-              <li>· 关注公众号的用户将收到实时减价通知、分享时间结束通知等。</li>
-              <li>· 若发现用户存在刷单、虚假用户助力等违规行为，平台有权判定助力失败。</li>
-              <li>· 对物流、商品有疑问或者修改收货地址请联系客服。</li>
+              <li class="pline"><span class="line-left">·</span><div class="line-right">若达到商品底价或者砍价时间结束，系统将不再接受用户砍价操作。您可随时进入“砍价商品详情页”完成订单付款。</div></li>
+              <li class="pline"><span class="line-left">·</span><div class="line-right">当库存临近售罄时，按“先买先得”的原则，敬请留意您的下单速度。</div></li>
+              <li class="pline"><span class="line-left">·</span><div class="line-right">同一设备、微信号、手机号码视为同一用户。</div></li>
+              <li class="pline"><span class="line-left">·</span><div class="line-right">关注公众号的用户将收到实时减价通知、分享时间结束通知等。</div></li>
+              <li class="pline"><span class="line-left">·</span><div class="line-right">若发现用户存在刷单、虚假用户助力等违规行为，平台有权判定助力失败。</div></li>
+              <li class="pline"><span class="line-left">·</span><div class="line-right">对物流、商品有疑问或者修改收货地址请联系客服。</div></li>
             </ul>
           </div>
         </div>
@@ -100,6 +100,17 @@
             font-size: 14px
             li
               margin-bottom: 5px
+            .pline
+              position: relative
+              display: flex
+              margin-bottom: 5px
+              &:last-child
+                padding-bottom: 0
+              .line-left
+                text-align: right
+                padding-right: 3px
+              .line-right
+                flex: 1
     .detail-close
       position: relative
       width: 32px

@@ -42,7 +42,6 @@
             <strong>金币：<i class="coin-tips">{{coinTips}}</i></strong>
             <em @click.stop.prevent="toggleUseCoin">
               <i class="icon icon-check_circle" :class="{'on': useCoin}"></i>使用金币</i>
-              <!-- <input type="text" v-enterNumber v-model="coin" class="coinNum" :placeholder="coinTips"/><i class="tips_dou"> -->
             </em>
           </li>
           <li>
@@ -754,18 +753,6 @@
               text-align: left
               font-size: 12px
               border: 1px dashed #ccc
-            .tips_dou
-              content: ""
-              position: absolute
-              top: 50%
-              -webkit-transform: translateY(-50%)
-              transform: translateY(-50%)
-              right: 0px
-              width: 20px
-              height: 24px
-              display: block
-              background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeBAMAAADJHrORAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAnUExURZmZmUxpcZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmendggUAAAANdFJOU/8Axuk8BZIUf1dMZq39oAmJAAAAyElEQVQY02MQBALRZcoMRlmBICYDEIs3M4CARSGUP5nBzD20JJnBEsIPY1ABqRR0YkgF8UUPcAtCwAaeQCBfjNkRyhcxSATyJ7AIwoADpyCDuMFGEFMJREgzFzJIMAnC7BUUVGhkCIYoV4JoMGVYoCiIAEJcDAmNSHwJNgYFRyT1IkwMBoVI5okzMzAEIvFFGTD46Oqh5jHAzIPaxwCzD+oeBph7oO5lgLkX3T/o/kUPD4zwQg9P9PAGxYcaMD6SYPGBEV/I8QkAgrM0iLHbr7EAAAAASUVORK5CYII=") no-repeat 50%
-              background-size: 15px 15px
         >.payArea
           position: relative
           text-align: left

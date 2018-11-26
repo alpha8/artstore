@@ -161,11 +161,8 @@
       }),
       refreshData() {
         let user = this.$store.getters.getUserInfo;
-        if (!user.userId) {
-          return;
-        }
         api.getProfile({
-          userId: user.userId
+          userId: user.userId || 0
         }).then(response => {
           if (response.result === 0) {
             this.$store.dispatch('updateUserProfile', response);

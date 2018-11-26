@@ -1,20 +1,23 @@
 <template>
   <transition name="fade">
-    <div v-show="isOpen" class="detail">
-      <div class="detail-wrapper clearfix" @click="hide">
+    <div v-show="isOpen && canShow" class="detail">
+      <div class="detail-wrapper clearfix">
         <div class="detail-main">
           <div class="main-content">
+            <img class="icon" src="../../common/images/coin.png" alt="">
             <div class="text">
-              <p v-if="hasLogin">{{getRandText}}<span v-if="yourCoin">今日您获赠{{yourCoin}}枚金币，</span>您的朋友获增了{{coin}}枚金币～</p>
-              <p v-else>每天您的第一次来访，系统将赠送给您及您的朋友N枚金币，金币购物可抵至5折。</p>
+              <p v-if="hasLogin">{{getRandText}}哦耶，<span v-if="yourCoin">今日您获赠{{yourCoin}}枚{{getCoinName}}，</span>您的朋友获赠了{{coin}}枚{{getCoinName}}～</p>
+              <p v-else>每天您的第一次来访，系统将赠送给您及您所访页面的这位朋友2-50枚{{getCoinName}}，{{getCoinName}}购物可抵至5折。</p>
             </div>
-            <div class="coin"><img src="../../common/images/bargain_coin.png" alt=""></div>
+            <div class="coin"></div>
             <div class="footer">
-              <span class="btn" @click.stop.prevent="doOtherAction">{{btns.cancel.text || '取消'}}</span>
-              <span class="btn ok" v-if="btns.ok" @click.stop.prevent="doAction">{{btns.ok.text}}</span>
+              <span class="btn" v-if="hasLogin" @click.stop.prevent="doOtherAction">{{getCoinName}}:{{totalCoin}}枚</span>
+              <a class="btn" v-else :href="getLoginUrl" @click="noPrompt">不再提醒</a>
+              <span class="btn ok" v-if="hasLogin" @click.stop.prevent="doAction">{{btns.ok.text}}</span>
+              <a class="btn ok" v-else :href="getLoginUrl" @click="noPrompt">多多益善～</a>
             </div>
           </div>
-          <div class="btn-close"><i class="icon-close"></i></div>
+          <!-- <div class="btn-close"><i class="icon-close"></i></div> -->
         </div>
       </div>
     </div>
@@ -22,6 +25,8 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import api from '@/api/api';
+  const CONST_SHOW_ONCE = 'COIN_ACTIVITY';
   export default {
     props: {
       coin: {
@@ -55,6 +60,7 @@
     data() {
       return {
         isOpen: false,
+        showOnce: window.localStorage.getItem(CONST_SHOW_ONCE) || 0,
         words: [
           '心若有空山，无处不清欢。',
           '我住长江头，君住长江尾。',
@@ -75,6 +81,9 @@
         ]
       };
     },
+    created() {
+      this.showOnce = window.localStorage.getItem(CONST_SHOW_ONCE) || 0;
+    },
     computed: {
       getRandText() {
         let user = this.$store.getters.getUserInfo;
@@ -84,6 +93,32 @@
       },
       hasLogin() {
         return this.$store.getters.checkLogined;
+      },
+      totalCoin() {
+        let profile = this.$store.getters.getUserProfile;
+        return profile.wallet && profile.wallet.coinValue || 0;
+      },
+      canShow() {
+        if (this.$store.getters.checkLogined) {
+          return true;
+        }
+        // 一天只弹出一次
+        let lastDay = this.showOnce;
+        let today = (new Date().getMonth() + 1) + '-' + new Date().getDate();
+        if (lastDay === today) {
+          return false;
+        }
+        return true;
+      },
+      getLoginUrl() {
+        let redirect = window.location.href;
+        let anon = this.$store.getters.getAnonymous;
+        let referee = this.$route.query.userId || 0;
+        return `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}&uid=${anon}&userId=${referee}`;
+      },
+      getCoinName() {
+        let config = this.$store.getters.getCoinConfig;
+        return config.name || '金币';
       }
     },
     methods: {
@@ -100,9 +135,11 @@
         this.isOpen = false;
       },
       doOtherAction() {
-        if (this.btns.cancel && this.btns.cancel.callback) {
-          this.btns.cancel.callback();
-        }
+        this.isOpen = false;
+      },
+      noPrompt() {
+        let today = (new Date().getMonth() + 1) + '-' + new Date().getDate();
+        window.localStorage.setItem(CONST_SHOW_ONCE, today);
         this.isOpen = false;
       }
     }
@@ -148,7 +185,6 @@
           background: #fff
           border-radius: 15px
           box-sizing: border-box
-          overflow: hidden
           .icon
             position: absolute
             top: -32px
@@ -171,7 +207,10 @@
           .footer
             text-align: center
             display: flex
-            span
+            overflow: hidden
+            border-bottom-right-radius: 15px
+            border-bottom-left-radius: 15px
+            .btn
               flex: 1
               position: relative
               background: #fff

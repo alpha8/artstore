@@ -1,16 +1,16 @@
 <template>
   <transition name="fade">
     <div v-show="isOpen" class="detail">
-      <div class="detail-wrapper clearfix" @click="hide">
+      <div class="detail-wrapper clearfix">
         <div class="detail-main">
           <div class="main-content">
             <img class="icon" src="../../common/images/limitbuy2.png" alt="">
             <div class="text" v-html="text"></div>
             <div class="footer">
-              <div class="btn-group"><span>我知道了</span></div>
+              <div class="btn-group" @click.stop.prevent="hide"><span>我知道了</span></div>
             </div>
           </div>
-          <div class="btn-close"><i class="icon-close"></i></div>
+          <div class="btn-close" @click.stop.prevent="hide"><i class="icon-close"></i></div>
         </div>
       </div>
     </div>

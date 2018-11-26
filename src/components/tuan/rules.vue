@@ -6,20 +6,20 @@
           <modal-title :title="title"></modal-title>
           <div class="bulletin">
             <ul class="content">
-              <li>第1步：未关注公众号的用户，“长按”页面底部公众号二维码，“识别图中二维码”即完成公众号关注; 已关注用户可跳过这一步。</li>
-              <li>第2步：点击页面底部的“我要开团”，然后完成订单结算。</li>
-              <li>第3步：结算完成生成拼团分享页，点击右上角按钮选择“发送给朋友”或“分享到朋友圈”。</li>
-              <li>第4步：好友打开商品链接，点击“我要参团”并付款即加入此拼团，参团的付款人数满员后系统将立即发货。</li>
-              <li>第5步：如果拼团商品时间结束，参团的付款人数仍未满员，系统将自动退款。</li>
+              <li class="pline"><span class="line-left">第1步：</span><div class="line-right">未关注公众号的用户，“长按”页面底部公众号二维码，“识别图中二维码”即完成公众号关注; 已关注用户可跳过这一步。</div></li>
+              <li class="pline"><span class="line-left">第2步：</span><div class="line-right">点击页面底部的“我要开团”，然后完成订单结算。</div></li>
+              <li class="pline"><span class="line-left">第3步：</span><div class="line-right">结算完成生成拼团分享页，点击右上角按钮选择“发送给朋友”或“分享到朋友圈”。</div></li>
+              <li class="pline"><span class="line-left">第4步：</span><div class="line-right">好友打开商品链接，点击“我要参团”并付款即加入此拼团，参团的付款人数满员后系统将立即发货。</div></li>
+              <li class="pline"><span class="line-left">第5步：</span><div class="line-right">如果拼团商品时间结束，参团的付款人数仍未满员，系统将自动退款。</div></li>
             </ul>
           </div>
           <modal-title title="注意事项"></modal-title>
           <div class="bulletin">
             <ul class="content">
-              <li>· 同一设备、微信号、手机号码视为同一用户。</li>
-              <li>· 关注公众号的用户将收到最新的优惠通知、拼团通知等。</li>
-              <li>· 若发现用户存在刷单、虚假用户拼团等违规行为，平台有权判定拼团失败。</li>
-              <li>· 对物流、商品有疑问或者修改收货地址请联系客服。</li>
+              <li class="pline"><span class="line-left">·</span><div class="line-right">同一设备、微信号、手机号码视为同一用户。</div></li>
+              <li class="pline"><span class="line-left">·</span><div class="line-right">关注公众号的用户将收到最新的优惠通知、拼团通知等。</div></li>
+              <li class="pline"><span class="line-left">·</span><div class="line-right">若发现用户存在刷单、虚假用户拼团等违规行为，平台有权判定拼团失败。</div></li>
+              <li class="pline"><span class="line-left">·</span><div class="line-right">对物流、商品有疑问或者修改收货地址请联系客服。</div></li>
             </ul>
           </div>
         </div>
@@ -100,6 +100,17 @@
             font-size: 14px
             li
               margin-bottom: 5px
+            .pline
+              position: relative
+              display: flex
+              margin-bottom: 5px
+              &:last-child
+                padding-bottom: 0
+              .line-left
+                text-align: right
+                padding-right: 3px
+              .line-right
+                flex: 1
     .detail-close
       position: relative
       width: 32px

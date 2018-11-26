@@ -46,6 +46,7 @@
         &.gray
           background: #aeadad
       .text
+        position: relative
         padding-top: 29px
         padding-bottom: 3px
         font-size: 14px

@@ -23,7 +23,7 @@ const APP_CACHE = 'APP_CACHE';
 const CARTS_ADDED = 'cartAdded';
 const PAY_GOODS = 'payGoods';
 const ANONYMOUS = 'anonymous';
-const DEFAULT_USER = '{}';
+const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":95}';
 
 // states
 export const state = {
@@ -90,7 +90,26 @@ export const getters = {
     return state.cartAmount;
    }
   },
-  loadAppCache: state => state.appCache
+  loadAppCache: state => state.appCache,
+  getCoinConfig (state) {
+    var defaultConfig = {
+      sign: 5,
+      newshare: 100,
+      oldshare: 10,
+      newuser: 1500,
+      proportion: 100,
+      name: '金币'
+    };
+    var configs = state.userProfile.coinconfigure || {};
+    if (configs && configs.length) {
+      configs.forEach(item => {
+        if (item.value && item.propertyName) {
+          defaultConfig[item.propertyName] = item.value;
+        }
+      });
+    }
+    return defaultConfig;
+  }
 };
 
 // actions
