@@ -328,7 +328,7 @@
       openRules() {
         let config = this.$store.getters.getCoinConfig;
         let coinName = config.name || '金币';
-        this.layer.text = `<div style="display:flex;position:relative;padding-bottom: 3px;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">1枚${coinName}等价于人民币0.01元。</div></div><div style="display:flex;position:relative;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">在购买常规商品时，${coinName}可自动被最大化抵扣至商品原价的5折。已特惠的商品(首单特惠/拼团/秒杀/砍价/团购/拍卖)，不能用${coinName}抵扣商品价格。</div></div>`;
+        this.layer.text = `<div style="display:flex;position:relative;padding-bottom: 3px;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">1枚${coinName}等价于人民币0.01元。</div></div><div style="display:flex;position:relative;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">在购买常规商品时，${coinName}可自动被最大化<span style="text-decoration:underline">抵扣至商品原价的5折</span>。已特惠的商品(首单特惠/拼团/秒杀/砍价/团购/拍卖)，不能用${coinName}抵扣商品价格。</div></div>`;
         this.$refs.tipsLayer.show();
       },
       loadTencentPlayer() {

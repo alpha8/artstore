@@ -6,8 +6,8 @@
           <div class="main-content">
             <img class="icon" src="../../common/images/coin.png" alt="">
             <div class="text">
-              <p v-if="hasLogin">{{getRandText}}哦耶，<span v-if="yourCoin">今日您获赠{{yourCoin}}枚{{getCoinName}}，</span>您的朋友获赠了{{coin}}枚{{getCoinName}}～</p>
-              <p v-else>每天您的第一次来访，系统将赠送给您及您所访页面的这位朋友2-50枚{{getCoinName}}，{{getCoinName}}购物可抵至5折。</p>
+              <p v-if="hasLogin">{{getRandText}}哦耶，<span v-if="yourCoin">今日您获赠{{yourCoin}}枚{{getCoinName}}，</span>您的朋友因您获赠了{{coin}}枚{{getCoinName}}～</p>
+              <p v-else>每天您的第一次来访，系统将赠送给您及您所访页面的这位朋友10-100枚{{getCoinName}}，{{getCoinName}}购物可抵至5折。</p>
             </div>
             <div class="coin"></div>
             <div class="footer">
@@ -64,7 +64,6 @@
         words: [
           '心若有空山，无处不清欢。',
           '我住长江头，君住长江尾。',
-          '有福同享，拔刀相助。',
           '此时情绪此时天，无事小神仙。',
           '唯有别时今不忘，暮烟疏雨过枫桥。',
           '高阁建础立丹崖，',

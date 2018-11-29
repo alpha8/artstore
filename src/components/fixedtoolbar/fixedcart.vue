@@ -24,7 +24,7 @@
         <span class="button-lg red">到货提醒</span>
       </div>
       <div class="foot-item btn-share" v-else @click.stop.prevent="wxshare">
-        <span class="button-lg orange">分享有礼</span>
+        <span class="button-lg orange">分享得金币</span>
       </div>
     </div>
     <div class="ball-container">

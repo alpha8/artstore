@@ -12,7 +12,7 @@
     </div>
     <split v-show="showGetCoin"></split>
     <div class="get-coin" v-show="showGetCoin">
-      <h1 class="section-title"><div class="title">如何获取{{getCoinName}}(<b>极简</b>)：<i @click.stop.prevent="goMyCoin">[{{totalCoin}}枚]</i></div><span class="more" @click.stop.prevent="openRules">细则<i class="icon icon-question_mark"></i></span></h1>
+      <h1 class="section-title"><div class="title">如何获取{{getCoinName}}(极简)：<i @click.stop.prevent="goMyCoin">[{{totalCoin}}枚]</i></div><span class="more" @click.stop.prevent="openRules">细则<i class="icon icon-question_mark"></i></span></h1>
       <div class="get-wrapper">
         <timeflow :items="flowItems"></timeflow>
         <div class="get-rules">
@@ -38,7 +38,7 @@
         }, {
           text: '新用户100枚<br/>老用户每天10枚'
         }, {
-          text: '金币购物<em style="color: rgba(250,180,90,0.93);position: absolute;font-size: 20px;margin-top: -3px;">*</em><br/>可抵至5折'
+          text: '金币购物<br/><span style="text-decoration: underline">可抵至5折</span>'
         }],
         layer: {
           title: '细则',
@@ -64,7 +64,7 @@
         if (coinName !== '金币') {
           if (this.flowItems && this.flowItems.length === 3) {
             this.flowItems[1].text = `新用户${config.newshare}枚<br/>老用户每天${config.oldshare}枚`;
-            this.flowItems[2].text = `${coinName}购物<em style="color: rgba(250,180,90,0.93);position: absolute;font-size: 20px;margin-top: -3px;">*</em><br/>可抵至5折`;
+            this.flowItems[2].text = `${coinName}购物<br/><span style="text-decoration: underline">可抵至5折</span>`;
           }
         }
         return coinName;
@@ -127,7 +127,7 @@
       openRules() {
         let config = this.$store.getters.getCoinConfig;
         let coinName = config.name || '金币';
-        this.layer.text = `<div style="display:flex;position:relative;padding-bottom: 3px;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">1枚${coinName}等价于人民币0.01元。</div></div><div style="display:flex;position:relative;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">在购买常规商品时，${coinName}可自动被最大化抵扣至商品原价的5折。已特惠的商品(首单特惠/拼团/秒杀/砍价/团购/拍卖)，不能用${coinName}抵扣商品价格。</div></div>`;
+        this.layer.text = `<div style="display:flex;position:relative;padding-bottom: 3px;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">1枚${coinName}等价于人民币0.01元。</div></div><div style="display:flex;position:relative;text-align:left;padding-left:3px"><span style="padding-right:3px">*</span><div style="flex:1;color:#666">在购买常规商品时，${coinName}可自动被最大化<span style="text-decoration: underline">抵扣至商品原价的5折</span>。已特惠的商品(首单特惠/拼团/秒杀/砍价/团购/拍卖)，不能用${coinName}抵扣商品价格。</div></div>`;
         this.$refs.tipsLayer.show();
       },
       hideGetArea() {
