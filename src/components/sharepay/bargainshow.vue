@@ -1,7 +1,7 @@
 <template>
   <transition name="fade">
     <div v-show="isOpen" class="detail">
-      <div class="detail-wrapper clearfix" @click="hide">
+      <div class="detail-wrapper clearfix">
         <div class="detail-main">
           <div class="main-content">
             <img class="icon" src="../../common/images/bargain.png" alt="">
@@ -11,10 +11,10 @@
             </div>
             <div class="coin" v-show="!showTips"><img src="../../common/images/bargain_coin.png" alt=""></div>
             <div class="footer">
-              <div class="btn-group"><span>我知道了</span></div>
+              <div class="btn-group" @click="hide"><span>我知道了</span></div>
             </div>
           </div>
-          <div class="btn-close"><i class="icon-close"></i></div>
+          <div class="btn-close" @click="hide"><i class="icon-close"></i></div>
         </div>
       </div>
     </div>

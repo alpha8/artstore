@@ -754,7 +754,7 @@
         };
       },
       getCoin() {
-        this.$refs.coin.hideGetArea();
+        // this.$refs.coin.hideGetArea();
         let user = this.$store.getters.getUserInfo;
         let isAutoLogin = window.sessionStorage.getItem('quiet_login') || false;
         if (!user.userId && isAutoLogin) {

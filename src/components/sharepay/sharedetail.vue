@@ -18,7 +18,7 @@
           </div>
           <div class="row">
             <div class="label">砍价优惠：</div>  
-            <div class="desc fixedheight"><div class="box"><em>好友助力<strong>{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</strong></em><em class="rules" @click.stop.prevent="showRules"><strong>[砍价规则？]</strong></em></div></div>
+            <div class="desc fixedheight"><div class="box"><em>好友助力<strong>{{getCuttingUsers}}人 * {{sharepay.forwardFee || 0}}元</strong></em><em class="rules" @click.stop.prevent="showRules"><strong>[砍价规则?]</strong></em></div></div>
           </div>
           <div class="row">
             <div class="label">商品库存：</div>

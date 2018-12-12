@@ -109,7 +109,8 @@
         api.firstpayGoods({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          type: 1
+          type: 1,
+          status: 0
         }).then((response) => {
           let goods = response.list;
           if (goods && goods.length) {
