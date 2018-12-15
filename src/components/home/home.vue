@@ -157,6 +157,10 @@
           name: '文 章',
           url: '/articles',
           icon: 'icon-file'
+        }, {
+          name: '茶博会',
+          url: '/search?parentCat=teaexpo&key=现金券',
+          icon: 'icon-teapot_and_cup big'
         }],
         swiperSlides: [
           'http://imgcdn.yihuyixi.com/ps/download/5959aca4e4b00faa50475a16?h=500',

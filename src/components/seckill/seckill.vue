@@ -317,15 +317,18 @@
                 position: relative
                 font-size: 14px
                 color: #333
+                box-sizing: border-box
+                overflow: hidden
                 >.title
                   position: relative
                   padding-top: 5px
                   line-height: 1.2
                   overflow: hidden
                   text-overflow: ellipsis
-                  display: -webkit-box
+                  display: block
                   -webkit-line-clamp: 1
                   -webkit-box-orient: vertical
+                  white-space: nowrap
                 .sellpoint
                   display: block
                   font-size: 12px

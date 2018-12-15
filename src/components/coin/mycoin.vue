@@ -250,12 +250,13 @@
             padding-left: 8px
             overflow: hidden
             text-overflow: ellipsis
-            display: -webkit-box
+            display: block
             -webkit-line-clamp: 1
             -webkit-box-orient: vertical
             word-wrap: break-word
             word-break: break-all
             box-sizing: border-box
+            white-space: nowrap
           .col-3
             width: 25%
             padding-left: 10px

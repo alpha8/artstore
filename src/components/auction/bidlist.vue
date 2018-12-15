@@ -247,6 +247,12 @@
             padding-left: 10px
             overflow: hidden
             box-sizing: border-box
+            text-overflow: ellipsis
+            white-space: nowrap
+            -webkit-line-clamp: 1
+            -webkit-box-orient: vertical
+            word-wrap: break-word
+            word-break: break-all
           .col-3
             width: 15%
             padding-left: 10px

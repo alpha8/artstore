@@ -38,7 +38,7 @@
             <span v-if="availCoupons.length">{{usedDiscount}}</span>
             <span v-else class="disabled">无可用</span>
           </li>
-          <li class="coin">
+          <li class="coin" v-show="canUseCoin">
             <strong>金币：<i class="coin-tips">{{coinTips}}</i></strong>
             <em @click.stop.prevent="toggleUseCoin">
               <i class="icon icon-check_circle" :class="{'on': useCoin}"></i>使用金币</i>
@@ -191,6 +191,18 @@
           return maxUseCoin / rate;
         }
         return 0;
+      },
+      canUseCoin() {
+        var allow = true;
+        for (var i = 0, len = this.products.length; i < len; i++) {
+          if (this.products[i].name.indexOf('现金券') > -1) {
+            allow = false;
+          }
+        }
+        if (!allow) {
+          this.useCoin = false;
+        }
+        return allow;
       }
     },
     activated() {
@@ -711,11 +723,11 @@
               vertical-align: middle
               &.nowrap-line
                 position: relative
-                display: -webkit-box
                 text-overflow: ellipsis
                 overflow: hidden
                 -webkit-line-clamp: 1
                 -webkit-box-orient: vertical
+                white-space: nowrap
             &.change:after
               content: ""
               display: block

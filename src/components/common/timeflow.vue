@@ -31,7 +31,7 @@
       position: relative
       flex: 1
       text-align: center
-      i
+      >i
         position: absolute
         display: inline-block
         margin-left: -12px
@@ -45,14 +45,13 @@
         color: #fff
         &.gray
           background: #aeadad
-      .text
+      >.text
         position: relative
         padding-top: 29px
         padding-bottom: 3px
         font-size: 14px
         overflow: hidden
         text-overflow: ellipsis
-        display: -webkit-box
         -webkit-line-clamp: 2
         -webkit-box-orient: vertical
         word-wrap: break-word
