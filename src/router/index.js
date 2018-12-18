@@ -72,6 +72,7 @@ import wiptuan from '@/components/stats/wip_tuans';
 import withdraw from '@/components/my/withdraw';
 import withdrawdetail from '@/components/my/withdrawdetail';
 import mycoin from '@/components/coin/mycoin';
+import poster from '@/components/common/poster';
 
 // import citychoose from '@/components/my/citychoose';
 
@@ -153,6 +154,7 @@ export default new Router({
     {path: '/withdraw', component: withdraw, name: 'withdraw', meta: {keepAlive: true}},
     {path: '/withdrawdetail', component: withdrawdetail, name: 'withdrawdetail', meta: {keepAlive: true}},
     {path: '/mycoin', component: mycoin, name: 'mycoin', meta: {keepAlive: true}},
+    {path: '/poster', component: poster, meta: {keepAlive: true}},
     {path: '/my', component: my, meta: {keepAlive: true}}
   ]
 });

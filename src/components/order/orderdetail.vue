@@ -22,9 +22,9 @@
         <split v-if="order.express"></split>
         <div class="title" v-if="order.express">配送信息</div>
         <div class="delivery-info" v-if="order.express">
-          <p><label>收货地址：</label><span>{{order.express.expressAddress}}</span></p>
-          <p><label>收货人：</label><span>{{order.express.receiver}}</span></p>
-          <p><label>联系方式：</label><span>{{order.express.mobile}}</span></p>
+          <p v-if="isMime"><label>收货地址：</label><span>{{order.express.expressAddress}}</span></p>
+          <p v-if="isMime"><label>收货人：</label><span>{{order.express.receiver}}</span></p>
+          <p v-if="isMime"><label>联系方式：</label><span>{{order.express.mobile}}</span></p>
           <p v-if="order.remarks"><label>用户留言：</label><span>{{order.remarks}}</span></p>
           <p v-if="order.express.expressNo"><label>快递单号：</label><span>{{order.express.expressNo}}</span></p>
           <p v-if="order.express.expressCompany"><label>快递公司：</label><span>{{order.express.expressCompany}}</span></p>
@@ -183,6 +183,9 @@
         let isOwner = this.loginUser && this.loginUser.userId === this.order.userId;
         let ignoreOrderType = (this.order.type === 8 || this.order.type === 6) && this.order.status === 1;
         return canShowStatus.filter(o => o === status).length && isOwner && !ignoreOrderType;
+      },
+      isMime() {
+        return this.loginUser && this.loginUser.userId === this.order.userId;
       },
       totalPrice() {
         if (this.order && this.order.type === 6) {
