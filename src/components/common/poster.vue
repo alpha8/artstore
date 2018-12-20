@@ -1,26 +1,6 @@
 <template>
   <div class="poster">
     <canvas id="canvas"></canvas>
-    <!-- <div class="slide-wrap">
-      <div class="slide">
-        <img src="http://imgcdn.yihuyixi.com/ps/download/5aaae398e4b060c567fd3b12?w=750&h=500&v=v2" alt="" />
-      </div>
-    </div>
-    <div class="slide-wrap">
-      <div class="slide">
-        <img src="http://imgcdn.yihuyixi.com/ps/download/5aaae398e4b060c567fd3b12?w=750&h=500&v=v2" alt="" />
-      </div>
-      <div class="slide">
-        <img src="http://imgcdn.yihuyixi.com/ps/download/5aaae397e4b060c567fd3b0f?w=750&h=500&v=v2" alt="" />
-      </div>
-    </div>
-    <div class="poster-info">
-      <div class="item-info">
-        <h1 class="pname">[曦瓜] 正山小种(红茶.源味250g) [一虎一席.品牌榜]</h1>
-        <div class="price"><span class="now">¥75</span><span class="old">¥100</span></div>
-      </div>
-      <div class="qrcode"><img src="http://www.yihuyixi.com/cms/qrcode/artwork?aid=5bdc5c49e4b009b7223c5238" border="0" width="120" height="120"></img></div>
-    </div> -->
   </div>
 </template>
 
@@ -33,7 +13,7 @@
           name: '[曦瓜] 正山小种(红茶.源味250g) [一虎一席.品牌榜]',
           sellPoint: '问鹤几时来？我本往来无定迹。',
           price: 75,
-          marketPrice: 100,
+          marketPrice: 500,
           icons: ['http://imgcdn.yihuyixi.com/ps/download/5aaae398e4b060c567fd3b12', 'http://imgcdn.yihuyixi.com/ps/download/5aaae398e4b060c567fd3b12', 'http://imgcdn.yihuyixi.com/ps/download/5aaae397e4b060c567fd3b0f']
         },
         offset: 0
@@ -54,7 +34,7 @@
                     context.msBackingStorePixelRatio ||
                     context.oBackingStorePixelRatio ||
                     context.backingStorePixelRatio || 1;
-      var ratio = (window.devicePixelRatio || 1) / backingStore;
+      var ratio = Math.round((window.devicePixelRatio || 1) / backingStore);
       var width = document.documentElement.offsetWidth;
       var height = document.documentElement.clientHeight;
       canvas.style.width = width + 'px';
@@ -66,6 +46,7 @@
       canvas.height = pixelHeight;
       context.fillStyle = '#e1e1e1';
       context.fillRect(0, 0, pixelWidth, pixelHeight);
+      console.log('width=' + pixelWidth + ', height=' + pixelHeight + ', ratio=' + ratio);
 
       var icons = this.good && this.good.icons || [];
       if (!icons.length) {
@@ -107,27 +88,32 @@
         this.$store.commit('SHOW_FOOTER');
       },
       drawProductInfo(context, that, pixelWidth) {
-        context.font = 'bold 24px "Helvetica Neue", Helvetica, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
+        var fontfamily = '"Helvetica Neue", Helvetica, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
+        context.font = `bold 24px ${fontfamily}`;
         context.fillStyle = '#07111b';
         // context.fillText(that.good.name, 20, that.offset + 40);
         that.offset += 20;
         that.drawMultiLineText(context, that.good.name, 20, that.offset, pixelWidth, 24);
 
-        context.font = '20px "Helvetica Neue", Helvetica, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
+        context.font = `20px ${fontfamily}`;
         context.fillStyle = '#07111b';
         that.offset += 25;
         context.fillText(that.good.sellPoint, 20, that.offset);
 
-        context.font = 'bold 24px "Helvetica Neue", Helvetica, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
+        context.font = `bold 24px ${fontfamily}`;
         context.fillStyle = '#f01414';
         that.offset += 30;
         context.fillText(that.good.price, 20, that.offset);
 
-        context.font = '20px "Helvetica Neue", Helvetica, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
-        // canvas.style.textDecoration = 'line-through';
+        context.font = `20px ${fontfamily}`;
         context.fillStyle = '#93999f';
         var priceWidth = context.measureText(that.good.price).width;
         context.fillText(that.good.marketPrice, priceWidth + 50, that.offset);
+        context.fillStyle = '#000';
+        context.moveTo(priceWidth + 50, that.offset - 8);
+        var marketPrice = context.measureText(that.good.marketPrice);
+        context.lineTo(priceWidth + 50 + marketPrice.width, that.offset - 8);
+        context.stroke();
       },
       drawImage(ctx, url, x, y) {
         return new Promise(function(resolve, reject) {
