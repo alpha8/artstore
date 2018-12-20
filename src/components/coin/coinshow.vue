@@ -6,7 +6,7 @@
           <div class="main-content">
             <img class="icon" src="../../common/images/coin.png" alt="">
             <div class="text">
-              <p v-if="hasLogin">{{getRandText}}哦耶，<span v-if="yourCoin">今日您获赠{{yourCoin}}枚{{getCoinName}}，</span><span v-if="yourCoin">您的朋友因</span><span v-else>您的本次来访</span>您获赠了{{coin}}枚{{getCoinName}}～</p>
+              <p v-if="hasLogin">{{getRandText}}哦耶，<span v-if="yourCoin">今日您获赠{{yourCoin}}枚{{getCoinName}}，</span><span v-if="yourCoin">您的朋友因您</span><span v-else>您的本次来访</span>获赠了{{coin}}枚{{getCoinName}}～</p>
               <p v-else>每天您的第一次来访，系统将赠送给您及您所访页面的这位朋友10-100枚{{getCoinName}}，{{getCoinName}}购物可抵至5折。</p>
             </div>
             <div class="coin"></div>
