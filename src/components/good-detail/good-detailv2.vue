@@ -133,10 +133,12 @@
       <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
     </div>
     <layer :title="layer.title" :text="getQrcode" :btn="layer.button" ref="layerWin"></layer>
+
     <layer title="金币使用细则" :text="layer.text" :btn="layer.button" ref="tipsLayer"></layer>
     <share ref="weixinShare"></share>
     <quietlogin></quietlogin>
     <coinshow :coin="coins.coin" :yourCoin="coins.yourCoin" ref="coinShow"></coinshow>
+    <poster ref="poster"></poster>    
   </div>
 </template>
 
@@ -161,6 +163,7 @@
   import share from '@/components/coin/share';
   import coin from '@/components/coin/coin';
   import coinshow from '@/components/coin/coinshow';
+  import poster from '@/components/common/poster';
 
   const ALL = 3;
   // const ERR_OK = 0;
@@ -456,7 +459,9 @@
         this.$router.back();
       },
       showQrcode() {
-        this.$refs.layerWin.show();
+        // this.$refs.layerWin.show();
+        this.$refs.poster.drawPoster(this.good);
+        this.$refs.poster.show();
       },
       addFirst(event) {
         Vue.set(this.good, 'count', 1);
@@ -818,7 +823,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, quietlogin, gotop, layer, share, coin, coinshow
+      cartcontrol, split, ratingselect, fixedcart, fixedheader, swipe, star, modalTitle, channel, quietlogin, gotop, layer, share, coin, coinshow, poster
     }
   };
 </script>

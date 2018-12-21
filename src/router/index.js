@@ -72,7 +72,7 @@ import wiptuan from '@/components/stats/wip_tuans';
 import withdraw from '@/components/my/withdraw';
 import withdrawdetail from '@/components/my/withdrawdetail';
 import mycoin from '@/components/coin/mycoin';
-import poster from '@/components/common/poster';
+import poster from '@/components/common/test';
 
 // import citychoose from '@/components/my/citychoose';
 

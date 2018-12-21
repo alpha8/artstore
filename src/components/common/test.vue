@@ -27,17 +27,24 @@
         good: {}
       };
     },
-    // mounted() {
-    //   var good = {
-    //     id: '5bdc5c49e4b009b7223c5238',
-    //     name: '[曦瓜] 正山小种(红茶.源味250g) [一虎一席.品牌榜]',
-    //     sellPoint: '问鹤几时来？我本往来无定迹。',
-    //     price: 75,
-    //     marketPrice: 500,
-    //     icons: ['http://imgcdn.yihuyixi.com/ps/download/5aaae398e4b060c567fd3b12', 'http://imgcdn.yihuyixi.com/ps/download/5aaae398e4b060c567fd3b12', 'http://imgcdn.yihuyixi.com/ps/download/5aaae397e4b060c567fd3b0f']
-    //   };
-    //   this.drawPoster(good);
-    // },
+    mounted() {
+      var good = {
+        id: '5bdc5c49e4b009b7223c5238',
+        name: '[曦瓜] 正山小种(红茶.源味250g) [一虎一席.品牌榜]',
+        sellPoint: '问鹤几时来？我本往来无定迹。',
+        price: 75,
+        oldPrice: 500,
+        pictures: [{
+          id: '5aaae398e4b060c567fd3b12'
+        }, {
+          id: '5aaae398e4b060c567fd3b12'
+        }, {
+          id: '5aaae397e4b060c567fd3b0f'
+        }]
+      };
+      this.drawPoster(good);
+      this.show();
+    },
     methods: {
       show() {
         this.isOpen = true;
@@ -47,7 +54,8 @@
       },
       viewPicture() {
         var canvas = document.getElementById('canvas');
-        var base64 = canvas.toDataURL('image/png');
+        var base64 = canvas.toDataURL('image/jpeg', 0.85);
+        console.log(base64);
         wx.previewImage({
           current: base64,
           urls: [base64]
@@ -61,6 +69,7 @@
         console.log(good);
         this.good = good || {};
         this.offset = 0;
+        this.posterImage = '';
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext('2d');
         var backingStore = context.backingStorePixelRatio ||
@@ -237,6 +246,13 @@
             text-align: center
             box-sizing: border-box
             background: #e1e1e1
+            moz-user-select: -moz-none
+            -moz-user-select: none
+            -o-user-select: none
+            -khtml-user-select: none
+            -webkit-user-select: none
+            -ms-user-select: none
+            user-select: none
           .footer
             padding: 10px 25px
             text-align: center
@@ -255,7 +271,7 @@
                 flex: 1
                 border-radius: 5px
                 background: rgba(250,180,90,0.93)
-                color: #f1f1f1
+                color: #fff
                 box-sizing: border-box
         .btn-close
           position: absolute
