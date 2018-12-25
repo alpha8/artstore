@@ -185,6 +185,10 @@
         return canShowStatus.filter(o => o === status).length && isOwner && !ignoreOrderType;
       },
       isMime() {
+        var fromNotice = this.$route.query.from || '';
+        if (fromNotice && fromNotice === 'notice') {
+          return true;
+        }
         return this.loginUser && this.loginUser.userId === this.order.userId;
       },
       totalPrice() {

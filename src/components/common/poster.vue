@@ -58,7 +58,6 @@
         this.hide();
       },
       drawPoster(good) {
-        console.log(good);
         this.good = good || {};
         this.offset = 0;
         var canvas = document.getElementById('canvas');
@@ -73,7 +72,7 @@
         var width = document.documentElement.offsetWidth;
         var height = document.documentElement.clientHeight;
         // canvas.style.width = (width - 30) + 'px';
-        canvas.style.height = '500px';
+        canvas.style.height = '480px';
 
         var pixelWidth = width * ratio;
         var pixelHeight = height * ratio;
@@ -87,21 +86,21 @@
         if (!icons.length) {
           return;
         }
-        var mainImage = `${api.CONFIG.psCtx}${icons[0].id}?w=${pixelWidth}&v=v2`;
+        var mainImage = `http://www.yihuyixi.com/ps/download/${icons[0].id}?w=${pixelWidth}&v=v2`;
         var promise = this.drawImage(context, mainImage, 0, 0);
         var that = this;
         promise.then(function(data) {
           that.offset = data.h + 5;
 
           if (icons.length >= 3) {
-            var secondImage = `${api.CONFIG.psCtx}${icons[1].id}?w=${data.w / 2}&v=v2`;
+            var secondImage = `http://www.yihuyixi.com/ps/download/${icons[1].id}?w=${data.w / 2}&v=v2`;
             var p2 = that.drawImage(context, secondImage, 0, data.h + 5);
             p2.then(function(result) {
               that.offset += result.h;
               that.drawProductInfo(context, that, pixelWidth);
             });
 
-            var thirdImage = `${api.CONFIG.psCtx}${icons[2].id}?w=${data.w / 2}&v=v2`;
+            var thirdImage = `http://www.yihuyixi.com/ps/download/${icons[2].id}?w=${data.w / 2}&v=v2`;
             that.drawImage(context, thirdImage, data.w / 2 + 5, data.h + 5);
           } else {
             that.drawProductInfo(context, that, pixelWidth);
@@ -111,7 +110,7 @@
           // context.fillStyle = '#fff';
           // that.drawRoundedRect(context, 20, (data.h / 2) + data.h + 20, pixelWidth - 40, 350, 20, true, false);
 
-          var qrcode = `http://www.yihuyixi.com/cms/qrcode/artwork?aid=${that.good.id}&size=180&margin=0`;
+          var qrcode = `${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${that.good.id}&size=180&margin=0`;
           that.drawImage(context, qrcode, pixelWidth - 200, pixelHeight - 200);
         });
       },

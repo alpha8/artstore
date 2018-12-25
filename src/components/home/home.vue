@@ -13,6 +13,9 @@
           <channel :items="item.goods" :cols="2" :section="item.key"></channel>
           <split></split>
         </div>
+        <modal-title title="优质茶器(1000元以内)" moreText="更多" catKey="teaart" catName="优质茶器" price="0-1000"></modal-title>
+        <channel :items="teaPots" :cols="2" section="cheap_teaware"></channel>
+        <split></split>
         <modal-title title="茶席套装.三百席" moreText="更多" catKey="art" catName="茶席套装.三百席"></modal-title>
         <channel :items="arts" :cols="2" section="teasuite"></channel>
         <split></split>
@@ -24,9 +27,6 @@
           </div>
           <div class="slogan">[深圳国际艺术博览会] VIP室：一虎一席茶室艺术</div>
         </div>
-        <split></split>
-        <modal-title title="优质茶器(1000元以内)" moreText="更多" catKey="teaart" catName="优质茶器" price="0-1000"></modal-title>
-        <channel :items="teaPots" :cols="2" section="cheap_teaware"></channel>
         <split></split>
         <modal-title title="贵重茶器(1000元以上)" moreText="更多" catKey="teaart" catName="贵重茶器" price="1000-"></modal-title>
         <channel :items="dearTeapots" :cols="2" section="dearly_teaware"></channel>
@@ -282,25 +282,6 @@
       _initScroll() {
         let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
         this.swipeHeight = swipe.clientHeight;
-        // this.$nextTick(() => {
-        //   if (!this.scroll) {
-        //     this.scroll = new BScroll(this.$refs.mainWrapper, {
-        //       click: true,
-        //       probeType: 3,
-        //       bounce: false
-        //     });
-        //     let swipe = this.$refs.mainWrapper.getElementsByClassName('swipe-hook')[0];
-        //     this.swipeHeight = swipe.clientHeight;
-        //     this.scroll.on('scroll', (pos) => {
-        //       let offset = Math.abs(Math.round(pos.y));
-        //       if (this.scrollY !== offset) {
-        //         this.scrollY = offset;
-        //       }
-        //     });
-        //   } else {
-        //     this.scroll.refresh();
-        //   }
-        // });
       },
       selectGood(good) {
         this.selectedGood = good;
