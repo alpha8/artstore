@@ -460,8 +460,15 @@
       },
       showQrcode() {
         // this.$refs.layerWin.show();
-        this.$refs.poster.drawPoster(this.good);
-        this.$refs.poster.show();
+        if (this.good.id) {
+          var qrcode = `${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&size=180&margin=0`;
+          let uid = this.$store.getters.getUserInfo.userId;
+          if (uid) {
+            qrcode += `&userId=${uid}`;
+          }
+          this.$refs.poster.drawPoster(this.good, qrcode);
+          this.$refs.poster.show();
+        }
       },
       addFirst(event) {
         Vue.set(this.good, 'count', 1);

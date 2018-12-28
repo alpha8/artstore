@@ -1,17 +1,9 @@
 <template>
   <transition name="fade">
     <div v-show="isOpen" class="detail">
-      <div class="detail-wrapper clearfix">
-        <div class="detail-main">
-          <div class="main-content">
-            <div class="text" @click.stop.prevent="viewPicture"><canvas id="canvas"></canvas></div>
-            <div class="footer">
-              <div class="btn-group" @click.stop.prevent="savePicture"><span>保存商品海报</span></div>
-            </div>
-          </div>
-          <div class="btn-close" @click.stop.prevent="hide"><i class="icon-close"></i></div>
-        </div>
-      </div>
+      <div class="poster" @click.stop.prevent="viewPicture"><canvas id="canvas"></canvas></div>
+      <div class="btn-close" @click.stop.prevent="hide"><i class="icon-close"></i></div>
+      <div class="save-tips" @click.stop.prevent="savePicture">点击图片，保存商品海报</div>
     </div>
   </transition>
 </template>
@@ -24,7 +16,8 @@
       return {
         offset: 0,
         isOpen: false,
-        good: {}
+        good: {},
+        ratio: 1
       };
     },
     // mounted() {
@@ -57,7 +50,7 @@
         this.viewPicture();
         this.hide();
       },
-      drawPoster(good) {
+      drawPoster(good, qrcode) {
         this.good = good || {};
         this.offset = 0;
         var canvas = document.getElementById('canvas');
@@ -69,18 +62,19 @@
                       context.oBackingStorePixelRatio ||
                       context.backingStorePixelRatio || 1;
         var ratio = Math.round((window.devicePixelRatio || 1) / backingStore);
+        this.ratio = ratio;
         var width = document.documentElement.offsetWidth;
         var height = document.documentElement.clientHeight;
-        // canvas.style.width = (width - 30) + 'px';
-        canvas.style.height = '480px';
+        canvas.style.width = `${width}px`;
+        // canvas.style.height = `${height}px`;
 
         var pixelWidth = width * ratio;
         var pixelHeight = height * ratio;
         canvas.width = pixelWidth;
         canvas.height = pixelHeight;
-        context.fillStyle = '#e1e1e1';
+        context.fillStyle = '#fff';
         context.fillRect(0, 0, pixelWidth, pixelHeight);
-        console.log('width=' + pixelWidth + ', height=' + pixelHeight + ', ratio=' + ratio);
+        console.log(`width=${width}, height=${height}, deviceWidth=${pixelWidth}, deviceHeight=${pixelHeight}, ratio=${ratio}`);
 
         var icons = this.good && this.good.pictures || [];
         if (!icons.length) {
@@ -93,14 +87,14 @@
           that.offset = data.h + 5;
 
           if (icons.length >= 3) {
-            var secondImage = `http://www.yihuyixi.com/ps/download/${icons[1].id}?w=${data.w / 2}&v=v2`;
+            var secondImage = `http://www.yihuyixi.com/ps/download/${icons[1].id}?w=${Math.round(data.w / 2)}&v=v2`;
             var p2 = that.drawImage(context, secondImage, 0, data.h + 5);
             p2.then(function(result) {
               that.offset += result.h;
               that.drawProductInfo(context, that, pixelWidth);
             });
 
-            var thirdImage = `http://www.yihuyixi.com/ps/download/${icons[2].id}?w=${data.w / 2}&v=v2`;
+            var thirdImage = `http://www.yihuyixi.com/ps/download/${icons[2].id}?w=${Math.round(data.w / 2)}&v=v2`;
             that.drawImage(context, thirdImage, data.w / 2 + 5, data.h + 5);
           } else {
             that.drawProductInfo(context, that, pixelWidth);
@@ -109,37 +103,41 @@
         promise.then(function(data) {
           // context.fillStyle = '#fff';
           // that.drawRoundedRect(context, 20, (data.h / 2) + data.h + 20, pixelWidth - 40, 350, 20, true, false);
-
-          var qrcode = `${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${that.good.id}&size=180&margin=0`;
-          that.drawImage(context, qrcode, pixelWidth - 200, pixelHeight - 200);
+          if (qrcode) {
+            that.drawImage(context, qrcode, pixelWidth - 220, pixelHeight - 220);
+          }
         });
       },
       drawProductInfo(context, that, pixelWidth) {
         var fontfamily = '"Helvetica Neue", Helvetica, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
-        context.font = `bold 24px ${fontfamily}`;
+        var titleFontSize = 14;
+        context.font = `bold ${titleFontSize * that.ratio}px ${fontfamily}`;
         context.fillStyle = '#07111b';
         // context.fillText(that.good.name, 20, that.offset + 40);
         that.offset += 20;
         that.drawMultiLineText(context, that.good.name, 20, that.offset, pixelWidth, 30);
 
-        context.font = `20px ${fontfamily}`;
+        var sellpointFontSize = 12.5;
+        context.font = `${sellpointFontSize * that.ratio}px ${fontfamily}`;
         context.fillStyle = '#07111b';
-        that.offset += 25;
+        that.offset += sellpointFontSize * that.ratio + 5;
         context.fillText(that.good.sellPoint, 20, that.offset);
 
-        context.font = `bold 24px ${fontfamily}`;
+        context.font = `bold ${titleFontSize * that.ratio}px ${fontfamily}`;
         context.fillStyle = '#f01414';
-        that.offset += 35;
-        context.fillText(that.good.price, 20, that.offset);
+        that.offset += titleFontSize * that.ratio + 10;
+        context.fillText('¥' + that.good.price, 20, that.offset);
 
-        context.font = `20px ${fontfamily}`;
+        context.font = `${12 * that.ratio}px ${fontfamily}`;
         context.fillStyle = '#93999f';
         var priceWidth = context.measureText(that.good.price).width;
-        context.fillText(that.good.oldPrice, priceWidth + 50, that.offset);
-        context.fillStyle = '#000';
-        context.moveTo(priceWidth + 50, that.offset - 8);
+        var marginLeft = 30 * that.ratio;
+        context.fillText('¥' + that.good.oldPrice, priceWidth + marginLeft, that.offset);
+        context.fillStyle = '#666';
+        context.strokeStyle = '#666';
+        context.moveTo(priceWidth + marginLeft, that.offset - 10);
         var oldPrice = context.measureText(that.good.oldPrice);
-        context.lineTo(priceWidth + 50 + oldPrice.width, that.offset - 8);
+        context.lineTo(priceWidth + marginLeft + oldPrice.width, that.offset - 10);
         context.stroke();
       },
       drawImage(ctx, url, x, y) {
@@ -199,75 +197,42 @@
     right: 0
     bottom: 0
     overflow: hidden
-    background: rgba(7, 17, 27, 0.6)
+    background: #fff
     opacity: 1
     &.fade-enter-active, &.fade-leave-active
       opacity: 1
       transition: all 0.5s
     &.fade-enter, &.fade-leave-active
       opacity: 0
-      background: rgba(7, 17, 27, 0)
-    .detail-wrapper
-      position: relative
-      width: 100%
-      height: 100%
+      background: #fff
+    .btn-close
+      position: absolute
+      width: 24px
+      height: 24px
+      border-radius: 100%
+      background: #fff
+      border: 1px solid #e1e1e1
+      right: 15px
+      top: 15px
+      clear: both
+      font-size: 24px
+      padding: 2px
+      color: #e4393c
+      box-shadow: 0px 1px 20px 0px #dfdbdb
+    .save-tips
+      position: absolute
+      display: block
+      bottom: 15px
+      left: 45%
       box-sizing: border-box
-      overflow: auto
-      -webkit-overflow-scrolling: touch
-      .detail-main
-        position: absolute
-        top: 50%
-        left: 0
-        width: 100%
-        height: auto
-        box-sizing: border-box
-        transform: translate(0, -50%)
-        .main-content
-          position: relative
-          height: auto
-          margin: 0 20px
-          border-radius: 15px
-          box-sizing: border-box
-          background: #fff
-          overflow: hidden
-          .text
-            font-size: 14px
-            line-height: 1.4
-            text-align: center
-            box-sizing: border-box
-            background: #e1e1e1
-          .footer
-            padding: 10px 25px
-            text-align: center
-            box-sizing: border-box
-            .btn-group
-              display: flex
-              margin: 0
-              height: 35px
-              line-height: 35px
-              padding: 0 50px
-              font-size: 14px
-              text-align: center
-              border-radius: 2px
-              text-align: center
-              span
-                flex: 1
-                border-radius: 5px
-                background: rgba(250,180,90,0.93)
-                color: #f1f1f1
-                box-sizing: border-box
-        .btn-close
-          position: absolute
-          width: 24px
-          height: 24px
-          border-radius: 100%
-          background: #fff
-          border: 1px solid #e1e1e1
-          right: 10px
-          top: -10px
-          clear: both
-          font-size: 24px
-          padding: 2px
-          color: #e4393c
-          box-shadow: 0px 1px 20px 0px #dfdbdb
+      background: transparent
+      border: 1px solid #e1e1e1
+      box-shadow: 0px 1px 20px 0px #dfdbdb
+      transform: translate(-50%, -50%)
+      box-sizing: border-box
+      font-size: 13px
+      padding: 8px 10px
+      text-align: center
+      border-radius: 5px
+      color: #666
 </style>

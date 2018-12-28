@@ -13,12 +13,6 @@
           <channel :items="item.goods" :cols="2" :section="item.key"></channel>
           <split></split>
         </div>
-        <modal-title title="优质茶器(1000元以内)" moreText="更多" catKey="teaart" catName="优质茶器" price="0-1000"></modal-title>
-        <channel :items="teaPots" :cols="2" section="cheap_teaware"></channel>
-        <split></split>
-        <modal-title title="茶席套装.三百席" moreText="更多" catKey="art" catName="茶席套装.三百席"></modal-title>
-        <channel :items="arts" :cols="2" section="teasuite"></channel>
-        <split></split>
         <modal-title title="一虎一席茶室艺术空间 (30秒大片)"></modal-title>
         <div class="vipmovie">
           <div id="vip_video_player" :style="getVideoWidth">
@@ -27,6 +21,12 @@
           </div>
           <div class="slogan">[深圳国际艺术博览会] VIP室：一虎一席茶室艺术</div>
         </div>
+        <split></split>
+        <modal-title title="优质茶器(1000元以内)" moreText="更多" catKey="teaart" catName="优质茶器" price="0-1000"></modal-title>
+        <channel :items="teaPots" :cols="2" section="cheap_teaware"></channel>
+        <split></split>
+        <modal-title title="茶席套装.三百席" moreText="更多" catKey="art" catName="茶席套装.三百席"></modal-title>
+        <channel :items="arts" :cols="2" section="teasuite"></channel>
         <split></split>
         <modal-title title="贵重茶器(1000元以上)" moreText="更多" catKey="teaart" catName="贵重茶器" price="1000-"></modal-title>
         <channel :items="dearTeapots" :cols="2" section="dearly_teaware"></channel>
