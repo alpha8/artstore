@@ -20,6 +20,25 @@
         ratio: 1
       };
     },
+    mounted() {
+      var good = {
+        id: '5bdc5c49e4b009b7223c5238',
+        name: '[曦瓜] 正山小种(红茶.源味250g) [一虎一席.品牌榜]',
+        sellPoint: '问鹤几时来？我本往来无定迹。',
+        price: 75,
+        oldPrice: 500,
+        pictures: [{
+            id: '5aaae398e4b060c567fd3b12'
+          }, {
+            id: '5aaae398e4b060c567fd3b12'
+          }, {
+            id: '5aaae397e4b060c567fd3b0f'
+          }]
+      };
+      var qrcode = `${api.CONFIG.cmsCtx}/qrcode/artwork?aid=5aaaeab9e4b060c567fd3b40&size=180&margin=0`;
+      this.drawPoster(good, qrcode);
+      this.show();
+    },
     methods: {
       show() {
         this.isOpen = true;
@@ -132,6 +151,7 @@
       drawImage(ctx, url, x, y) {
         return new Promise(function(resolve, reject) {
           var img = new Image();
+          img.setAttribute('crossOrigin', 'anonymous');
           img.src = url;
           img.onload = function() {
             ctx.drawImage(this, x, y, this.width, this.height);

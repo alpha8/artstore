@@ -252,13 +252,13 @@
     top: 44px
     bottom: 0
     width: 100%
-    overflow: hidden
+    overflow: auto
+    -webkit-overflow-scrolling: touch
     .invitation-wrapper
       position: relative
       width: 100%
       background-color: #fff
-      box-sizing: border-box
-      overflow: hidden
+      padding-bottom: 30px
       .invitation-heading
         padding: 20px 10px
         color: #fff

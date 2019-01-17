@@ -108,6 +108,7 @@
           { amount: 0, text: '奖金余额', link: '/cashback' }
         ],
         others: [
+          { icon: 'icon-qrcode', text: '我的推广码', link: '/promocode' },
           { icon: 'icon-tuan', text: '我的拼团', link: '/mytuan', key: 'teamCount' },
           { icon: 'icon-cutingprice', text: '我的砍价', link: '/myshare', key: 'cutCount' },
           { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
