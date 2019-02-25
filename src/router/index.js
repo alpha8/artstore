@@ -61,7 +61,7 @@ import sharetuan from '@/components/tuan/sharetuan';
 import mytuan from '@/components/tuan/mytuan';
 // import signature from '@/components/common/signature';
 import notfound from '@/components/common/404';
-// import info from '@/components/common/info';
+import info from '@/components/common/info';
 import visitlist from '@/components/sharepay/visitlist';
 import yourfriends from '@/components/user/your_friends';
 import yourbuyers from '@/components/user/your_buyers';
@@ -73,7 +73,6 @@ import withdraw from '@/components/my/withdraw';
 import withdrawdetail from '@/components/my/withdrawdetail';
 import mycoin from '@/components/coin/mycoin';
 import promocode from '@/components/user/promocode';
-import poster from '@/components/common/test';
 
 // import citychoose from '@/components/my/citychoose';
 
@@ -145,7 +144,7 @@ export default new Router({
     {path: '/sharetuan/:id', component: sharetuan, name: 'sharetuan', meta: {keepAlive: true}},
     // {path: '/signature', component: signature, name: 'signature', meta: {keepAlive: true}},
     {path: '/404', component: notfound, name: 'notfound', meta: {keepAlive: true}},
-    // {path: '/info', component: info, name: 'info', meta: {keepAlive: true}},
+    {path: '/info', component: info, name: 'info', meta: {keepAlive: true}},
     {path: '/friends', component: yourfriends, name: 'yourfriends', meta: {keepAlive: true}},
     {path: '/buyers', component: yourbuyers, name: 'yourbuyers', meta: {keepAlive: true}},
     {path: '/buyers/:uid', component: yourorders, name: 'yourorders', meta: {keepAlive: true}},
@@ -155,7 +154,6 @@ export default new Router({
     {path: '/withdraw', component: withdraw, name: 'withdraw', meta: {keepAlive: true}},
     {path: '/withdrawdetail', component: withdrawdetail, name: 'withdrawdetail', meta: {keepAlive: true}},
     {path: '/mycoin', component: mycoin, name: 'mycoin', meta: {keepAlive: true}},
-    {path: '/poster', component: poster, name: 'poster', meta: {keepAlive: true}},
     {path: '/promocode', component: promocode, name: 'promocode', meta: {keepAlive: true}},
     {path: '/my', component: my, meta: {keepAlive: true}}
   ]

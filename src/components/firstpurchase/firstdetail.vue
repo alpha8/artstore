@@ -108,7 +108,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title :title="aboutUs" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -253,6 +253,9 @@
       },
       userProfile() {
         return this.$store.getters.getUserProfile;
+      },
+      aboutUs() {
+        return `关于「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」`;
       }
     },
     mounted() {
@@ -575,8 +578,8 @@
         }
         let vm = this;
         let shareData = {
-          title: `[一虎一席.首单3折${this.firstpay.buttomFee}元] ` + reduceGoodsName(this.firstpay.name),
-          desc: `首单价：¥${this.firstpay.buttomFee}, 市场价：¥${this.firstpay.fieldPrice}.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】`,
+          title: `[${api.CONFIG.NICKNAME || '一虎一席'}.首单3折${this.firstpay.buttomFee}元] ` + reduceGoodsName(this.firstpay.name),
+          desc: `首单价：¥${this.firstpay.buttomFee}, 市场价：¥${this.firstpay.fieldPrice}.「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
           success: function () {

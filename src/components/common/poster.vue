@@ -2,8 +2,8 @@
   <transition name="fade">
     <div v-show="isOpen" class="detail">
       <div class="poster" @click.stop.prevent="viewPicture"><canvas id="canvas"></canvas></div>
-      <div class="btn-close" @click.stop.prevent="hide"><i class="icon-close"></i></div>
-      <div class="save-tips" @click.stop.prevent="savePicture">点击图片，保存商品海报</div>
+      <div class="btn-close" @click.stop.prevent="hide" v-show="!isAndroid"><i class="icon-close"></i></div>
+      <div class="save-tips" @click.stop.prevent="savePicture" v-show="!showOnce">{{posterTips}}</div>
     </div>
   </transition>
 </template>
@@ -11,31 +11,53 @@
 <script type="text/ecmascript-6">
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
+  import {Device} from '@/common/js/util';
+
   export default {
     data() {
       return {
         offset: 0,
         isOpen: false,
         good: {},
-        ratio: 1
+        ratio: 1,
+        showOnce: false,
+        isAndroid: Device().isAndroid
       };
+    },
+    computed: {
+      posterTips() {
+        if (this.isAndroid) {
+          return '请截屏，保存商品海报';
+        }
+        return '点击图片，保存商品海报';
+      }
     },
     methods: {
       show() {
+        this.showOnce = false;
         this.isOpen = true;
       },
       hide() {
         this.isOpen = false;
+        this.showOnce = false;
       },
       viewPicture() {
+        if (this.isAndroid) {
+          this.hide();
+          return;
+        }
         var canvas = document.getElementById('canvas');
-        var base64 = canvas.toDataURL('image/png');
+        var base64 = canvas.toDataURL();
         wx.previewImage({
           current: base64,
           urls: [base64]
         });
       },
       savePicture() {
+        if (this.isAndroid) {
+          this.showOnce = true;
+          return;
+        }
         this.viewPicture();
         this.hide();
       },
@@ -93,26 +115,27 @@
           // context.fillStyle = '#fff';
           // that.drawRoundedRect(context, 20, (data.h / 2) + data.h + 20, pixelWidth - 40, 350, 20, true, false);
           if (qrcode) {
-            that.drawImage(context, qrcode, pixelWidth - 220, pixelHeight - 220);
+            let margin = 260;
+            that.drawImage(context, qrcode, pixelWidth - margin, pixelHeight - margin);
           }
         });
       },
       drawProductInfo(context, that, pixelWidth) {
         var fontfamily = '"Helvetica Neue", Helvetica, Tahoma, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif';
-        var titleFontSize = 14;
+        var titleFontSize = 15;
         context.font = `bold ${titleFontSize * that.ratio}px ${fontfamily}`;
         context.fillStyle = '#07111b';
         // context.fillText(that.good.name, 20, that.offset + 40);
-        that.offset += 20;
-        that.drawMultiLineText(context, that.good.name, 20, that.offset, pixelWidth, 30);
+        that.offset += 22;
+        that.drawMultiLineText(context, that.good.name, 20, that.offset, pixelWidth, titleFontSize * that.ratio);
 
-        var sellpointFontSize = 12.5;
+        var sellpointFontSize = 14;
         context.font = `${sellpointFontSize * that.ratio}px ${fontfamily}`;
-        context.fillStyle = '#07111b';
+        context.fillStyle = '#323232';
         that.offset += sellpointFontSize * that.ratio + 5;
         context.fillText(that.good.sellPoint, 20, that.offset);
 
-        context.font = `bold ${titleFontSize * that.ratio}px ${fontfamily}`;
+        context.font = `bold ${16 * that.ratio}px ${fontfamily}`;
         context.fillStyle = '#f01414';
         that.offset += titleFontSize * that.ratio + 10;
         context.fillText('¥' + that.good.price, 20, that.offset);
@@ -120,7 +143,7 @@
         context.font = `${12 * that.ratio}px ${fontfamily}`;
         context.fillStyle = '#93999f';
         var priceWidth = context.measureText(that.good.price).width;
-        var marginLeft = 30 * that.ratio;
+        var marginLeft = 29 * that.ratio;
         context.fillText('¥' + that.good.oldPrice, priceWidth + marginLeft, that.offset);
         context.fillStyle = '#666';
         context.strokeStyle = '#666';
@@ -211,8 +234,8 @@
     .save-tips
       position: absolute
       display: block
-      bottom: 15px
-      left: 45%
+      bottom: 6px
+      left: 40%
       box-sizing: border-box
       background: transparent
       border: 1px solid #e1e1e1

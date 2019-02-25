@@ -12,7 +12,7 @@
           <div class="rule-content">
             <ol v-if="!qrcode.content">
               <li>优惠券可叠加使用，订单支付时系统将自动抵扣</li>
-              <li>如有其它疑问，请咨询一虎一席艺术平台客服</li>
+              <li>如有其它疑问，请咨询一虎一席茶生活美学商城客服</li>
             </ol>
             <div v-html="qrcode.content"></div>
           </div>
@@ -145,7 +145,7 @@
           provideId: publishid
         }).then(response => {
           if (response.result === 0) {
-            this.layer.text = '优惠券领取成功，您可前往一虎一席商城「个人中心 — 优惠券余额」中查看明细';
+            this.layer.text = '优惠券领取成功，您可前往一虎一席茶生活美学商城「个人中心 — 优惠券余额」中查看明细';
             this.$refs.layerWin.show();
           } else if (response.code === 1001) {
             this.layer.text = '您已领取过此优惠券';

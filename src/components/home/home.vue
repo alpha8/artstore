@@ -55,7 +55,7 @@
           <div class="slogan">一虎一席东方生活美学雅集《春风十里》</div>
         </div>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title :title="aboutUs" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -233,6 +233,9 @@
       getVideoWidth() {
         let w = document.documentElement.clientWidth;
         return { width: w + 'px', height: w * 0.575 + 'px' };
+      },
+      aboutUs() {
+        return `关于「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」`;
       }
     },
     methods: {

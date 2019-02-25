@@ -118,7 +118,7 @@
         api.withdraw({
           payValue: this.amount,
           wish: '传播奖金红包',
-          sendName: '一虎一席茶生活美学商城',
+          sendName: `${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}`,
           actName: '奖金提现.专用红包',
           sence_id: 0,
           userId: user.userId || 0,
@@ -132,7 +132,7 @@
           } else if (response.err_info && response.err_info.err_code === 'NOTENOUGH') {
             this.layer.text = '<p style="text-align:left">请联系客服检查商户账户~</p>';
             this.$refs.layerWin.show();
-          } else if (response.result === 1 && response.data.code) {
+          } else if (response.result === 1 && response.data && response.data.code) {
             let wxcode = response.data.code;
             switch (wxcode) {
               case 'MONEY_LIMIT':

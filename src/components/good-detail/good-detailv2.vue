@@ -124,7 +124,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2" module="productdetail" section="guessGoods"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title :title="aboutUs" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -274,6 +274,9 @@
         } else {
           return 'about: blank';
         }
+      },
+      aboutUs() {
+        return `关于「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」`;
       }
     },
     mounted() {
@@ -461,7 +464,7 @@
       showQrcode() {
         // this.$refs.layerWin.show();
         if (this.good.id) {
-          var qrcode = `${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&size=180&margin=0`;
+          var qrcode = `${api.CONFIG.cmsCtx}/qrcode/artwork?aid=${this.good.id}&size=240&margin=0`;
           let uid = this.$store.getters.getUserInfo.userId;
           if (uid) {
             qrcode += `&userId=${uid}`;
@@ -650,7 +653,7 @@
         let vm = this;
         let shareData = {
           title: `${this.good.name}`,
-          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】',
+          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + `.「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
           success: function () {
@@ -659,7 +662,7 @@
         };
         let shareData2 = {
           title: `${this.good.name}（¥${this.good.activityPrice || this.good.markPrice}）`,
-          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + '.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】',
+          desc: '售价：¥' + (this.good.activityPrice || this.good.markPrice) + `.「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: img,
           success: function () {
@@ -757,6 +760,7 @@
       _reset() {
         this.good.videoUrl = '';
         this.good.videos = [];
+        this.good.relates = [];
         this.guessGoods = [];
         this.processing = false;
         this.lazyloaded = false;

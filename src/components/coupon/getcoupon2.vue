@@ -12,7 +12,7 @@
           <div class="rule-content">
             <ol v-if="!qrcode.content">
               <li>优惠券可叠加使用，订单支付时系统将自动抵扣。</li>
-              <li>如有其它问题，请咨询一虎一席茶生活美学商城客服。</li>
+              <li>如有其它问题，请咨询{{appName}}客服。</li>
             </ol>
             <div v-html="qrcode.content"></div>
           </div>
@@ -64,6 +64,9 @@
       },
       getCouponTitle() {
         return '🌈' + (this.qrcode.provideTitle || '优惠券领取');
+      },
+      appName() {
+        return `${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}`;
       }
     },
     activated() {
@@ -146,7 +149,7 @@
           type: this.qrcode.type
         }).then(response => {
           if (response.result === 0) {
-            this.layer.text = '<p style="text-align:left">优惠券领取成功，您可前往一虎一席商城「个人中心 — 优惠券余额」中查看明细。</p>';
+            this.layer.text = `<p style="text-align:left">优惠券领取成功，您可前往${this.appName}「个人中心 — 优惠券余额」中查看明细。</p>`;
             this.$refs.layerWin.show();
           } else if (response.code === 1001) {
             this.layer.text = '您已领取过此优惠券';

@@ -29,7 +29,7 @@
         <modal-title :title="article.relateTile || '猜你喜欢'" moreText="更多" catKey="" catName="" v-show="article.relates && article.relates.length"></modal-title>
         <channel :items="article.relates" :cols="2" v-show="article.relates && article.relates.length"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title :title="aboutUs" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -130,6 +130,9 @@
       },
       isLogin() {
         return this.$store.getters.checkLogined;
+      },
+      aboutUs() {
+        return `关于「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」`;
       }
     },
     methods: {

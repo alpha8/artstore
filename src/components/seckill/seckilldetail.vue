@@ -109,7 +109,7 @@
         <modal-title title="您可能还喜欢" moreText="更多" catKey="" catName="" v-show="guessGoods.length"></modal-title>
         <channel :items="guessGoods" :cols="2"></channel>
         <split v-if="showFollow"></split>
-        <modal-title title="关于「一虎一席茶生活美学商城」" catKey="" catName="" v-show="showFollow"></modal-title>
+        <modal-title :title="aboutUs" catKey="" catName="" v-show="showFollow"></modal-title>
         <div v-if="showFollow" class="wx_follow">
           <img :src="wxqrcode" border="0" @click.stop.prevent="previewQrcode" />
         </div>
@@ -269,6 +269,9 @@
           }
         }
         return '';
+      },
+      aboutUs() {
+        return `关于「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」`;
       }
     },
     mounted() {
@@ -689,8 +692,8 @@
         }
         let vm = this;
         let shareData = {
-          title: `[一虎一席.秒杀${this.good.killPrice}元] ` + reduceGoodsName(this.good.name),
-          desc: '秒杀价：¥' + this.good.killPrice + '.「一虎一席茶生活美学商城」精品.【一站式优品商城，品味脱凡】',
+          title: `[${api.CONFIG.NICKNAME || '一虎一席'}.秒杀${this.good.killPrice}元] ` + reduceGoodsName(this.good.name),
+          desc: '秒杀价：¥' + this.good.killPrice + `.「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」精品.【一站式优品商城，品味脱凡】`,
           link: redirect,
           imgUrl: icon,
           success: function () {
