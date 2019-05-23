@@ -7,6 +7,7 @@ import goodComment from '@/components/good-detail/comments';
 import home from '@/components/home/home';
 import shopcart from '@/components/cart/shopcart';
 import pay from '@/components/cart/pay';
+import vendingPay from '@/components/cart/vendingPay';
 import remark from '@/components/cart/remark';
 import category from '@/components/category/category';
 import search from '@/components/search/search';
@@ -91,6 +92,7 @@ export default new Router({
     {path: '/good/:id/comments', component: goodComment, name: 'goodComment', meta: {keepAlive: true}},
     {path: '/cart', component: shopcart, meta: {keepAlive: true}},
     {path: '/pay', component: pay, name: 'pay', meta: {keepAlive: true}},
+    {path: '/vending', component: vendingPay, name: 'vendingPay', meta: {keepAlive: true}},
     {path: '/pay/deposit', component: deposit, name: 'deposit', meta: {keepAlive: true}},
     {path: '/pay/remark', component: remark, meta: {keepAlive: true}},
     {path: '/address', component: addressList, name: 'addresslist', meta: {keepAlive: true}},

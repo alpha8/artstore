@@ -33,7 +33,7 @@
       saveRemarks() {
         this.$store.commit('PAY_REMARK', this.remarks);
         this.$store.dispatch('openToast', '保存收货备注成功！');
-        this.$router.replace('/pay');
+        this.$router.back();
       },
       doClear() {
         this.remarks = '';

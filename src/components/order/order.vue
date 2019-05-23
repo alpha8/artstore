@@ -187,6 +187,8 @@
           return '砍价订单';
         } else if (item.type === 10) {
           return '拼团直购';
+        } else if (item.type === 100) {
+          return '茶美售卖机';
         }
         return '';
       },

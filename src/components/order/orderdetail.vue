@@ -170,11 +170,13 @@
           return '砍价订单';
         } else if (this.order.type === 10) {
           return '拼团直购';
+        } else if (this.order.type === 100) {
+          return '茶美售卖机';
         }
         return '';
       },
       rejectCancelOrder() {
-        let orderTypes = [6, 8];
+        let orderTypes = [6, 8, 100];
         return orderTypes.filter(o => o === this.order.type).length;
       },
       canShowFooter() {

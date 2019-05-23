@@ -91,6 +91,7 @@ export default {
     cmsCtx: 'http://www.yihuyixi.com/cms',
     wxCtx: 'http://www.yihuyixi.com/wxservice',
     webCtx: 'http://www.yihuyixi.com/yihu',
+    ossCtx: 'http://www.yihuyixi.com/oss',
     webspreadCtx: 'http://www.yihuyixi.com/webspread',
     auctionCtx: 'http://www.yihuyixi.com/cmsAuction',
     seckillCtx: 'http://www.yihuyixi.com/goodsKill',
@@ -738,5 +739,12 @@ export default {
    */
   getCoin(params) {
     return doPost(this.CONFIG.cmsCtx + '/user/coin', params);
+  },
+
+  /**
+   * 查询自动售卖机订单信息
+   */
+  getVendingOrder(preOrderId) {
+    return doGet(this.CONFIG.ossCtx + '/preorder/get/' + preOrderId);
   }
 };
