@@ -23,8 +23,9 @@
         <div class="title" v-if="order.express">配送信息</div>
         <div class="delivery-info" v-if="order.express">
           <p v-if="isMime"><label>收货地址：</label><span>{{order.express.expressAddress}}</span></p>
+          <p v-if="isMime && todoDelivery"><label>售卖机兑换码：</label><span><strong>{{order.vendor.pickCode}}</strong></span></p>
           <p v-if="isMime"><label>收货人：</label><span>{{order.express.receiver}}</span></p>
-          <p v-if="isMime"><label>联系方式：</label><span>{{order.express.mobile}}</span></p>
+          <p v-if="isMime && order.express.mobile"><label>联系方式：</label><span>{{order.express.mobile}}</span></p>
           <p v-if="order.remarks"><label>用户留言：</label><span>{{order.remarks}}</span></p>
           <p v-if="order.express.expressNo"><label>快递单号：</label><span>{{order.express.expressNo}}</span></p>
           <p v-if="order.express.expressCompany"><label>快递公司：</label><span>{{order.express.expressCompany}}</span></p>
@@ -176,6 +177,9 @@
         return '';
       },
       rejectCancelOrder() {
+        if (this.order.vendor && this.order.vendor.status > 0) {
+          return true;
+        }
         let orderTypes = [6, 8, 100];
         return orderTypes.filter(o => o === this.order.type).length;
       },
@@ -192,6 +196,9 @@
           return true;
         }
         return this.loginUser && this.loginUser.userId === this.order.userId;
+      },
+      todoDelivery() {
+        return this.order.status > 0 && this.order.vendor && this.order.vendor.pickCode || false;
       },
       totalPrice() {
         if (this.order && this.order.type === 6) {

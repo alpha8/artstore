@@ -33,12 +33,12 @@
           </li>
         </ul>
         <ul class="shop-info">
-          <li class="discount change" @click.stop.prevent="selectCoupon">
+          <li class="discount change" @click.stop.prevent="selectCoupon" v-show="!isVendingOrder">
             <strong>折扣券：</strong>
             <span v-if="availCoupons.length">{{usedDiscount}}</span>
             <span v-else class="disabled">无可用</span>
           </li>
-          <li class="coin" v-show="canUseCoin">
+          <li class="coin" v-show="canUseCoin && !isVendingOrder">
             <strong>金币：<i class="coin-tips">{{coinTips}}</i></strong>
             <em @click.stop.prevent="toggleUseCoin">
               <i class="icon icon-check_circle" :class="{'on': useCoin}"></i>使用金币</i>
@@ -46,7 +46,7 @@
           </li>
           <li>
             <strong>是否自提：</strong>
-            <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span>线下自提</span>
+            <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span><span v-if="isVendingOrder">售卖机取货</span><span v-else-if="selfservice">线下自提</span></span>
           </li>
           <li class="shipping" v-show="!selfservice">
             <strong>配送方式：</strong>
@@ -73,15 +73,15 @@
             <span class="label">商品总额：</span>
             <span class="totalPrice">{{totalFee | currency}}</span>
           </p>
-          <p class="price">
+          <p class="price" v-show="!isVendingOrder">
             <span class="label">优惠券抵扣：</span>
             <span class="totalPrice">{{couponValue | currency}}</span>
           </p>
-          <p class="price" v-show="discount">
+          <p class="price" v-show="discount && !isVendingOrder">
             <span class="label">折扣券抵扣：</span>
             <span class="totalPrice">{{discount | currency}}</span>
           </p>
-          <p class="price" v-show="useCoin">
+          <p class="price" v-show="useCoin && !isVendingOrder">
             <span class="label">金币抵扣：</span>
             <span class="totalPrice">{{coinValue | currency}}</span>
           </p>
@@ -145,7 +145,9 @@
           button: {
             text: '知道了!'
           }
-        }
+        },
+        isVendingOrder: false,
+        vendor: ''
       };
     },
     computed: {
@@ -216,7 +218,6 @@
       this.show();
       this._totalPrice();
       this.computeCouponValue();
-      this._initScroll();
       this.countdown();
     },
     deactivated() {
@@ -232,9 +233,8 @@
       this.coupons = [];
       this.assets = {};
       this.useCoin = true;
-    },
-    mounted() {
-      this._initScroll();
+      this.isVendingOrder = false;
+      this.vendor = '';
     },
     methods: {
       loadCouponData() {
@@ -246,23 +246,27 @@
           }
         });
       },
-      _initScroll() {
-        // this.$nextTick(() => {
-        //   if (!this.scroll) {
-        //     this.scroll = new BScroll(this.$refs.pay, {
-        //       click: true
-        //     });
-        //   } else {
-        //     this.scroll.refresh();
-        //   }
-        // });
-      },
       _totalPrice() {
         let total = 0;
         this.products.forEach((item) => {
           total += item.count * item.price;
+          this.isVendingOrder = this._isVendingOrder(item.id);
         });
         this.totalFee = total;
+        if (this.isVendingOrder) {
+          this.selfservice = true;
+        }
+      },
+      _isVendingOrder(pid) {
+        let goods = this.$store.getters.getVendingGoods;
+        for (let key in goods) {
+          this.vendor = typeof key === 'string' ? key : '';
+          let product = goods[key].find(p => p == pid); // eslint-disable-line
+          if (product) {
+            return true;
+          }
+        }
+        return false;
       },
       delivery() {
         this.selfservice = !this.selfservice;
@@ -437,6 +441,12 @@
         if (this.discount) {
           params.coupons = this.discountTickets;
         }
+        // 售卖机取货订单
+        if (this.isVendingOrder) {
+          params.vendor = {
+            vendorId: this.vendor
+          };
+        }
         this.paying = true;
         api.createOrder(params).then(response => {
           if (response.result !== 0) {
@@ -491,6 +501,7 @@
                   } else if (orderType === '3') {
                     api.finishSeckill(seckillId, order.orderNo);
                   }
+                  that.$store.dispatch('removeVendingGoods');
                 } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
                   that.$store.dispatch('openToast', '取消支付！');
                   if (orderType === '8') {

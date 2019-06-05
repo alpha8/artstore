@@ -23,6 +23,7 @@ const APP_CACHE = 'APP_CACHE';
 const CARTS_ADDED = 'cartAdded';
 const PAY_GOODS = 'payGoods';
 const ANONYMOUS = 'anonymous';
+const AVM_GOODS = 'avm_goods';
 const DEFAULT_USER = '{"activateTime":0,"createAt":1500652800000,"icon":"http://wx.qlogo.cn/mmhead/jRoggJ2RF3D7sZjekK8gksnaoHhXlklibA2licFtLibTUeee8IiahAKwjQ/0","nickName":"🐳 Alpha🐯","openid":"oimf-jrjcbSAtz59WOc_bkzbJHWA","sex":"1","status":0,"type":0,"userId":38}';
 
 // states
@@ -45,7 +46,8 @@ export const state = {
   searchHistory: load(SEARCH_HISTORY, []),
   usedDiscount: load(USED_DISCOUNT, []),   // 已使用的折扣券
   anonymous: load(ANONYMOUS, ''),
-  appCache: load(APP_CACHE, {})  // 应用缓存
+  appCache: load(APP_CACHE, {}),  // 应用缓存
+  vendingGoods: load(AVM_GOODS, {})   // 售卖机商品，eg. {'VM001': ['A001'], 'VM002': ['A002']}
 };
 
 // getters
@@ -109,7 +111,8 @@ export const getters = {
       });
     }
     return defaultConfig;
-  }
+  },
+  getVendingGoods: state => state.vendingGoods
 };
 
 // actions
@@ -235,6 +238,13 @@ export const actions = {
   },
   cleanAppCache(context, cacheKey) {
     context.commit(types.CLEAN_APP_CACHE, cacheKey);
+  },
+  /** item: {id: 'VM001', value: 'A002'} */
+  addVendingGoods(context, item) {
+    context.commit(types.ADD_VENDING_GOODS, item);
+  },
+  removeVendingGoods(context) {
+    context.commit(types.REMOVE_VENDING_GOODS);
   }
 };
 
@@ -485,6 +495,13 @@ export const mutations = {
     }
     state.appCache = appCache;
     save(APP_CACHE, state.appCache);
+  },
+  [types.ADD_VENDING_GOODS] (state, item) {
+    state.vendingGoods[item.id] = [item.value];
+    save(AVM_GOODS, state.vendingGoods);
+  },
+  [types.REMOVE_VENDING_GOODS] (state) {
+    save(AVM_GOODS, {});
   }
 };
 

@@ -321,6 +321,10 @@
         if (!id) {
           return;
         }
+        let vendor = this.$route.query.vendorId;
+        if (vendor) {
+          this.$store.dispatch('addVendingGoods', {id: vendor, value: id});
+        }
         this.$store.dispatch('openLoading');
         let user = this.$store.getters.getUserInfo;
         let anon = '';
