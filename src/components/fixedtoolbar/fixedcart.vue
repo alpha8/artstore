@@ -8,7 +8,10 @@
       <span class="mini-favorite-item" @click.stop.prevent="mark">
         <span class="button-lg"><i :class="{'icon-favorite': marked, 'icon-heart': !marked}"></i></span>
       </span>
-      <div class="foot-item" v-if="good.stock && (good.stock.total > 0 || good.stock.bookTotal > 0)" @click.stop.prevent="addGood">
+      <div class="foot-item" v-if="good.commodityStates && good.commodityStates.id !== 2">
+        <span class="button-lg disable">已售磬</span>
+      </div>
+      <div class="foot-item" v-else-if="good.stock && (good.stock.total > 0 || good.stock.bookTotal > 0)" @click.stop.prevent="addGood">
         <span class="button-lg red">加入购物车</span>
       </div>
       <!-- <div class="foot-item" v-if="good.stock && good.stock.total > 0" @click.stop.prevent="pay">
@@ -20,7 +23,7 @@
       <div class="foot-item" v-else-if="good.stock && good.stock.total <= 0 && good.stock.bookTotal <= 0">
         <span class="button-lg disable">已售磬</span>
       </div>
-      <div class="foot-item" v-if="good.stock && good.stock.total <= 0 && good.stock.bookTotal <= 0" @click.stop.prevent="bookNotify">
+      <div class="foot-item" v-if="(good.stock && good.stock.total <= 0 && good.stock.bookTotal <= 0) || (good.stock && good.stock.status === 2)" @click.stop.prevent="bookNotify">
         <span class="button-lg red">到货提醒</span>
       </div>
       <div class="foot-item btn-share" v-else @click.stop.prevent="wxshare">

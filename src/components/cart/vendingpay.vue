@@ -151,6 +151,9 @@
             mobile: '',
             receiver: userInfo.nickName || ''
           },
+          vendor: {
+            vendorId: this.product.vendingId || ''
+          },
           products: [{
             id: this.product.productId,
             name: this.product.name,
