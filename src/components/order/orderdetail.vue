@@ -22,11 +22,11 @@
         <split v-if="order.express"></split>
         <div class="title" v-if="order.express">配送信息</div>
         <div class="delivery-info" v-if="order.express">
-          <p v-if="isMime"><label>收货地址：</label><span>{{order.express.expressAddress}}</span></p>
+          <p v-if="isMime && !isVendingOrder"><label>收货地址：</label><span>{{order.express.expressAddress}}</span></p>
           <p v-if="isMime && todoDelivery"><label>售卖机兑换码：</label><span><strong>{{order.vendor.pickCode}}</strong></span></p>
           <p v-if="isMime"><label>收货人：</label><span>{{order.express.receiver}}</span></p>
           <p v-if="isMime && order.express.mobile"><label>联系方式：</label><span>{{order.express.mobile}}</span></p>
-          <p v-if="order.remarks"><label>用户留言：</label><span>{{order.remarks}}</span></p>
+          <p v-if="order.remarks && !isVendingOrder"><label>用户留言：</label><span>{{order.remarks}}</span></p>
           <p v-if="order.express.expressNo"><label>快递单号：</label><span>{{order.express.expressNo}}</span></p>
           <p v-if="order.express.expressCompany"><label>快递公司：</label><span>{{order.express.expressCompany}}</span></p>
           <p v-if="order.express.deliverAt"><label>发货时间：</label><span>{{order.express.deliverAt | formatDate}}</span></p>
@@ -172,9 +172,12 @@
         } else if (this.order.type === 10) {
           return '拼团直购';
         } else if (this.order.type === 100) {
-          return '茶美售卖机';
+          return '茶美售货机';
         }
         return '';
+      },
+      isVendingOrder() {
+        return this.order.type === 100;
       },
       rejectCancelOrder() {
         if (this.order.vendor && this.order.vendor.status > 0) {
@@ -198,7 +201,7 @@
         return this.loginUser && this.loginUser.userId === this.order.userId;
       },
       todoDelivery() {
-        return this.order.status > 0 && this.order.vendor && this.order.vendor.pickCode || false;
+        return this.order.status > 0 && this.order.vendor && this.order.vendor.pickCode > 0 || false;
       },
       totalPrice() {
         if (this.order && this.order.type === 6) {
