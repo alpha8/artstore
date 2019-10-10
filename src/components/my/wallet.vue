@@ -1,12 +1,6 @@
 <template>
   <div>
-    <div class="header border-bottom-1px">
-      <div class="left">
-        <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
-      </div>
-      <div class="title">账户余额</div>
-      <div class="right"></div>
-    </div>
+    <fixedheader title="账户余额"></fixedheader>
     <div class="wallet" ref="wallet">
       <div class="wallet-wrapper">
         <div class="wallet-heading">

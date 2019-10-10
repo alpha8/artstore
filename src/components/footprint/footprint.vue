@@ -6,12 +6,13 @@
         <div class="footprint-container" ref="footprintlist" v-show="footprints.length">
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="footprint-list">
             <mu-flexbox-item basis="100%" class="footprint-item border-1px" v-for="(footprint, index) in footprints" :key="index">
-              <div class="item-img" @click.stop.prevent="showProductDetail(footprint)"><img :src="getThumbnail(footprint)" alt=""></div>
+              <div class="item-img" @click.stop.prevent="showProductDetail(footprint)"><img :src="getThumbnail(footprint.productPic)" alt=""></div>
               <div class="item-info" @click.stop.prevent="showProductDetail(footprint)">
-                <h3 class="title">{{footprint.name}}</h3>
+                <h3 class="title">{{footprint.productName}}</h3>
+                <div class="sub_title">{{footprint.productSubTitle || ''}}</div>
                 <div class="extra-wrap">
                   <div class="state-wrap">
-                      <p class="line price">{{footprint.price | currency}}</p>
+                      <p class="line price">{{footprint.productPrice | currency}}</p>
                     </div>
                   <div class="item-ops">
                     <span class="btn" @click.stop.prevent="removeItem(footprint)">移除</span>
@@ -20,14 +21,11 @@
               </div>
             </mu-flexbox-item>
           </mu-flexbox>
-          <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
-          <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
+          <el-backtop target=".footprint-container" :bottom="55" :right="10"></el-backtop>
         </div>
         <div class="no-footprint" v-show="footprints.length === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
-        <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
-    <mydialog :text="dialog.text" :btns="dialog.btns" ref="dialogWin"></mydialog>
     <div class="footer" v-show="footprints.length">
       <div class="btns"><span class="btn-red" @click.stop.prevent="clearAll()">清空所有足迹</span></div>
     </div>
@@ -36,147 +34,88 @@
 
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
-  import gotop from '@/components/fixedtoolbar/gotop';
-  import mydialog from '@/components/common/mydialog';
   import api from '@/api/api';
 
   export default {
     data() {
       return {
         footprints: [],
-        pageNumber: 1,
-        pageSize: 20,
-        totalPages: 0,
-        loadEnd: false,
-        scroller: null,
-        loading: false,
-        lastExec: +new Date(),
-        scrollY: 0,
-        dialog: {
-          text: '是否清空所有足迹？',
-          btns: {
-            ok: {
-              text: '确定',
-              callback: function() {
-                console.log('ok');
-              }
-            }
-          }
-        }
+        loading: false
       };
     },
     activated() {
-      this.loadEnd = false;
-      this.fetchData(true);
+      this.fetchData();
       this.show();
     },
     deactivated() {
       this._reset();
       this.hide();
     },
-    mounted() {
-      this.scroller = this.$refs.footprintlist;
-      window.onscroll = () => {
-        this.scrollY = window.pageYOffset;
-      };
-    },
     methods: {
-      fetchData(force) {
-        if (this.totalPages && this.pageNumber > this.totalPages) {
-          return;
-        }
-        let now = +new Date();
-        if (!force && now - this.lastExec <= 50) {
-          return;
-        }
-        let user = this.$store.getters.getUserInfo;
+      fetchData() {
+        let userId = this.$store.getters.userId;
         this.loading = true;
-        api.getFootprint({
-          currentPage: this.pageNumber,
-          pageSize: this.pageSize,
-          userId: user.userId || -1
-        }).then(response => {
-          if (response.result === 0) {
-            if (response.histories && response.histories.length) {
-              response.histories.forEach(item => {
-                this.footprints.push(item);
-              });
-            }
-            this.totalPages = response.totalPages;
-            this.pageNumber++;
-            this.lastExec = +new Date();
+        api.getFootprint({memberId: userId || -1}).then(response => {
+          if (response.code == 200) {
+            this.footprints = response.data;
             this.loading = false;
-            this.loadEnd = this.pageNumber > this.totalPages;
           }
         }).catch(response => {
-          this.loadEnd = false;
           this.loading = false;
-          this.totalPages = 0;
         });
       },
       _reset() {
         this.footprints = [];
-        this.pageNumber = 1;
-        this.totalPages = 0;
       },
-      getThumbnail(item) {
-        let icons = item.icons;
-        if (icons && icons.length) {
-          return api.CONFIG.psCtx + icons[0].id + '?w=750&h=500&v=v2';
+      getThumbnail(icon) {
+        if (icon) {
+          return icon;
         } else {
           return api.CONFIG.defaultImg;
         }
       },
       showProductDetail(product) {
-        this.$router.push({name: 'good', params: {id: product.pid}});
+        this.$router.push({name: 'good', params: {id: product.productId}});
       },
       removeItem(footprint) {
-        api.removeFootprint(footprint.id).then(response => {
-          if (response.result === 0) {
-            this.$store.dispatch('openToast', '此记录已删除！');
-            let items = this.footprints;
-            for (let i = 0; i < items.length; i++) {
-              if (items[i].id === footprint.id) {
-                items.splice(i, 1);
-                i--;
-              }
-            }
-            this.footprints = items;
-          }
-        });
+        let params = new URLSearchParams();
+        params.append('ids', [footprint.id]);
+        this.doClear(params);
       },
       clearAll() {
-        let user = this.$store.getters.getUserInfo;
-        let vm = this;
-        this.dialog.btns.ok.callback = function() {
-          api.clearFootprint(user.userId).then(response => {
-            if (response.result === 0) {
-              vm.$store.dispatch('openToast', '用户所有足迹已清空！');
-              vm.footprints = [];
-            }
-          });
-        };
-        this.$refs.dialogWin.show();
+        var ids = [];
+        this.footprints.map(item => {
+          if (item.id) {
+            ids.push(item.id);
+          }
+        });
+        this.$confirm('确认清空所有足迹吗?', '提示', {
+          confirmButtonText: '删除',
+          cancelButtonText: '返回',
+          type: 'warning'
+        }).then(() => {
+          let params = new URLSearchParams();
+          params.append('ids', ids);
+          this.doClear(params);
+        });
+      },
+      doClear(params) {
+        api.removeFootprint(params).then(response => {
+          if (response.code == 200) {
+            this.$store.dispatch('openToast', '删除成功!');
+            this.fetchData();
+          }
+        });
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
       },
       hide() {
         this.$store.commit('SHOW_FOOTER');
-      },
-      back() {
-        this.$router.back();
-      },
-      loadMore() {
-        this.fetchData();
-      },
-      goTop() {
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
       }
     },
     components: {
-      fixedheader, gotop, mydialog
+      fixedheader
     }
   };
 </script>
@@ -202,47 +141,21 @@
       height: 47px
       line-height: 47px
       font-size: 14px
+      box-sizing: border-box
       .btn-red
-        color: #e1e1e1
+        background: #e4393c
+        color: #fff
         border-radius: 0
   .footprint
     position: absolute
     top: 44px
     bottom: 47px
     width: 100%
+    background-color: #fff
     .footprint-wrap
       position: relative
       width: 100%
       background-color: #fff
-      .btn-red
-        background: #d05148
-        color: #fff
-      .btn-blue
-        background: #3a77e7
-        color: #fff
-      .btn-green
-        background: #44b549
-        color: #fff
-      .btn-orange
-        background: #f19325
-        color: #fff
-      .btn-white
-        background: #fff
-        color: #333
-        border: 1px solid #ddd
-      .tab
-        position: relative
-        display: flex
-        border-1px(rgba(7, 17, 27, 0.1))
-        .tab-item
-          flex: 1
-          font-size: 14px
-          padding: 15px 0
-          text-align: center
-          border-bottom: 2px solid transparent
-          &.active
-            color: #f15353
-            border-bottom: 2px solid #f15353
       .no-more
         width: 100%
         padding: 10px 0 70px
@@ -258,21 +171,23 @@
         overflow: auto
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
+        padding-bottom: 100px
         .footprint-list
           position: relative
           width: 100%
           .footprint-item
             display: flex
-            padding: 8px
+            padding: 10px
             border-1px(rgba(7, 17, 27, 0.1))
             box-sizing: border-box
             font-size: 12px
             .item-img
               display: inline-block
-              width: 35%
+              width: auto
               float: left
               img
-                width: 95%
+                width: 100px
+                height: 100px
                 margin-right: 10px
                 overflow: hidden
             .item-info
@@ -289,7 +204,21 @@
                 text-overflow: ellipsis
                 display: -webkit-box
                 -webkit-line-clamp: 2
-                -webkit-box-orient: vertical
+                /*! autoprefixer: off */
+                -webkit-box-orient:vertical
+                /*! autoprefixer: on */
+                line-height: 1.2
+              >.sub_title
+                color: #999
+                font-size: 12px
+                padding-top: 8px
+                overflow: hidden
+                text-overflow: ellipsis
+                display: -webkit-box
+                -webkit-line-clamp: 1
+                /*! autoprefixer: off */
+                -webkit-box-orient:vertical
+                /*! autoprefixer: on */
                 line-height: 1.2
               .extra-wrap
                 position: absolute
@@ -322,13 +251,13 @@
                   float: right
                   height: 25px
                   line-height: 25px
-                  padding: 0 10px
-                  background: #d05148
-                  color: #e1e1e1
+                  padding: 0 15px
+                  background: #e4393c
+                  color: #fff
                   border-radius: 2px
                   font-size: 11px
                   &.white
-                    color: #000
+                    color: #ff8c00
                     background: #fff
                     border: 1px solid rgba(7, 17, 27, 0.1)
       .no-footprint

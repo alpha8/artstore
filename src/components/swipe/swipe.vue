@@ -1,10 +1,13 @@
 <template>
-  <swiper :options="swiperOption">
-    <swiper-slide v-for="(slide, index) in swiperSlides" :key="index">
-      <div class="slide" :style="getSlideUrl(slide)"></div>
-    </swiper-slide>
-    <div class="swiper-pagination" slot="pagination"></div>
-  </swiper>
+  <div>
+    <div class="slider-bg"></div>
+    <swiper :options="swiperOption">
+      <swiper-slide v-for="(slide, index) in swiperSlides" :key="index">
+        <img :src="getSlideUrl(slide)" class="slide"  v-if="slide && slide.pic" />
+      </swiper-slide>
+      <div class="swiper-pagination" slot="pagination"></div>
+    </swiper>
+  </div>
 </template>
 
 <script type="text/ecmascript-6">
@@ -31,7 +34,7 @@
     },
     methods: {
       getSlideUrl(slide) {
-        return `background-image: url(${slide})`;
+        return `${slide.pic}?imageView2/0/w/750/h/500`;
       }
     }
   };
@@ -39,29 +42,58 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   .swiper-container-horizontal > .swiper-pagination-bullets
-    text-align: right
-    right: 10px
+    text-align: center
+    right: 0
     width: auto
 </style>
 
 <style lang="stylus" rel="stylesheet/stylus">
+  @require '../../common/stylus/variables'
   .swiper-container-horizontal > .swiper-pagination-bullets
-    bottom: 7px
+    bottom: 3px
+  .slider-bg
+    background-image: -webkit-gradient(linear,left bottom,left top,from($color-main),color-stop(50%,$color-main));
+    background-image: -webkit-linear-gradient(bottom,$color-main,$color-main 50%);
+    background-image: linear-gradient(0deg,$color-main,$color-main 50%);
+    position: absolute;
+    top: 0;
+    left: -25%;
+    height: 7.25rem;
+    width: 150%;
+    border-bottom-left-radius: 100%;
+    border-bottom-right-radius: 100%;
+    overflow: hidden;
   .swiper-container
-    height: 45vw
+    width: 100%
+    height: 9.35rem
+    overflow: hidden
     .slide
-      display: block
-      width: 100%
-      height: 100%
-      content: ""
-      background-repeat: no-repeat
-      background-position: center
-      background-size: cover
+      display: block;
+      overflow: hidden;
+      width: calc(100% - 1.25rem);
+      height: 7rem;
+      margin: 0 auto;
+      top: 2.25rem;
+      position: relative;
+      border-radius: .35rem;
+      img
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        display: block;
+        border: 0;
+        vertical-align: top;
     .swiper-pagination-bullet
-      background: #fff
-      opacity: .6
+      box-sizing: border-box;
+      border-radius: 7px;
+      height: 4px;
+      width: 8px;
+      background: hsla(0,0%,92.9%,.4);
+      margin: 0 2px;
+      display: inline-block;
+      opacity: 1;
       &.swiper-pagination-bullet-active
-        background: #00a0dc
-        width: 15px
-        border-radius: 10px
+        background: #ededed
+        width: 12px
+        margin: 0
 </style>

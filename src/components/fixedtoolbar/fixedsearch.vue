@@ -9,7 +9,6 @@
               <input type="search" name="txtSearch" class="txtSearch" :class="{'trans': trans}" :placeholder="rollingSlogan" autocomplete="off" @click.stop.prevent="openSmartSearch" v-model="keyword" v-on:input="changeText">
             </form>
           </div>
-          <!-- <i class="removeText" v-show="keyword" @click.stop.prevent="clearText"></i> -->
         </div>
       </div>
       <div class="ext-tools">
@@ -40,8 +39,7 @@
         typing: false,
         highlight: false,
         trans: false,
-        slogan: '一站式优品商城、品味脱凡',
-        timer: null,
+        slogan: '搜索商品',
         counter: 10
       };
     },
@@ -71,30 +69,16 @@
       }
     },
     activated() {
-      this.$store.dispatch('reloadUserInfo');
-      let user = this.$store.getters.getUserInfo;
-      this.isLogin = (user.userId > 0);
-      if (!user.userId) {
-        this.timer = setInterval(() => {
-          this.counter--;
-          let uinfo = this.$store.getters.getUserInfo;
-          this.isLogin = (user.userId > 0);
-          if (this.counter <= 0) {
-            clearInterval(this.timer);
-          }
-        }, 500);
-      }
+      let user = this.$store.getters.userInfo;
+      this.isLogin = (user.id > 0);
     },
     deactivated() {
       this.hideDialog();
       this.keyword = '';
       this.counter = 10;
-      if (this.timer) {
-        clearInterval(this.timer);
-      }
     },
     created() {
-      let ads = ['1200款，300席，年增100%', '优质茶生活、茶文化高端礼品', '领略东方生活之美...', '一站式优品商城、品味脱凡'];
+      let ads = ['搜索商品', '优质生活、高端礼品', '领略东方生活之美...', '一站式优品商城'];
       let idx = 0;
       setInterval(() => {
         if (!this.typing) {
@@ -151,6 +135,7 @@
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
+  @require '../../common/stylus/variables'
   .toolbar
     position: fixed
     margin: 0 auto
@@ -163,7 +148,7 @@
     &.searchBox
       background: #fff
     &.fixed
-      background: #442712
+      background: $color-main
       animation: searchTop .4s ease-in-out
     @-webkit-keyframes searchTop
       from { top: -50px; }
@@ -255,12 +240,14 @@
           width: 100%
           height: 33px
           line-height: 33px
+          vertical-align: top
           .userIcon
             text-align: left
             text-indent: 10px
             margin-top: 1px
+            text-align: center
           .button
-            background: #442712
+            background: $color-main
             color: #fff
             border: none
             &.active

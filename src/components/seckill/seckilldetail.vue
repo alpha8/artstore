@@ -153,7 +153,7 @@
   import Vue from 'vue';
   import BScroll from 'better-scroll';
   import {formatDate, countdown} from '@/common/js/date';
-  import {mixUsername, reduceGoodsName} from '@/common/js/util';
+  import {mixUsername} from '@/common/js/util';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
   import split from '@/components/split/split';
   import modalTitle from '@/components/modal-title/modal-title';
@@ -192,7 +192,6 @@
         this.lazyload();
         this.bindPictureEvent();
       }
-      this._initScroll();
     },
     data() {
       return {
@@ -271,14 +270,8 @@
         return '';
       },
       aboutUs() {
-        return `关于「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」`;
+        return `关于「${api.CONFIG.APPNAME}」`;
       }
-    },
-    mounted() {
-      this.scroller = this.$refs.seckillRef;
-      window.onscroll = () => {
-        this.scrollY = window.pageYOffset;
-      };
     },
     methods: {
       fetchData() {
@@ -369,9 +362,6 @@
           let list = response.artworks;
           this.removeDups(list, this.good.relates || []);
           this.guessGoods = list;
-          setTimeout(() => {
-            this._initScroll();
-          }, 800);
         });
       },
       getRelatedGoods() {
@@ -388,9 +378,6 @@
           relatedid: ids.join(',')
         }).then((response) => {
           this.good.relates = response || [];
-          setTimeout(() => {
-            this._initScroll();
-          }, 800);
         });
       },
       removeDups(goods, relates) {
@@ -506,29 +493,6 @@
         }
         return '';
       },
-      _initScroll() {
-        // this.$nextTick(() => {
-        //   if (!this.scroll) {
-        //     this.scroll = new BScroll(this.$refs.seckillRef, {
-        //       click: true,
-        //       bounce: false,
-        //       probeType: 3,
-        //       preventDefaultException: {
-        //         className: /(^|\s)goodsIntroHook(\s|$)/,
-        //         tagName: /^(P|SPAN)$/
-        //       }
-        //     });
-        //   } else {
-        //     this.scroll.refresh();
-        //   }
-        //   this.scroll.on('scroll', (pos) => {
-        //     let offset = Math.abs(Math.round(pos.y));
-        //     if (this.scrollY !== offset) {
-        //       this.scrollY = offset;
-        //     }
-        //   });
-        // });
-      },
       getWXFollow() {
         let user = this.$store.getters.getUserInfo;
         if (!user.userId) {
@@ -545,7 +509,6 @@
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
-        this._initScroll();
       },
       hide() {
         this.$store.commit('SHOW_FOOTER');
@@ -692,8 +655,8 @@
         }
         let vm = this;
         let shareData = {
-          title: `[${api.CONFIG.NICKNAME || '一虎一席'}.秒杀${this.good.killPrice}元] ` + reduceGoodsName(this.good.name),
-          desc: '秒杀价：¥' + this.good.killPrice + `.「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」精品.【一站式优品商城，品味脱凡】`,
+          title: `[${api.CONFIG.NICKNAME || '一虎一席'}.秒杀${this.good.killPrice}元] ` + this.good.name,
+          desc: '秒杀价：¥' + this.good.killPrice + `.「${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}」精品.【一站式，品味脱凡】`,
           link: redirect,
           imgUrl: icon,
           success: function () {
@@ -803,7 +766,7 @@
       }
     },
     components: {
-      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, modalTitle, channel, share, gotop, layer, nicelayer
+      cartcontrol, split, ratingselect, fixedheader, swipe, star, frame, modalTitle, channel, share, layer, nicelayer
     }
   };
 </script>

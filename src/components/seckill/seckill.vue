@@ -9,7 +9,7 @@
               <div class="item-content">
                 <div class="item-img" @click.stop.prevent="showDetail(item)"><img :src="getThumbnail(item)" alt=""></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{reduceName(item.name)}}</h3>
+                  <h3 class="title" @click.stop.prevent="showDetail(item)">{{item.name}}</h3>
                   <div class="sellpoint" v-if="item.sellPoint">{{item.sellPoint}}</div>
                   <div class="extra-wrap">
                     <div class="price-wrap">
@@ -41,7 +41,6 @@
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
         </div>
         <div class="no-order" v-show="!seckills.length && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
-        <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
   </div>
@@ -49,9 +48,7 @@
 
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
-  import gotop from '@/components/fixedtoolbar/gotop';
   import {formatDate, countdown} from '@/common/js/date';
-  import {reduceGoodsName} from '@/common/js/util';
   import api from '@/api/api';
 
   export default {
@@ -65,7 +62,6 @@
         scroller: null,
         loading: false,
         lastExec: +new Date(),
-        scrollY: 0,
         timer: null
       };
     },
@@ -79,12 +75,6 @@
       this.stopTimer();
       this._reset();
       this.hide();
-    },
-    mounted() {
-      this.scroller = this.$refs.seckList;
-      window.onscroll = () => {
-        this.scrollY = window.pageYOffset;
-      };
     },
     methods: {
       fetchData(force) {
@@ -189,9 +179,6 @@
           return api.CONFIG.defaultImg;
         }
       },
-      reduceName(name) {
-        return reduceGoodsName(name);
-      },
       showDetail(item) {
         this.$router.push({name: 'seckillDetail', params: {id: item.seckillId}});
       },
@@ -218,14 +205,10 @@
       },
       loadMore() {
         this.fetchData();
-      },
-      goTop() {
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
       }
     },
     components: {
-      fixedheader, gotop
+      fixedheader
     }
   };
 </script>

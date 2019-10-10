@@ -14,7 +14,6 @@
       };
     },
     activated() {
-      this.$store.dispatch('reloadUserInfo');
     },
     mounted() {
       let isWeixin = Device().isWeixin;
@@ -22,8 +21,8 @@
         console.log('非微信平台，跳过授权认证！');
         return;
       }
-      let user = this.$store.getters.getUserInfo;
-      if (!user.userId) {
+      let user = this.$store.getters.userId;
+      if (!userId) {
         this.$store.dispatch('setAnonymous');
         this.isAutoLogin = window.sessionStorage.getItem(AUTO_LOGIN) || false;
         if (!this.isAutoLogin) {
@@ -43,9 +42,8 @@
           if (!referee && userId) {
             referee = userId;
           }
-          let anon = this.$store.getters.getAnonymous;
           setTimeout(() => {
-            window.location.href = `${api.CONFIG.wxCtx}/wx/base?url=${escape(redirect)}&uid=${anon}&userId=${referee}`;
+            window.location.href = `${api.CONFIG.wxCtx}/wx/base?url=${escape(redirect)}&userId=${referee}`;
           }, 50);
         }
       } else {

@@ -45,15 +45,16 @@
   .title
     position: relative
     display: flex
-    width: 100%
     padding: 14px 18px 12px 14px
     box-sizing: border-box
     background-color: #fff
+    margin: 0 8px
+    box-sizing: border-box
     &:after
       position: absolute
       display: block
-      width: 8px
-      height: 8px
+      width: 7px
+      height: 7px
       content: ""
       border-top: 1px solid #666
       border-left: 1px solid #666
@@ -98,7 +99,7 @@
       line-height: 16px
       top: 50%
       right: 21px
-      margin-top: -8px
-      font-size: 14px
+      margin-top: -7px
+      font-size: 12px
       color: #666
 </style>

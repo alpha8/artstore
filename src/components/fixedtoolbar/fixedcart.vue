@@ -3,31 +3,23 @@
     <div class="foot-wrapper">
       <router-link to="/cart" class="mini-favorite-item">
         <span class="badge" v-show="getCartAmount">{{getCartAmount}}</span>
+        <span class="add_num" :class="{'show': showAddOne}" id="popone">+1</span>
         <span class="button-lg"><i class="icon-cart"></i></span>
       </router-link>
-      <span class="mini-favorite-item" @click.stop.prevent="mark">
-        <span class="button-lg"><i :class="{'icon-favorite': marked, 'icon-heart': !marked}"></i></span>
+      <span class="mini-favorite-item">
+        <span class="button-lg" @click="mark"><i :class="{'icon-favorite': marked, 'icon-heart': !marked}"></i></span>
       </span>
-      <div class="foot-item" v-if="good.commodityStates && good.commodityStates.id !== 2">
+      <div class="foot-item" v-if="good.stock" @click.stop.prevent="addGood">
+        <span class="button-lg orange">加入购物车</span>
+      </div>
+      <div class="foot-item" v-else>
         <span class="button-lg disable">已售磬</span>
       </div>
-      <div class="foot-item" v-else-if="good.stock && (good.stock.total > 0 || good.stock.bookTotal > 0)" @click.stop.prevent="addGood">
-        <span class="button-lg red">加入购物车</span>
-      </div>
-      <!-- <div class="foot-item" v-if="good.stock && good.stock.total > 0" @click.stop.prevent="pay">
+      <div class="foot-item" v-if="good.stock">
         <span class="button-lg red">立即购买</span>
       </div>
-      <div class="foot-item" v-else-if="good.stock && good.stock.status === 1" @click.stop.prevent="bookBuy">
-        <span class="button-lg red">预定购买</span>
-      </div> -->
-      <div class="foot-item" v-else-if="good.stock && good.stock.total <= 0 && good.stock.bookTotal <= 0">
-        <span class="button-lg disable">已售磬</span>
-      </div>
-      <div class="foot-item" v-if="(good.stock && good.stock.total <= 0 && good.stock.bookTotal <= 0) || (good.stock && good.stock.status === 2)" @click.stop.prevent="bookNotify">
+      <div class="foot-item" v-else @click.stop.prevent="bookNotify">
         <span class="button-lg red">到货提醒</span>
-      </div>
-      <div class="foot-item btn-share" v-else @click.stop.prevent="wxshare">
-        <span class="button-lg orange">分享得金币</span>
       </div>
     </div>
     <div class="ball-container">
@@ -54,68 +46,73 @@
       return {
         balls: [{show: false}, {show: false}, {show: false}, {show: false}, {show: false}],
         dropBalls: [],
+        showAddOne: false,
         marked: false
       };
+    },
+    watch: {
+      good(newValue) {
+        if (!newValue) {
+          return;
+        }
+        var user = this.$store.getters.userInfo;
+        if (!user.id) {
+          return;
+        }
+        api.existCollect(user.id, newValue.id).then(response => {
+          if (response.code == 200) {
+            this.marked = response.data;
+          }
+        });
+      }
     },
     computed: {
       getCartAmount() {
         return this.$store.getters.getCartAmount;
       }
     },
-    watch: {
-      'good'() {
-        this._initMarkState();
-      }
-    },
-    activated() {
-      this._initMarkState();
-    },
-    deactivated() {
-      this.marked = false;
-    },
     methods: {
-      _initMarkState() {
-        let uid = this.$store.getters.getUserInfo.userId;
-        let ids = this.good && this.good.collected || [];
-        let flag = false;
-        for (let i = 0; i < ids.length; i++) {
-          if (uid === ids[i]) {
-            flag = true;
-          }
-        }
-        this.marked = flag;
-      },
       addGood() {
         this.$emit('add', event.target);
+        var selected = this.$store.getters.getSelectedSku;
+        var sku = selected.find(o => o.id == this.good.id);
+        if (!sku) {
+          this.$store.dispatch('showSkuWin', this.good);
+          this.$store.dispatch('addSku', this.good);
+        }
       },
       pay() {
         if (!this.good.count) {
           this.$emit('add');
         }
-        let good = {
-          id: this.good.id,
-          name: this.good.name,
-          pictures: this.good.pictures,
-          src: this.good.src,
-          content: this.good.content,
-          price: this.good.price,
-          oldPrice: this.good.oldPrice,
-          count: this.good.count,
-          icon: (this.good.pictures && this.good.pictures.length) ? api.CONFIG.psCtx + this.good.pictures[0].id + '?w=750&h=500' : api.CONFIG.defaultImg,
-          checked: false
-        };
-        this.$store.dispatch('addPayGoods', [good]);
-        // this.$router.push('/pay');
         window.location.href = 'http://' + location.host + location.pathname + '#/pay';
       },
-      bookBuy() {
-        this.pay();
-      },
-      wxshare() {
-        this.$emit('share');
+      mark() {
+        if (this.marked) {
+          this.$store.dispatch('openToast', '商品已收藏！');
+        }
+        var user = this.$store.getters.userInfo;
+        if (!user.id) {
+          this.$store.dispatch('openToast', '未登录！');
+          return;
+        }
+        api.addProductCollect({
+          memberIcon: user.icon,
+          memberId: user.id,
+          memberNickname: user.nickname,
+          productId: this.good.id,
+          productName: this.good.name,
+          productPic: this.good.pic,
+          productPrice: this.good.price,
+          productSubTitle: this.good.subTitle
+        }).then(response => {
+          if (response.code == 200) {
+            this.marked = true;
+          }
+        });
       },
       bookNotify() {
-        let openid = this.$store.getters.getUserInfo.openid;
+        let openid = this.$store.getters.userInfo.openId;
         api.arrivalNotify({
           id: this.good.id,
           openid: openid
@@ -127,45 +124,6 @@
           }
         }).catch(response => {
           this.$store.dispatch('openToast', '网络太忙了，请稍候再来吧！');
-        });
-      },
-      mark() {
-        let uid = this.$store.getters.getUserInfo.userId;
-        if (!uid) {
-          this.$store.dispatch('openToast', '请先登录！');
-          return;
-        }
-        let params = {
-          userId: uid,
-          type: 1,
-          artworkId: this.good.id,
-          price: this.good.price,
-          name: this.good.name,
-          icons: this.good.pictures,
-          fromCart: false
-        };
-        if (this.marked) {
-          delete params.name;
-          delete params.icons;
-          delete params.price;
-          // 已关注，再次点击取消关注
-          api.unmark(params).then(response => {
-            if (response.result === 0) {
-              this.good.collected = [];
-            }
-          });
-          this.marked = false;
-          return;
-        }
-        api.mark(params).then(response => {
-          if (response.result === 0) {
-            if (this.good.collected) {
-              this.good.collected.push(uid);
-            } else {
-              this.good.collected = [uid];
-            }
-            this.marked = true;
-          }
         });
       },
       drop(el) {
@@ -197,6 +155,7 @@
         };
       },
       dropping(el, done) {
+        this.showAddOne = true;
         /* eslint-disable no-unused-vars */
         let rf = el.offsetHeight;
         this.$nextTick(() => {
@@ -221,6 +180,7 @@
         if (ball) {
           ball.show = false;
           el.style.display = 'none';
+          this.showAddOne = false;
         }
       }
     }
@@ -228,6 +188,7 @@
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
+  @require '../../common/stylus/variables'
   .fixed-foot
     position: fixed
     left: 0
@@ -261,6 +222,23 @@
           display: block
           line-height: 1
           font-size: 10px
+        >.add_num
+          position: absolute
+          padding: 2px 3px
+          color: #e4393c
+          font-weight: 700
+          top: -10px
+          left: 50%
+          margin-left: -9px
+          display: none
+          font-size: 18px
+          pointer-events: none
+          z-index: 30
+          &.show
+            display: block
+            opacity: 0
+            animation: de_add_num 2s
+            -webkit-animation: de_add_num 2s
         .button-lg
           display: block
           line-height: 50px
@@ -320,6 +298,6 @@
           width: 16px
           height: 16px
           border-radius: 50%
-          background: rgb(0, 160, 220)
+          background: $color-main
           transition: all 0.4s linear
 </style>

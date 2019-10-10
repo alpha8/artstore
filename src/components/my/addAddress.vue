@@ -7,41 +7,31 @@
           <li class="border-1px">
             <p>
               <span class="title">收货人：</span>
-              <input type="text" v-model="user.name" placeholder="姓名" autofocus required>
+              <input type="text" v-model="address.name" placeholder="姓名" autofocus required>
             </p>
           </li>
           <li class="border-1px">
             <p>
               <span class="title">联系方式：</span>
-              <input type="text" v-model="user.mobile" placeholder="手机号码" maxlength="11" required>
+              <input type="text" v-model="address.phoneNumber" placeholder="手机号码" maxlength="11" required>
             </p>
           </li>
           <li class="border-1px">
-            <p>
-              <span class="title">选择国家：</span>
-              <select class="country" v-model="user.country" placeholder="选择国家" required @change="changeCountry">
-                <option value="中国">中国</option>
-                <option value="国外">国外</option>
-              </select>
-            </p>
-          </li>
-          <li class="border-1px" v-show="!noCity">
             <p class="more">
               <span class="title">所在地区：</span>
-              <div class="text-control" v-if="city" @click.stop.prevent="openCityChoose">{{city}}</div>
+              <div class="text-control" v-if="fullAddress" @click.stop.prevent="openCityChoose">{{fullAddress}}</div>
               <div class="text-control tips" v-else @click.stop.prevent="openCityChoose">选择所在地区</div>
             </p>
           </li>
           <li>
             <p class="pr">
               <span class="title special">详细地址：</span>
-              <textarea v-model="user.address" placeholder="详细地址需填写楼栋楼层或房间号" rows="3" required></textarea>
+              <textarea v-model="address.detailAddress" placeholder="详细地址" rows="3" required></textarea>
               <i class="icon-close" v-show="clearAddress" @click.stop.prevent="doClearAddr"></i>
             </p>
           </li>
-          <input type="hidden" v-model="user.default" value="false">
         </ul>
-        <div class="btns btn-green" @click.stop.prevent="addAddress"><span>确认</span></div>
+        <div class="btns btn-green" @click="addAddress"><span>保存</span></div>
       </div>
     </div>
     <citychoose ref="city" @selectCity="cityChosed"></citychoose>
@@ -52,55 +42,44 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import citychoose from '@/components/my/citychoose';
   import api from '@/api/api';
+  const RESPONSE_OK = 200;
 
-  const RESPONSE_OK = 0;
-
+  const defaultAddress = {
+    name: '',
+    phoneNumber: '',
+    detailAddress: '',
+    defaultStatus: 0
+  };
   export default {
     data() {
       return {
-        user: {
-          name: '',
-          mobile: '',
-          address: '',
-          country: '中国',
-          default: false
-        },
-        city: '',
-        noCity: false
+        address: Object.assign({}, defaultAddress),
+        fullAddress: ''
       };
-    },
-    computed: {
-      clearAddress() {
-        if (this.user.address.length) {
-          return true;
-        }
-        return false;
-      }
     },
     activated() {
       this.show();
     },
     deactivated() {
       this.hide();
-      this.noCity = false;
+    },
+    computed: {
+      clearAddress() {
+        if (this.address.detailAddress && this.address.detailAddress.length) {
+          return true;
+        }
+        return false;
+      }
     },
     methods: {
       addAddress() {
-        if (!this.user.mobile || !this.user.address) {
+        if (!this.address.phoneNumber || !this.address.detailAddress) {
           return;
         }
-        this.user.userId = this.$store.getters.getUserInfo.userId;
-        this.user.city = this.city;
-        if (!this.user.userId) {
-          this.$store.dispatch('addAddress', this.user);
-          this._reset();
-          this.$router.back();
-          return;
-        }
-        api.addAddress(this.user).then(response => {
-          if (response.result === RESPONSE_OK) {
-            this.$store.dispatch('addAddress', this.user);
-            this._reset();
+        api.addAddress(this.address).then(response => {
+          if (response.code === RESPONSE_OK) {
+            this.$store.dispatch('addAddress', this.address);
+            this.$store.dispatch('openToast', {message: '添加收货地址成功', icon: 'success'});
             this.$router.back();
           }
         });
@@ -108,29 +87,16 @@
       openCityChoose() {
         this.$refs.city.choseAdd();
       },
-      changeCountry() {
-        if (this.user.country === '国外') {
-          this.noCity = true;
-        } else {
-          this.noCity = false;
-        }
-      },
       cityChosed(city) {
         if (city && city.city) {
-          this.city = city.province + city.city + (city.district || '');
+          this.address.province = city.province;
+          this.address.city = city.city;
+          this.address.region = city.district || '';
+          this.fullAddress = `${city.province || ''}${city.city || ''}${city.district || ''}`;
         }
       },
-      _reset() {
-        this.user = {
-          name: '',
-          mobile: '',
-          address: '',
-          country: '中国',
-          default: false
-        };
-      },
       doClearAddr() {
-        this.user.address = '';
+        this.address.detailAddress = '';
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -183,7 +149,6 @@
             padding-right: 2px
           .title
             position: absolute
-            display: block
             width: 70px
             top: 11px
             left: 0

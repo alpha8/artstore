@@ -16,16 +16,8 @@
       };
     },
     created() {
-      // let user = this.$store.getters.getUserInfo;
-      // let hotfix = window.localStorage.getItem('autohotfix') || false;
-      // if (!user.icon && hotfix) {
-      //   removeCookie('wxuser', '', '.yihuyixi.com');
-      //   window.localStorage.setItem('autohotfix', true);
-      //   console.log('HotFix online issue.');
-      // }
     },
     activated() {
-      this.$store.dispatch('reloadUserInfo');
     },
     deactivated() {
       this.isAutoLogin = false;
@@ -37,9 +29,8 @@
         console.log('非微信平台，跳过授权认证！');
         return;
       }
-      let user = this.$store.getters.getUserInfo;
-      if (!user.userId) {
-        this.$store.dispatch('setAnonymous');
+      let userId = this.$store.getters.userId;
+      if (!userId) {
         this.isAutoLogin = window.sessionStorage.getItem(AUTO_LOGIN) || false;
         if (!this.isAutoLogin) {
           let redirect = window.location.href;

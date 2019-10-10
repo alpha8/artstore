@@ -5,14 +5,12 @@
         <div class="box">
           <div class="box-container">
             <div class="avatar">
-              <a v-show="!hasLogin()" :href="getLoginUrl()"><img :src="getDefaultAvatar" alt="" class="pic"></a>
-              <img :src="getUserIcon" alt="" class="pic" v-show="hasLogin()">
-              <span class="vipflag" v-if="userExt.model === 2">代理商</span>
+              <a v-show="!hasLogin()" @click="getLoginUrl"><img :src="getDefaultAvatar" alt="" class="pic"></a>
+              <img :src="getUserIcon" alt="" class="pic" v-show="hasLogin()" />
             </div>
             <div class="line">
-              <div class="userName" v-show="!hasLogin()"><a :href="getLoginUrl()">点击登录</a></div>
-              <div class="userName" v-show="hasLogin()"><span class="svip" :class="getVipIcon"></span>{{user().nickName}}<!-- <span class="supplier" v-if="userExt.model === 2">(代理商)</span><span class="supplier" v-else-if="userExt.model === 0">(系统用户)</span> --></div>
-              <div class="info" v-show="hasLogin()" v-if="userExt.spreadLevel"><span class="vip" :class="getSVipIcon">{{getSVipTitle}}</span><span class="userflag" @click.stop.prevent="goYourFriends">[朋友:{{userExt.friendCount}}]</span><span class="userflag" @click.stop.prevent="goYourBuyers">[买家:{{userExt.friendOrderCount}}]</span></div>
+              <div class="userName" v-show="!hasLogin()"><a @click="getLoginUrl()">点击登录</a></div>
+              <div class="userName" v-show="hasLogin()"><span>{{username()}}</span></div>
             </div>
             <span class="setting" v-show="hasLogin()"><router-link to="/personInfo"><img src="../../common/images/settings.png"/><span>账号管理</span></router-link></span>
           </div>
@@ -39,42 +37,26 @@
         <div class="title border-1px">
           <router-link to="">
             <i class="icon-wallet"></i>我的钱包
-            <!-- <span class="more"><i class="icon-keyboard_arrow_right"></i></span> -->
           </router-link>
         </div>
         <ul class="itemList">
           <li class="item border-1px" v-for="item in wallet">
             <router-link :to="item.link">
-              <div class="amount">{{item.amount | currency}}</div>
+              <div class="amount"><em class="symbol">¥</em>{{item.amount}}</div>
               <div class="text">{{item.text}}</div>
             </router-link>
           </li>
         </ul>
       </div>
-      <split v-show="profile.hasQrCode"></split>
-      <div class="invite-wrapper" v-show="profile.hasQrCode">
-        <div class="title border-1px">分享有礼</div>
-        <div class="item-list">
-          <router-link class="item border-1px" to="/myrecommend">
-            <span class="text"><i class="icon-gift_card"></i> 专属优惠活动，推荐好友拿奖金！</span>
-            <span class="more"><i class="icon-keyboard_arrow_right"></i></span>
-          </router-link>
-        </div>
-      </div>
       <split></split>
       <div class="other-wrapper">
         <div class="title border-1px">其他</div>
         <div class="otherList">
-          <router-link to="/coupon/new" class="item border-1px" v-show="userExt.model === 0">
-            <i class="icon-coupon"></i>
-            <span class="text">创建优惠券</span>
-            <span class="more"><i class="icon-keyboard_arrow_right"></i></span>
-          </router-link>
           <router-link :to="item.link" class="item border-1px" v-for="(item, index) in others" :key="index">
             <i :class="item.icon"></i>
             <span class="text" v-if="!item.callable">{{item.text}}<i class="dot" v-if="item.highlight"></i></span>
             <span class="text" v-else @click.stop.prevent="item.callable">{{item.text}}</span>
-            <em class="count" v-if="getWIPCount(item)">({{getWIPCount(item)}})</em>
+            <!-- <em class="count">(0)</em> -->
             <span class="more" v-show="!item.noPage"><i class="icon-keyboard_arrow_right"></i></span>
           </router-link>
         </div>
@@ -89,9 +71,9 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import split from '@/components/split/split';
   import {mapGetters} from 'vuex';
-  import {removeCookie} from '@/common/js/store';
   import frame from '@/components/common/myiframe';
   import api from '@/api/api';
+  let Base64 = require('js-base64').Base64;
 
   export default {
     data() {
@@ -104,16 +86,12 @@
         ],
         wallet: [
           { amount: 0, text: '账户余额', link: '/wallet' },
-          { amount: 0, text: '优惠券余额', link: '/coupon' },
-          { amount: 0, text: '奖金余额', link: '/cashback' }
+          { amount: 0, text: '优惠券', link: '/coupon' },
+          { amount: this.user().integration || 0, text: '我的积分', link: '/coupon' }
         ],
         others: [
-          { icon: 'icon-qrcode', text: '我的推广码', link: '/promocode' },
-          { icon: 'icon-tuan', text: '我的拼团', link: '/mytuan', key: 'teamCount' },
-          { icon: 'icon-cutingprice', text: '我的砍价', link: '/myshare', key: 'cutCount' },
+         //  { icon: 'icon-qrcode', text: '我的推广码', link: '/promocode' },
           { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
-          { icon: 'icon-group_purchase', text: '我的团购', link: '/mygroupbuy' },
-          { icon: 'icon-auction', text: '我的拍卖', link: '/myauction' },
           { icon: 'icon-heart', text: '我的收藏', link: '/follow' },
           { icon: 'icon-footprint', text: '浏览足迹', link: '/footprint' },
           { icon: 'icon-address', text: '收货地址', link: '/address' },
@@ -125,145 +103,51 @@
             callable: () => {
               window.localStorage.clear();
               window.sessionStorage.clear();
-              removeCookie('wxuser', '', '.yihuyixi.com');
+              this.$store.dispatch('LogOut');
               this.$store.dispatch('openToast', '缓存清理成功！');
             }
-          }
-          /*
-          ,{
+          },
+          {
             icon: 'icon-quit',
             text: '退出登录',
             link: '',
             noPage: true,
             highlight: true,
             callable: () => {
-              removeCookie('wxuser', '', '.yihuyixi.com');
-              this.$router.push('/home');
+              this.$store.dispatch('LogOut');
+              this.$router.push('/login');
             }
           }
-           */
-        ],
-        userExt: {},
-        profile: {}
+        ]
       };
     },
     activated() {
-      this.refreshData();
+      this.refreshSSO();
     },
     mounted() {
-      this._initScroll();
     },
     computed: {
-      getVipTitle() {
-        // let userLevel = {'lv0': '初级用户', 'lv1': 'VIP一钻', 'lv2': 'VIP二钻', 'lv3': 'VIP三钻', 'lv4': 'VIP四钻', 'lv5': 'VIP五钻'};
-        let agentLevel = {'lv0': '初级', 'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
-        let level = this.userExt.level || 'lv0';
-        if (this.userExt.model === 1) {
-          // 初级用户
-          return agentLevel[level];
-        } else if (this.userExt.model === 2) {
-          // 代理商
-          return agentLevel[level];
-        } else {
-          return agentLevel[level];
-        }
-      },
-      getVipIcon() {
-        return this.userExt.level || 'lv0';
-      },
-      getSVipIcon() {
-        return this.userExt.spreadLevel || 'lv1';
-      },
-      getSVipTitle() {
-        let agentLevel = {'lv1': '皇冠一星', 'lv2': '皇冠二星', 'lv3': '皇冠三星', 'lv4': '皇冠四星', 'lv5': '皇冠五星'};
-        let level = this.userExt.spreadLevel || 'lv1';
-        if (this.userExt.model === 1) {
-          // 初级用户
-          return agentLevel[level];
-        } else if (this.userExt.model === 2) {
-          // 代理商
-          return agentLevel[level];
-        } else {
-          return agentLevel[level];
-        }
-      },
       getUserIcon() {
-        let user = this.$store.getters.getUserInfo;
-        if (user && user.icon) {
-          return user.icon;
-        }
-        return this.profile.user && this.profile.user.icon;
+        return this.$store.getters.avatar;
       },
       getDefaultAvatar() {
-        return `${api.CONFIG.userAvatar}?w=80&h=80`;
+        return `${api.CONFIG.userAvatar}`;
       }
     },
     updated() {
-      // this._initScroll();
     },
     methods: {
       ...mapGetters({
-        hasLogin: 'checkLogined',
-        user: 'getUserInfo'
+        hasLogin: 'userId',
+        user: 'userInfo',
+        avatar: 'avatar',
+        username: 'name'
       }),
-      refreshData() {
-        let user = this.$store.getters.getUserInfo;
-        let anon = '';
-        if (!user.userId) {
-          anon = this.$store.getters.getAnonymous;
-        }
-        api.getProfile({
-          userId: user.userId || 0,
-          type: 'usercenter',
-          stat: 1,
-          unlogin: anon
-        }).then(response => {
-          if (response.result === 0) {
-            this.$store.dispatch('updateUserProfile', response);
-            if (this.wallet.length >= 3) {
-              this.wallet[0].amount = response.wallet && response.wallet.accountValue || 0;
-              let couponValue = response.wallet && response.wallet.totalValue || 0;
-              this.wallet[1].amount = couponValue;
-              this.$store.dispatch('updateCouponAmount', couponValue);
-              this.wallet[2].amount = response.wallet && response.wallet.rewardValue || 0;
-            }
-            this.userExt = response.user || {};
-            this.profile = response;
-          }
-          this._initScroll();
-        }).catch(response => {
-          console.error(response);
-        });
-      },
-      _initScroll() {
-        this.$nextTick(() => {
-          // if (!this.scroll) {
-          //   this.scroll = new BScroll(this.$refs.my, {
-          //     click: true
-          //   });
-          // } else {
-          //   this.scroll.refresh();
-          // }
-        });
+      refreshSSO() {
+        api.refreshToken();
       },
       getLoginUrl() {
-        let redirect = 'http://' + location.host + location.pathname + '#/my';
-        let anon = this.$store.getters.getAnonymous;
-        return `${api.CONFIG.wxCtx}/baseInfo?url=${escape(redirect)}&uid=${anon}`;
-      },
-      goYourFriends() {
-        this.$router.push({name: 'yourfriends'});
-      },
-      goYourBuyers() {
-        this.$router.push({name: 'yourbuyers'});
-      },
-      getWIPCount(item) {
-        if (!item.key) {
-          return 0;
-        }
-        let appCache = this.$store.getters.loadAppCache;
-        let cacheData = appCache.TodoList && appCache.TodoList.data || {};
-        return cacheData[item.key] || 0;
+        this.$router.push('/login');
       }
     },
     components: {
@@ -301,8 +185,8 @@
       border-radius: 6px
       font-size: 12px
       color: #fff
-      background: -webkit-linear-gradient(left,#eb3c3c,#ff7459)
-      background: linear-gradient(90deg,#eb3c3c,#ff7459)
+      background: -webkit-linear-gradient(0deg, #ff8c00, #ff8c00 50%)
+      background: linear-gradient(0deg, #ff8c00, #ff8c00 50%)
       box-shadow: 0 2px 4px rgba(228,57,60,.4)
       .box-container
         display: flex
@@ -498,14 +382,13 @@
           font-size: 22px
           line-height: 1
         .amount
-          font-size: 22px
+          font-size: 16px
           color: rgb(255, 95, 62)
           line-height: 1 
           margin-bottom: 2px
           .symbol
-            font-size: 19px
+            font-size: 14px
             margin-right: 1px
-            vertical-align: bottom
         .text
           padding-top: 5px
           line-height: 1

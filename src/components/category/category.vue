@@ -4,9 +4,8 @@
     <div class="goods">
       <div class="menu-wrapper" ref="menuWrapper">
         <ul>
-          <li v-for="(item, index) in goods" class="menu-item border-1px" :class="{'active': item.id===good.id, 'twoline': item.desc}" @click.stop.prevent="selectMenu(index)">
-            <span class="text"><span :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css && item.css !== 'strong'" :class="item.css"></i></span><em>({{item.count || 0}})</em></span>
-            <i v-if="item.desc">{{item.desc}}</i>
+          <li v-for="(item, index) in goods" class="menu-item border-1px" :class="{'active': item.id===good.id}" @click.stop.prevent="selectMenu(index)" :key="item.id">
+            <span class="text">{{item.name}}</span>
           </li>
         </ul>
       </div>
@@ -17,53 +16,19 @@
           </div>
           <ul>
             <li class="good-list good-list-hook">
-              <ul class="itemList" v-if="good.childrens && good.childrens[0].childrens && !good.childrens[0].childrens.length">
-                <li v-for="innergood in good.childrens" :class="typeStatus(innergood.status)" v-if="!innergood.hide">
-                  <router-link :to="{path: '/search', query: {cat: dummyKey(innergood.propertyName), key: (innergood.value === 'thumbnail' ? innergood.desc : innergood.value)}}" class="good-item" :class="{'thumbnail': innergood.value === 'thumbnail'}">
-                    <div class="icon" v-if="innergood.value==='thumbnail'">
-                      <img :src="innergood.css" border="0" />
+              <ul class="itemList" v-if="good.children && good.children.length">
+                <li v-for="innergood in good.children" :key="innergood.id" class="type3">
+                  <router-link :to="{path: '/search'}" class="good-item" :class="{'thumbnail': innergood.icon}">
+                    <div class="icon" v-if="innergood.icon">
+                      <img :src="getCategoryIcon(innergood.icon)" border="0"/>
                     </div>
-                    <div class="content" v-if="innergood.value!=='thumbnail'">
-                      <h2 class="name">
-                      <span v-if="containsDot(innergood.value)" :class="{'strong': innergood.css === 'strong'}">{{beforeDot(innergood.value)}}<span class="dot">{{afterDot(innergood.value)}}</span></span>
-                      <span v-if="!containsDot(innergood.value)" :class="{'strong': innergood.css === 'strong'}">{{innergood.value}}</span>
-                      <i v-if="innergood.css" :class="innergood.css"></i><em>({{innergood.count || 0}})</em></h2>
-                    </div>
+                    <div class="name">{{innergood.name}}</div>
                   </router-link>
                 </li>
               </ul>
-              <div v-if="innergood && innergood.childrens.length && innergood.propertyName !== 'banner'" v-for="innergood in good.childrens">
-                <h1 class="title border-1px">{{innergood.value}}</h1>
-                <ul class="itemList">
-                  <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName === 'art'">
-                    <router-link :to="{path: '/search', query: {ck: innergood.propertyName, cv: dummyKey(item.propertyName), parentCat: 'art', key: (item.value === 'thumbnail' ? item.desc: item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
-                      <div class="icon" v-if="item.value==='thumbnail'">
-                        <img :src="item.css" border="0" />
-                      </div>
-                      <div class="content" v-if="item.value!=='thumbnail'">
-                        <h2 class="name" :class="{'strong': item.css === 'strong'}">{{item.value}}<i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em></h2>
-                      </div>
-                    </router-link>
-                  </li>
-                  <li v-for="item in innergood.childrens" :class="typeStatus(item.status)" v-if="!item.hide && good.propertyName !== 'art'">
-                    <router-link :to="{path: '/search', query: {sunCat: dummyKey(item.propertyName), lv1: good.propertyName, lv2: innergood.propertyName, key: (item.value === 'thumbnail' ? item.desc : item.value)}}" class="good-item" :class="{'thumbnail': item.value === 'thumbnail'}">
-                      <div class="icon" v-if="item.value==='thumbnail'">
-                        <img :src="item.css" border="0" />
-                      </div>
-                      <div class="content" v-if="item.value!=='thumbnail'">
-                        <h2 class="name">
-                          <span v-if="containsDot(item.value)" :class="{'strong': item.css === 'strong'}">{{beforeDot(item.value)}}<span class="dot">{{afterDot(item.value)}}</span></span>
-                          <span v-if="!containsDot(item.value)" :class="{'strong': item.css === 'strong'}">{{item.value}}</span>
-                          <i v-if="item.css" :class="item.css"></i><em>({{item.count || 0}})</em>
-                        </h2>
-                      </div>
-                    </router-link>
-                  </li>
-                </ul>
-              </div>
+              <div class="nomore" v-else>正在疯狂上新中...</div>
             </li>
           </ul>
-          <div class="item-footer" v-show="good.propertyName === 'ticket' || good.propertyName === 'freetrade'">(本版块内部公测中，近期开放)</div>
         </div>
       </div>
     </div>
@@ -103,84 +68,13 @@
     },
     created() {
       this.$store.dispatch('openLoading');
-      api.getTeaTotal().then(res => {
-        let typeTotal = res.teatype;
-        let totalPivot = {};
-        typeTotal.forEach(type => {
-          for (let key in type) {
-            totalPivot[key] = {};
-            let item = type[key];
-            if (item.length) {
-              let total = 0;
-              item.forEach(o => {
-                totalPivot[key][o.name] = o.count || 0;
-                total += o.count || 0;
-                let items = o.childrens;
-                if (items && items.length) {
-                  items.forEach(o1 => {
-                    totalPivot[key][o.name + o1.name] = o1.count || 0;
-                  });
-                }
-              });
-              totalPivot[key].total = total;
-            }
-          }
-        });
-        totalPivot['artcount'] = res.artcount;
-        this.teaTotal = totalPivot;
-
-        let user = this.$store.getters.getUserInfo;
-        let anon = '';
-        if (!user.userId) {
-          anon = this.$store.getters.getAnonymous;
+      api.GetCategories().then((response) => {
+        this.goods = response.data;
+        if (this.goods && this.goods.length) {
+          this.good = this.goods[0];
         }
-        api.GetCategories({
-          type: 'category',
-          stat: 1,
-          unlogin: anon
-        }).then((response) => {
-          this.goods = response.childrens;
-          this.goods.forEach(good => {
-            try {
-              if (good.propertyName === 'art') {
-                good.count = this.teaTotal['artcount'] || 0;
-              } else {
-                good.count = this.teaTotal[good.propertyName] && this.teaTotal[good.propertyName].total || 0;
-              }
-            } catch (e) {
-              console.log(e);
-            }
-            let lv2Category = good.childrens;
-            if (lv2Category.length) {
-              lv2Category.forEach(inner => {
-                try {
-                  let count = this.teaTotal[good.propertyName] && this.teaTotal[good.propertyName][inner.propertyName];
-                  inner.count = count || 0;
-                  let lv3 = inner.childrens;
-                  if (lv3.length) {
-                    lv3.forEach(node => {
-                      try {
-                        let qty = this.teaTotal[good.propertyName] && this.teaTotal[good.propertyName][inner.propertyName + node.propertyName];
-                        node.count = qty || 0;
-                      } catch (e1) {
-                        console.log(e1);
-                      }
-                    });
-                  }
-                } catch (e) {
-                  console.log(e);
-                }
-              });
-            }
-          });
-          if (this.goods.length) {
-            this.good = this.goods[0];
-          }
-          this._initScroll();
-          this.$store.dispatch('closeLoading');
-        }).catch(response => {
-          this.$store.dispatch('closeLoading');
-        });
+        this._initScroll();
+        this.$store.dispatch('closeLoading');
       }).catch(response => {
         this.$store.dispatch('closeLoading');
       });
@@ -212,47 +106,9 @@
       selectMenu(index) {
         this.good = this.goods[index];
         this.sliders.splice(0, this.sliders.length);
-        this.$nextTick(() => {
-          if (this.good.propertyName === 'ticket') {
-            this.good.childrens.forEach(item => {
-              Vue.set(item, 'hide', false);
-              if (item.propertyName === 'banner') {
-                item.hide = true;
-              } else if (!this.show4Months(item.propertyName)) {
-                item.hide = true;
-              }
-            });
-          }
-          let list = this.good.childrens;
-          if (list && list.length) {
-            list.forEach(item => {
-              if (item.propertyName === 'banner') {
-                let nodes = item.childrens;
-                let sliders = [];
-                nodes.forEach(node => {
-                  sliders.push({'thumbnail': node.value, 'src': node.value});
-                });
-                this.sliders = sliders;
-              }
-            });
-          }
-          this._initScroll();
-        });
-      },
-      selectGood(good) {
-        this.selectedGood = good;
-        this.$refs.goodDetail.show();
-      },
-      dummyKey(key) {
-        if (key && key.indexOf('DUM_') > -1) {
-          return key.substring(4);
+        if (this.good.icon) {
+          this.sliders.push({'thumbnail': `${this.good.icon}?imageView2/2/w/750/h/500`, 'src': this.good.icon});
         }
-        return key;
-      },
-      addFood(target) {
-        this._drop(target);
-      },
-      _drop(target) {
       },
       _initScroll() {
         if (!this.menuScroll) {
@@ -272,6 +128,9 @@
           this.scrollY = Math.abs(Math.round(pos.y));
         });
       },
+      getCategoryIcon(icon) {
+        return icon ? `${icon}?imageView2/2/w/140/h/140` : icon;
+      },
       _calcHeight() {
         let goodList = this.$refs.goodsWrapper.getElementsByClassName('good-list-hook');
         let height = 0;
@@ -281,25 +140,6 @@
           height += item.clientHeight;
           this.heightArr.push(height);
         }
-      },
-      show4Months(month) {
-        let now = new Date();
-        var months = [];
-        for (let i = 0; i < 4; i++) {
-          let m = now.getMonth() + 1;
-          months.push(m);
-          now.setMonth(m);
-        }
-        return months.find(item => item === Number(month));
-      },
-      containsDot(name) {
-        return name && name.indexOf('.') !== -1;
-      },
-      beforeDot(name) {
-        return name && name.substring(0, name.indexOf('.'));
-      },
-      afterDot(name) {
-        return name && name.substring(name.indexOf('.'));
       }
     },
     components: {
@@ -329,8 +169,9 @@
       overflow: hidden
       .menu-item
         flex: 1
-        height: 65px
-        padding: 6px 5px 6px 10px
+        height: 45px
+        line-height: 45px
+        padding-left: 10px
         border-left: 4px solid transparent
         box-sizing: border-box
         border-1px(rgba(7, 17, 27, 0.1))
@@ -338,8 +179,8 @@
           margin-top: -1px
           background: #fff
           font-weight: 700
-          border-left: 4px solid $color-molv
-          color: $color-molv
+          border-left: 4px solid $color-main
+          color: $color-main
           .text
             border-none()
         &.twoline
@@ -358,23 +199,13 @@
           display: block
           width: 100%
           vertical-align: middle
-          font-size: 0
           box-sizing: border-box
+          font-size: $fontsize-medium-s
+          word-wrap: break-word
+          text-overflow: ellipsis
+          -webkit-line-clamp: 2
+          -webkit-box-orient: vertical
           overflow: hidden
-          span
-            position: relative
-            display: block
-            float: left
-            font-size: $fontsize-medium-s
-            word-wrap: break-word
-            text-overflow: ellipsis
-            -webkit-line-clamp: 2
-            -webkit-box-orient: vertical
-            overflow: hidden
-            line-height: 1.45
-            max-height: 38px
-            padding-right: 7px
-            box-sizing: border-box
           em
             display: block
             clear: both
@@ -390,8 +221,11 @@
             z-index: 10
     .goods-wrapper
       flex: 1
+      padding-top: 10px
+      background-color: #fff
       .banner
         position: relative
+        margin-top: -10px
         padding: 0 2px 5px
         box-sizing: border-box
       .title
@@ -419,26 +253,29 @@
           position: relative
           width: 50%
           height: auto
-          max-height: 80px
           overflow: hidden
           box-sizing: border-box
           border-1px(rgba(7, 17, 27, 0.1))
           clear: both
           &.type0
             width: 50%
+            float: left
           &.type1
             width: 100%
           &.type2
             width: 33.3%
+            float: left
           &.type2delta
             width: 66.6%
+            float: left
           &.type3
-            width: 33.3%
+            width: 32.8%
+            float: left
           .good-item
             display: inline-block
             width: 100%
             padding: 15px 10px
-            text-align: left
+            text-align: center
             border-1px(rgba(7, 17, 27, 0.1))
             color: #00bb9c
             box-sizing: border-box
@@ -450,47 +287,34 @@
               vertical-align: middle
               .icon
                 font-size: $fontsize-small
-                height: 60px
                 overflow: hidden
               img
-                height: 100%
-                padding: 2px 0 3px 10px
+                width: 70px
+                height: 70px
                 box-sizing: border-box
             .icon
               display: block
-              font-size: $fontsize-bigicon
-            .content
+            .name
               position: relative
               display: block
-              .name
-                position: relative
-                display: block
-                float: left
-                line-height: 1.2
-                font-size: $fontsize-medium-s
-                color: $color-dark
-                white-space: nowrap
-                word-wrap: break-word
-                word-break: break-all
-                text-overflow: ellipsis
-                -webkit-line-clamp: 1
-                -webkit-box-orient: vertical
-                padding-right: 7px
-                box-sizing: border-box
-                .dot
-                  font-size: $fontsize-small-s
-                  color: $color-gray
-                em
-                  display: block
-                  clear: both
-                  font-size: $fontsize-small-s
-                .highlight
-                  position: absolute
-                  width: 5px
-                  height: 5px
-                  border-radius: 50%
-                  background: $color-redpoint
-                  right: 0
-                  top: 0
-                  z-index: 10
+              line-height: 1.2
+              font-size: $fontsize-medium-s
+              color: $color-dark
+              white-space: nowrap
+              word-wrap: break-word
+              word-break: break-all
+              text-overflow: ellipsis
+              -webkit-line-clamp: 1
+              -webkit-box-orient: vertical
+              box-sizing: border-box
+              text-align: center
+              height: 35px;
+              margin-top: 2px;
+              -webkit-box-pack: start;
+    .nomore
+      line-height: 25px
+      height: 25px
+      text-align: center
+      font-size: 14px
+      color: #999
 </style>

@@ -1,7 +1,7 @@
 <template>
   <swiper :options="swiperOption" class="swiperHook" :style="getStyle">
     <swiper-slide v-for="(slide, index) in swiperSlides" :key="index">
-      <div class="slide2" :style="getSlideUrl(slide)" @click.stop.prevent="preview(slide.src)"></div>
+      <img v-lazy="getSlideUrl(slide)" class="slide2"  v-if="slide && slide.src" @click.stop.prevent="preview(slide.src)" />
     </swiper-slide>
     <div class="swiper-pagination pager" slot="pagination"></div>
   </swiper>
@@ -26,7 +26,7 @@
         },
         screen: {
           width: document.documentElement.clientWidth,
-          height: document.documentElement.clientWidth ? document.documentElement.clientWidth * 2 / 3 : 250
+          height: document.documentElement.clientWidth
         }
       };
     },
@@ -40,11 +40,7 @@
     },
     methods: {
       getSlideUrl(slide) {
-        return {
-          'background-image': `url(${slide.thumbnail})`,
-          width: this.screen.width + 'px',
-          height: this.screen.height + 'px'
-        };
+        return `${slide.thumbnail}`;
       },
       preview(img) {
         let pics = [];
@@ -70,10 +66,13 @@
       width: 100%
       height: 100%
       min-height: 213px
-      content: ""
-      background-repeat: no-repeat
-      background-position: center
-      background-size: cover
+      img
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        display: block;
+        border: 0;
+        vertical-align: top;
     .pager
       width: 100%
       .swiper-pagination-bullet

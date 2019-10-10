@@ -11,16 +11,19 @@
           <li class="good-item" v-for="product in cartProducts">
             <div class="cart-item border-top-1px">
               <span class="icon-check_circle" :class="{'on': product.checked}" @click.stop.prevent="toggleCheckout(product)"></span>
-              <router-link class="pic" :to="{name:'good', params: { id: product.id }}">
-                <img :src="product.icon" alt="">
-              </router-link>
+              <div class="pic" @click="goGoodDetail(product)">
+                <img :src="getThumbnail(product.productPic)" alt="">
+              </div>
               <div class="item-wrapper">
                 <div class="item-name">
-                  <router-link :to="{name:'good', params: { id: product.id }}">{{product.name}}</router-link>
+                  <div @click="goGoodDetail(product)">{{product.productName}}</div>
+                </div>
+                <div class="sku_line" v-show="product.sp1">
+                  <div class="sku">{{`${product.sp1 || ''} ${product.sp2 || ''}  ${product.sp3 || ''}`}}</div>
                 </div>
                 <div class="amountWrapper">
                   <div class="price">{{product.price | currency}}</div>
-                  <cartcontrol :good="product" @confirm="confirmRemove"></cartcontrol>
+                  <cartcontrol :good="product" @confirm="confirmRemove" @add="doAdd" @minus="doMinus"></cartcontrol>
                 </div>
               </div>
             </div>
@@ -54,17 +57,13 @@
         </div>
       </div>
     </div>
-    <mydialog :text="dialog.text" :btns="dialog.btns" ref="dialogWin"></mydialog>
-    <frame></frame>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
-  import mydialog from '@/components/common/mydialog';
-  import frame from '@/components/common/myiframe';
+  import api from '@/api/api';
 
   export default {
     data() {
@@ -72,18 +71,7 @@
         checkedAll: false,
         editMode: false,
         cartProducts: [],
-        total: 0,
-        dialog: {
-          text: '是否确认删除此商品？',
-          btns: {
-            ok: {
-              text: '确定',
-              callback: function() {
-                console.log('ok');
-              }
-            }
-          }
-        }
+        total: 0
       };
     },
     computed: {
@@ -101,7 +89,7 @@
         let total = 0;
         this.cartProducts.forEach((item) => {
           if (item.checked) {
-            total += item.count * item.price;
+            total += item.quantity * item.price;
           }
         });
         this.total = total;
@@ -111,18 +99,15 @@
         let count = 0;
         this.cartProducts.forEach((item) => {
           if (item.checked) {
-            count += item.count;
+            count += item.quantity;
           }
         });
         return count;
       }
     },
     activated() {
-      this.reloadItems();
+      this.fetchData();
       this.$store.commit('HIDE_FOOTER');
-    },
-    updated() {
-      this._initScroll();
     },
     deactivated() {
       this.checkAll(false);
@@ -131,50 +116,53 @@
       this.$refs.header.hide();
     },
     methods: {
-      _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.cart, {
-              click: true
+      fetchData() {
+        this.$store.dispatch('openLoading');
+        api.getCartList().then(response => {
+          if (response.code == 200) {
+            this.cartProducts = response.data;
+            var sum = 0;
+            this.cartProducts.forEach(product => {
+              if (!product.checked) {
+                this.$set(product, 'checked', false);
+              }
+              sum += product.quantity;
             });
-          } else {
-            this.scroll.refresh();
+            this.$store.dispatch('updateCartAmount', sum);
           }
+          this.$store.dispatch('closeLoading');
+        }).catch(error => {
+          console.log(error);
+          this.$store.dispatch('closeLoading');
         });
-      },
-      reloadItems() {
-        let goods = this.$store.getters.cartProducts;
-        this.cartProducts = [];
-        goods.forEach((product) => {
-          if (!product.type) {
-            this.cartProducts.push({
-              id: product.id,
-              name: product.name,
-              icon: product.icon,
-              src: product.src,
-              info: product.info,
-              description: product.description,
-              price: product.price,
-              oldPrice: product.oldPrice,
-              count: product.count,
-              checked: product.checked || false,
-              stock: product.stock,
-              fromCart: true
-            });
-          }
-        });
-        this._initScroll();
       },
       removeCartItem() {
-        let deleteItems = [];
+        var deleteCount = 0;
+        var ids = [];
         this.cartProducts.forEach((item) => {
           if (item.checked) {
-            deleteItems.push(item);
+            deleteCount++;
+            ids.push(item.id);
           }
         });
-        this.$store.dispatch('removeCartItems', deleteItems);
-        this.reloadItems();
-        this.editMode = false;
+        if (deleteCount == 0) {
+          this.$store.dispatch('openToast', '请选择一件需要删除的商品');
+          return;
+        }
+        this.$confirm('是否确认删除此商品?', '提示', {
+          confirmButtonText: '删除',
+          cancelButtonText: '返回',
+          type: 'warning'
+        }).then(() => {
+          let params = new URLSearchParams();
+          params.append('ids', ids);
+          api.deleteCartProducts(params).then(response => {
+            if (response.code == 200) {
+              this.fetchData();
+              this.editMode = false;
+            }
+          });
+        });
       },
       toggleCheckAll() {
         this.checkedAll = !this.checkedAll;
@@ -194,6 +182,13 @@
           item.checked = state;
         });
       },
+      getThumbnail(pic) {
+        if (pic) {
+          return `${pic}?imageView2/2/w/372/h/372`;
+        } else {
+          return api.CONFIG.defaultImg;
+        }
+      },
       check(state) {
         let notSame = false;
         this.cartProducts.forEach((item) => {
@@ -209,27 +204,58 @@
       },
       pay() {
         if (this.total) {
-          this.$store.dispatch('addPayGoods', this.cartProducts.filter(item => item.checked));
-          // window.location.href = window.location.href.replace('cart', 'pay');
-          window.location.href = 'http://' + location.host + '/weixin/pay';
+          window.location.href = 'http://' + location.host + '#/pay';
         }
       },
       confirmRemove(good) {
-        let vm = this;
-        this.dialog.btns.ok.callback = function() {
-          vm.$store.commit('REDUCE_QUANTITY', good.id);
-          vm.reloadItems();
-        };
-        this.$refs.dialogWin.show();
+        this.$confirm('是否确认删除此商品?', '', {
+          confirmButtonText: '删除',
+          cancelButtonText: '返回',
+          type: 'warning'
+        }).then(() => {
+          let params = new URLSearchParams();
+          params.append('ids', [good.id]);
+          api.deleteCartProducts(params).then(response => {
+            if (response.code == 200) {
+              this.fetchData();
+            }
+          });
+        });
+      },
+      doAdd(good) {
+        this.changeQty(good);
+      },
+      doMinus(good) {
+        this.changeQty(good);
+      },
+      changeQty(good) {
+        api.updateCartQty({
+          id: good.id,
+          quantity: good.quantity
+        }).then(response => {
+          if (response.code == 200) {
+            this.fetchData();
+          }
+        });
+      },
+      goGoodDetail(product) {
+        this.$store.dispatch('addSkuSpec', {
+          id: product.productId,
+          spec: JSON.parse(product.productAttr || '[]'),
+          checkedSpec: [(product.sp1 || ''), (product.sp2 || ''), (product.sp3 || '')],
+          count: product.quantity || 1
+        });
+        this.$router.push({name: 'good', params: { id: product.productId }});
       }
     },
     components: {
-      fixedheader, cartcontrol, mydialog, frame
+      fixedheader, cartcontrol
     }
   };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
+  @require '../../common/stylus/variables'
   @import '../../common/stylus/mixin';
   .cart-wrapper
     position: absolute
@@ -237,7 +263,6 @@
     bottom: 50px
     width: 100%
     background: #fff
-    overflow: hidden
     .toolbars
       display: flex
       align-items: center
@@ -255,7 +280,6 @@
           width: 15px
           padding-right: 3px
           padding-left: 10px
-          overflow: hidden
         .gpsaddress
           max-width: 80%
           white-space: nowrap
@@ -270,6 +294,11 @@
           padding-right: 5px
     .good-list
       display: block
+      background: #fff
+      padding-bottom: 100px
+      -webkit-overflow-scrolling: touch
+      overflow-x: hidden
+      overflow-y: auto
       .good-item
         position: relative
         .cart-item
@@ -280,7 +309,7 @@
             display: inline-block
             width: 46px
             float: left
-            font-size: 24px
+            font-size: 20px
             color: #d3d3d3
             text-align: center
             padding-top: 35px
@@ -290,18 +319,19 @@
           .pic
             vertical-align: top
             display: inline-block
-            width: 30%
             float: left
-            padding: 5px 0
+            padding: 5px 10px 0 0
             box-sizing: border-box
             img
-              width: 95%
+              width: 100px
+              height: 100px
               overflow: hidden
           .item-wrapper
             flex: 1
             position: relative
             vertical-align: top
-            padding: 0 5px 5px 0
+            padding: 5px 5px 5px 0
+            box-sizing: border-box
             .item-name
               position: relative
               padding-top: 8px
@@ -313,18 +343,36 @@
                 text-overflow: ellipsis
                 display: -webkit-box
                 -webkit-line-clamp: 2
-                -webkit-box-orient: vertical
+                /*! autoprefixer: off */
+                -webkit-box-orient:vertical
+                /*! autoprefixer: on */
                 line-height: 1.2
+            .sku_line
+              display: flex
+              align-items: center
+              margin: 3px 10px 0 0
+              justify-content: space-between
+              font-size: 12px
+              .sku
+                position: relative
+                background: #f7f7f7
+                padding: 0 15px 0 5px
+                height: 20px
+                line-height: 20px
+                color: #666
+                flex: 1;
+                border-radius: 2px;
             .amountWrapper
               position: absolute
               display: inline-block
               width: 100%
-              bottom: 6px
+              bottom: 2px
               .price
                 display: inline-block
                 margin-top: 10px
-                color: #fb4741
+                color: #f2270c
                 font-size: 13px
+                font-weight: 700
               .cartcontrol
                 display: inline-block
                 float: right
@@ -388,7 +436,7 @@
           display: block
           font-size: 16px
           .price
-            color: #e4393c
+            color: #f2270c
         .savePrice
           display: block
           line-height: 1

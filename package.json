@@ -1,7 +1,7 @@
 {
-  "name": "artstore",
+  "name": "h5",
   "version": "1.0.0",
-  "description": "yihuyixi art store",
+  "description": "future tech h5",
   "author": "Alpha Tan <alpha8@vip.qq.com>",
   "private": true,
   "scripts": {
@@ -13,7 +13,9 @@
   "dependencies": {
     "axios": "^0.16.1",
     "better-scroll": "^0.1.15",
+    "element-ui": "^2.12.0",
     "js-base64": "^2.3.2",
+    "js-cookie": "^2.2.1",
     "vue": "^2.2.6",
     "vue-awesome-swiper": "2.4.2",
     "vue-axios": "^2.0.2",

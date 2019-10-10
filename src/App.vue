@@ -6,9 +6,8 @@
     <router-view v-if="!$route.meta.keepAlive"></router-view>
     <fixedfoot :items="items"></fixedfoot>
     <loading :show="loading.show" :text="loading.text"></loading>
-    <toast v-show="toast.show" :text="toast.text"></toast>
-    <gohome></gohome>
-    <task></task>
+    <toast v-show="toast.show" :text="toast.text" :icon="toast.icon"></toast>
+    <sku></sku>
   </div>
 </template>
 
@@ -16,8 +15,7 @@
 import fixedfoot from '@/components/fixedtoolbar/fixedfoot';
 import loading from '@/components/common/loading';
 import toast from '@/components/common/toast';
-import task from '@/components/common/task';
-import gohome from '@/components/fixedtoolbar/gohome';
+import sku from '@/components/good-detail/sku';
 import {fixFontSize} from '@/common/js/util';
 
 export default {
@@ -50,7 +48,8 @@ export default {
     toast() {
       return {
         show: this.$store.getters.showMsg,
-        text: this.$store.getters.messageText
+        text: this.$store.getters.messageText,
+        icon: this.$store.getters.messageType || ''
       };
     },
     loading() {
@@ -67,7 +66,7 @@ export default {
     }
   },
   components: {
-    fixedfoot, loading, toast, gohome, task
+    fixedfoot, loading, sku, toast
   }
 };
 </script>

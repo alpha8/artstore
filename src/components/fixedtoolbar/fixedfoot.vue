@@ -45,7 +45,7 @@
         text-align: center
         color: $color-darkgray
         &.active
-          color: $color-molv
+          color: $color-main
         .icon
           display: block
           padding-top: 5px

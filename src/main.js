@@ -12,14 +12,11 @@ import VueLazyload from 'vue-lazyload';
 Vue.use(VueLazyload);
 
 import App from './App';
-// import App from '@/components/xmas/App';
 import router from './router';
 import store from './store';
+import { getToken } from '@/common/js/auth';
 import { currency } from '@/common/js/util';
 
-// import MuseUI from 'muse-ui';
-// import 'muse-ui/dist/muse-ui.css';
-// Vue.use(MuseUI);
 import '@/components/common/styles/base.less';
 import infiniteScroll from '@/components/common/infiniteScroll';
 import * as flexbox from '@/components/common/flexbox';
@@ -30,26 +27,54 @@ const modules = {
 Object.keys(modules).forEach((key) => {
   Vue.component(modules[key].name, modules[key]);
 });
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+import locale from 'element-ui/lib/locale/lang/zh-CN'; // lang i18n
+Vue.use(ElementUI, { locale });
 
 Vue.filter('currency', currency);
 Vue.config.productionTip = false;
 import wx from 'weixin-js-sdk';
 
 /** 全局守卫 */
+const blackList = ['/my', '/cart']; // 重定向黑名单
 router.beforeEach((to, from, next) => {
+  if (getToken()) {
+    if (to.path === '/login') {
+      next({ path: '/' });
+    } else {
+      if (!store.getters.name) {
+        store.dispatch('GetInfo').then(res => { // 拉取用户信息
+          next();
+        }).catch((err) => {
+          console.error(err);
+          store.dispatch('FedLogOut').then(() => {
+            next({ path: '/' });
+          });
+        });
+      } else {
+        next();
+      }
+    }
+  } else {
+    if (blackList.indexOf(to.path) !== -1) {
+      next('/login');
+    } else {
+      next();
+    }
+  }
+});
+/* router.beforeEach((to, from, next) => {
   let shareData = {
-    title: '[一虎一席茶生活美学商城] 一站式优品商城，品味脱凡',
-    desc: '1200款精美茶器、300套茶席佳作、茶室专业配画、200款好茶老茶.【每年递增100%】',
+    title: '',
+    desc: '',
     link: 'http://' + location.host + location.pathname,
-    imgUrl: 'http://www.yihuyixi.com/ps/download/5a60046ae4b0a5130574a5fc'
+    imgUrl: ''
   };
   wx.onMenuShareTimeline(shareData);
   wx.onMenuShareAppMessage(shareData);
-  // if (to && (to.name === 'sharedetail' || to.name === 'firstdetail' || to.name === 'tuandetail' || to.name === 'articledetail' || to.name === 'good' || to.name === 'seckillDetail')) {
-  //   document.body.scrollTop = document.documentElement.scrollTop = 0;
-  // }
   next();
-});
+}); */
 
 /* eslint-disable no-new */
 new Vue({

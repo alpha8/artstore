@@ -5,12 +5,12 @@
         <div class="top_list" ref="topList">
           <div class="top_item" v-for="channel in currentPageItems(page)" :class="channel.css">
             <div v-if="!channel.url" class="top_url" @click.stop.prevent="doAction(channel)">
-              <i :class="channel.icon" class="top_icon"></i>
-              <h3 class="top_name"><div class="text" :class="{'highlight': channel.highlight}">{{channel.name}}<i></i></div></h3>
+              <img :src="channel.icon" class="top_icon" />
+              <span class="top_name">{{channel.name}}</span>
             </div>
             <router-link v-else :to="channel.url" class="top_url">
-              <i :class="channel.icon" class="top_icon"></i>
-              <h3 class="top_name"><div class="text" :class="{'highlight': channel.highlight}">{{channel.name}}<i></i></div></h3>
+              <img :src="channel.icon" class="top_icon" />
+              <span class="top_name">{{channel.name}}</span>
             </router-link>
           </div>
         </div>
@@ -81,33 +81,38 @@
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
+  @require '../../common/stylus/variables'
   .swiper-container-horizontal > .swiper-pager
     left: 0
     bottom: 0
     width: 100%
     font-size:0
     height: 16px
-    border-top: 1px solid rgba(7, 17, 27, 0.1)
-    border-bottom: 1px solid rgba(7, 17, 27, 0.1)
-    background: #f3f5f7
+    line-height: 16px
     .swiper-pagination-bullet
-      width: 30px
-      height: 3px
-      background: #ccc
-      opacity: .6
-      border-radius: 20px
-      margin: 6.5px 3px 7.5px 0
+      width: 5px;
+      height: 5px;
+      opacity: 1;
+      background-color: rgba(0,0,0,.2);
+      box-sizing: border-box;
+      border-radius: 50%;
+      display: inline-block;
+      vertical-align: middle;
+      margin: 0 3px;
       &.swiper-pagination-bullet-active
-        background: #00a0dc
-        width: 30px
-        border-radius: 20px
+        background-color: $color-main;
+        width: 10px;
+        height: 5px;
+        border-radius: 3px;
+        opacity: .7;
 </style>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import '../../common/stylus/mixin';
   @require '../../common/stylus/variables'
   .swiper-container
-    height: 147px
+    height: 9rem
+    background-color: #fff
     .slide
       display: block
       width: 100%
@@ -119,7 +124,6 @@
   .top_wrapper
     position: relative
     width: 100%
-    height: auto
     white-space: nowrap
     overflow: hidden
     background-color: #fff
@@ -127,7 +131,7 @@
       position: relative
       display: flex
       flex-wrap: wrap
-      height: 129px
+      height: 8.1rem
       box-sizing: border-box
       overflow: hidden
       &.more
@@ -135,62 +139,19 @@
       .top_item
         display: block
         width: 25%
-        padding: 7px 0
-        height: 65px
-        border-bottom: 1px solid rgba(7, 17, 27, 0.1)
-        border-right: 1px solid rgba(7, 17, 27, 0.1)
         text-align: center
         box-sizing: border-box
         &:nth-child(4n)
           border-right: none
-        &.nobottom
-          border-bottom: 1px solid rgba(7, 17, 27, 0.1)
         .top_url
           display: block
           .top_icon
-            display: block
-            width: 35px
-            height: 35px
-            margin: 0 auto
-            font-size: $fontsize-homeicon
-            color: $color-molv
-            &.big
-              font-size: $fontsize-homebigicon
-            &.icon-teapot_kitchen
-              font-size: 34px
-            &.icon-file
-              height: 33px
-              padding-top: 2px
+            width: 2rem;
+            margin-top: .5rem;
+            vertical-align: top;
           .top_name
-            position: relative
-            display: block
-            width: 100%
-            font-size: $fontsize-small
-            color: $color-darkgray
-            text-align: center
-            line-height: 1.2
-            margin-top: 1px
-            font-weight: 400
-            .text
-              margin: 0 auto
-              position: relative
-              text-align: center
-              overflow: hidden
-              display: inline-block
-              word-wrap: break-word
-              word-break: break-all
-              text-overflow: ellipsis
-              -webkit-line-clamp: 1
-              -webkit-box-orient: vertical
-              max-width: 85%
-              &.highlight
-                padding-right: 9px
-                > i
-                  position: absolute
-                  width: 6px
-                  height: 6px
-                  border-radius: 50%
-                  background: #ff463c
-                  right: 0
-                  top: 0
+            display: block;
+            margin-top: .3rem;
+            font-size: .6rem;
+            color: #666;
 </style>

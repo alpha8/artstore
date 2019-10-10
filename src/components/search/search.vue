@@ -17,7 +17,7 @@
       <div class="right"><span @click.stop.prevent="search">搜索</span><span @click.stop.prevent="showSidebar">筛选</span></div>
     </div>
     <div class="sortbar-wrapper">
-      <div class="sortbar-item" :class="{'active': sort === 'scoreSort'}" @click.stop.prevent="fireSort('scoreSort')">专业评分</div>
+      <div class="sortbar-item" :class="{'active': sort === 'scoreSort'}" @click.stop.prevent="fireSort('scoreSort')">综合</div>
       <div class="sortbar-item" :class="{'active': sort === 'saleSort'}" @click.stop.prevent="fireSort('saleSort')">销量</div>
       <div class="sortbar-item" :class="{'active': sort === 'priceSort'}" @click.stop.prevent="fireSort('priceSort')"><span class="sort">价格<i class="arrow_up" :class="{'on': priceSort === '2'}"></i><i class="arrow_down" :class="{'on': priceSort === '1'}"></i></span></div>
       <div class="sortbar-item" :class="{'active': sort === 'commentSort'}" @click.stop.prevent="fireSort('commentSort')">上架时间</div>
@@ -33,7 +33,6 @@
               <div class="product-title" @click.stop.prevent="goGoodDetail(product)">{{fillName(product.name)}}</div>
               <div class="sellpoint" v-if="product.sellPoint">{{product.sellPoint}}</div>
               <div class="product-price"><div class="num">{{product.price | currency}}</div><div class="salesCount">(已售:{{product.stock && product.stock.salesCount || 0}}件)</div></div>
-              <div class="icon" @click.stop.prevent="mark(product)"><i :class="favorited(product)"></i></div>
             </div>
           </mu-flexbox-item>
         </mu-flexbox>
@@ -42,15 +41,12 @@
       </div>
     </div>
     <sidebar ref="sidebar" @fireAction="search" @fireReset="clearSearch"></sidebar>
-    <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import Vue from 'vue';
-  import {reduceGoodsName} from '@/common/js/util';
   import sidebar from '@/components/search/sidebar';
-  import gotop from '@/components/fixedtoolbar/gotop';
   import api from '@/api/api';
 
   export default {
@@ -76,10 +72,6 @@
     },
     activated() {
       this.show();
-      // let reload = this.$route.query.reload;
-      // if (reload === '0') {
-      //   return;
-      // }
       this._reset();
       this.keyword = this.$route.query.key || '';
       let parentCategory = this.$route.query.parentCat;
@@ -125,20 +117,6 @@
     deactivated() {
       this.$refs.sidebar.reset();
       this.hide();
-    },
-    // beforeRouteLeave(to, from, next) {
-    //   let queryJson = this.$route.query;
-    //   if (queryJson.reload) {
-    //     queryJson.reload = 0;
-    //     this.$router.replace({name: 'search', query: queryJson});
-    //   }
-    //   next();
-    // },
-    mounted() {
-      this.scroller = this.$refs.productWrapper;
-      window.onscroll = () => {
-        this.scrollY = window.pageYOffset;
-      };
     },
     methods: {
       fetchData(force) {
@@ -199,7 +177,7 @@
         }
       },
       fillName(name) {
-        return reduceGoodsName(name);
+        return name;
       },
       getThumbnail(item) {
         let pic = item.pictures;
@@ -303,75 +281,10 @@
       },
       loadMore() {
         this.fetchData();
-      },
-      goTop() {
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
-      },
-      favorited(good) {
-        let uid = this.$store.getters.getUserInfo.userId;
-        let ids = good.collected || [];
-        let flag = false;
-        for (let i = 0, len = ids.length; i < len; i++) {
-          if (uid === ids[i]) {
-            flag = true;
-          }
-        }
-        if (typeof good.marked === 'undefined') {
-          Vue.set(good, 'marked', false);
-        }
-        if (flag) {
-          good.marked = true;
-          return 'icon-favorite';
-        } else {
-          good.marked = false;
-          return 'icon-heart';
-        }
-      },
-      mark(good) {
-        let uid = this.$store.getters.getUserInfo.userId;
-        if (!uid) {
-          this.$store.dispatch('openToast', '请先登录！');
-          return;
-        }
-        let params = {
-          userId: uid,
-          type: 1,
-          artworkId: good.id,
-          price: good.price,
-          name: good.name,
-          icons: good.pictures,
-          fromCart: false
-        };
-        if (good.marked) {
-          delete params.name;
-          delete params.icons;
-          delete params.price;
-          // 已关注，再次点击取消关注
-          api.unmark(params).then(response => {
-            if (response.result === 0) {
-              good.collected = [];
-              good.marked = false;
-              this.favorited(good);
-            }
-          });
-          return;
-        }
-        api.mark(params).then(response => {
-          if (response.result === 0) {
-            if (good.collected) {
-              good.collected.push(uid);
-            } else {
-              good.collected = [uid];
-            }
-            good.marked = true;
-            this.favorited(good);
-          }
-        });
       }
     },
     components: {
-      sidebar, gotop
+      sidebar
     }
   };
 </script>

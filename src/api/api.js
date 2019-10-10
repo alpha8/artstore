@@ -1,6 +1,8 @@
 /* jshint esnext: true */
 import axios from 'axios';
-import {reportTrackEvent} from '@/common/js/util';
+import { Message, MessageBox } from 'element-ui';
+import store from '../store';
+import {getToken, setToken, removeToken} from '@/common/js/auth';
 
 // axios 配置
 axios.defaults.timeout = 90000;
@@ -9,9 +11,12 @@ axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 
 // POST传参序列化
 axios.interceptors.request.use((config) => {
-  if (config.method === 'post') {
-    config.data = JSON.stringify(config.data);
+  if (store.getters.token) {
+    config.headers['Authorization'] = getToken(); // 让每个请求携带自定义token 请根据实际情况自行修改
   }
+  // if (config.method === 'post') {
+  //   config.data = JSON.stringify(config.data);
+  // }
   return config;
 }, (error) => {
   console.log('错误的传参');
@@ -19,9 +24,25 @@ axios.interceptors.request.use((config) => {
 });
 
 // 返回状态判断
-axios.interceptors.response.use((res) => {
-  return res;
-}, (error) => {
+axios.interceptors.response.use((response) => {
+  const res = response.data;
+  if (res && res.code == undefined) {
+    return response;
+  }
+  // 401:未登录;
+  if (res.code === 401 || res.code === 403) {
+    MessageBox.confirm('你已被登出，可以取消继续留在该页面，或者重新登录', '确定登出', {
+      confirmButtonText: '重新登录',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      store.dispatch('FedLogOut').then(() => {
+        location.reload(); // 为了重新实例化vue-router对象 避免bug
+      });
+    });
+  }
+  return response;
+}, (error) => {  
   console.log('网络异常, err=' + error);
   return Promise.reject(error);
 });
@@ -86,26 +107,100 @@ export function doPut(url, params) {
 
 export default {
   CONFIG: {
-    APPNAME: '一虎一席茶生活美学商城',
-    NICKNAME: '一虎一席',
+    APPNAME: '未来科技电商平台',
+    NICKNAME: '未来科技',
+    ctx: 'http://localhost:8088',
     cmsCtx: 'http://www.yihuyixi.com/cms',
     wxCtx: 'http://www.yihuyixi.com/wxservice',
-    webCtx: 'http://www.yihuyixi.com/yihu',
-    ossCtx: 'http://www.yihuyixi.com/oss',
-    webspreadCtx: 'http://www.yihuyixi.com/webspread',
-    auctionCtx: 'http://www.yihuyixi.com/cmsAuction',
     seckillCtx: 'http://www.yihuyixi.com/goodsKill',
-    psCtx: 'https://imgcdn.yihuyixi.com/ps/download/',
-    cdnCtx: 'https://imgcdn.yihuyixi.com',
     defaultImg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAAMFBMVEX///+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpufk+pAAAAD3RSTlMAESIzRFVmd4iZqrvM3e5GKvWZAAABv0lEQVRoge2YP1ICMRSH2R0UYZiRwlI5glfAylZP4G5twxGwt0BPgKVDs44XAFsbqW32CFTCiEAkhF3235DJyxud0d9XZRLyTXjJe9ndUgkAAAAAAAAAAADgx3DfhI5nI2Fd6xNfRsJDvVAYCt/7uwlNhQ+aXwQQ/hmhc/14xiq8EmLWYBTuyYx4yoydN+jCphRO0kNl8UIXelI4Tw+dqLJAE3alcJkOYqCCwCasrHpmZGE7/5dbsuvOalOmyQEnlF2fVOG+nD1MDlRVcb2hHuzOqtSnQugp4ZQqdG9fL5P97nhT/32m4hBfXh89HmE3Ei557pSyxa1XKGwmfEsO4YBFeBSfm4rNRR8LnXAYNVsswnpcEFXaWQsDsdi0aikfNYYyeX3VbAuOFa6yWYzWrTjtrITra0oFMfvMSBOuN1YFscchdNXG+tFarYXHaq4M4imLMFBzZRAHHMKDzdxFNu2owvjk+aULDuG2/I0yaUcUbvdhUsv5CEJn+zo173AIC1ZlJyxYlZWwvNtnLsylhq1Q94ZrKqxqfMZCj1l4P2YW9nU+U6F2gaZCPb8rZP8qwv7dBgAAAAAAAAAAAP+Lb4Qtq0R4e5WOAAAAAElFTkSuQmCC',
-    wxqrcode: 'http://imgcdn.yihuyixi.com/ps/download/5bc5969de4b015b6bd8b5b36',
     usericon: 'http://imgcdn.yihuyixi.com/ps/download/5ac3557de4b05b85527caee3',
-    userAvatar: 'http://imgcdn.yihuyixi.com/ps/download/5959abcae4b00faa50475a10',
-    CoinSourceMapping: {
-      'article': '文章',
-      'home': '首页',
-      'product': '商品详情'
-    }
+    userAvatar: 'http://imgcdn.win-berry.com/1568716692050.png?imageView2/2/w/750/h/500',
+    logo: 'http://imgcdn.win-berry.com/1570705317649.png'
+  },
+
+  /**
+   * 加入购物车
+   */
+  addToCart(data) {
+    return doPost(this.CONFIG.ctx + '/cart/add', data);
+  },
+
+  /**
+   * 获取购物车列表
+   */
+  getCartList() {
+    return doGet(this.CONFIG.ctx + '/cart/list');
+  },
+
+  /**
+   * 更新购物车商品SKU规格
+   */
+  updateCartSpec(data) {
+    return doPost(this.CONFIG.ctx + '/cart/update/attr', data);
+  },
+
+  /**
+   * 更新购物车商品数量
+   */
+  updateCartQty(params) {
+    return doGet(this.CONFIG.ctx + '/cart/update/quantity', params);
+  },
+
+  /**
+   * 获取某个商品的SKU列表
+   */
+  getProductSkuSpecs(productId) {
+    return doGet(this.CONFIG.ctx + '/cart/getProduct/' + productId);
+  },
+
+  /**
+   * 删除购物车中某个商品
+   */
+  deleteCartProducts(params) {
+    return doPost(this.CONFIG.ctx + '/cart/delete', params);
+  },
+
+  /**
+   * 清空购物车
+   */
+  clearCart() {
+    return doPost(this.CONFIG.ctx + '/cart/clear');
+  },
+
+  /**
+   * 获取某个用户购物车中商品的促销信息
+   */
+  getCartPromotion() {  
+    return doPost(this.CONFIG.ctx + '/cart/list/promotion');
+  },
+
+  /**
+   * 添加会员商品收藏
+   */
+  addProductCollect(data) {  
+    return doPost(this.CONFIG.ctx + '/member/collection/addProduct', data);
+  },
+
+  /**
+   * 删除会员商品收藏
+   */
+  removeProductCollect(memberId, productId) {  
+    return doPost(`${this.CONFIG.ctx}/member/collection/deleteProduct?memberId=${memberId}&productId=${productId}`);
+  },
+
+  /**
+   * 显示会员商品收藏列表
+   */
+  getProductCollect(memberId) {  
+    return doGet(this.CONFIG.ctx + '/member/collection/listProduct/' + memberId);
+  },
+
+  /**
+   * 显示会员商品收藏列表
+   */
+  existCollect(memberId, productId) {  
+    return doGet(`${this.CONFIG.ctx}/member/collection/exist/${memberId}/${productId}`);
   },
 
   /**
@@ -138,99 +233,52 @@ export default {
     * 申请退款
     */
   refund(params) {
-    return doPost(this.CONFIG.cmsCtx + '/order/user/refund', params);
+    return doPost(this.CONFIG.ctx + '/order/user/refund', params);
   },
 
   /**
     * 取消退款申请
     */
   cancelRefund(params) {
-    return doPost(this.CONFIG.cmsCtx + '/order/user/cancelRefund', params);
+    return doPost(this.CONFIG.ctx + '/order/user/cancelRefund', params);
   },
 
   /**
     * 设置订单收货地址(用于拍卖业务)
     */
   updateOrderAddress(params) {
-    return doPost(this.CONFIG.cmsCtx + '/order/address', params);
-  },
-
-  /** 获取所有商品列表 */
-  GetGoods(params) {
-    return doGet(this.CONFIG.cmsCtx + '/artwork/list', params);
-  },
-  /** 查询单个商品详情 */
-  GetGood(id) {
-    return doGet(this.CONFIG.webCtx + '/artwork/' + id + '?type=productdetail&stat=1');
-  },
-  /** 查询单个商品详情 */
-  GetGoodDetail(id, params) {
-    return doGet(this.CONFIG.webCtx + '/artwork/' + id, params);
-  },
-  /** 查询产品的关联产品列表 */
-  GetRelatedGoods(params) {
-    return doGet(this.CONFIG.cmsCtx + '/artwork/list/related', params);
-  },
-  /** 获取所有商品分类 */
-  GetCategories(params) {
-    return doGet(this.CONFIG.cmsCtx + '/datadic/childrens?parentPath=cms/basedata/tea/type', params);
-  },
-  /** 获取商品分类统计值 */
-  getTeaTotal() {
-    return doGet(this.CONFIG.cmsCtx + '/service/tea/total?commodityStatesId=2');
+    return doPost(this.CONFIG.ctx + '/order/address', params);
   },
   /** 查询数据字典配置值 */
   GetConfigList(parent) {
     return doGet(this.CONFIG.cmsCtx + '/datadic/childrens?parentPath=' + (parent || ''));
   },
 
-  /**
-   * 加入收藏
-   */
-  mark(params) {
-    return doPost(this.CONFIG.cmsCtx + '/user/collect', params);
+  /** 获取所有商品列表 */
+  GetGoods(params) {
+    return doGet(this.CONFIG.ctx + '/product/list', params);
   },
-
-  /**
-   * 取消收藏
-   */
-  unmark(params) {
-    return doDelete(this.CONFIG.cmsCtx + '/user/collect', params);
+  /** 查询单个商品详情 */
+  GetGoodDetail(id) {
+    return doGet(this.CONFIG.ctx + '/product/detail/' + id);
   },
-
-  /**
-   * 获取用户商品收藏
-   */
-  getUserCollect(params) {
-    return doGet(this.CONFIG.webCtx + '/user/artwork/collects', params);
-  },
-
-  /**
-   * 删除指定商品收藏
-   */
-  removeCollect(params) {
-    return doDelete(this.CONFIG.webCtx + '/user/collect', params);
+  /** 获取所有商品分类 */
+  GetCategories() {
+    return doGet(this.CONFIG.ctx + '/home/list/withChildren');
   },
 
   /**
    * 获取用户足迹
    */
   getFootprint(params) {
-    return doGet(this.CONFIG.webCtx + '/history/list', params);
+    return doGet(this.CONFIG.ctx + '/member/readHistory/list', params);
   },
 
   /**
    * 删除用户足迹
    */
-  removeFootprint(oid) {
-    return doDelete(this.CONFIG.webCtx + '/history?id=' + oid);
-  },
-
-  /**
-   * 清空用户足迹
-   */
-  clearFootprint(userId) {
-    return doDelete(this.CONFIG.webCtx + '/history/clear?userId=' + userId);
+  removeFootprint(data) {
+    return doPost(this.CONFIG.ctx + '/member/readHistory/delete', data);
   },
 
   /**
@@ -278,29 +326,36 @@ export default {
    /**
     * 获取用户收货地址列表
     */
-  getAddressList(userId) {
-    return doGet(this.CONFIG.cmsCtx + '/user/addressList?userId=' + userId);
+  getAddressList() {
+    return doGet(this.CONFIG.ctx + '/member/address/list');
   },
 
    /**
     * 新增收货地址
     */
   addAddress(address) {
-    return doPost(this.CONFIG.cmsCtx + '/user/address', address);
+    return doPost(this.CONFIG.ctx + '/member/address/add', address);
   },
 
    /**
     * 更新收货地址
     */
-  updateAddress(address) {
-    return doPut(this.CONFIG.cmsCtx + '/user/address', address);
+  updateAddress(id, address) {
+    return doPost(this.CONFIG.ctx + '/member/address/update/' + id, address);
   },
 
    /**
     * 删除收货地址
     */
-  removeAddress(address) {
-    return doDelete(this.CONFIG.cmsCtx + '/user/address', address);
+  removeAddress(id) {
+    return doPost(this.CONFIG.ctx + '/member/address/delete/' + id);
+  },
+
+   /**
+    * 查询收货地址
+    */
+  getAddress(id) {
+    return doGet(this.CONFIG.ctx + '/user/address' + id);
   },
 
    /**
@@ -334,22 +389,38 @@ export default {
    /**
     * 发送手机验证码
     */
-  getVerifyCode(mobile) {
-    return doGet(this.CONFIG.webCtx + '/user/code?mobileNumber=' + mobile);
+  getVerifyCode(tel) {
+    return doGet(this.CONFIG.ctx + '/sso/getAuthCode?telephone=' + tel);
   },
 
-   /**
-    * 验证手机验证码
-    */
-  verifyCode(mobile, code) {
-    return doGet(this.CONFIG.webCtx + '/user/verificationCodeByMobile?mobileNumber=' + mobile + '&code=' + code);
+  /**
+   * 用户注册或登录
+   */
+  ssoLogin(data) {
+    return doPost(this.CONFIG.ctx + '/sso/login', data);
   },
 
-   /**
-    * 绑定手机号码
-    */
-  bindPhone(params) {
-    return doPost(this.CONFIG.cmsCtx + '/user/update/mobile', params);
+  /**
+   * 获取当前登录的用户信息
+   */
+  getInfo() {
+    return doGet(this.CONFIG.ctx + '/sso/info');
+  },
+
+  /**
+   * 注销或登出
+   */
+  logout() {
+    return doPost(this.CONFIG.ctx + '/sso/logout');
+  },
+
+  /**
+   * 刷新token
+   * @param  {[type]} params [description]
+   * @return {[type]}        [description]
+   */
+  refreshToken() {
+    return doGet(this.CONFIG.ctx + '/sso/token/refresh');
   },
 
    /**
@@ -377,63 +448,63 @@ export default {
     * 秒杀列表
     */
   getSeckills(params) {
-    return doGet(this.CONFIG.seckillCtx + '/seckill/list', params);
+    return doGet(this.CONFIG.ctx + '/seckill/list', params);
   },
 
    /**
     * 秒杀单品详情
     */
   getSeckillDetail(id, params) {
-    return doGet(this.CONFIG.seckillCtx + '/seckill/' + id + '/detail', params);
+    return doGet(this.CONFIG.ctx + '/seckill/' + id + '/detail', params);
   },
 
    /**
     * 秒杀单品详情及用户是否参与秒杀
     */
   getSeckillDetailAndUser(id, userId, params) {
-    return doGet(`${this.CONFIG.seckillCtx}/seckill/${id}/detail/${userId}`, params);
+    return doGet(`${this.CONFIG.ctx}/seckill/${id}/detail/${userId}`, params);
   },
 
    /**
     * 获取秒杀URL
     */
   getSeckillUrl(seckillId) {
-    return doPost(this.CONFIG.seckillCtx + '/seckill/' + seckillId + '/exposer');
+    return doPost(this.CONFIG.ctx + '/seckill/' + seckillId + '/exposer');
   },
 
    /**
     * 执行秒杀
     */
   killGoods(seckillId, md5, userLevel) {
-    return doPost(this.CONFIG.seckillCtx + '/seckill/' + seckillId + '/' + md5 + '/execution/v2?userLevel=' + userLevel);
+    return doPost(this.CONFIG.ctx + '/seckill/' + seckillId + '/' + md5 + '/execution/v2?userLevel=' + userLevel);
   },
 
    /**
     * 秒杀成功列表
     */
   getSuccessSeckills(params) {
-    return doGet(this.CONFIG.seckillCtx + '/seckill/successkilled/list', params);
+    return doGet(this.CONFIG.ctx + '/seckill/successkilled/list', params);
   },
 
   /**
    * 取消秒杀订单
    */
   cancelSeckillOrder(params) {
-    return doPost(this.CONFIG.seckillCtx + '/seckill/' + params.seckillId + '/cancel', params);
+    return doPost(this.CONFIG.ctx + '/seckill/' + params.seckillId + '/cancel', params);
   },
 
   /**
    * 结束秒杀订单
    */
   finishSeckill(seckillId, orderNo) {
-    return doPost(`${this.CONFIG.seckillCtx}/seckill/${seckillId}/finish/v2?orderNo=${orderNo}`);
+    return doPost(`${this.CONFIG.ctx}/seckill/${seckillId}/finish/v2?orderNo=${orderNo}`);
   },
 
    /**
     * 当前时间
     */
   getServerTime() {
-    return doGet(this.CONFIG.seckillCtx + '/seckill/time/now');
+    return doGet(this.CONFIG.ctx + '/seckill/time/now');
   },
 
    /**
@@ -507,203 +578,18 @@ export default {
     return doGet(this.CONFIG.cmsCtx + '/comment/list', params);
   },
 
-   /**
-    * 获取拍卖列表
-    */
-  getAuctions(params) {
-    return doGet(this.CONFIG.auctionCtx + '/auctionList', params);
-  },
-
-   /**
-    * 查询指定用户参与的所有拍卖
-    */
-  getAuctionsByUID(params) {
-    return doGet(this.CONFIG.auctionCtx + '/auctionListByUserNameId', params);
-  },
-
-   /**
-    * 获取单个拍品
-    */
-  getAuction(id, params) {
-    return doGet(this.CONFIG.auctionCtx + '/auction/' + id, params);
-  },
-
-   /**
-    * 出价
-    */
-  bidPrice(params) {
-    return doPost(this.CONFIG.auctionCtx + '/auctionProductPriceRecord', params);
-  },
-
-   /**
-    * 获取出价列表
-    */
-  getBidPrices(params) {
-    return doGet(this.CONFIG.auctionCtx + '/auctionProductPriceRecordList', params);
-  },
-
-  /**
-   * 查询文章详情
-   */
-  getArticleDetail(id, params) {
-    return doGet(this.CONFIG.cmsCtx + '/article/' + id, params);
-  },
-
-  /**
-   * 获取文章列表
-   */
-  getArticles(params) {
-    return doGet(this.CONFIG.cmsCtx + '/article/list', params);
-  },
-
-  /**
-   * 今日统计数据
-   */
-  stats(params) {
-    return doGet(this.CONFIG.cmsCtx + '/user/allstat', params);
-  },
-
-  /**
-   * 今日商品统计数据
-   */
-  topGoods(params) {
-    return doGet(this.CONFIG.cmsCtx + '/user/topbehavior', params);
-  },
-
-  /**
-   * 今日商品访问详情
-   */
-  goodsPvDetail(params) {
-    return doGet(this.CONFIG.cmsCtx + '/user/listbehavior', params);
-  },
-
-  /**
-   * 首单特惠商品列表
-   */
-  firstpayGoods(params) {
-    return doGet(this.CONFIG.webspreadCtx + '/specialfield/list', params);
-  },
-
-  /**
-   * 查询单个首单特惠商品
-   */
-  getFirstpayGood(id, params) {
-    return doGet(this.CONFIG.webspreadCtx + '/specialfield/get/' + id, params);
-  },
-
-  /**
-   * 创建砍价预订单
-   */
-  createSharePreOrder(params) {
-    return doPost(this.CONFIG.webspreadCtx + '/spreadcut/add?stat=1&type=createbargain&pid=' + (params.fieldId || ''), params);
-  },
-
-  /**
-   * 查询砍价列表
-   */
-  getShareCuttings(params) {
-    return doPost(this.CONFIG.webspreadCtx + '/spreadcut/check', params);
-  },
-
-  /**
-   * 查询我的砍价访客列表
-   */
-  getCutVisitList(params) {
-    if (params) {
-      reportTrackEvent('bargain_list', {'cutorderid': params.cutOrderId, 'currentpage': params.currentPage, 'pagesize': params.pageSize});
-    }
-    return doGet(this.CONFIG.webspreadCtx + '/spreadcut/list/all', params);
-  },
-
-  /**
-   * 查询我的砍价
-   */
-  getMyShareOrder(params) {
-    return doGet(this.CONFIG.webspreadCtx + '/spreadcut/list', params);
-  },
-
-  /**
-   * 创建发起和参加拼团
-   */
-  createTuanOrder(params) {
-    return doPost(this.CONFIG.webspreadCtx + '/spreadteam/add?stat=1&type=createtuan&pid=' + (params.fieldId || ''), params);
-  },
-
-  /**
-   * 查询拼团列表
-   */
-  getTuanList(params) {
-    return doGet(this.CONFIG.webspreadCtx + '/spreadteam/check', params);
-  },
-
-  /**
-   * 查询我的拼团列表
-   */
-  getMyTuanList(params) {
-    return doGet(this.CONFIG.webspreadCtx + '/spreadteam/list', params);
-  },
-
-  /**
-   * 删除指定的拼团
-   */
-  deleteTuan(orderNo) {
-    return doDelete(this.CONFIG.cmsCtx + '/order/delete/' + orderNo);
-  },
-
-  /**
-   * 查询拼团的cms订单信息
-   */
-  getCmsOrderInfo(params) {
-    return doGet(this.CONFIG.cmsCtx + '/order', params);
-  },
-
   /**
    * 查询首页栏目列表数据
    */
   getHomeList(params) {
-    return doGet(this.CONFIG.cmsCtx + '/artwork/home/v2', params);
+    return doGet(this.CONFIG.ctx + '/home/content', params);
   },
 
   /**
-   * 查询推荐的朋友
+   * 获取推荐的商品列表
    */
-  getYourFriends(params) {
-    return doGet(this.CONFIG.cmsCtx + '/user/friend/visit', params);
-  },
-
-  /**
-   * 查询推荐的朋友中，购买过的买家
-   */
-  getYourBuyers(params) {
-    return doGet(this.CONFIG.cmsCtx + '/user/friend/order', params);
-  },
-
-  /**
-   * 查询推荐的朋友中，购买过的买家的订单列表
-   */
-  getYourBuyerOrders(params) {
-    return doGet(this.CONFIG.cmsCtx + '/front/order/list', params);
-  },
-
-  /**
-   * 待办项列表
-   */
-  getTodoList(uid, params) {
-    return doGet(this.CONFIG.webspreadCtx + '/user/schedule/' + uid, params);
-  },
-
-  /**
-   * 所有拼砍中的订单
-   */
-  getWIPBargains(params) {
-    return doGet(this.CONFIG.webspreadCtx + '/spreadcut/list', params);
-  },
-
-  /**
-   * 所有拼团中的订单
-   */
-  getWIPTuans(params) {
-    return doGet(this.CONFIG.webspreadCtx + '/spreadteam/listcreate', params);
+  getRecommendProducts(params) {
+    return doGet(this.CONFIG.ctx + '/home/recommendProductList', params);
   },
 
   /**
@@ -725,26 +611,5 @@ export default {
    */
   getDeliveryLog(params) {
     return doGet(this.CONFIG.cmsCtx + '/deliverlog/list', params);
-  },
-
-  /**
-   * 获取我的金币列表
-   */
-  getCoinList(params) {
-    return doGet(this.CONFIG.cmsCtx + '/user/coin/list', params);
-  },
-
-  /**
-   * 老用户获取金币
-   */
-  getCoin(params) {
-    return doPost(this.CONFIG.cmsCtx + '/user/coin', params);
-  },
-
-  /**
-   * 查询自动售卖机订单信息
-   */
-  getVendingOrder(preOrderId) {
-    return doGet(this.CONFIG.ossCtx + '/preorder/get/' + preOrderId);
   }
 };

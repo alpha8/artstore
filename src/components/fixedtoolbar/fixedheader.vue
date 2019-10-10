@@ -101,6 +101,7 @@
     .title
       flex: 1
       color: #666
+      font-size: 16px
     .right
       flex: 0 0 30px
       padding-right: 8px

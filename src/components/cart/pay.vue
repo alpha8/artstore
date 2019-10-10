@@ -1,16 +1,16 @@
 <template>
   <div class="wxpay">
     <fixedheader title="确认订单" ref="header"></fixedheader>
-    <div class="address-wrap" v-if="!selfservice">
-      <div class="addressNull" v-show="!defaultAddress || !defaultAddress.address">
-        <h3 @click.stop.prevent="showAddressList">！请填写收货地址</h3>
-      </div>
-      <div class="address-default address-border" v-show="defaultAddress && defaultAddress.address" @click.stop.prevent="showAddressList">
+    <div class="address-wrap" v-if="!selfservice">      
+      <div class="address-default address-border" v-if="hasDefaultAddress" @click.stop.prevent="showAddressList">
         <h3>收货地址</h3>
         <ul>
-          <li>{{(defaultAddress.city || '') + defaultAddress.address}}</li>
-          <li><strong>{{defaultAddress.name}}</strong><span class="mobile">{{defaultAddress.mobile}}</span></li>
+          <li>{{getFullAddress}}</li>
+          <li><strong>{{defaultAddress.name}}</strong><span class="mobile">{{defaultAddress.phoneNumber | mixPhone}}</span></li>
         </ul>
+      </div>
+      <div class="addressNull" v-else>
+        <h3 @click.stop.prevent="showAddressList">！请填写收货地址</h3>
       </div>
     </div>
     <div class="pay" ref="pay" :class="{'notop': selfservice}">
@@ -33,12 +33,12 @@
           </li>
         </ul>
         <ul class="shop-info">
-          <li class="discount change" @click.stop.prevent="selectCoupon" v-show="!isVendingOrder">
-            <strong>折扣券：</strong>
+          <li class="discount change" @click.stop.prevent="selectCoupon">
+            <strong>优惠券：</strong>
             <span v-if="availCoupons.length">{{usedDiscount}}</span>
             <span v-else class="disabled">无可用</span>
           </li>
-          <li class="coin" v-show="canUseCoin && !isVendingOrder">
+          <li class="coin">
             <strong>金币：<i class="coin-tips">{{coinTips}}</i></strong>
             <em @click.stop.prevent="toggleUseCoin">
               <i class="icon icon-check_circle" :class="{'on': useCoin}"></i>使用金币</i>
@@ -46,20 +46,16 @@
           </li>
           <li>
             <strong>是否自提：</strong>
-            <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span><span v-if="isVendingOrder">售卖机取货</span><span v-else-if="selfservice">线下自提</span></span>
+            <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span><span v-if="selfservice">线下自提</span></span>
           </li>
           <li class="shipping" v-show="!selfservice">
             <strong>配送方式：</strong>
             <span>快递</span>
           </li>
-          <li class="shipping" v-show="defaultAddress && defaultAddress.address && !selfservice">
+          <li class="shipping" v-show="!selfservice">
             <strong>快递费：</strong>
             <span>{{0 | currency}} (包邮)</span>
           </li>
-         <!--  <li class="checkout-item change">
-            <strong>发票信息</strong>
-            <span>明细</span>
-          </li> -->
         </ul>
         <split></split>
         <ul class="shop-info">
@@ -73,15 +69,15 @@
             <span class="label">商品总额：</span>
             <span class="totalPrice">{{totalFee | currency}}</span>
           </p>
-          <p class="price" v-show="!isVendingOrder">
+          <p class="price">
             <span class="label">优惠券抵扣：</span>
             <span class="totalPrice">{{couponValue | currency}}</span>
           </p>
-          <p class="price" v-show="discount && !isVendingOrder">
+          <p class="price" v-show="discount">
             <span class="label">折扣券抵扣：</span>
             <span class="totalPrice">{{discount | currency}}</span>
           </p>
-          <p class="price" v-show="useCoin && !isVendingOrder">
+          <p class="price" v-show="useCoin">
             <span class="label">金币抵扣：</span>
             <span class="totalPrice">{{coinValue | currency}}</span>
           </p>
@@ -107,12 +103,10 @@
     <transition name="fade">
       <div class="list-mask" @click.stop.prevent="hideAddressList" v-show="showBox"></div>
     </transition>
-    <layer :title="layer.title" :text="layer.text" :btn="layer.button" ref="tipsLayer"></layer>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import BScroll from 'better-scroll';
   import split from '@/components/split/split';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import addressList from '@/components/my/addressList';
@@ -120,7 +114,7 @@
   import api from '@/api/api';
   import {pay} from '@/common/js/pay';
   import {countdown} from '@/common/js/date';
-  import layer from '@/components/common/layer';
+  import {mixPhone} from '@/common/js/util';
 
   export default {
     data() {
@@ -130,24 +124,12 @@
         paying: false,
         remarks: '',
         countdownStats: {},
-        timer: null,
-        seckill: {},
         couponValue: 0,
         selfservice: false,
         coupons: [],
         discount: 0,
         discountTickets: [],
-        assets: {},
-        useCoin: true,
-        layer: {
-          title: '温馨提示',
-          text: '',
-          button: {
-            text: '知道了!'
-          }
-        },
-        isVendingOrder: false,
-        vendor: ''
+        useCoin: false
       };
     },
     computed: {
@@ -156,6 +138,13 @@
       },
       defaultAddress() {
         return this.$store.getters.getDefaultAddress;
+      },
+      getFullAddress() {
+        var item = this.defaultAddress;
+        return `${item.province || ''}${item.city || ''}${item.region || ''}${item.detailAddress || ''}`;
+      },
+      hasDefaultAddress() {
+        return this.defaultAddress && this.defaultAddress.detailAddress;
       },
       payRemarks() {
         this.remarks = this.$store.getters.getPayRemark;
@@ -177,11 +166,10 @@
         });
       },
       totalCoin() {
-        let profile = this.$store.getters.getUserProfile;
-        return profile.wallet && profile.wallet.coinValue || 0;
+        return 0;
       },
       availCoin() {
-        return this.assets.coin && this.assets.coin.useCoin || 0;
+        return 0;
       },
       coinTips() {
         return `共${this.totalCoin}个，可用${this.availCoin}个`;
@@ -207,39 +195,27 @@
         return allow;
       },
       appName() {
-        return `${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}`;
+        return `${api.CONFIG.APPNAME}`;
       }
     },
     activated() {
-      if (!this.$store.getters.getPayGoods.length) {
-        this.$router.replace('/cart');
-        return;
-      }
       this.show();
-      this._totalPrice();
-      this.computeCouponValue();
-      this.countdown();
+      // this._totalPrice();
+      // this.computeCouponValue();
     },
     deactivated() {
       this.hide();
       this.paying = false;
       this.couponValue = 0;
-      this.seckill = {};
-      this.selfservice = false;
-      if (this.timer) {
-        clearInterval(this.timer);
-      }
       this.discount = 0;
       this.coupons = [];
       this.assets = {};
       this.useCoin = true;
-      this.isVendingOrder = false;
-      this.vendor = '';
     },
     methods: {
       loadCouponData() {
-        let user = this.$store.getters.getUserInfo;
-        api.getUserProfile(user.userId || 0).then(response => {
+        let userId = this.$store.getters.userId;
+        api.getUserProfile(userId).then(response => {
           if (response.result === 0) {
             this.$store.dispatch('updateUserProfile', response);
             this.couponValue = response.wallet && response.wallet.totalValue || 0;
@@ -257,17 +233,6 @@
           this.selfservice = true;
         }
       },
-      _isVendingOrder(pid) {
-        let goods = this.$store.getters.getVendingGoods;
-        for (let key in goods) {
-          this.vendor = typeof key === 'string' ? key : '';
-          let product = goods[key].find(p => p == pid); // eslint-disable-line
-          if (product) {
-            return true;
-          }
-        }
-        return false;
-      },
       delivery() {
         this.selfservice = !this.selfservice;
       },
@@ -275,40 +240,8 @@
         this.useCoin = !this.useCoin;
       },
       computeCouponValue() {
-        let type = this.$route.query.orderType || 0;
-        if (type >= 3) {
-          return;
-        }
-        let user = this.$store.getters.getUserInfo;
-        let items = [];
-        this.products.forEach(product => {
-          items.push({'id': product.id, 'count': product.count});
-        });
-        api.getAvailCouponAmount({
-          userId: user.userId || 0,
-          products: items
-        }).then(response => {
-          this.assets = response;
-          this.couponValue = response.couponFee || 0;
-          if (response.oldTotalFee) {
-            this.totalFee = response.oldTotalFee;
-          }
-          this.coupons = response.otherCoupons || [];
-          this._calcDiscount();
-        }).catch(response => {
-          console.log(response);
-        });
       },
       _calcDiscount() {
-        let user = this.$store.getters.getUserInfo;
-        let coupons = this.$store.getters.loadUsedDiscount;
-        if (coupons && coupons.length) {
-          coupons.forEach(o => {
-            if (o.type === 1 && user.userId === o.userId) {
-              this.discount = (this.totalFee - this.couponValue) * (1 - o.payValue);
-            }
-          });
-        }
       },
       openRemarkBox() {
         this.$router.push('/pay/remark');
@@ -331,7 +264,6 @@
       },
       updateDefaultAddress() {
         this.showBox = false;
-        this.defaultAddress = this.$store.getters.getDefaultAddress;
       },
       countdown() {
         let createTime = 0;
@@ -398,7 +330,7 @@
           return;
         }
         this.$store.dispatch('cleanUsedDiscount');
-        let maxUseCoin = this.assets.coin && this.assets.coin.useCoin || 0;
+        let maxUseCoin = 0;
         let params = {
           openid: userInfo.openid,
           userId: userInfo.userId,
@@ -420,50 +352,13 @@
             receiver: this.defaultAddress.name
           };
         }
-        let goodsId = '';
-        let seckillId = 0;
-        if (orderType === '8' || orderType === '9') {
-          // 拼团订单和分享订单采用预订单ID作为产品ID给后台
-          let items = [];
-          this.products.forEach(product => {
-            goodsId = product.id;
-            items.push({'id': product.preOrderId || product.id, 'count': product.count});
-          });
-          params.products = items;
-        } else {
-          let items = [];
-          this.products.forEach(product => {
-            seckillId = product.id;
-            items.push({'id': product.id, 'count': product.count});
-          });
-          params.products = items;
-        }
+        params.products = items;
         if (this.discount) {
           params.coupons = this.discountTickets;
-        }
-        // 售卖机取货订单
-        if (this.isVendingOrder) {
-          params.vendor = {
-            vendorId: this.vendor
-          };
         }
         this.paying = true;
         api.createOrder(params).then(response => {
           if (response.result !== 0) {
-            if (orderType === '7') {
-              // 首单订单失败，存在未付款的订单或已经参加过首单
-              if (response.order && response.order.status === 0) {
-                this.$store.dispatch('openToast', '你有一个未付款的首单订单!');
-                this.$router.replace({name: 'orderdetail', params: {id: response.order && response.order.orderNo}});
-              } else {
-                this.$store.dispatch('openToast', '你已经参加过首单优惠了! 看看其他的吧!');
-              }
-              return;
-            } else if (orderType === '9' && response.code === 100001) {
-              this.layer.text = `<p style="text-align:left">抱歉，您来晚了，商品抢光了！</p>`;
-              this.$refs.tipsLayer.show();
-              return;
-            }
             this.$store.dispatch('openToast', '生成订单失败！');
             this.paying = false;
             return;
@@ -488,31 +383,11 @@
                 'signType': response.signType || 'MD5',
                 'paySign': response.paySign
               }, function(res) {
-                that.$store.dispatch('clearPayGoods');
                 // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
                 if (res.err_msg === 'get_brand_wcpay_request:ok') {
                   that.$store.dispatch('openToast', '支付成功！');
-                  if (orderType === '8') {
-                    that.$router.replace('mytuan');
-                    return;
-                  } else if (orderType === '9') {
-                    that.$router.replace('myshare');
-                    return;
-                  } else if (orderType === '3') {
-                    api.finishSeckill(seckillId, order.orderNo);
-                  }
-                  that.$store.dispatch('removeVendingGoods');
                 } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
                   that.$store.dispatch('openToast', '取消支付！');
-                  if (orderType === '8') {
-                    // 拼团订单取消付款，删除拼团订单
-                    api.deleteTuan(order.orderNo);
-                    that.$router.replace({name: 'tuandetail', params: {id: goodsId}});
-                    return;
-                  } else if (orderType === '9') {
-                    that.$router.replace({name: 'sharedetail', params: {id: goodsId}});
-                    return;
-                  }
                 } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
                   that.$store.dispatch('openToast', '支付失败！');
                 }
@@ -529,7 +404,12 @@
       }
     },
     components: {
-      split, fixedheader, addressList, usecoupon, layer
+      split, fixedheader, addressList, usecoupon
+    },
+    filters: {
+      mixPhone(phone) {
+        return mixPhone(phone);
+      }
     },
     directives: {
       enterNumber: {

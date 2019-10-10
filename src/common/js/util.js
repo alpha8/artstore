@@ -53,9 +53,6 @@ export function mixUsername (name) {
   if (!name) {
     return '匿名';
   }
-  if (name === 'yihuyixi') {
-    return name;
-  }
   if (name.length === 3) {
     return name.substring(0, 1) + '***' + name.substring(name.length - 1);
   } else if (name.length === 4) {
@@ -66,16 +63,14 @@ export function mixUsername (name) {
   return name.substring(0, 1) + '***';
 }
 
-/**
- * 替换[]多余品牌名称
- * @param  {[type]} str [description]
- * @return {[type]}     [description]
- */
-export function reduceGoodsName (str) {
-  if (!str) {
+export function mixPhone (phone) {
+  if (!phone) {
     return '';
   }
-  return str.replace(/\[一[^]+\]/, '');
+  if (phone.length === 11) {
+    return phone.substring(0, 3) + '****' + phone.substring(phone.length - 4);
+  }
+  return phone.substring(0, 3) + '****';
 }
 
 /**
@@ -185,10 +180,4 @@ export function convertVideoUrl(url) {
     .replace('http://', '')
     .replace(/v\.qq\.com\/x\/cover\/[\w]+\/([\w]+)\.html/i, 'v.qq.com/iframe/player.html?vid=$1&tiny=0&auto=0')
     .replace(/v\.qq\.com\/x\/cover\/([\w]+)\.html/i, 'v.qq.com/iframe/player.html?vid=$1&tiny=0&auto=0');
-}
-
-export function reportTrackEvent(eventId, params) {
-  if (MtaH5) {
-    MtaH5.clickStat(eventId, params);
-  }
 }

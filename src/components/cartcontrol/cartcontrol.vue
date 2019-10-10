@@ -1,12 +1,12 @@
 <template>
   <div class="cartcontrol">
     <transition name="move">
-      <div class="cart-decrease" :class="{'disable': good.count < 1}" @click.stop.prevent="decreaseCart">
+      <div class="cart-decrease" :class="{'disable': good.quantity < 1}" @click.stop.prevent="decreaseCart">
         <span class="inner icon-remove_circle_outline"></span>
       </div>
     </transition>
-    <div class="cart-count" v-show="good.count >= 0">{{good.count}}</div>
-    <div class="cart-add" v-if="maxCount === -1 || good.count < maxCount" @click.stop.prevent="addCart">
+    <div class="cart-quantity" v-show="good.quantity > 0">{{good.quantity}}</div>
+    <div class="cart-add" v-if="stock == -1 || good.quantity < stock" @click.stop.prevent="addCart">
       <span class="inner icon-add_circle"></span>
     </div>
     <div class="cart-add disable" v-else>
@@ -16,81 +16,55 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import Vue from 'vue';
-
   export default {
     props: {
       good: {
         type: Object
       },
-      maxCount: {
-        type: Number,
-        default: -1
-      },
       stock: {
         type: Number,
-        default: 0
-      },
-      bookStock: {
-        type: Number,
-        default: 0
+        default() {
+          return -1;
+        }
       }
     },
     methods: {
       addCart() {
         let stockEmpty = false;
-        if (!this.good.count) {
-          Vue.set(this.good, 'count', 1);
-        } else if (this.stock > 0) {
-          let total = this.stock + (this.bookStock || 0);
-          if (this.good.count >= total) {
-            this.$store.dispatch('openToast', '超过当前库存数了哦!');
-            stockEmpty = true;
-          } else {
-            this.good.count++;
-          }
+        if (!this.good.quantity) {
+          this.$set(this.good, 'quantity', 1);
         } else {
-          let stock = this.good.stock && this.good.stock.total || 0;
-          let bookStock = this.good.stock && this.good.stock.bookTotal || 0;
-          let total = stock + bookStock;
-          if (this.good.count >= total) {
+          let total = this.stock || 0;
+          if (this.stock != -1 && this.good.quantity >= total) {
             this.$store.dispatch('openToast', '超过当前库存数了哦!');
             stockEmpty = true;
           } else {
-            this.good.count++;
+            this.good.quantity++;
+            this.$set(this.good, 'quantity', this.good.quantity);
           }
         }
         if (!stockEmpty) {
-          this.$store.commit('ADD_QUANTITY', this.getGoodsId());
-          this.$store.dispatch('addToCart', this.good);
-          this.$emit('add', event.target);
+          // this.$store.dispatch('addToCart', this.good);
+          this.$emit('add', this.good);
         }
       },
       decreaseCart() {
-        if (this.good.count > 1) {
-          this.good.count--;
-          this.$store.commit('REDUCE_QUANTITY', this.getGoodsId());
+        if (this.good.quantity > 1) {
+          this.good.quantity--;
+          this.$emit('minus', this.good);
         } else {
-          if (!this.good.fromCart) {
-            this.good.count = 0;
-            this.$store.commit('REDUCE_QUANTITY', this.getGoodsId());
-          }
           this.$emit('confirm', this.good);
         }
-        this.$emit('refresh', this.good);
       },
       getGoodsId() {
-        if (this.good.type) {
-          return this.good.type + this.good.id;
-        } else {
-          return this.good.id;
-        }
+        return this.good.id;
       }
     }
   };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
+  @require '../../common/stylus/variables'
   .cartcontrol
     font-size: 0
     .cart-decrease
@@ -121,7 +95,7 @@
         transform: translate3d(24px, 0, 0)
         .inner
           transform: rotate(180deg)
-    .cart-count
+    .cart-quantity
       display: inline-block
       vertical-align: top
       width: 12px

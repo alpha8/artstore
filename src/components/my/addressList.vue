@@ -4,13 +4,13 @@
     <div class="address" ref="address">
       <div class="address-wrap">
         <ul class="addressList">
-          <li class="address-item border-1px" v-for="item in addressList">
-            <span class="icon-check_circle" :class="{'on': item.default}" @click.stop.prevent="toggle(item)"></span>
-            <div class="addr" @click.stop.prevent="toggle(item)">
-              <div class="addr-item">{{item.city ? item.city + item.address : item.address}}</div>
+          <li class="address-item border-1px" v-for="item in addressList" :key="item.id">
+            <span class="icon-check_circle" :class="{'on': item.defaultStatus == 1}" @click="toggle(item)"></span>
+            <div class="addr">
+              <div class="addr-item">{{getFullAddress(item)}}</div>
               <div class="addr-item">
                 <strong>{{item.name}}</strong>
-                <span class="mobile">{{item.mobile}}</span>
+                <span class="mobile">{{item.phoneNumber | mixPhone}}</span>
               </div>
             </div>
             <span class="ops"><i class="icon-edit" @click.stop.prevent="editAddress(item)"></i><i class="icon-recycle" @click.stop.prevent="removeAddress(item)"></i></span>
@@ -21,32 +21,19 @@
         </div>
       </div>
     </div>
-    <mydialog :text="dialog.text" :btns="dialog.btns" ref="dialogWin"></mydialog>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
-  import mydialog from '@/components/common/mydialog';
+  import {mixPhone} from '@/common/js/util';
   import api from '@/api/api';
 
   export default {
     data() {
       return {
         addressList: [],
-        showBack: true,
-        dialog: {
-          text: '确定要删除此收货地址吗？',
-          btns: {
-            ok: {
-              text: '确定',
-              callback: function() {
-                console.log('ok');
-              }
-            }
-          }
-        }
+        showBack: true
       };
     },
     activated() {
@@ -57,44 +44,38 @@
       this.$store.commit('SHOW_FOOTER');
     },
     methods: {
-      _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.address, {
-              click: true,
-              bounce: false
-            });
-          } else {
-            this.scroll.refresh();
-          }
-        });
-      },
       getAddressList() {
-        let uid = this.$store.getters.getUserInfo.userId;
+        let uid = this.$store.getters.userId;
         if (!uid) {
           this.addressList = this.$store.getters.getAddressList;
-          this._initScroll();
           return;
         }
         api.getAddressList(uid || -1).then(response => {
-          this.addressList = response;
-          this.$store.dispatch('setDefaultAddress', this.addressList);
-          this._initScroll();
+          if (response.code == 200) {
+            this.addressList = response.data;
+            this.$store.dispatch('setDefaultAddress', this.addressList);
+          }
         });
       },
       show() {
-        this._initScroll();
         this.showBack = false;
+      },
+      getFullAddress(item) {
+        return `${item.province || ''}${item.city || ''}${item.region || ''}${item.detailAddress || ''}`;
       },
       toggle(item) {
         this.addressList.forEach((addr) => {
-          if (item.id !== addr.id && addr.default) {
-            addr.default = false;
+          if (item.id !== addr.id && addr.defaultStatus == 1) {
+            addr.defaultStatus = 0;
           }
         });
-        item.default = !item.default;
-        this.$store.dispatch('setDefaultAddress', this.addressList);
-        this.$emit('update');
+        item.defaultStatus = item.defaultStatus == 1 ? 0 : 1;
+        api.updateAddress(item.id, item).then(response => {
+          if (response.code == 200) {
+            this.$store.dispatch('setDefaultAddress', this.addressList);
+            this.$emit('update');
+          }
+        });
       },
       addAddress() {
         this.$router.push('/address/add');
@@ -103,30 +84,27 @@
         this.$router.push({name: 'address', params: {id: item.id}});
       },
       removeAddress(item) {
-        let vm = this;
-        this.dialog.btns.ok.callback = function() {
-          api.removeAddress({id: item.id}).then(response => {
-            if (response.result === 0) {
-              vm.$store.dispatch('openToast', '收货地址删除成功！');
-              let addressList = vm.addressList;
-              for (let i = 0; i < addressList.length; i++) {
-                let addr = addressList[i];
-                if (item.id === addr.id) {
-                  addressList.splice(i, 1);
-                  i--;
-                }
-              };
-              vm.$store.dispatch('setDefaultAddress', vm.addressList);
-            } else {
-              vm.$store.dispatch('openToast', '网络太忙，删除失败！');
+         this.$confirm('确定要删除吗?', '提示', {
+          confirmButtonText: '删除',
+          cancelButtonText: '返回',
+          type: 'warning'
+        }).then(() => {
+          api.removeAddress(item.id).then(response => {
+            if (response.code == 200) {
+              this.$store.dispatch('removeAddress', item.id);
+              this.getAddressList();
             }
           });
-        };
-        this.$refs.dialogWin.show();
+        });
+      }
+    },
+    filters: {
+      mixPhone(phone) {
+        return mixPhone(phone);
       }
     },
     components: {
-      fixedheader, mydialog
+      fixedheader
     }
   };
 </script>
@@ -139,7 +117,12 @@
     overflow: hidden
     >.address-wrap
       position: relative
-      padding: 10px 15px 65px
+      padding: 10px 15px 80px
+      height: 100vh
+      -webkit-overflow-scrolling: touch
+      overflow-x: hidden
+      overflow-y: auto
+      box-sizing: border-box
       .addressList
         position: relative
         width: 100%

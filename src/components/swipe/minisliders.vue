@@ -62,7 +62,7 @@
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   .swiper-container-horizontal > .swiper-pagination-bullets
-    bottom: 3px
+    bottom: 1px
   .swiper-container
     position: relative
     .slide2

@@ -1,16 +1,10 @@
 <template>
   <div>
-    <div class="header border-bottom-1px">
-      <div class="left">
-        <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
-      </div>
-      <div class="title">优惠券账户</div>
-      <div class="right"></div>
-    </div>
+    <fixedheader title="优惠券"></fixedheader>
     <div class="wallet" ref="wallet">
       <div class="wallet-wrapper">
         <div class="wallet-heading">
-          <p class="balance-name">优惠券余额（元）</p>
+          <p class="balance-name">优惠券（元）</p>
           <p class="balance-num"><i class="symbol">¥</i><span>{{balance | currency('')}}</span></p>
         </div>
         <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">优惠券明细</span></div>

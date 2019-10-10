@@ -353,7 +353,7 @@
     position: fixed
     right: 0
     top: 0
-    width: 20rem
+    width: 15rem
     height: 100%
     z-index: 20
     background: #fff
@@ -451,11 +451,12 @@
           width: 45%
           background-color: transparent
           text-align: center
-      .title
+      >.title
         height: 44px
         line-height: 44px
         background: #fcfcfc
         border-1px(rgba(7, 17, 27,0.1))
+        font-size: 16px
         i
           position: absolute
           top: 50%
@@ -475,6 +476,7 @@
         right: 0
         height: 44px
         line-height: 44px
+        font-size: 16px
         .ops-button
           display: flex
           width: 100%
