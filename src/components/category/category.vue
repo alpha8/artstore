@@ -12,13 +12,13 @@
       <div class="goods-wrapper" ref="goodsWrapper">
         <div>
           <div class="banner" v-if="sliders.length">
-            <swipe :swiperSlides="sliders"></swipe>
+            <swipe :swiperSlides="sliders" :goods="good"></swipe>
           </div>
           <ul>
             <li class="good-list good-list-hook">
               <ul class="itemList" v-if="good.children && good.children.length">
                 <li v-for="innergood in good.children" :key="innergood.id" class="type3">
-                  <router-link :to="{path: '/search'}" class="good-item" :class="{'thumbnail': innergood.icon}">
+                  <router-link :to="{path: '/search', query: {cid: innergood.id, key: innergood.name}}" class="good-item" :class="{'thumbnail': innergood.icon}">
                     <div class="icon" v-if="innergood.icon">
                       <img :src="getCategoryIcon(innergood.icon)" border="0"/>
                     </div>
@@ -72,6 +72,7 @@
         this.goods = response.data;
         if (this.goods && this.goods.length) {
           this.good = this.goods[0];
+          this.selectMenu(0);
         }
         this._initScroll();
         this.$store.dispatch('closeLoading');

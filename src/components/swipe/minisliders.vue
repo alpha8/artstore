@@ -1,7 +1,7 @@
 <template>
   <swiper :options="swiperOption" class="swiperHook" :style="getStyle">
     <swiper-slide v-for="(slide, index) in swiperSlides" :key="index">
-      <div class="slide2" :style="getSlideUrl(slide)" @click.stop.prevent="preview(slide.src)"></div>
+      <img :src="getSlideUrl(slide)" class="slide2" @click.stop.prevent="search" />
     </swiper-slide>
     <div class="swiper-pagination pager" slot="pagination"></div>
   </swiper>
@@ -13,6 +13,12 @@
     props: {
       swiperSlides: {
         type: Array
+      },
+      goods: {
+        type: Object,
+        default() {
+          return {};
+        }
       }
     },
     data() {
@@ -40,21 +46,10 @@
     },
     methods: {
       getSlideUrl(slide) {
-        return {
-          'background-image': `url(${slide.thumbnail})`,
-          width: this.screen.width + 'px',
-          height: this.screen.height + 'px'
-        };
+        return `${slide.thumbnail}`;
       },
-      preview(img) {
-        let pics = [];
-        this.swiperSlides.forEach(item => {
-          pics.push(item.src);
-        });
-        wx.previewImage({
-          current: img,
-          urls: pics
-        });
+      search() {
+        this.$router.push({name: 'search', query: { pid: this.goods.id, key: this.goods.name }});
       }
     }
   };

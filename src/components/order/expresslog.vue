@@ -3,42 +3,54 @@
     <fixedheader title="物流查询"></fixedheader>
     <div class="expressLog" ref="expressLog">
       <div class="expressLog-wrap">
-        <div class="expressLog-container" v-show="expressLogs.length">
+        <div class="expressLog-container" v-if="logisticsInfo">
+          <div class="status">最新状态：{{deliveryStatus}} <span v-if="logisticsInfo.expName">, &nbsp;承运公司：{{logisticsInfo.expName}} <span v-if="logisticsInfo.expPhone">({{logisticsInfo.expPhone}})</span></span></div>
           <div class="expressLog-list">
-            <div class="expressLog-item" v-for="(expressLog, index) in expressLogs" :key="index">
+            <div class="expressLog-item" v-for="(expressLog, index) in logisticsInfo.list" :key="index">
               <i></i>
-              <div class="msg-box">{{expressLog.content}}</div>
+              <div class="msg-box">{{expressLog.status}}</div>
               <small>{{expressLog.time}}</small>
             </div>
           </div>
         </div>
-        <div class="no-expressLog" v-show="expressLogs.length === 0 && !loading">{{errorTips}}</div>
-        <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
+        <div class="no-expressLog" v-else>{{errorTips}}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
-  import gotop from '@/components/fixedtoolbar/gotop';
   import api from '@/api/api';
 
   export default {
     data() {
       return {
-        expressLogs: [],
-        pageNumber: 1,
-        pageSize: 200,
-        totalPages: 0,
-        loadEnd: false,
-        scroller: null,
-        loading: false,
-        lastExec: +new Date(),
+        logisticsInfo: null,
         scrollY: 0,
         errorTips: '啊哦，还没有相关记录哦'
       };
+    },
+    computed: {
+      deliveryStatus() {
+        if (this.logisticsInfo.deliverystatus == '0') {
+          return '快递收件(揽件)';
+        } else if (this.logisticsInfo.deliverystatus == '1') {
+          return '在途中';
+        } else if (this.logisticsInfo.deliverystatus == '2') {
+          return ' 正在派件';
+        } else if (this.logisticsInfo.deliverystatus == '3') {
+          return '已签收';
+        } else if (this.logisticsInfo.deliverystatus == '4') {
+          return '派送失败';
+        } else if (this.logisticsInfo.deliverystatus == '5') {
+          return '疑难件';
+        } else if (this.logisticsInfo.deliverystatus == '6') {
+          return '退件签收';
+        } else {
+          return '未知状态';
+        }
+      }
     },
     activated() {
       this.fetchData(true);
@@ -49,56 +61,35 @@
       this.hide();
     },
     mounted() {
-      this._initScroll();
       window.onscroll = () => {
         this.scrollY = window.pageYOffset;
       };
     },
     methods: {
       fetchData(force) {
-        if (this.totalPages && this.pageNumber > this.totalPages) {
-          return;
-        }
-        let now = +new Date();
-        if (!force && now - this.lastExec <= 50) {
-          return;
-        }
-        let code = this.$route.params.expressCode;
-        let expressNo = this.$route.params.expressNo || '';
-        api.trackingGoods(expressNo, code).then(response => {
-          if (response.list) {
-            this.expressLogs = response.list;
+        this.$store.dispatch('openLoading', '加载中...');
+        let no = this.$route.params.no;
+        let company = this.$route.query.company || '';
+        api.getExpressLog({
+          no: no,
+          company: company 
+        }).then(response => {
+          if (response.code == 200) {
+            if (response.data.status == '0') {
+              this.logisticsInfo = response.data.result;
+            } else {
+              this.errorTips = `抱歉，未查询此运单${no}信息。`;
+            }
           } else {
-            this.errorTips = `抱歉，未查询此运单${expressNo}信息。`;
-            console.log(response.msg);
+            this.errorTips = `抱歉，未查询此运单${no}信息。`;
           }
-          this.totalPages = 0;
-          this.pageNumber++;
-          this.lastExec = +new Date();
-          this.loading = false;
-          this.loadEnd = this.pageNumber > this.totalPages;
+          this.$store.dispatch('closeLoading');
         }).catch(response => {
-          this.loadEnd = false;
-          this.loading = false;
-          this.totalPages = 0;
+          this.$store.dispatch('closeLoading');
         });
-      },
-      _initScroll() {
-        // this.$nextTick(() => {
-        //   if (!this.scroll) {
-        //     this.scroll = new BScroll(this.$refs.expressLog, {
-        //       click: true
-        //     });
-        //   } else {
-        //     this.scroll.refresh();
-        //   }
-        // });
       },
       _reset() {
         this.expressLogs = [];
-        this.pageNumber = 1;
-        this.totalPages = 0;
-        this.loadEnd = false;
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -112,7 +103,7 @@
       }
     },
     components: {
-      fixedheader, gotop
+      fixedheader
     }
   };
 </script>
@@ -136,19 +127,6 @@
     .expressLog-wrap
       position: relative
       width: 100%
-      .tab
-        position: relative
-        display: flex
-        border-1px(rgba(7, 17, 27, 0.1))
-        .tab-item
-          flex: 1
-          font-size: 14px
-          padding: 15px 0
-          text-align: center
-          border-bottom: 2px solid transparent
-          &.active
-            color: #f15353
-            border-bottom: 2px solid #f15353
       .no-more
         width: 100%
         padding: 10px 0
@@ -163,6 +141,10 @@
         line-height: 1.5
         box-sizing: border-box
         background-color: #fff
+        >.status, >.status span
+          font-size: 14px
+          font-weight: 700
+          color: #666
         .expressLog-list
           position: relative
           .expressLog-item
@@ -210,8 +192,9 @@
                 border-radius: 6px
             .msg-box
               position: relative
+              font-size: 13px
             small
-              font-size: 10px
+              font-size: 11px
               color: #999
       .no-expressLog
         width: 100%

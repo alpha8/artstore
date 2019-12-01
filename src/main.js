@@ -32,6 +32,9 @@ import 'element-ui/lib/theme-chalk/index.css';
 import locale from 'element-ui/lib/locale/lang/zh-CN'; // lang i18n
 Vue.use(ElementUI, { locale });
 
+import Clipboard from 'v-clipboard';
+Vue.use(Clipboard);
+
 Vue.filter('currency', currency);
 Vue.config.productionTip = false;
 import wx from 'weixin-js-sdk';
@@ -64,17 +67,17 @@ router.beforeEach((to, from, next) => {
     }
   }
 });
-/* router.beforeEach((to, from, next) => {
+router.beforeEach((to, from, next) => {
   let shareData = {
-    title: '',
-    desc: '',
+    title: '[未来科技电商平台]',
+    desc: '深耕于国内礼品采购和积分兑换业务，您贴心的礼品小助手，欢迎围观',
     link: 'http://' + location.host + location.pathname,
-    imgUrl: ''
+    imgUrl: 'http://imgcdn.win-berry.com/1570705317649.png'
   };
   wx.onMenuShareTimeline(shareData);
   wx.onMenuShareAppMessage(shareData);
   next();
-}); */
+});
 
 /* eslint-disable no-new */
 new Vue({

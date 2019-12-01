@@ -5,14 +5,15 @@
         <div class="box">
           <div class="box-container">
             <div class="avatar">
-              <a v-show="!hasLogin()" @click="getLoginUrl"><img :src="getDefaultAvatar" alt="" class="pic"></a>
+              <a v-show="!hasLogin()" @click="getLoginUrl()"><img :src="getDefaultAvatar" alt="" class="pic"></a>
               <img :src="getUserIcon" alt="" class="pic" v-show="hasLogin()" />
             </div>
             <div class="line">
-              <div class="userName" v-show="!hasLogin()"><a @click="getLoginUrl()">点击登录</a></div>
-              <div class="userName" v-show="hasLogin()"><span>{{username()}}</span></div>
+              <div class="userName" v-if="!hasLogin()"><a @click="getLoginUrl()">点击登录</a></div>
+              <div class="userName" v-else><span>{{username()}}</span></div>
+              <div class="info" v-if="getMemberLevel"><span class="vip">{{getMemberLevel}}</span></div>
             </div>
-            <span class="setting" v-show="hasLogin()"><router-link to="/personInfo"><img src="../../common/images/settings.png"/><span>账号管理</span></router-link></span>
+            <!-- <span class="setting" v-show="hasLogin()"><router-link to="/personInfo"><img src="../../common/images/settings.png"/><span>账号管理</span></router-link></span> -->
           </div>
         </div>
       </div>
@@ -26,7 +27,7 @@
         <ul class="itemList">
           <li class="item border-1px" v-for="item in orders">
             <router-link :to="item.link">
-              <div class="icon"><i :class="item.icon"></i></div>
+              <div class="icon"><i :class="item.icon"></i><em v-if="orderNum(item.status)">{{orderNum(item.status)}}</em></div>
               <div class="text">{{item.text}}</div>
             </router-link>
           </li>
@@ -42,7 +43,7 @@
         <ul class="itemList">
           <li class="item border-1px" v-for="item in wallet">
             <router-link :to="item.link">
-              <div class="amount"><em class="symbol">¥</em>{{item.amount}}</div>
+              <div class="amount"><em class="symbol" v-if="!item.noCash">¥</em>{{item.amount}}</div>
               <div class="text">{{item.text}}</div>
             </router-link>
           </li>
@@ -67,34 +68,35 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import split from '@/components/split/split';
   import {mapGetters} from 'vuex';
   import frame from '@/components/common/myiframe';
   import api from '@/api/api';
-  let Base64 = require('js-base64').Base64;
 
   export default {
     data() {
       return {
         orders: [
-          { icon: 'icon-pending_payment', text: '待付款', link: '/order?type=0' },
-          { icon: 'icon-delivery_package_box', text: '待发货', link: '/order?type=1' },
-          { icon: 'icon-truck', text: '待收货', link: '/order?type=2' },
-          { icon: 'icon-refund_and_return', text: '退换货', link: '/order?type=6' }
+          { icon: 'icon-pending_payment', text: '待付款', link: '/order?type=0', num: 0, status: 0 },
+          { icon: 'icon-delivery_package_box', text: '待发货', link: '/order?type=1', num: 0, status: 1 },
+          { icon: 'icon-truck', text: '待收货', link: '/order?type=2', num: 0, status: 2 },
+          { icon: 'icon-refund_and_return', text: '退换货', link: '/order?type=6', num: 0, status: 6 }
         ],
         wallet: [
           { amount: 0, text: '账户余额', link: '/wallet' },
-          { amount: 0, text: '优惠券', link: '/coupon' },
-          { amount: this.user().integration || 0, text: '我的积分', link: '/coupon' }
+          { amount: this.user().integration || 0, text: '我的积分', noCash: true, link: '/cashback' }
         ],
         others: [
          //  { icon: 'icon-qrcode', text: '我的推广码', link: '/promocode' },
-          { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
+         // { icon: 'icon-miaosha', text: '我的秒杀', link: '/myseckill' },
+          { icon: 'icon-gift_card', text: '我的卡券', link: '/mycard' },
+          { icon: 'icon-gift', text: '实物卡兑换', link: '/exchangecard' },
+          { icon: 'icon-coupon', text: '我的优惠券', link: '/discount/ticket?showList=true' },
           { icon: 'icon-heart', text: '我的收藏', link: '/follow' },
           { icon: 'icon-footprint', text: '浏览足迹', link: '/footprint' },
           { icon: 'icon-address', text: '收货地址', link: '/address' },
+          { icon: 'icon-kefu', text: '客服中心', link: '/service' },
           {
             icon: 'icon-command',
             text: '清理缓存',
@@ -118,7 +120,8 @@
               this.$router.push('/login');
             }
           }
-        ]
+        ],
+        stats: []
       };
     },
     activated() {
@@ -128,13 +131,22 @@
     },
     computed: {
       getUserIcon() {
-        return this.$store.getters.avatar;
+        let icon = this.$store.getters.avatar;
+        if (icon) {
+          return icon;
+        }
+        return api.CONFIG.userAvatar;
       },
       getDefaultAvatar() {
         return `${api.CONFIG.userAvatar}`;
+      },
+      getMemberLevel() {
+        let profile = this.$store.getters.userProfile;
+        if (profile.memberLevel) {
+          return profile.memberLevel.name || '';
+        }
+        return '';
       }
-    },
-    updated() {
     },
     methods: {
       ...mapGetters({
@@ -144,10 +156,26 @@
         username: 'name'
       }),
       refreshSSO() {
-        api.refreshToken();
+        this.wallet[1].amount = this.user().integration || 0;
+        let uid = this.$store.getters.userId;
+        if (uid) {
+          api.refreshToken();
+          api.getTodoOrderStats().then(response => {
+            if (response.code == 200) {
+              this.stats = response.data || [];
+            }
+          });
+        }
       },
       getLoginUrl() {
         this.$router.push('/login');
+      },
+      orderNum(status) {
+        if (!this.stats.length) {
+          return 0;
+        }
+        let item = this.stats.find(stat => stat.status == status);
+        return item ? item.amount : 0;
       }
     },
     components: {
@@ -249,84 +277,20 @@
               color: #e0e0e0
               font-size: 12px
               box-sizing: border-box
-            .supplier
-              display: inline-block
-              font-size: 10px
-              vertical-align: middle
-            .svip
-              position: relative
-              display: block
-              float: left
-              width: 16px
-              height: 16px
-              background: url(../../common/images/icons.png) no-repeat 0 0
-              margin-right: 2px
-              &.lv1
-                background-position: 0 0
-              &.lv2
-                background-position: 0 -25px
-              &.lv3
-                background-position: 0 -50px
-              &.lv4
-                background-position: 0 -75px
-              &.lv5
-                background-position: 0 -100px
-              &.lv6
-                background-position: 0 -125px
-              &.lv7
-                background-position: 0 -150px
           .info
             margin-top: 5px
             .vip, .svip
               position: relative
-              padding: 2px 8px 2px 15px
+              padding: 2px 8px
               height: 16px
               line-height: 16px
               font-size: 10px
               color: #e1e1e1
               background: #9f3838
               border-radius: 12px
-              &:before
-                content: ""
-                display: block
-                width: 14px
-                height: 14px
-                position: absolute
-                left: 0
-                top: 50%
-                margin-top: -8px
-                background: url(../../common/images/icons.png) no-repeat 0 0
-              &.lv6:before
-                background-position: -25px -125px
-              &.lv5:before
-                background-position: -25px -100px
-              &.lv4:before
-                background-position: -25px -75px
-              &.lv3:before
-                background-position: -25px -50px
-              &.lv2:before
-                background-position: -25px -25px
-              &.lv1:before
-                background-position: -25px 0
-              &.lv0:before
-                background-position: 0 -175px
             .svip
               padding: 2px 8px 2px 16px
               margin-left: 8px
-              &.lv1:before
-                background-position: 0 0
-              &.lv2:before
-                background-position: 0 -25px
-              &.lv3:before
-                background-position: 0 -50px
-              &.lv4:before
-                background-position: 0 -75px
-              &.lv5:before
-                background-position: 0 -100px
-              &.lv6:before
-                background-position: 0 -125px
-              &.lv7:before
-                background-position: 0 -150px
             .userflag
               padding: 2px 0 2px 3px
               height: 16px
@@ -380,7 +344,22 @@
           border-right: none
         .icon
           font-size: 22px
-          line-height: 1
+          position: relative
+          width: 24px
+          height: 24px
+          margin: 0 auto
+          em
+            position: absolute;
+            right: -6px;
+            top: 0px;
+            color: #fff;
+            background: #f23030;
+            font-size: 10px;
+            height: 12px;
+            line-height: 12px;
+            min-width: 12px;
+            border-radius: 12px;
+            text-align: center;
         .amount
           font-size: 16px
           color: rgb(255, 95, 62)

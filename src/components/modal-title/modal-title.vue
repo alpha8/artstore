@@ -16,26 +16,16 @@
       moreText: {
         type: String
       },
-      catName: {
-        type: String
-      },
-      catKey: {
-        type: String
-      },
-      price: {
-        type: String,
+      pid: {
+        type: Number, 
         default() {
-          return '';
+          return 0;
         }
       }
     },
     methods: {
       fetchMore() {
-        if (this.price) {
-          this.$router.push({path: '/search', query: {parentCat: this.catKey, key: this.catName, price: this.price}});
-        } else {
-          this.$router.push({path: '/search', query: {parentCat: this.catKey, key: this.catName}});
-        }
+        this.$router.push({path: '/search', query: {pid: this.pid || '', key: this.title}});
       }
     }
   };

@@ -173,3 +173,25 @@ html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6, a, span, pre{
   background: #ff8c00!important;
   border-color: #ff8c00!important;
 }
+.el-tabs__item{
+  text-align: center!important;
+}
+.el-tabs--border-card{
+  box-shadow: none!important;
+}
+.el-tabs__nav{
+  display: flex;
+  width: 100%;
+}
+.el-tabs__nav .el-tabs__item{
+  flex: 1;
+}
+.el-tabs--border-card>.el-tabs__content{
+  padding: 0!important;
+}
+.el-tabs__header{
+  background-color: #fff!important;
+}
+.el-backtop{
+  color: #ff8c00!important;
+}

@@ -1,32 +1,4 @@
 /* jshint esnext: true */
-export function saveToLocal(id, key, value) {
-  let seller = window.localStorage.__seller;
-  if (!seller) {
-    seller = {};
-    seller[id] = {};
-  } else {
-    seller = JSON.parse(seller);
-    if (!seller[id]) {
-      seller[id] = {};
-    }
-  }
-  seller[id][key] = value;
-  localStorage.__seller = JSON.stringify(seller);
-}
-
-export function loadFromLocal(id, key, def) {
-  let seller = window.localStorage.__seller;
-  if (!seller) {
-    return def;
-  }
-  seller = JSON.parse(seller)[id];
-  if (!seller) {
-    return def;
-  }
-  let ret = seller[key];
-  return ret || def;
-}
-
 export function save(key, val) {
   if (!key) {
     return;
@@ -65,6 +37,37 @@ export function clear(key) {
   if (window.localStorage) {
     window.localStorage.removeItem(key);
   }
+}
+
+export function saveSession(key, val) {
+  if (!key) {
+    return;
+  }
+
+  if (!val) {
+    val = '';
+  }
+
+  if (window.sessionStorage) {
+    window.sessionStorage.setItem(key, JSON.stringify(val));
+  }
+}
+
+export function loadSession(key, def) {
+  if (!key) {
+    return def;
+  }
+  if (window.sessionStorage) {
+    let val = window.sessionStorage.getItem(key);
+    if (val) {
+      try {
+        return JSON.parse(val);
+      } catch (e) {
+        return def;
+      }
+    }
+  }
+  return def;
 }
 
 export function loadCookie(key, def) {

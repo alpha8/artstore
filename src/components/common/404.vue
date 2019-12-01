@@ -1,11 +1,9 @@
 <template>
   <div>
-    <fixedheader title="商品已下架" right-icon="icon-more"></fixedheader>
+    <fixedheader title="404" right-icon="icon-more"></fixedheader>
     <div class="content_wrap">
-      <div class="icon">
-        <img src="../../common/images/404.png" alt="商品已下架" />
-        <h1>啊哦, 商品下架了！</h1>
-      </div>
+      <h2>404</h2>
+      <div class="text">哦啊，页面掉进黑洞了！</div>
     </div>
   </div>
 </template>
@@ -31,23 +29,18 @@
     top: 44px
     bottom: 0
     width: 100%
-    display: flex
-    padding-top: 34px
     box-sizing: border-box
-    .icon
-      margin: 0 auto
-      width: 200px
-      height: auto
-      overflow: hidden
-      img
-        width: 100%
-        height: auto
-        opacity: 0.2
-    h1
-      position: relative
-      padding-top: 15px
-      flex: 1
-      text-align: center
-      font-size: 14px
-      color: #999
+    text-align: center; 
+    h2
+      display: block;
+      font-size: 60px;
+      margin-top: 50px;
+      color: #EB6001;
+    .text
+      display: block;
+      color: #EB6001;
+      margin-top: 30px;
+      display: block;
+      padding: 0 20px;
+      font-size: 14px;
 </style>

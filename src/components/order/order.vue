@@ -11,81 +11,83 @@
           <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="order-list">
             <mu-flexbox-item basis="100%" class="order-item border-1px" v-for="(order, index) in orders" v-show="showOrder(order)" :key="index">
               <div class="item-title" @click.stop.prevent="showOrderDetail(order)">
-                <span class="productNo">订单号：{{order.orderNo}}<span class="orderflag" v-if="order.type">({{orderTypeDesc(order)}})</span></span>
-                <span class="op-btns"></span>
+                <span class="order_sn">订单号：{{order.orderSn}}<span class="orderflag" v-if="order.type">({{orderTypeDesc(order)}})</span></span>
+                <span class="order_state" :class="{'red': order.status == 0}">{{statusDesc(order)}}</span>
               </div>
-              <div class="item-summary border-top-1px border-1px">
-                <div class="summary">
-                  <p class="status"><label>状&nbsp;&nbsp;&nbsp;&nbsp;态：</label><span class="text">{{statusDesc(order)}}</span></p>
-                  <p class="price"><label>总&nbsp;&nbsp;&nbsp;&nbsp;价：</label><span class="text">{{order.totalFee | currency}}</span></p>
-                </div>
-                <div class="ops">
-                  <span class="button btn-orange" v-if="order.status === 0 && !order.express && order.type !== 6" @click.stop.prevent="goFillAddress(order)">填写收货地址</span>
-                  <span class="button btn-red" v-else-if="order.status === 0" @click.stop.prevent="weixinPay(order)">去支付</span>
-                  <!-- <span class="button btn-green" v-if="order.status === 10">催单</span>
-                  <span class="button btn-blue" v-if="order.status === 10">去评价</span>
-                  <span class="button btn-orange" v-if="order.status === 10">再次购买</span>
-                  <span class="button btn-white" v-if="order.status === 10">看相似</span> -->
-                </div>
-              </div>
-              <div class="item-content" v-for="product in order.products">
-                <div class="item-img" @click.stop.prevent="showProductDetail(order, product)"><img :src="getThumbnail(product)" alt=""></div>
+              <div class="item-content" v-for="product in order.orderItemList">
+                <div class="item-img" @click.stop.prevent="showProductDetail(order, product)"><img :src="getThumbnail(product.productPic)" alt=""></div>
                 <div class="item-info">
-                  <h3 class="title" @click.stop.prevent="showOrderDetail(order)">{{product.name}}</h3>
-                  <div class="specs" v-show="product.specs">规格：{{product.specs}}</div>
+                  <h3 class="title" @click.stop.prevent="showOrderDetail(order)">{{product.productName}}</h3>
+                  <div class="sku_line" v-show="product.sp1">
+                    <div class="sku">{{`${product.sp1 || ''} ${product.sp2 || ''}  ${product.sp3 || ''}`}}</div>
+                  </div>
                 </div>
                 <div class="item-pay">
-                  <p class="price">{{product.price | currency}}</p>
-                  <p class="nums">x{{product.count}}</p>
+                  <p class="price">{{product.productPrice | currency}}</p>
+                  <p class="nums">x{{product.productQuantity}}</p>
                 </div>
+              </div>
+              <div class="order_total_bar">
+                <div class="total_count"><span v-if="order.orderItemList.length">{{getTotalQtyDesc(order)}}</span></div>
+                <div class="payment">{{getPaymentText(order)}}：<span class="price">{{order.payAmount | currency}}</span></div>
+              </div>
+              <div class="item-footer border-top-1px">
+                <span class="order_tips" v-if="order.status == 0">{{getLeftTime(order)}}</span>
+                <span class="order_tips" v-else></span>
+                <span class="button btn-white" v-if="order.status != 0"  @click="viewSameType(order)">看相似</span>
+                <span class="button btn-red" v-if="order.status == 0" @click.stop.prevent="weixinPay(order)">去支付</span>
+                <!-- <span class="button btn-green" v-if="order.status === 10">催单</span>
+                <span class="button btn-blue" v-if="order.status === 10">去评价</span>
+                <span class="button btn-red" v-if="order.status === 10">再次购买</span>-->
               </div>
             </mu-flexbox-item>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
+          <el-backtop target=".order-container" :bottom="55" :right="10"></el-backtop>
         </div>
         <div class="no-order" v-show="showRecords === 0 && !loading">———&nbsp;&nbsp;啊哦，还没有相关记录哦&nbsp;&nbsp;———</div>
-        <gotop ref="top" @top="goTop" :scrollY="scrollY"></gotop>
       </div>
     </div>
+    <quietlogin/>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
-  import gotop from '@/components/fixedtoolbar/gotop';
   import api from '@/api/api';
   import {pay} from '@/common/js/pay';
+  import {formatDate, countdown} from '@/common/js/date';
+  import quietlogin from '@/components/common/quietlogin';
 
   export default {
     data() {
       return {
         tabItems: [
-          { text: '全部', val: -1 },
+          { text: '全部', val: '' },
           { text: '待付款', val: 0 },
           { text: '待发货', val: 1 },
           { text: '待收货', val: 2 },
-          { text: '退换货', val: 5 }
+          { text: '已完成', val: 3 }
         ],
         orders: [],
-        activeItem: -1,
+        activeItem: '',
         mapStatus: ['待支付', '待发货', '待收货', '已完成', '已取消', '退款申请中', '退款中', '已退款', '退款失败'],
         pageNumber: 1,
-        pageSize: 10,
+        pageSize: 20,
         totalPages: -1,
         loadEnd: false,
         scroller: null,
         loading: false,
         lastExec: +new Date(),
-        scrollY: 0,
         paying: false
       };
     },
     activated() {
       this.loadEnd = false;
       let type = this.$route.query.type;
-      if (typeof type === 'undefined') {
-        this.activeItem = -1;
+      if (typeof type === 'undefined' || type == '') {
+        this.activeItem = '';
       } else {
         this.activeItem = Number(type);
       }
@@ -99,7 +101,7 @@
     },
     computed: {
       showRecords() {
-        if (this.activeItem === -1) {
+        if (!this.activeItem) {
           return true;
         } else {
           return this.orders.filter((order) => order.status === this.activeItem).length;
@@ -108,9 +110,6 @@
     },
     mounted() {
       this.scroller = this.$refs.orderlist;
-      window.onscroll = () => {
-        this.scrollY = window.pageYOffset;
-      };
     },
     methods: {
       fetchData(force) {
@@ -125,16 +124,15 @@
         api.getOrders({
           currentPage: this.pageNumber,
           pageSize: this.pageSize,
-          userId: this.$store.getters.getUserInfo.userId || 0,
           status: this.activeItem
         }).then(response => {
-          if (response.code === 0) {
-            if (response.orders && response.orders.length) {
-              response.orders.forEach(item => {
+          if (response.code == 200) {
+            if (response.data && response.data.list && response.data.list.length) {
+              response.data.list.forEach(item => {
                 this.orders.push(item);
               });
+              this.totalPages = response.data.totalPage;
             }
-            this.totalPages = response.totalPages;
             this.pageNumber++;
             this.lastExec = +new Date();
             this.loading = false;
@@ -146,51 +144,51 @@
           this.totalPages = 0;
         });
       },
+      getLeftTime(order) {
+        let result = countdown(order.leftPayTimes / 1000);
+        var text = `支付剩余`;
+        if (result.hours) {
+          text += result.hours + '时';
+        }
+        if (result.mins) {
+          text += result.mins + '分';
+        }
+        return text;
+      },
       _reset() {
         this.orders = [];
         this.pageNumber = 1;
         this.totalPages = -1;
+        this.loadEnd = true;
       },
-      getThumbnail(item) {
-        let icon = item.icon;
-        if (icon) {
-          return api.CONFIG.psCtx + icon + '?w=750&h=500&v=v2';
+      getThumbnail(pic) {
+        if (pic) {
+          return `${pic}?imageView2/2/w/372/h/372`;
         } else {
           return api.CONFIG.defaultImg;
         }
       },
-      statusDesc(order) {
-        let todo = '';
-        if (order.status === 1 || order.status === 2) {
-          if (order.deliverStatus === 1) {
-            todo = ' (部分发货)';
-          } else if (order.deliverStatus === 2) {
-            todo = ' (延迟发货)';
-          }
+      getTotalQtyDesc(order) {
+        var total = 0;
+        order.orderItemList.map(item => {
+          total += item.productQuantity;
+        });
+        return `共${total}件商品`;
+      },
+      getPaymentText(order) {
+        if (order.status == 0) {
+          return '应付金额';
         }
-        return this.mapStatus[order.status] + todo;
+        return '实付金额';
+      },
+      statusDesc(order) {
+        return this.mapStatus[order.status];
       },
       orderTypeDesc(item) {
-        if (item.type === 3) {
-          return '秒杀';
-        } else if (item.type === 4) {
-          return '团购';
-        } else if (item.type === 5) {
-          return '拍卖';
-        } else if (item.type === 6) {
-          return '充值订单';
-        } else if (item.type === 7) {
-          return '首单特惠';
-        } else if (item.type === 8) {
-          return '拼团';
-        } else if (item.type === 9) {
-          return '砍价订单';
-        } else if (item.type === 10) {
-          return '拼团直购';
-        } else if (item.type === 100) {
-          return '茶美售卖机';
+        if (item.orderType == 1) {
+          return '秒杀订单';
         }
-        return '';
+        return '正常订单';
       },
       changeTab(item) {
         this.activeItem = item.val;
@@ -199,9 +197,7 @@
         this.fetchData(true);
       },
       showOrder(order) {
-        if ((order.type === 8 || order.type === 9) && (order.status === 0 || order.status === 4)) {
-          return false;
-        } else if (this.activeItem === -1) {
+        if (!this.activeItem) {
           return true;
         } else if (order.status === this.activeItem) {
           return true;
@@ -209,21 +205,11 @@
         return false;
       },
       showOrderDetail(order) {
-        this.$router.push({name: 'orderdetail', params: {id: order.orderNo}});
+        this.$router.push({name: 'orderdetail', params: {id: order.orderSn}});
       },
       showProductDetail(order, product) {
-        if (order.type === 3) { // 秒杀
+        if (order.orderType == 1) { // 秒杀
           this.$router.push({name: 'seckillDetail', params: {id: product.id}});
-        } else if (order.type === 4) {  // 团购
-          this.$router.push({name: 'groupbuyDetail', params: {id: product.id}});
-        } else if (order.type === 5) {  // 拍卖
-          this.$router.push({name: 'auctiondetail', params: {id: product.id}});
-        } else if (order.type === 7) {  // 首单特惠
-          this.$router.push({name: 'firstdetail', params: {id: product.id}});
-        } else if (order.type === 8 || order.type === 10) {  // 8: 拼团, 10: 拼团直购
-          this.$router.push({name: 'tuandetail', params: {id: product.id}, query: {tuanId: order.spreadId || ''}});
-        } else if (order.type === 9) {  // 砍价订单
-          this.$router.push({name: 'sharedetail', params: {id: product.id}, query: {shareId: order.spreadId || ''}});
         } else {
           this.$router.push({name: 'good', params: {id: product.id}});
         }
@@ -240,17 +226,41 @@
       loadMore() {
         this.fetchData();
       },
-      goFillAddress(order) {
-        this.$router.push({name: 'filladdress', params: {id: order.orderNo}});
+      viewSameType(order) {
+        let cid = order.orderItemList.length && order.orderItemList[0].productCategoryId || '';
+        this.$router.push({name: 'search', query: {cid: cid}});
       },
-      goTop() {
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
+      wxpay(params, order) {
+        let that = this;
+        WeixinJSBridge.invoke(
+          'getBrandWCPayRequest', {
+            'appId': params.appId,
+            'timeStamp': params.timeStamp,
+            'nonceStr': params.nonceStr,
+            'package': params.package,
+            'signType': params.signType,
+            'paySign': params.paySign
+          }, function(res) {
+            that.paying = false;
+            if (res.err_msg === 'get_brand_wcpay_request:ok') {
+              that.$store.dispatch('openToast', '支付成功！');
+              that.$router.push({name: 'orderdetail', params: {id: order.orderSn}});
+            } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
+              that.$store.dispatch('openToast', '取消支付！');
+            } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
+              that.$store.dispatch('openToast', '支付失败！');
+            } else {
+              that.$router.push({name: 'orderdetail', params: {id: order.orderSn}});
+            }
+          }
+        );
+        pay(params);
       },
       weixinPay(order) {
-        let userInfo = this.$store.getters.getUserInfo;
-        if (!userInfo.openid) {
-          this.$store.dispatch('openToast', '请先登录！');
+        let openId = this.$store.getters.getOpenId || this.$store.getters.userInfo.openId;
+        if (!openId) {
+          this.$store.dispatch('openToast', '正在登录中...');
+          window.location.href = `${api.CONFIG.ctx}/weixin/base?url=` + encodeURI(location.href);
           return;
         }
         if (this.paying) {
@@ -258,53 +268,45 @@
           return;
         }
         this.paying = true;
-        let payParams = {
-          totalFee: order.totalFee || 0,
-          openid: userInfo.openid,
-          orderNo: order.orderNo,
-          body: order.title || order.products[0].name,
-          orderId: order.id
-        };
-        api.wxpay(payParams).then((response) => {
-          this.paying = false;
-          let that = this;
-          WeixinJSBridge.invoke(
-            'getBrandWCPayRequest', {
-              'appId': response.appId,
-              'timeStamp': response.timeStamp || +new Date(),
-              'nonceStr': response.nonceStr,
-              'package': response.packageValue,
-              'signType': response.signType || 'MD5',
-              'paySign': response.paySign
-            }, function(res) {
-              // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
-              if (res.err_msg === 'get_brand_wcpay_request:ok') {
-                that.$store.dispatch('openToast', '支付成功！');
-                if (order.type === '3') {
-                  api.finishSeckill(order.products[0].id, order.orderNo);
-                }
-                that._reset();
-                that.fetchData(true);
-              } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
-                that.$store.dispatch('openToast', '取消支付！');
-                if (order.type === 8) {
-                  // 拼团订单取消付款，删除拼团订单
-                  api.deleteTuan(order.orderNo);
-                }
-              } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
-                that.$store.dispatch('openToast', '支付失败！');
+        if (!order.prepayId) {
+          api.unifiedOrder({
+            openId: openId,
+            orderSn: order.orderSn
+          }).then(response => {
+            if (response.code != 200) {
+              this.paying = false;
+              this.$store.dispatch('openToast', response.message);
+            } else {
+              this.paying = false;
+              if (response.data.finish) {
+                this.$router.push({name: 'orderdetail', params: {id: order.orderSn}});
+                return;
               }
-              that.$router.push('order');
+              if (!response.data.apiSign) {
+                this.$store.dispatch('openToast', '微信支付配置失败，请联系管理后重试!');
+                return;
+              }
+              this.wxpay(response.data.apiSign, order);
             }
-          );
-          pay();
-        }).catch(response => {
-          this.paying = false;
-        });
+          });
+        } else {
+          api.wxpaySign(order.prepayId).then(response => {
+            this.paying = false;
+            if (response.code == 200) {
+              this.wxpay(response.data, order);
+            } else {
+              this.$store.dispatch('openToast', '微信支付配置失败，请联系管理后重试!');
+            }
+          }).catch(error => {
+            this.paying = false;
+            console.log(error);
+            this.$message('网络开了小差，请稍候再试');
+          });
+        }
       }
     },
     components: {
-      fixedheader, gotop
+      fixedheader, quietlogin
     }
   };
 </script>
@@ -326,22 +328,6 @@
     .order-wrap
       position: relative
       width: 100%
-      .btn-red
-        background: #d05148
-        color: #f1f1f1
-      .btn-blue
-        background: #3a77e7
-        color: #fff
-      .btn-green
-        background: #44b549
-        color: #fff
-      .btn-orange
-        background: rgba(250,180,90,0.93)
-        color: #f1f1f1
-      .btn-white
-        background: #fff
-        color: #333
-        border: 1px solid #ddd
       .tab
         position: relative
         display: flex
@@ -367,23 +353,25 @@
         width: 100%
         display: flex
         flex-wrap: wrap
-        overflow: auto
+        padding-bottom: 60px
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
-        background-color: #fff
+        overflow: auto
         .order-list
           position: relative
           width: 100%
+          padding: 5px 10px
+          box-sizing: border-box
           .order-item
-            padding-bottom: 15px
-            border-1px(rgba(7, 17, 27, 0.1))
+            margin-bottom: 15px
+            background: #fff
+            border-radius: 8px
             .item-title
               position: relative
               width: 100%
               height: 40px
               line-height: 40px
               font-size: 14px
-              background-color: #e1e1e1
               padding: 0 8px
               box-sizing: border-box
               &:after
@@ -401,53 +389,58 @@
                 top: 50%
                 right: 10px
                 margin-top: -4px
-              .op-btns
+              .order_state
+                color: #333
+                font-size: 13px
                 display: inline-block
                 float: right
                 padding-right: 20px
+                &.red
+                  color: #e93b3d
               .orderflag
                 margin-left: 5px
                 font-size: 13px
                 font-weight: 700
-            .item-summary
-              position: relative
+            .item-footer
               display: flex
-              padding: 0 8px
+              padding: 10px 10px 0 0
               font-size: 14px
-              border-top-1px(rgba(7, 17, 27, 0.1))
-              border-1px(rgba(7, 17, 27, 0.1))
-              box-sizing: border-box
-              .summary
-                position: relative
+              color: #333
+              height: 40px
+              position: relative
+              .order_tips
                 flex: 1
-                p
-                  height: auto
-                  line-height: 1
-                  &.status
-                    padding-top: 13px
-                    padding-bottom: 5px
-                  &.price
-                    height: auto
-                    line-height: 1
-                    padding-bottom: 5px
-                  .text
-                    color: #f15353
-              .ops
-                width: 45%
-                float: right
                 text-align: right
-                padding: 10px 0
-                height: 50px
-                box-sizing: border-box
-                overflow: hidden
-                .button
-                  display: inline-block
-                  padding: 6px 10px
-                  text-align: center
-                  margin-left: 5px
-                  font-size: 12px
-                  &:first-child
-                    margin-left: 0
+                font-size: 12px
+                padding-top: 6px
+              .button
+                display: inline-block
+                text-align: center
+                width: 80px
+                border-radius: 4px
+                margin-left: 5px
+                font-size: 13px
+                flex-shrink: 0
+                color: #fff
+                border: none
+                height: 30px
+                line-height: 30px
+              .btn-red
+                background: #d05148
+                color: #f1f1f1
+              .btn-blue
+                background: #3a77e7
+                color: #fff
+              .btn-green
+                background: #44b549
+                color: #fff
+              .btn-orange
+                background: rgba(250,180,90,0.93)
+                color: #f1f1f1
+              .btn-white
+                background: #fff
+                color: #333
+                border: 1px solid #ddd
             .item-content
               position: relative
               display: flex
@@ -457,9 +450,12 @@
               .item-img
                 display: inline-block
                 float: left
-                width: 30%
+                width: 75px
+                height: 75px
+                margin-right: 10px
                 img
-                  width: 95%
+                  width: 100%
+                  height: 100%
                   overflow: hidden
               .item-info
                 position: relative
@@ -468,28 +464,72 @@
                 box-sizing: border-box
                 >.title
                   padding-top: 8px
+                  color: #333
                   position: relative
-                  color: #666
                   overflow: hidden
                   text-overflow: ellipsis
                   word-wrap: break-word
                   display: -webkit-box
                   -webkit-line-clamp: 2
-                  -webkit-box-orient: vertical
-                  line-height: 1.3
+                  /*! autoprefixer: off */
+                  -webkit-box-orient:vertical
+                  /*! autoprefixer: on */
+                  line-height: 1.2
+                  font-size: 13px
+                >.sku_line
+                  display: flex
+                  align-items: center
+                  margin: 3px 10px 0 0
+                  justify-content: space-between
+                  font-size: 12px
+                  .sku
+                    position: relative
+                    background: #f7f7f7
+                    padding: 0 15px 0 5px
+                    height: 20px
+                    line-height: 20px
+                    color: #666
+                    flex: 1
+                    border-radius: 2px
+                    overflow: hidden
+                    text-overflow: ellipsis
+                    display: -webkit-box
+                    -webkit-line-clamp: 2
+                    /*! autoprefixer: off */
+                    -webkit-box-orient:vertical
+                    /*! autoprefixer: on */
               .item-pay
                 position: relative
                 width: 50px
                 float: right
                 text-align: right
                 padding-top: 8px
-                color: #666
+                color: #333
                 .price
                   padding-bottom: 8px
-                  color: #e4393c
                   font-weight: 400
                 .nums
                   text-align: right
+            .order_total_bar
+              padding: 6px 0
+              position: relative
+              display: flex
+              .total_count
+                margin-left: 10px
+                font-size: 14px
+                color: #999
+                line-height: 21px
+                text-align: right
+                font-size: 12px
+                flex: 1
+              .payment
+                margin-left: 10px
+                font-size: 14px
+                color: #999
+                line-height: 21px
+                padding-right: 10px
+                >.price
+                  color: #151515      
       .no-order
         position: relative
         width: 100%

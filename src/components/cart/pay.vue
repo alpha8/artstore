@@ -1,61 +1,45 @@
 <template>
   <div class="wxpay">
     <fixedheader title="确认订单" ref="header"></fixedheader>
-    <div class="address-wrap" v-if="!selfservice">      
+    <div class="address-wrap">      
       <div class="address-default address-border" v-if="hasDefaultAddress" @click.stop.prevent="showAddressList">
-        <h3>收货地址</h3>
         <ul>
-          <li>{{getFullAddress}}</li>
-          <li><strong>{{defaultAddress.name}}</strong><span class="mobile">{{defaultAddress.phoneNumber | mixPhone}}</span></li>
+          <li><strong>{{defaultAddress.name}} {{defaultAddress.phoneNumber | mixPhone}}</strong></li>
+          <li><span class="tag tag_red">默认</span>{{getFullAddress}}</li>
         </ul>
       </div>
       <div class="addressNull" v-else>
         <h3 @click.stop.prevent="showAddressList">！请填写收货地址</h3>
       </div>
     </div>
-    <div class="pay" ref="pay" :class="{'notop': selfservice}">
+    <div class="pay" ref="pay">
       <div class="order-wrap">
-        <split v-if="!selfservice"></split>
+        <split></split>
         <div class="order-shop border-1px">{{appName}}</div>
         <ul class="orderlist">
           <li class="product border-1px" v-for="product in products">
             <div class="thumbnail">
-              <img :src="product.icon" alt="" class="photo">
+              <img :src="getThumbnail(product.productPic)" alt="" class="photo">
             </div>
             <div class="sku-info">
-              <p class="sku-name">{{product.name}}</p>
-              <p class="sku-item"></p>
-            </div>
-            <div class="sku-ext">
-              <p class="sku-price">{{product.price | currency}}</p>
-              <p class="sku-count">x{{product.count}}</p>
+              <p class="sku-name">{{product.productName}}</p>
+              <p class="sku-item" v-show="product.sp1">{{`${product.sp1 || ''} ${product.sp2 || ''}  ${product.sp3 || ''}`}}</p>
+              <p class="sku-point"><span class="sku_price">{{product.price | currency}}</span><i class="icon-database" />{{product.price * plusPointRate()}}</span><span class="sku_count">x{{product.quantity}}</span></p>
             </div>
           </li>
         </ul>
         <ul class="shop-info">
           <li class="discount change" @click.stop.prevent="selectCoupon">
             <strong>优惠券：</strong>
-            <span v-if="availCoupons.length">{{usedDiscount}}</span>
+            <span v-if="coupons.length">{{usedDiscount}}</span>
             <span v-else class="disabled">无可用</span>
           </li>
           <li class="coin">
-            <strong>金币：<i class="coin-tips">{{coinTips}}</i></strong>
+            <strong>积分：<i class="coin-tips">{{coinTips}}</i></strong>
             <em @click.stop.prevent="toggleUseCoin">
-              <i class="icon icon-check_circle" :class="{'on': useCoin}"></i>使用金币</i>
+              <i class="icon icon-check_circle" :class="{'on': useCoin}"></i>使用积分</i>
             </em>
-          </li>
-          <li>
-            <strong>是否自提：</strong>
-            <span @click.stop.prevent="delivery"><span class="icon icon-check_circle" :class="{'on': selfservice}"></span><span v-if="selfservice">线下自提</span></span>
-          </li>
-          <li class="shipping" v-show="!selfservice">
-            <strong>配送方式：</strong>
-            <span>快递</span>
-          </li>
-          <li class="shipping" v-show="!selfservice">
-            <strong>快递费：</strong>
-            <span>{{0 | currency}} (包邮)</span>
-          </li>
+          </li>         
         </ul>
         <split></split>
         <ul class="shop-info">
@@ -64,35 +48,38 @@
             <span class="nowrap-line remark">{{payRemarks}}</span>
           </li>
         </ul>
-        <div class="payArea">
-          <p class="price">
-            <span class="label">商品总额：</span>
-            <span class="totalPrice">{{totalFee | currency}}</span>
-          </p>
-          <p class="price">
-            <span class="label">优惠券抵扣：</span>
-            <span class="totalPrice">{{couponValue | currency}}</span>
-          </p>
-          <p class="price" v-show="discount">
-            <span class="label">折扣券抵扣：</span>
-            <span class="totalPrice">{{discount | currency}}</span>
-          </p>
-          <p class="price" v-show="useCoin">
-            <span class="label">金币抵扣：</span>
-            <span class="totalPrice">{{coinValue | currency}}</span>
-          </p>
-          <p class="price">
-            <span class="label">应付金额：</span>
-            <span class="totalPrice"><strong>{{totalFee - couponValue - discount - coinValue | currency}}</strong></span>
-          </p>
-          <div class="payBtnList">
-            <div class="btns btn-green" :class="{'btn-gray': paying}" @click.stop.prevent="weixinPay"><span>微信支付</span></div>
-            <!-- <div class="btns btn-red"><span>京东支付</span></div>
-            <div class="btns btn-lightblue"><span>货到付款</span></div> -->
-          </div>
-          <div class="countdownTips" v-if="countdownStats && countdownStats.milliseconds > 0">
-            请在<span v-if="countdownStats.hours"><span class="red-text">{{countdownStats.hours}}</span>小时</span><span v-if="countdownStats.mins"><span class="red-text">{{countdownStats.mins}}</span>分</span><span v-if="countdownStats.seconds"><span class="red-text">{{countdownStats.seconds}}</span>秒</span>内完成支付，否则订单将自动取消。</div>
+        <split></split>
+        <ul class="buy_chart">
+          <li class="buy_item">
+            <p class="buy_item_text">商品金额：</p>
+            <p class="buy_item_price">{{totalFee | currency}}</p>
+          </li>
+          <li class="buy_item">
+            <p class="buy_item_text">运费：</p>
+            <p class="buy_item_price">+ {{freightFee | currency}}</p>
+          </li>
+          <li class="buy_item">
+            <p class="buy_item_text">优惠券抵扣：</p>
+            <p class="buy_item_price">- {{couponValue | currency}}</p>
+          </li>
+          <li class="buy_item">
+            <p class="buy_item_text">积分抵扣：</p>
+            <p class="buy_item_price">- {{coinValue | currency}}</p>
+          </li>
+        </ul>
+        <div class="pay_area">
+          <p class="price">实付金额：  <strong>{{shouldPay - coinValue | currency}}</strong></p>
         </div>
+        <div class="payBtnList">
+          <div class="btns btn-green" :class="{'btn-gray': paying}" @click.stop.prevent="weixinPay"><span>微信支付</span></div>
+          <!-- <div class="btns btn-red"><span>京东支付</span></div>
+          <div class="btns btn-lightblue"><span>货到付款</span></div> -->
+        </div>
+        <div class="countdownTips" v-if="countdownStats && countdownStats.milliseconds > 0">
+          请在<span v-if="countdownStats.hours"><span class="red-text">{{countdownStats.hours}}</span>小时</span><span v-if="countdownStats.mins"><span class="red-text">{{countdownStats.mins}}</span>分</span><span v-if="countdownStats.seconds"><span class="red-text">{{countdownStats.seconds}}</span>秒</span>内完成支付，否则订单将自动取消。</div>
+      </div>
+      <div class="footer">
+        <div class="logo"><img :src="logoSrc" /></div>
       </div>
     </div>
     <transition name="move">
@@ -103,6 +90,7 @@
     <transition name="fade">
       <div class="list-mask" @click.stop.prevent="hideAddressList" v-show="showBox"></div>
     </transition>
+    <quietlogin/>
   </div>
 </template>
 
@@ -115,6 +103,7 @@
   import {pay} from '@/common/js/pay';
   import {countdown} from '@/common/js/date';
   import {mixPhone} from '@/common/js/util';
+  import quietlogin from '@/components/common/quietlogin';
 
   export default {
     data() {
@@ -124,20 +113,26 @@
         paying: false,
         remarks: '',
         countdownStats: {},
-        couponValue: 0,
-        selfservice: false,
         coupons: [],
         discount: 0,
-        discountTickets: [],
-        useCoin: false
+        useCoin: false,
+        freightFee: 0,
+        logoSrc: api.CONFIG.logo,
+        products: [],
+        totalCoin: 0,
+        addressId: '',
+        couponId: '',
+        useIntegration: '',
+        apiSign: ''
       };
     },
     computed: {
-      products() {
-        return this.$store.getters.getPayGoods;
-      },
       defaultAddress() {
-        return this.$store.getters.getDefaultAddress;
+        let addr = this.$store.getters.getDefaultAddress;
+        if (addr && addr.id) {
+          this.addressId = addr.id;
+        }
+        return addr;
       },
       getFullAddress() {
         var item = this.defaultAddress;
@@ -151,97 +146,107 @@
         return this.remarks;
       },
       usedDiscount() {
-        let discounts = this.$store.getters.loadUsedDiscount;
-        if (discounts && discounts.length) {
-          this.discountTickets = discounts;
-          return `已使用${discounts.length}张折扣券`;
-        } else {
-          this.discountTickets = [];
-          return `您有${this.availCoupons.length}张可用折扣券`;
+        let selectedCoupon = this.$store.getters.loadUsedDiscount;
+        if (selectedCoupon && selectedCoupon.length) {
+          let coupon = selectedCoupon[0];
+          let name = coupon.coupon && coupon.coupon.name || '';
+          this.couponId = coupon.coupon.id;
+          return `已选择${selectedCoupon.length}张（${name}）`;
         }
-      },
-      availCoupons() {
-        return this.coupons && this.coupons.filter(o => {
-          return o.status === 0;
-        });
-      },
-      totalCoin() {
-        return 0;
-      },
-      availCoin() {
-        return 0;
+        return `您有${this.coupons.length}张可用优惠券`;
       },
       coinTips() {
-        return `共${this.totalCoin}个，可用${this.availCoin}个`;
-      },
-      coinValue() {
+        let profile = this.$store.getters.userProfile;
+        let rate = profile.memberLevel && profile.memberLevel.pointRate || 100;
         if (this.useCoin) {
-          let rate = this.assets.coin && this.assets.coin.rate || 100;
-          let maxUseCoin = this.assets.coin && this.assets.coin.useCoin || 0;
-          return maxUseCoin / rate;
+          this.useIntegration = Math.floor(this.coinValue * rate);
+          return `共${this.totalCoin}个, 本单消费${this.useIntegration}个`;
         }
-        return 0;
-      },
-      canUseCoin() {
-        var allow = true;
-        for (var i = 0, len = this.products.length; i < len; i++) {
-          if (this.products[i].name.indexOf('现金券') > -1) {
-            allow = false;
-          }
-        }
-        if (!allow) {
-          this.useCoin = false;
-        }
-        return allow;
+        return `共${this.totalCoin}个, ${rate}积分抵扣1元`;
       },
       appName() {
         return `${api.CONFIG.APPNAME}`;
+      },
+      couponValue() {
+        let selectedCoupon = this.$store.getters.loadUsedDiscount;
+        if (selectedCoupon && selectedCoupon.length) {
+          return selectedCoupon[0].coupon && selectedCoupon[0].coupon.amount || 0;
+        }
+        return 0;
+      },
+      shouldPay() {
+        return this.totalFee - this.couponValue + this.freightFee;
+      },
+      coinValue() {
+        if (!this.useCoin) {
+          return 0;
+        }
+        let profile = this.$store.getters.userProfile;
+        let rate = profile.memberLevel && profile.memberLevel.pointRate || 100;
+        let amount = Math.floor(this.totalCoin / rate);
+        if (amount > this.shouldPay) {
+          return this.shouldPay;
+        }
+        return amount;
       }
     },
     activated() {
       this.show();
-      // this._totalPrice();
-      // this.computeCouponValue();
+      this.fetchData();
     },
     deactivated() {
       this.hide();
       this.paying = false;
-      this.couponValue = 0;
+      this.product = [];
       this.discount = 0;
       this.coupons = [];
-      this.assets = {};
       this.useCoin = true;
+      this.addressId = '';
+      this.couponId = '';
+      this.useIntegration = '';
+      this.apiSign = '';
     },
     methods: {
-      loadCouponData() {
-        let userId = this.$store.getters.userId;
-        api.getUserProfile(userId).then(response => {
-          if (response.result === 0) {
-            this.$store.dispatch('updateUserProfile', response);
-            this.couponValue = response.wallet && response.wallet.totalValue || 0;
+      fetchData() {
+        var userId = this.$store.getters.userId;
+        if (!userId) {
+          var redirect = window.location.href.replace('?from=singlemessage&isappinstalled=0', '').replace('&from=singlemessage&isappinstalled=0', '');
+          if (api.CONFIG.profiles != 'dev') {
+            redirect = 'http://' + location.host + '/wx/pay';
           }
-        });
-      },
-      _totalPrice() {
-        let total = 0;
-        this.products.forEach((item) => {
-          total += item.count * item.price;
-          this.isVendingOrder = this._isVendingOrder(item.id);
-        });
-        this.totalFee = total;
-        if (this.isVendingOrder) {
-          this.selfservice = true;
+          this.$router.push({name: 'login', query: {redirect: encodeURI(redirect)}});
+          // 未登录
+          return;
         }
+        this.$store.dispatch('openLoading');
+        api.generateConfirmOrder().then(response => {
+          if (response.code == 200) {
+            let data = response.data;
+            this.products = data.cartPromotionItemList || [];
+            if (!this.products.length) {
+              this.$router.replace({name: 'home'});
+              return;
+            }
+            this.totalFee = data.calcAmount.totalAmount || 0;
+            this.freightFee = data.calcAmount.freightAmount || 0;
+            this.totalCoin = data.memberIntegration || 0;
+            this.coupons = data.couponHistoryDetailList || [];
+          }
+          this.$store.dispatch('closeLoading');
+        }).catch(error => {
+          console.log(error);
+          this.$store.dispatch('closeLoading');
+        });
       },
-      delivery() {
-        this.selfservice = !this.selfservice;
+      getThumbnail(pic) {
+        if (pic) {
+          return `${pic}?imageView2/2/w/372/h/372`;
+        } else {
+          return api.CONFIG.defaultImg;
+        }
       },
       toggleUseCoin() {
         this.useCoin = !this.useCoin;
-      },
-      computeCouponValue() {
-      },
-      _calcDiscount() {
       },
       openRemarkBox() {
         this.$router.push('/pay/remark');
@@ -264,6 +269,7 @@
       },
       updateDefaultAddress() {
         this.showBox = false;
+        this.fetchData();
       },
       countdown() {
         let createTime = 0;
@@ -284,149 +290,96 @@
             if (!this.seckill.id) {
               return;
             }
-            // 取消订单
-            let userId = this.$store.getters.getUserInfo.userId;
-            api.cancelSeckillOrder({
-              seckillId: this.seckill.id,
-              userId: userId
-            }).then(response => {
-              if (response.success) {
-                this.$store.dispatch('openToast', '支付超时，订单已取消');
-                this.$store.dispatch('removeKillProduct', this.seckill.id);
-                this.$store.dispatch('cleanUsedDiscount');
-                setTimeout(() => {
-                  this.$router.push('/my');
-                }, 1500);
-                return;
-              }
-            });
           }
           this.countdownStats = countdown(--cTime);
         }, 1000);
       },
-      back() {
-        this.$router.back();
-      },
       weixinPay() {
-        if (!this.selfservice && !this.defaultAddress.address) {
-          this.$store.dispatch('openToast', '请选择收货人信息');
-          return;
-        }
-        let orderType = this.$route.query.orderType || 0;
-        let userInfo = this.$store.getters.getUserInfo;
-        if (!userInfo.openid) {
-          this.$store.dispatch('openToast', '正在登录中...');
-          setTimeout(() => {
-            let redirect = 'http://' + location.host + '/weixin/pay';
-            if (orderType >= 3) {
-              redirect += '?orderType=' + orderType;
-            }
-            window.location.href = `${api.CONFIG.wxCtx}/baseInfo?url=` + escape(redirect);
-          }, 1500);
-          return;
-        }
         if (this.paying) {
           this.$store.dispatch('openToast', '正在支付中...');
           return;
         }
-        this.$store.dispatch('cleanUsedDiscount');
-        let maxUseCoin = 0;
-        let params = {
-          openid: userInfo.openid,
-          userId: userInfo.userId,
-          totalPrice: this.totalFee,
-          remarks: this.remarks,
-          type: orderType,
-          coinCount: this.useCoin ? maxUseCoin : 0
-        };
-        if (this.selfservice) {
-          params.express = {
-            expressAddress: '线下自提',
-            mobile: '',
-            receiver: userInfo.nickName || ''
-          };
-        } else {
-          params.express = {
-            expressAddress: (this.defaultAddress.city || '') + this.defaultAddress.address,
-            mobile: this.defaultAddress.mobile,
-            receiver: this.defaultAddress.name
-          };
+        let openId = this.$store.getters.getOpenId || this.$store.getters.userInfo.openId;
+        if (!openId) {
+          this.$store.dispatch('openToast', '正在登录中...');
+          window.location.href = `${api.CONFIG.ctx}/weixin/base?url=` + encodeURI(location.href);
+          return;
         }
-        params.products = items;
-        if (this.discount) {
-          params.coupons = this.discountTickets;
+        if (!this.addressId) {
+          this.$store.dispatch('openToast', '请选择收货人信息');
+          return;
         }
         this.paying = true;
-        api.createOrder(params).then(response => {
-          if (response.result !== 0) {
-            this.$store.dispatch('openToast', '生成订单失败！');
+        if (this.apiSign) {
+          this.wxpay();
+          return;
+        }
+        api.generateOrder({
+          memberReceiveAddressId: this.addressId,
+          couponId: this.couponId || '',
+          useIntegration: this.useIntegration || '',
+          payType: 1,
+          openId: openId,
+          note: this.remarks || ''
+        }).then(response => {
+          if (response.code != 200) {
             this.paying = false;
-            return;
+            this.$store.dispatch('openToast', response.message);
+          } else {
+            this.$store.dispatch('cleanUsedDiscount');
+            let order = response.data && response.data.order;
+            if (response.data.finish) {
+              this.$router.replace({name: 'orderdetail', params: {id: order.orderSn}});
+              return;
+            }
+            this.apiSign = response.data && response.data.apiSign;
+            if (!this.apiSign) {
+              this.$store.dispatch('openToast', '微信支付配置失败，请联系管理后重试!');
+              return;
+            }
+            this.wxpay(order);
           }
-          let order = response.order;
-          let payParams = {
-            totalFee: order.totalFee,
-            openid: userInfo.openid,
-            orderNo: order.orderNo,
-            body: order.body,
-            orderId: order.orderId
-          };
-          api.wxpay(payParams).then((response) => {
-            this.paying = false;
-            let that = this;
-            WeixinJSBridge.invoke(
-              'getBrandWCPayRequest', {
-                'appId': response.appId,
-                'timeStamp': response.timeStamp || +new Date(),
-                'nonceStr': response.nonceStr,
-                'package': response.packageValue,
-                'signType': response.signType || 'MD5',
-                'paySign': response.paySign
-              }, function(res) {
-                // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
-                if (res.err_msg === 'get_brand_wcpay_request:ok') {
-                  that.$store.dispatch('openToast', '支付成功！');
-                } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
-                  that.$store.dispatch('openToast', '取消支付！');
-                } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
-                  that.$store.dispatch('openToast', '支付失败！');
-                }
-                that.$router.replace('order');
-              }
-            );
-            pay();
-          }).catch(response => {
-            this.paying = false;
-          });
-        }).catch(response => {
+        }).catch(error => {
           this.paying = false;
+          console.log(error);
+          this.$store.dispatch('openToast', '网络开了小差，请稍候再试!');
         });
+      },
+      wxpay(order) {
+        let that = this;
+        WeixinJSBridge.invoke(
+          'getBrandWCPayRequest', {
+            'appId': that.apiSign.appId,
+            'timeStamp': that.apiSign.timeStamp,
+            'nonceStr': that.apiSign.nonceStr,
+            'package': that.apiSign.package,
+            'signType': that.apiSign.signType,
+            'paySign': that.apiSign.paySign
+          }, function(res) {
+            that.paying = false;
+            if (res.err_msg === 'get_brand_wcpay_request:ok') {
+              that.$store.dispatch('openToast', '支付成功！');
+            } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
+              that.$store.dispatch('openToast', '取消支付！');
+            } else if (res.err_msg === 'get_brand_wcpay_request:fail') {
+              that.$store.dispatch('openToast', '支付失败！');
+            }
+            that.$router.replace({name: 'orderdetail', params: {id: order.orderSn}});
+          }
+        );
+        pay(this.apiSign);
+      },
+      plusPointRate() {
+        let profile = this.$store.getters.userProfile;
+        return profile.memberLevel && profile.memberLevel.pointRate || 100;
       }
     },
     components: {
-      split, fixedheader, addressList, usecoupon
+      split, fixedheader, addressList, usecoupon, quietlogin
     },
     filters: {
       mixPhone(phone) {
         return mixPhone(phone);
-      }
-    },
-    directives: {
-      enterNumber: {
-        inserted: function (el) {
-          el.addEventListener('keypress', function(e) {
-            e = e || window.event;
-            let charcode = typeof e.charCode === 'number' ? e.charCode : e.keyCode;
-            let re = /\d/;
-            if (!re.test(String.fromCharCode(charcode)) && charcode > 9 && !e.ctrlKey) {
-              if (e.preventDefault) {
-                e.preventDefault();
-              } else {
-                e.returnValue = false;
-              }
-            }
-          });
-        }
       }
     }
   };
@@ -474,22 +427,11 @@
       .address-default
         position: relative
         background: #fff
-        padding: 12px 10px 12px 58px
-        line-height: 1.5
+        padding: 12px 10px
         &.address-border
           padding-bottom: 16px
           background: #fff url(../../common/images/line.png) -7px bottom repeat-x
           background-size: 60px 4px
-        h3
-          position: absolute
-          top: 12px
-          left: 10px
-          width: 2em
-          font-weight: 400
-          font-size: 14px
-          color: #999
-        strong
-          font-weight: 400
         ul
           position: relative
           padding-right: 30px
@@ -508,23 +450,51 @@
             top: 50%
             right: 5px
             margin-top: -4px
-          li
-            display: -webkit-box
-            text-overflow: ellipsis
-            overflow: hidden
-            -webkit-line-clamp: 1
-            -webkit-box-orient: vertical
+          >li
+            word-wrap: break-word
+            word-break: break-all
             font-size: 14px
-            height: 21px
-            >.mobile
-              margin-left: 10px
+            > strong
+              font-weight: 700
+              font-size: 16px
+            >.tag
+              display: inline-block
+              position: relative
+              overflow: hidden
+              padding: 0 5px
+              vertical-align: middle
+              margin: -2px 5px 0 0
+              max-width: 8em
+              height: 15px
+              line-height: 15px
+              font-size: 10px
+              color: #4b9bfb
+              &.tag_red
+                color: #e93b3d
+              &::after
+                content: ""
+                position: absolute
+                z-index: 1
+                pointer-events: none
+                background-color: #e93b3d
+                border: 1px solid #ddd
+                top: 0
+                bottom: 0
+                left: 0
+                right: 0
+                background: none
+                border-color: #e93b3d
+                right: -100%
+                bottom: -100%
+                -webkit-transform: scale(.5)
+                -webkit-transform-origin: 0 0
+                border-radius: 4px
     >.pay
       position: absolute
       top: 114px
       left: 0
       bottom: 0
       width: 100%
-      background: #fff
       overflow: auto
       box-sizing: border-box
       -webkit-overflow-scrolling: touch
@@ -533,7 +503,6 @@
       .order-wrap
         position: relative
         width: 100%
-        padding-bottom: 60px
         .order-shop
           display: block
           height: 40px
@@ -541,9 +510,11 @@
           padding: 0 10px
           font-size: 14px
           border-1px(rgba(7, 17, 27, 0.1))
+          background: #fff
         .orderlist
           position: relative
           padding: 10px
+          background: #fff
           li
             display: flex
             padding: 5px 0
@@ -553,15 +524,17 @@
             &:last-child
               margin-bottom: 0
             .thumbnail
+              vertical-align: top
               display: inline-block
               float: left
-              width: 35%
+              padding: 5px 10px 0 0
+              box-sizing: border-box
               img
-                width: 95%
+                width: 100px
+                height: 100px
                 overflow: hidden
             .sku-info
               flex: 1
-              padding: 0 5px 5px 0
               .sku-name
                 padding-top: 8px
                 line-height: 1.3
@@ -570,9 +543,38 @@
                 text-overflow: ellipsis
                 display: -webkit-box
                 -webkit-line-clamp: 2
-                -webkit-box-orient: vertical
+                /*! autoprefixer: off */
+                -webkit-box-orient:vertical
+                /*! autoprefixer: on */
               .sku-item
-                padding-bottom: 10px
+                position: relative
+                background: #f7f7f7
+                height: 20px
+                line-height: 20px
+                color: #666
+                display: block
+                border-radius: 2px
+                font-size: 12px
+              .sku-point
+                position: relative
+                margin-top: 5px
+                height: 20px
+                line-height: 20px
+                padding-right: 60px
+                color: #666
+                display: block
+                font-size: 12px
+                .sku_price
+                  color: #ff6325
+                  font-size: 13px
+                  padding-right: 8px
+                .icon-database
+                  padding-right: 2px
+                .sku_count
+                  position: absolute
+                  top: 0
+                  right: 0
+                  font-size: 14px
             .sku-ext
               width: 15%
               float: right
@@ -582,18 +584,19 @@
               p
                 padding-bottom: 8px
               .sku-price
-                color: #e4393c
+                color: #ff6325
                 font-weight: 700
         >.shop-info, .buy-checkout
           position: relative        
           padding: 10px
           font-size: 14px
+          background: #fff
           >li
             position: relative
             display: flex
             height: 35px
             line-height: 35px
-            align-items: center
+            align-items: center              
             strong
               flex: 1
               font-weight: 400
@@ -620,7 +623,9 @@
                 text-overflow: ellipsis
                 overflow: hidden
                 -webkit-line-clamp: 1
-                -webkit-box-orient: vertical
+                /*! autoprefixer: off */
+                -webkit-box-orient:vertical
+                /*! autoprefixer: on */
                 white-space: nowrap
             &.change:after
               content: ""
@@ -637,14 +642,19 @@
               right: 5px
               top: 50%
               margin-top: -5px
-          .item-border
-            background: #fff url(../../common/images/line.png) -7px bottom repeat-x
-            background-size: 60px 4px
         >.shop-info > li
           padding-right: 0
           &.discount > span
+            font-size: 12px
             padding-right: 15px
             color: #e4393c
+            text-overflow: ellipsis
+            overflow: hidden
+            -webkit-line-clamp: 1
+            /*! autoprefixer: off */
+            -webkit-box-orient:vertical
+            /*! autoprefixer: on */
+            white-space: nowrap
             &.disabled
               color: #999
           .coin-tips
@@ -659,21 +669,20 @@
               text-align: left
               font-size: 12px
               border: 1px dashed #ccc
-        >.payArea
-          position: relative
-          text-align: left
-          background: #fff
+        >.buy_chart
           padding: 0 10px
-          .price
-            padding: 6px 0
-            font-size: 14px
-            &.last
-              padding-top: 2px
-            .label
-              display: inline-block
-              width: 85px
-            .totalPrice
-              color: #e4393c
+          position: relative
+          background-color: #fff
+          padding: 10px
+          font-size: 14px
+          .buy_item
+            display: flex
+            padding: 2px 0
+            .buy_item_text
+              flex: 1
+              color: #333
+            .buy_item_price
+              color: #e93b3d
             strong
               font-weight: 700
               font-size: 20px
@@ -684,6 +693,36 @@
             .red-text
               color: #e4393c
               font-weight: 700
+        >.pay_area
+          overflow: hidden
+          text-align: center
+          padding: 0 10px
+          background: #fff
+          position: relative
+          .price
+            font-size: 16px
+            font-weight: 700
+            margin-bottom: 20px
+            text-align: right
+            strong
+              color: #e93b3d
+              font-weight: 400
+        .payBtnList
+          display: block
+          padding: 10px
+          background: #fff
+          .btns
+            margin: 0
+    .footer
+      margin: 15px 0 40px
+      .logo
+        display: block
+        width: 100px
+        margin: 0 auto
+        img
+          width: 100px
+          height: auto
+          border: 0
     >.address-list-wrap
       position: absolute
       left: 0

@@ -11,11 +11,11 @@
           <div class="subtitle" v-if="good.subTitle">{{good.subTitle}}</div>
           <div class="price_wrap">
             <span class="price"><em class="currency">¥</em>{{getGoodPrice}}</span>
-            <span v-show="isMemberPlus && getGoodPrice != getPlusPrice" class="price_plus"><em class="currency">¥</em>{{getPlusPrice}}<em class="member"><i class="icon-diamond" />{{memberPlusInfo.name || '会员价'}}</em></span>
+            <span v-show="isMemberPlus && getPlusPrice" class="price_plus"><em class="currency">¥</em>{{getPlusPrice}}<em class="member"><i class="icon-diamond" />{{memberPlusInfo.name || '会员价'}}</em></span>
           </div>
           <div class="price_wrap">
             <span class="point integration"><i class="icon-database" />{{defaultPointRate * getGoodPrice}}</span>
-            <span v-show="isMemberPlus && getGoodPrice != getPlusPrice" class="point_plus integration"><i class="icon-database" />{{plusPointRate * getPlusPrice}}</span></div>
+            <span v-show="isMemberPlus && getPlusPrice" class="point_plus integration"><i class="icon-database" />{{plusPointRate * getPlusPrice}}</span></div>
           <!-- <div class="price">
             <span class="now">¥{{getGoodPrice}}</span><span class="old" v-show="good.originalPrice !== good.price">¥{{good.originalPrice}}</span>
           </div> -->
@@ -70,8 +70,10 @@
         </div>
         <el-backtop target=".good-content" :bottom="55" :right="10"></el-backtop>
       </div>
-      <fixedcart ref="shopcart" @add="addToCart" :good="good"></fixedcart>
+      <fixedcart ref="shopcart" @add="addToCart" @fastAdd="fastConfirmOrder" :good="good"></fixedcart>
+      <nicelayer ref="nicelayer" :icon="qrcode" />
     </div>
+    <quietlogin />
   </div>
 </template>
 
@@ -85,6 +87,7 @@
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import quietlogin from '@/components/common/quietlogin';
   import swipe from '@/components/swipe/quietswipe';
+  import nicelayer from '@/components/common/nicelayer';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
 
@@ -130,7 +133,7 @@
         activeName: 'intro',
         skuId: null,
         skuCount: 0,
-        skuSelected: []
+        qrcode: api.CONFIG.qrcode
       };
     },
     computed: {
@@ -151,7 +154,6 @@
       },
       selectSku() {
         var selected = this.$store.getters.getSelectedSku;
-        this.skuSelected = selected;
         var sku = selected.find(o => o.id == this.good.id);
         if (!sku) {
           return `1件`;
@@ -176,12 +178,16 @@
             if (txt == searchSkuIdKey) {
               this.skuId = item.id;
               this.good.stock = item.stock;
+              this.$set(this.good, 'skuPrice', item.price);
             }
           });
         }
         return `${text} ${this.good.count || 1}件`;
       },
       getGoodPrice() {
+        if (this.good.skuPrice) {
+          return this.good.skuPrice;
+        }
         return this.good.price;
       },
       getFrameHeight() {
@@ -214,16 +220,7 @@
         return profile.memberLevel && profile.memberLevel.pointRate || 100;
       },
       getPlusPrice() {
-        let memberPrice = this.good.memberPriceList || []; 
-        let currentMember = this.$store.getters.userInfo;
-        let price = this.good.price;
-        memberPrice.map(member => {
-          if (member.memberLevelId == currentMember.memberLevelId && member.memberPrice) {
-            price = member.memberPrice;
-            this.$set(this.good, 'plusPrice', price);
-          }
-        });
-        return price;
+        return this.good.plusPrice || ''; 
       }
     },
     mounted() {
@@ -231,6 +228,7 @@
       window.onscroll = () => {
         this.scrollY = window.pageYOffset;
       };
+      this.$refs.nicelayer.show();
     },
     methods: {
       fetchData() {
@@ -246,8 +244,9 @@
           this.$store.dispatch('closeLoading');
           this.wxReady();
         }).catch(response => {
+          console.log(response);
+          this.$router.replace({name: 'notfound'});
           this.$store.dispatch('closeLoading');
-          this.$router.replace('/404');
         });
       },
       setSkuCount() {
@@ -342,6 +341,35 @@
           });
         }
       },
+      fastConfirmOrder() {
+        let stockEmpty = false;
+        if (!this.good.count) {
+          this.$set(this.good, 'count', 1);
+        }
+        var selected = this.$store.getters.getSelectedSku;
+        var sku = selected.find(o => o.id == this.good.id);
+        if (!stockEmpty && sku) {
+          this.$store.dispatch('addToCart', {
+            productId: this.good.id,
+            productSkuId: this.skuId,
+            quantity: this.good.count
+          }).then(response => {
+            api.addToConfirmOrder({
+              productId: this.good.id,
+              productSkuId: this.skuId
+            }).then(response => {
+              if (response.code == 200) {
+                this.$router.push({name: 'pay'});
+              } else {
+                this.$message('网络开了小差，请稍候再试!');
+              }
+            });
+          }).catch(error => {
+            this.$store.dispatch('openToast', {message: error || '网络开了小差，请稍候再试', icon: 'warning'});
+            console.log(error);
+          });
+        }
+      },
       _drop(target) {
         // 优化体验，异步执行小球下落动画
         this.$nextTick(() => {
@@ -396,7 +424,12 @@
         this.$router.push({name: 'goodComment', params: {id: this.good.id}});
       },
       wxReady() {
-        api.wxsignature(encodeURIComponent(location.href.split('#')[0])).then(response => {
+        api.apiSign(encodeURIComponent(location.href.split('#')[0]))
+        .then(res => {
+          if (res.code != 200) {
+            return;
+          }
+          let response = res.data;
           wx.config({
             // debug: true, // 开启调试模式
             appId: response.appId,      // 必填，公众号的唯一标识
@@ -405,11 +438,16 @@
             signature: response.signature,  // 必填，签名，见附录1
             jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone']
           });
+        }).catch(error => {
+          console.error(error);
         });
-        let redirect = 'http://' + location.host + '/weixin/g/' + this.good.id;
+        var redirect = location.href;
+        if (api.CONFIG.profiles != 'dev') {
+          redirect = 'http://' + location.host + '/wx/p/' + this.good.id;
+        }
         let uid = this.$store.getters.userId;
         if (uid) {
-          redirect += '?userId=' + uid;
+          redirect += '?uid=' + uid;
         }
         let img = `${this.good.pic}?imageView2/0/w/423/h/423`;
         let vm = this;
@@ -462,24 +500,10 @@
       }
     },
     components: {
-      cartcontrol, split, fixedcart, fixedheader, swipe, modalTitle
+      cartcontrol, split, fixedcart, fixedheader, swipe, modalTitle, quietlogin, nicelayer
     }
   };
 </script>
-
-<style lang="stylus" rel="stylesheet/stylus">
-.el-tabs--border-card
-  box-shadow: none!important
-.el-tabs__nav
-  display: flex
-  width: 100%
-  .el-tabs__item
-    flex: 1
-.el-tabs--border-card>.el-tabs__content
-  padding: 0!important
-.el-tabs__header
-  background-color: #fff!important
-</style>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @require '../../common/stylus/variables'
@@ -521,11 +545,9 @@
     .good-content
       position: relative
       width: 100%
-      height: 100vh
       padding-bottom: 80px
       -webkit-overflow-scrolling: touch
-      overflow-x: hidden
-      overflow-y: auto
+      overflow: auto
       box-sizing: border-box
     .content
       position: relative

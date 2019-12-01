@@ -63,3 +63,7 @@ export const REMOVE_SKU_SPEC = 'REMOVE_SKU_SPEC';
 // SHOW SKU WINDOW
 export const HIDE_SKU_WINDOW = 'HIDE_SKU_WINDOW';
 export const SHOW_SKU_WINDOW = 'SHOW_SKU_WINDOW';
+
+// ADD OPENID
+export const ADD_OPEN_ID = 'ADD_OPEN_ID';
+export const SET_REFERER_UID = 'SET_REFERER_UID';

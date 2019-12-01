@@ -9,18 +9,18 @@
           <i class="icon-search2"></i>
           <div class="search-form-input">
             <form action="" v-on:submit.stop.prevent="search">
-              <input type="search" name="txtSearch" class="txtSearch" placeholder="搜索所有商品" autocomplete="off" v-model="keyword" @keyup.delete.stop.prevent="changeText">
+              <input type="search" name="txtSearch" class="txtSearch" placeholder="搜索所有商品" autocomplete="off" v-model="text" @keyup.delete.stop.prevent="changeText">
             </form>
           </div>
         </div>
       </div>
-      <div class="right"><span @click.stop.prevent="search">搜索</span><span @click.stop.prevent="showSidebar">筛选</span></div>
+      <div class="right"><span @click.stop.prevent="search">搜索</span><!-- <span @click.stop.prevent="showSidebar">筛选</span> --></div>
     </div>
     <div class="sortbar-wrapper">
-      <div class="sortbar-item" :class="{'active': sort === 'scoreSort'}" @click.stop.prevent="fireSort('scoreSort')">综合</div>
-      <div class="sortbar-item" :class="{'active': sort === 'saleSort'}" @click.stop.prevent="fireSort('saleSort')">销量</div>
-      <div class="sortbar-item" :class="{'active': sort === 'priceSort'}" @click.stop.prevent="fireSort('priceSort')"><span class="sort">价格<i class="arrow_up" :class="{'on': priceSort === '2'}"></i><i class="arrow_down" :class="{'on': priceSort === '1'}"></i></span></div>
-      <div class="sortbar-item" :class="{'active': sort === 'commentSort'}" @click.stop.prevent="fireSort('commentSort')">上架时间</div>
+      <div class="sortbar-item" :class="{'active': !sort}" @click.stop.prevent="fireSort('')">综合</div>
+      <div class="sortbar-item" :class="{'active': sort == 'sale'}" @click.stop.prevent="fireSort('sale')">销量</div>
+      <div class="sortbar-item" :class="{'active': sort == 'price'}" @click.stop.prevent="fireSort('price')"><span class="sort">价格<i class="arrow_up" :class="{'on': !desc}"></i><i class="arrow_down" :class="{'on': desc}"></i></span></div>
+      <div class="sortbar-item" :class="{'active': sort == 'time'}" @click.stop.prevent="fireSort('time')">上架时间</div>
     </div>
     <div class="product-wrapper">
       <div class="productlist" ref="productWrapper">
@@ -31,96 +31,64 @@
             </div>
             <div class="product-info">
               <div class="product-title" @click.stop.prevent="goGoodDetail(product)">{{fillName(product.name)}}</div>
-              <div class="sellpoint" v-if="product.sellPoint">{{product.sellPoint}}</div>
-              <div class="product-price"><div class="num">{{product.price | currency}}</div><div class="salesCount">(已售:{{product.stock && product.stock.salesCount || 0}}件)</div></div>
+              <div class="product-price"><div class="num">{{product.memberPrice || product.price | currency}}</div><div class="salesCount">(已售:{{product.sale || 0}}件)</div></div>
             </div>
           </mu-flexbox-item>
         </mu-flexbox>
         <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
         <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;千款精品库每周上新，敬请饱览美物&nbsp;&nbsp;———</div>
+        <el-backtop target=".productlist" :bottom="55" :right="10"></el-backtop>
       </div>
     </div>
-    <sidebar ref="sidebar" @fireAction="search" @fireReset="clearSearch"></sidebar>
+    <!-- <sidebar ref="sidebar" @fireAction="search" @fireReset="clearSearch"></sidebar> -->
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import Vue from 'vue';
-  import sidebar from '@/components/search/sidebar';
+  // import sidebar from '@/components/search/sidebar';
   import api from '@/api/api';
 
   export default {
     data() {
       return {
-        keyword: '',
         products: [],
-        pageNumber: 1,
+        pageNum: 1,
         pageSize: 10,
         totalPages: -1,
         loadEnd: false,
         scroller: null,
         loading: false,
-        scrollY: 0,
         lastExec: +new Date(),
         params: {
-          artworkTypeName: 'tea',
-          categoryName: ''
+          keyword: ''
         },
+        text: '',
         sort: '',
-        priceSort: ''
+        desc: false
       };
     },
     activated() {
       this.show();
       this._reset();
-      this.keyword = this.$route.query.key || '';
-      let parentCategory = this.$route.query.parentCat;
-      let cat = this.$route.query.cat;
-      let sunCat = this.$route.query.sunCat;
-      let lv1 = this.$route.query.lv1;
-      let lv2 = this.$route.query.lv2;
-      if (parentCategory) {
-        this.params.categoryParentName = parentCategory || '';
-      } else if (cat) {
-        this.params.categoryName = this.$route.query.cat || '';
-      } else if (lv1 !== 'brand' && sunCat) {
-        this.params.categorychildrenName = sunCat || '';
+      this.text = this.$route.query.key || '';
+      this.params.keyword = this.$route.query.keyword || '';
+      if (this.params.keyword) {
+        this.text = this.params.keyword;
       }
-      if (lv1 === 'brand') {
-        this.params.brandType = lv2 || '';
-        this.params.brandName = sunCat || '';
-      } else {
-        this.params.brandType = '';
-        this.params.brandName = '';
-      }
-      let searchKeyword = this.$route.query.keyword;
-      if (searchKeyword) {
-        this.params.keyword = searchKeyword;
-        this.keyword = searchKeyword;
-      } else {
-        this.params.keyword = '';
-      }
-      this.params.yearName = '';
-      this.params.cfName = '';
-      this.params.qualityName = '';
-      let ck = this.$route.query.ck;
-      let cv = this.$route.query.cv;
-      if (ck && cv) {
-        this.params[ck] = cv;
-      }
-      let price = this.$route.query.price;
-      if (price) {
-        this.params.price = price;
-      }
+      this.params.productCategoryId = this.$route.query.cid || '';
+      this.params.parentCategoryId = this.$route.query.pid || '';
+      this.params.brandId = this.$route.query.brand || '';
+      this.scroller = this.$refs.productWrapper;
       this.fetchData(true);
     },
     deactivated() {
-      this.$refs.sidebar.reset();
       this.hide();
+      this.loadEnd = true;
     },
     methods: {
       fetchData(force) {
-        if (this.totalPages > -1 && this.pageNumber > this.totalPages) {
+        if (this.totalPages > -1 && this.pageNum > this.totalPages) {
           return;
         }
         let now = +new Date();
@@ -128,43 +96,37 @@
           return;
         }
         this.loading = true;
-        this.params.currentPage = this.pageNumber;
+        this.params.pageNum = this.pageNum;
         this.params.pageSize = this.pageSize;
-        this.params.commodityStatesId = 2;
-        if (!this.sort) {
-          this.params.scoreSort = true;
-          this.sort = 'scoreSort';
-        }
         api.GetGoods(this.params).then((response) => {
-          let goods = response.artworks;
+          if (response.code != 200) {
+            return;
+          }
+          let goods = response.data.list || [];
           if (goods && goods.length) {
             goods.forEach(item => {
               this.products.push(item);
             });
           }
-          this.totalPages = response.totalPages;
-          this.pageNumber++;
+          this.totalPages = response.data.totalPage;
+          this.pageNum++;
           this.lastExec = +new Date();
           this.loading = false;
-          this.loadEnd = this.pageNumber > this.totalPages;
+          this.loadEnd = this.pageNum > this.totalPages;
         }).catch(response => {
           this.products = [];
-          this.loadEnd = false;
+          this.loadEnd = true;
           this.loading = false;
           this.totalPages = 0;
         });
       },
       _reset() {
+        this.params = {
+          keyword: ''
+        };
+        this.text = '';
         this.products = [];
-        this.params.yearName = '';
-        this.params.cfName = '';
-        this.params.qualityName = '';
-        this.params.categoryName = '';
-        this.params.categoryParentName = '';
-        this.params.categorychildrenName = '';
-        this.params.brandType = '';
-        this.params.brandName = '';
-        this.pageNumber = 1;
+        this.pageNum = 1;
         this.totalPages = -1;
         this.loadEnd = false;
       },
@@ -173,20 +135,16 @@
       },
       changeText() {
         if (!this.keyword.length) {
-          this.$refs.sidebar.clearForm();
+          // this.$refs.sidebar.clearForm();
         }
       },
       fillName(name) {
         return name;
       },
       getThumbnail(item) {
-        let pic = item.pictures;
-        if (pic && pic.length) {
-          let icon = pic[0];
-          if (icon && icon.width < icon.height || icon.height / icon.width <= 1) {
-            return api.CONFIG.psCtx + icon.id + '?w=750&h=500&v=v2';
-          }
-          return api.CONFIG.psCtx + icon.id + '?w=750&h=500';
+        let pic = item.pic;
+        if (pic) {
+          return `${pic}?imageView2/2/w/372/h/372`;
         } else {
           return api.CONFIG.defaultImg;
         }
@@ -208,67 +166,24 @@
         this.keyword = '';
         this.search(true);
       },
-      search(clear) {
+      search() {
         this._reset();
-        let form = this.$refs.sidebar.getFormValue();
-        this.params.categoryName = form.categoryName || '';
-        this.params.price = form.price || '';
-        if (form.minPrice || form.maxPrice) {
-          this.params.price = `${form.minPrice || 0}-${form.maxPrice || ''}`;
-        }
-        this.params.shelfTime = form.shelfTime || '0';
-        this.params.categoryParentName = form.categoryParentName || '';
-        if (this.keyword) {
-          this.params.keyword = this.keyword;
-          this.$store.dispatch('addSearchHistory', this.keyword);
-        } else {
-          this.params.keyword = '';
-        }
-        let kw = '';
-        if (form.keyword) {
-          kw = form.keyword;
-        } else if (form.parentKeyword) {
-          kw = form.parentKeyword;
-        }
-        if (kw) {
-          this.keyword = kw;
-          this.params.keyword = '';
-        }
-        if (!clear && !this.params.categoryName && !this.params.categoryParentName && !this.params.categorychildrenName) {
-          let parentCategory = this.$route.query.parentCat;
-          let cat = this.$route.query.cat;
-          let sunCat = this.$route.query.sunCat;
-          if (parentCategory) {
-            this.params.categoryParentName = parentCategory || '';
-          } else if (cat) {
-            this.params.categoryName = this.$route.query.cat || '';
-          } else if (sunCat) {
-            this.params.categorychildrenName = this.$route.query.sunCat || '';
-          }
-          this.params.keyword = '';
-        }
+        this.params.keyword = this.text;
         this.fetchData(true);
       },
       fireSort(sortKey) {
         this.sort = sortKey;
-        let sortKeys = ['saleSort', 'scoreSort', 'commentSort', 'priceSort'];
-        if (sortKey === 'priceSort') {
-          if (!this.priceSort || this.priceSort === '1') {
-            this.priceSort = '2';
-          } else {
-            this.priceSort = '1';
-          }
+        if (sortKey == 'price') {
+          this.desc = !this.desc;
+        } else if (sortKey == 'time') {
+          this.desc = true;
         } else {
-          this.priceSort = '';
+          this.desc = false;
         }
-        for (let i = 0; i < sortKeys.length; i++) {
-          if (sortKeys[i] !== sortKey) {
-            delete this.params[sortKeys[i]];
-          }
-        }
-        this.params[sortKey] = this.priceSort || true;
+        this.params.sortBy = sortKey;
+        this.params.desc = this.desc || false;
         this.products = [];
-        this.pageNumber = 1;
+        this.pageNum = 1;
         this.totalPages = -1;
         this.loadEnd = false;
         this.fetchData(true);
@@ -284,7 +199,6 @@
       }
     },
     components: {
-      sidebar
     }
   };
 </script>
@@ -426,14 +340,14 @@
     top: 88px
     bottom: 0
     width: 100%
+    background-color: #f0f2f5
     .productlist
       position: relative
       display: flex
       flex-wrap: wrap
       width: 100%
-      padding: 10px 0 10px 5px
+      padding: 2px 0 6px
       overflow: auto
-      background-color: #fff
       box-sizing: border-box
       -webkit-overflow-scrolling: touch
       .mu-flexbox
@@ -447,67 +361,69 @@
       .product-item
         width: 50%
         float: left
-        padding-bottom: 10px
         box-sizing: border-box
+        padding-bottom: 4px
+        overflow: hidden
+        &:nth-child(2n)
+          padding-left: 2px
+        &:nth-child(odd)
+          padding-right: 2px
         .product-thumbnail
           position: relative
           width: 100%
           min-height: 102px
           overflow: hidden
+          background-color: #fff
           a
             display: inline-block
             width: 100%
             overflow: hidden
             img
-              width: 48vw
+              width: 194px
+              height: 194px
               vertical-align: top
               overflow: hidden
         .product-info
           position: relative
           width: 100%
-          padding-right: 40px
           padding-left: 3px
-          min-height: 51px
           box-sizing: border-box
+          background-color: #fff
+          padding-bottom: 4px
+          overflow: hidden
         .product-title
+          line-height: 16px
+          margin-bottom: 3px
+          padding: 0 4px
+          box-sizing: border-box
+          height: 31px
+          font-size: 13px
           overflow: hidden
+          text-overflow: ellipsis
           display: -webkit-box
-          font-size: 14px
-          height: 20px
-          line-height: 1.5
-          word-wrap: break-word
-          word-break: break-all
-          text-overflow: ellipsis
-          -webkit-line-clamp: 1
-          -webkit-box-orient: vertical
-        .sellpoint
-          display: block
-          font-size: 12px
-          color: #7f7f7f
-          padding: 2px 0 3px
-          white-space: nowrap
-          text-overflow: ellipsis
-          overflow: hidden
+          -webkit-line-clamp: 2
+          /*! autoprefixer: off */
+          -webkit-box-orient:vertical
+          /*! autoprefixer: on */
+          word-break: break-word
         .product-price
-          position: relative
-          font-size: 14px
+          font-size: 16px
           font-weight: 700
           color: #ff463c
           white-space: nowrap
           overflow: hidden
           text-overflow: ellipsis
           vertical-align: bottom
+          padding: 0 4px
+          height: 25px
+          line-height: 25px
           .salesCount
-            display: block
+            display: inline-block
             color: #999
             font-size: 11px
             margin-left: 6px
-            float: left
-            margin-top: 1.5px
           .num
-            display: block
-            float: left
-            bottom: 0
+            display: inline-block
         .icon
           position: absolute
           top: 50%

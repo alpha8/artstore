@@ -7,7 +7,7 @@
         </div>
         <div class="item-info">
           <h3>{{item.name || ''}}</h3>
-          <div class="price"><div class="num">{{item.price | currency}}</div></div>
+          <div class="price"><div class="num">{{item.memberPrice || item.price | currency}}</div></div>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@
         <ul class="addressList">
           <li class="address-item border-1px" v-for="item in addressList" :key="item.id">
             <span class="icon-check_circle" :class="{'on': item.defaultStatus == 1}" @click="toggle(item)"></span>
-            <div class="addr">
+            <div class="addr" @click="toggle(item)">
               <div class="addr-item">{{getFullAddress(item)}}</div>
               <div class="addr-item">
                 <strong>{{item.name}}</strong>

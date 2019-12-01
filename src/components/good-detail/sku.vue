@@ -23,7 +23,7 @@
       </div>
       <div class="btns_group">
         <div class="btn orange" @click.stop.prevent="addCart">加入购物车</div>
-        <div class="btn red">立即购买</div>
+        <div class="btn red" @click.stop.prevent="fastPay">立即购买</div>
       </div>
     </div>
   </div>
@@ -42,18 +42,23 @@
         checkedSpecs: ['', '', ''],
         maxLevel: -1,
         skuCategory: ['', '', ''],
-        notExist: false
+        notExist: false,
+        product: {}
       };
     },
     computed: {
       goods() {
-        return this.$store.getters.getSku;
+        this.product = this.$store.getters.getSku;
+        return this.product;
       },
       getGoodPrice() {
+        if (this.product.skuPrice) {
+          return this.product.skuPrice;
+        }
         if (this.goods.plusPrice) {
           return this.goods.plusPrice;
         }
-        return this.goods.price;
+        return this.product.price;
       },
       dialogVisible() {
         this.skuChoose = [];
@@ -176,7 +181,7 @@
         var key = `${this.checkedSpecs[0] || ''}_${this.checkedSpecs[1] || ''}_${this.checkedSpecs[2] || ''}_`;
         var matched = this.availableSku.find(sku => sku.key == key);
         if (matched) {
-          this.goods.price = matched.price;
+          this.$set(this.product, 'skuPrice', matched.price);
         }
         this.selectedText();
       },
@@ -244,6 +249,11 @@
         return skuId;
       },
       addCart() {
+        if (!this.$store.getters.userId) {
+          this.hideDialog();
+          this.$router.push({name: 'login', query: {redirect: encodeURI(location.href)}});
+          return;
+        }
         if (this.notExist) {
           this.$message({
             message: '不存在此组合',
@@ -274,7 +284,55 @@
         }).then(response => {
           this.$store.dispatch('openToast', {message: '加入购物车成功', icon: 'success'});
         }).catch(error => {
-          this.$store.dispatch('openToast', {message: error || '网络开了小差，请稍候再试', icon: 'warning'});
+          console.log(error);
+        });
+        this.hideDialog();
+      },
+      fastPay() {
+        if (!this.$store.getters.userId) {
+          this.hideDialog();
+          this.$router.push({name: 'login', query: {redirect: encodeURI(location.href)}});
+          return;
+        }
+        if (this.notExist) {
+          this.$message({
+            message: '不存在此组合',
+            type: 'warning',
+            duration: 1200
+          });
+          return;
+        }
+        let selectedSku = this.checkedSpecs;
+        var level = this.maxLevel;
+        for (var i = 0; i <= level; i++) {
+          if (!selectedSku[i]) {
+            this.$store.dispatch('openToast', `请选择${this.skuCategory[i]}`);
+            return;
+          }
+        }
+        this.$store.dispatch('addSkuSpec', {
+          id: this.goods.id,
+          spec: this.skuChoose,
+          checkedSpec: this.checkedSpecs,
+          count: this.goods.count || 1
+        });
+        this.$store.dispatch('addToCart', {
+          productId: this.goods.id,
+          productSkuId: this.getSkuId(),
+          quantity: this.goods.count || 1,
+          productAttr: JSON.stringify(this.skuChoose || [])
+        }).then(response => {
+          api.addToConfirmOrder({
+            productId: this.goods.id,
+            productSkuId: this.getSkuId()
+          }).then(response => {
+            if (response.code == 200) {
+              this.$router.push({name: 'pay'});
+            } else {
+              this.$message('网络开了小差，请稍候再试!');
+            }
+          });
+        }).catch(error => {
           console.log(error);
         });
         this.hideDialog();

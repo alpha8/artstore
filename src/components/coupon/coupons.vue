@@ -1,66 +1,36 @@
 <template>
   <div>
-    <fixedheader title="优惠券" ref="header"></fixedheader>
+    <fixedheader title="购物先领券，优惠看得见" ref="header"></fixedheader>
     <div class="coupon" ref="coupon">
       <div class="coupon-wrap">
-        <el-tabs v-model="activeTab" type="border-card" v-if="coupons.length + invalidCoupons.length">
-          <el-tab-pane :label="availableTabTitle" name="available">
-            <div class="coupon-container" ref="couponlist">
-              <div class="coupon-list" v-if="coupons.length">
-                <div class="coupon-item" v-for="(coupon, index) in coupons" :key="coupon.id" @click.stop.prevent="toggle(coupon)">
-                  <div class="checkbox" :class="{'on': isChecked(coupon)}"><span class="icon icon-check_circle"></span></div>
-                  <div class="item-content">
-                    <div class="title">
-                      <div class="box">
-                        <p class="money">¥<span class="num">{{coupon.coupon.amount || 0}}</span></p>
-                      </div>
-                      <div class="dotbar"></div>
-                    </div>
-                    <div class="circle-tag circle-left"></div>
-                    <div class="circle-tag circle-right"></div>
-                    <div class="content">
-                      <p class="line text">{{getCouponName(coupon)}}</p>
-                      <p class="line">{{platformType[coupon.coupon.platform]}}</p>
-                      <p class="line">{{getCouponExpire(coupon.coupon.startTimes || coupon.createTimes)}} ~ {{getCouponExpire(coupon.coupon.endTimes)}}</p>
-                    </div>
+        <div class="coupon-container" ref="couponlist" v-if="coupons.length">
+          <div class="coupon-list">
+            <div class="coupon-item" v-for="(coupon, index) in coupons" :key="coupon.id">
+              <div class="item-content" :class="{'expired': isTaken(coupon)}">
+                <div class="title">
+                  <div class="box">
+                    <p class="money">¥<span class="num">{{coupon.amount || 0}}</span></p>
                   </div>
+                  <i class="tag" v-if="isTaken(coupon)"><span class="text">已领取</span></i>
+                  <div class="dotbar"></div>
+                </div>
+                <div class="circle-tag circle-left"></div>
+                <div class="circle-tag circle-right"></div>
+                <div class="content">
+                  <p class="line text">{{getCouponName(coupon)}}</p>
+                  <p class="line">{{platformType[coupon.platform]}}</p>
+                  <p class="line">{{getCouponExpire(coupon.startTimes)}} ~ {{getCouponExpire(coupon.endTimes)}}</p>
+                  <span class="fastDeposit" @click.stop.prevent="takeIt(coupon)" v-if="!isTaken(coupon)">立即领取</span>
                 </div>
               </div>
             </div>
-          </el-tab-pane>
-          <el-tab-pane :label="notAvailableTabTitle" name="notavailable">
-            <div class="coupon-container" ref="couponlist">
-              <div class="coupon-list" v-if="invalidCoupons.length">
-                <div class="coupon-item" v-for="(coupon, index) in invalidCoupons" :key="coupon.id" @click.stop.prevent="toggle(coupon)">
-                  <div class="item-content" :class="{'expired': isExpired(coupon.coupon.endTimes)}">
-                    <div class="title">
-                      <div class="box">
-                        <p class="money">¥<span class="num">{{coupon.coupon.amount || 0}}</span></p>
-                      </div>
-                      <i class="tag"><span class="text">{{isExpired(coupon.coupon.endTimes) ? '已过期' : '不可用'}}</span></i>
-                      <div class="dotbar"></div>
-                    </div>
-                    <div class="circle-tag circle-left"></div>
-                    <div class="circle-tag circle-right"></div>
-                    <div class="content">
-                      <p class="line text">{{getCouponName(coupon)}}</p>
-                      <p class="line">{{platformType[coupon.coupon.platform]}}</p>
-                      <p class="line">{{getCouponExpire(coupon.coupon.startTimes || coupon.createTimes)}} ~ {{getCouponExpire(coupon.coupon.endTimes)}}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </el-tab-pane>
-        </el-tabs>
+          </div>
+        </div>
         <div class="no-coupon" v-else>
           <img src="../../common/images/ticket.png" alt="">
-          <p>啊哦，还没有相关记录哦</p>
+          <p>等着急吧，小二正在争取多发点优惠券！</p>
         </div>
       </div>
-    </div>
-    <div class="fixed-foot" v-if="!hideButton">
-      <div class="btns" @click.stop.prevent="ok"><span class="btn-red">确定<em v-if="count"> (已选{{count}}张)</em></span></div>
     </div>
   </div>
 </template>
@@ -75,112 +45,68 @@
     data() {
       return {
         coupons: [],
-        invalidCoupons: [],
         couponTypes: ['全场通用', '特定分类', '特定商品'],
         platformType: ['全平台', '移动平台', '限平台'],
-        count: 0,
-        selectOne: true,
-        usedDiscount: [],
-        activeTab: 'available',
-        hideButton: false
+        takedCoupons: []
       };
     },
     activated() {
       this.$store.commit('HIDE_FOOTER');
-      if (this.$route.query.showList) {
-        this.hideButton = true;
-      }
       this.fetchData();
     },
     deactivated() {
       this.$store.commit('SHOW_FOOTER');
       this.coupons = [];
-      this.invalidCoupons = [];
       this.count = 0;
-      this.hideButton = false;
-    },
-    computed: {
-      availableTabTitle() {
-        return `可用(${this.coupons.length})`;
-      },
-      notAvailableTabTitle() {
-        return `不可用(${this.invalidCoupons.length})`;
-      }
     },
     methods: {
       fetchData() {
-        api.getCartCoupons(1).then(response => {
-          this.coupons = response.data || [];
-        });
-        api.getCartCoupons(0).then(res => {
-          this.invalidCoupons = res.data || [];
+        if (this.$store.getters.userId) {
+          api.getCoupons().then(response => {
+            if (response.code == 200) {
+              this.takedCoupons = response.data || [];
+            }
+          });
+        }
+        api.getAllCoupons().then(response => {
+          if (response.code == 200) {
+            this.coupons = response.data || [];
+          }
         });
       },
+      isTaken(coupon) {
+        if (!coupon) {
+          return false;
+        }
+        if (coupon.taked) {
+          return true;
+        }
+        this.takedCoupons.map(item => {
+          if (item.couponId == coupon.id) {
+            this.$set(coupon, 'taked', true);
+          }
+        });
+        return coupon.taked;
+      },
       getCouponName(coupon) {
-        if (!coupon || !coupon.coupon) {
+        if (!coupon) {
           return;
         }
         var type = '';
         var minPoint = '';
-        if (coupon.coupon.useType) {
-          type = this.couponTypes[coupon.coupon.useType] || '';
+        if (coupon.useType) {
+          type = this.couponTypes[coupon.useType] || '';
         }
-        if (coupon.coupon.minPoint) {
-          minPoint = `满${coupon.coupon.minPoint}元可用`;
+        if (coupon.minPoint) {
+          minPoint = `满${coupon.minPoint}元可用`;
         }
         if (type || minPoint) {
-          return `${coupon.coupon.name}（${type} ${minPoint}）`;
+          return `${coupon.name}（${type} ${minPoint}）`;
         }
-        return `${coupon.coupon.name}`;
-      },
-      toggle(item) {
-        if (typeof item.on === 'undefined') {
-          Vue.set(item, 'on', true);
-        } else {
-          item.on = !item.on;
-        }
-        if (this.selectOne) {
-          this.usedDiscount.splice(0, this.usedDiscount.length);
-        }
-        if (item.on) {
-          this.count++;
-          this.usedDiscount.push(item);
-        } else {
-          this.count--;
-        }
-        if (this.selectOne) {
-          let flag = false;
-          this.coupons.forEach(o => {
-            if (o.id === item.id && item.on) {
-              flag = true;
-            } else {
-              o.on = false;
-            }
-          });
-          if (flag) {
-            this.count = 1;
-          } else {
-            this.count = 0;
-          }
-        }
-        this.$store.dispatch('addUsedDiscount', this.usedDiscount);
+        return `${coupon.name}`;
       },
       getCouponType(type) {
         return this.couponTypes[type];
-      },
-      isChecked(item) {
-        if (item.on) {
-          return true;
-        }
-        let selectedCoupon = this.$store.getters.loadUsedDiscount;
-        if (selectedCoupon && selectedCoupon.length) {
-          let flag = selectedCoupon.find(o => o.couponId == item.couponId);
-          if (flag) {
-            this.count = 1;
-            return true;
-          }
-        }
-        return false;
       },
       getCouponExpire(times) {
         if (!times) {
@@ -188,14 +114,19 @@
         }
         return formatDate(new Date(times), 'yyyy-MM-dd');
       },
-      isExpired(times) {
-        if (!times) {
-          return false;
+      takeIt(coupon) {
+        if (!this.$store.getters.userId) {
+          this.$router.push({name: 'login', query: {redirect: encodeURI(location.href)}});
+          return;
         }
-        return new Date(times).getTime() <= new Date().getTime();
-      },
-      ok() {
-        this.$router.back();
+        api.takeCoupon(coupon.id).then(response => {
+          this.$set(coupon, 'taked', true);
+          if (response.code == 200) {
+            this.$store.dispatch('openToast', '领取成功！');
+          } else {
+            this.$store.dispatch('openToast', response.message || '领取失败！');
+          }
+        });
       }
     },
     components: {
@@ -415,18 +346,20 @@
                   /*! autoprefixer: on */
                   height: 36px
                   line-height: 18px
-                .fastDeposit
-                  position: absolute
-                  display: inline-block
-                  right: 0
-                  top: 0
-                  width: 75px
-                  height: 28px
-                  line-height: 28px
-                  background: #d05148
-                  color: #fff
-                  text-align: center
-                  box-sizing: border-box
+              .fastDeposit
+                position: absolute
+                display: inline-block
+                right: 15px
+                bottom: 10px
+                width: 75px
+                height: 28px
+                line-height: 28px
+                background: #d05148
+                color: #fff
+                font-size: 13px
+                border-radius: 8px
+                text-align: center
+                box-sizing: border-box
       .no-coupon
         width: 100%
         padding: 40px 0

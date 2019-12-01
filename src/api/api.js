@@ -110,13 +110,12 @@ export default {
     APPNAME: '未来科技电商平台',
     NICKNAME: '未来科技',
     ctx: 'http://localhost:8088',
-    cmsCtx: 'http://www.yihuyixi.com/cms',
-    wxCtx: 'http://www.yihuyixi.com/wxservice',
-    seckillCtx: 'http://www.yihuyixi.com/goodsKill',
     defaultImg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgBAMAAAB54XoeAAAAMFBMVEX///+qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpufk+pAAAAD3RSTlMAESIzRFVmd4iZqrvM3e5GKvWZAAABv0lEQVRoge2YP1ICMRSH2R0UYZiRwlI5glfAylZP4G5twxGwt0BPgKVDs44XAFsbqW32CFTCiEAkhF3235DJyxud0d9XZRLyTXjJe9ndUgkAAAAAAAAAAADgx3DfhI5nI2Fd6xNfRsJDvVAYCt/7uwlNhQ+aXwQQ/hmhc/14xiq8EmLWYBTuyYx4yoydN+jCphRO0kNl8UIXelI4Tw+dqLJAE3alcJkOYqCCwCasrHpmZGE7/5dbsuvOalOmyQEnlF2fVOG+nD1MDlRVcb2hHuzOqtSnQugp4ZQqdG9fL5P97nhT/32m4hBfXh89HmE3Ei557pSyxa1XKGwmfEsO4YBFeBSfm4rNRR8LnXAYNVsswnpcEFXaWQsDsdi0aikfNYYyeX3VbAuOFa6yWYzWrTjtrITra0oFMfvMSBOuN1YFscchdNXG+tFarYXHaq4M4imLMFBzZRAHHMKDzdxFNu2owvjk+aULDuG2/I0yaUcUbvdhUsv5CEJn+zo173AIC1ZlJyxYlZWwvNtnLsylhq1Q94ZrKqxqfMZCj1l4P2YW9nU+U6F2gaZCPb8rZP8qwv7dBgAAAAAAAAAAAP+Lb4Qtq0R4e5WOAAAAAElFTkSuQmCC',
-    usericon: 'http://imgcdn.yihuyixi.com/ps/download/5ac3557de4b05b85527caee3',
+    usericon: 'http://imgcdn.win-berry.com/1568716692050.png?imageView2/2/w/750/h/500',
     userAvatar: 'http://imgcdn.win-berry.com/1568716692050.png?imageView2/2/w/750/h/500',
-    logo: 'http://imgcdn.win-berry.com/1570705317649.png'
+    logo: 'http://imgcdn.win-berry.com/1570705317649.png',
+    qrcode: 'http://imgcdn.win-berry.com/1571967335579.jpg?imageView2/2/w/500/h/500',
+    profiles: 'dev'
   },
 
   /**
@@ -162,6 +161,20 @@ export default {
   },
 
   /**
+   * 生成确认单
+   */
+  cartToOrder(data) {
+    return doPost(this.CONFIG.ctx + '/cart/cartToOrder', data);
+  },
+
+  /**
+   * 立即购买
+   */
+  addToConfirmOrder(data) {
+    return doPost(this.CONFIG.ctx + '/cart/addToConfirmOrder', data);
+  },
+
+  /**
    * 清空购物车
    */
   clearCart() {
@@ -180,6 +193,13 @@ export default {
    */
   addProductCollect(data) {  
     return doPost(this.CONFIG.ctx + '/member/collection/addProduct', data);
+  },
+
+  /**
+   * 批量添加会员商品收藏
+   */
+  batchCollect(data) {  
+    return doPost(this.CONFIG.ctx + '/member/collection/batchcollect', data);
   },
 
   /**
@@ -204,29 +224,43 @@ export default {
   },
 
   /**
-   * 微信登录
-   */
-  Login() {
-    return doGet(this.CONFIG.wxCtx + '/baseInfo');
-  },
-
-  /** 获取微信支付接口参数 */
-  wxpay(params) {
-    return doPost(this.CONFIG.wxCtx + '/wx/pay', params);
-  },
-
-  /**
     * 微信公众号签名
     */
-  wxsignature(url) {
-    return doGet(this.CONFIG.wxCtx + '/wx/sign?url=' + url);
+  apiSign(url) {
+    return doGet(this.CONFIG.ctx + '/weixin/apiSign?url=' + url);
   },
 
   /**
-    * 跟踪物流
-    */
-  trackingGoods(expressNo, expressCode) {
-    return doGet(this.CONFIG.wxCtx + '/order/express?expressNo=' + expressNo + '&expressCode=' + expressCode);
+   * 根据购物车生成确认订单
+   * @return {[type]} [description]
+   */
+  generateConfirmOrder() {
+    return doPost(this.CONFIG.ctx + '/order/generateConfirmOrder');
+  },
+
+  /**
+   * 创建支付订单
+   * @return {[type]} [description]
+   */
+  generateOrder(data) {
+    return doPost(this.CONFIG.ctx + '/order/generateOrder', data);
+  },
+
+  /**
+   * 直接调用微信统一下单接口，用于改价后重新生成订单
+   * @return {[type]} [description]
+   */
+  unifiedOrder(data) {
+    return doPost(this.CONFIG.ctx + '/order/wx/unifiedOrder', data);
+  },
+
+  /**
+   * 重试发送微信支付
+   * @param  {[type]} prepayId [description]
+   * @return {[type]}          [description]
+   */
+  wxpaySign(prepayId) {
+    return doGet(this.CONFIG.ctx + '/order/wxpaySign?prepayId=' + prepayId);
   },
 
   /**
@@ -248,10 +282,6 @@ export default {
     */
   updateOrderAddress(params) {
     return doPost(this.CONFIG.ctx + '/order/address', params);
-  },
-  /** 查询数据字典配置值 */
-  GetConfigList(parent) {
-    return doGet(this.CONFIG.cmsCtx + '/datadic/childrens?parentPath=' + (parent || ''));
   },
 
   /** 获取所有商品列表 */
@@ -285,42 +315,63 @@ export default {
    * 创建订单
    */
   createOrder(params) {
-    return doPost(this.CONFIG.cmsCtx + '/order?type=pay&stat=1', params);
+    return doPost(this.CONFIG.ctx + '/order', params);
   },
 
   /**
    * 取消订单
    */
-  cancelOrder(params) {
-    return doPost(this.CONFIG.cmsCtx + '/order/cancel', params);
+  cancelOrder(id) {
+    return doPost(this.CONFIG.ctx + '/order/cancelOrder?orderId=' + id);
   },
 
   /**
    * 查询订单列表
    */
   getOrders(params) {
-    return doGet(this.CONFIG.cmsCtx + '/order/list', params);
+    return doGet(this.CONFIG.ctx + '/order/list', params);
   },
 
   /**
    * 查询单个订单详情
    */
-  getOrderDetail(params) {
-    return doGet(this.CONFIG.cmsCtx + '/order', params);
+  getOrderDetail(orderSn) {
+    return doGet(this.CONFIG.ctx + '/order/' + orderSn);
   },
 
   /**
    * 确认收货
    */
-  confirmDelivery(params) {
-    return doPost(this.CONFIG.cmsCtx + '/order/received', params);
+  confirmDelivery(id) {
+    return doPut(this.CONFIG.ctx + '/order/received/' + id);
   },
 
   /**
-   * 用户可使用优惠券数额
+   * 领取优惠券
    */
-  getAvailCouponAmount(params) {
-    return doPost(this.CONFIG.cmsCtx + '/order/coupon/detail', params);
+  takeCoupon(couponId) {
+    return doPost(this.CONFIG.ctx + '/member/coupon/add/' + couponId);
+  },
+
+  /**
+   * 获取所有的优惠券列表
+   */
+  getAllCoupons() {
+    return doGet(this.CONFIG.ctx + '/member/coupon/alllist');
+  },
+
+  /**
+   * 获取当前用户的优惠券列表
+   */
+  getCoupons() {
+    return doGet(this.CONFIG.ctx + '/member/coupon/list');
+  },
+
+  /**
+   * 获取购物车相关优惠券
+   */
+  getCartCoupons(type) {
+    return doGet(this.CONFIG.ctx + '/member/coupon/list/cart/' + type);
   },
 
    /**
@@ -359,31 +410,17 @@ export default {
   },
 
    /**
-    * 查询优惠券明细
-    */
-  getCoupons(params) {
-    return doGet(this.CONFIG.cmsCtx + '/coupon/list', params);
-  },
-
-   /**
     * 优惠券充值
     */
   depositCoupon(params) {
-    return doPost(this.CONFIG.cmsCtx + '/user/wallet/recharge', params);
+    return doPost(this.CONFIG.ctx + '/user/wallet/recharge', params);
   },
 
    /**
     * 优惠券账户余额
     */
   getCouponAmount(userId) {
-    return doGet(this.CONFIG.cmsCtx + '/user/wallet?userId=' + userId);
-  },
-
-   /**
-    * 创建优惠券
-    */
-  createCoupon(params) {
-    return doPost(this.CONFIG.cmsCtx + '/qrcode', params);
+    return doGet(this.CONFIG.ctx + '/user/wallet?userId=' + userId);
   },
 
    /**
@@ -421,27 +458,6 @@ export default {
    */
   refreshToken() {
     return doGet(this.CONFIG.ctx + '/sso/token/refresh');
-  },
-
-   /**
-    * 获取用户基础数据
-    */
-  getUserProfile(userId) {
-    return doGet(this.CONFIG.cmsCtx + '/user/profile?userId=' + userId);
-  },
-
-   /**
-    * 获取用户基础数据(个人中心专用，增加数据统计)
-    */
-  getProfile(params) {
-    return doGet(this.CONFIG.cmsCtx + '/user/profile', params);
-  },
-
-   /**
-    * 获取奖金明细
-    */
-  getRewards(params) {
-    return doGet(this.CONFIG.cmsCtx + '/user/reward/list', params);
   },
 
    /**
@@ -512,70 +528,49 @@ export default {
     * type;  //0,秒杀，1：拍卖
     */
   reservedNotify(params) {
-    return doPost(this.CONFIG.cmsCtx + '/artwork/attention', params);
+    return doPost(this.CONFIG.ctx + '/artwork/attention', params);
   },
 
    /**
     * 到货提醒
     */
   arrivalNotify(params) {
-    return doPost(this.CONFIG.cmsCtx + '/artwork/book', params);
+    return doPost(this.CONFIG.ctx + '/artwork/book', params);
   },
 
    /**
     * 查询指定活动
     */
   getQrcode(id) {
-    return doGet(this.CONFIG.cmsCtx + '/qrcode/' + id);
+    return doGet(this.CONFIG.ctx + '/qrcode/' + id);
   },
 
    /**
     * 查询二维码领取优惠券活动
     */
   resolveQrcode(id) {
-    return doGet(this.CONFIG.cmsCtx + '/qrcode/resolve?id=' + id);
+    return doGet(this.CONFIG.ctx + '/qrcode/resolve?id=' + id);
   },
 
    /**
     * 查询专属活动列表
     */
   getCouponList(params) {
-    return doGet(this.CONFIG.cmsCtx + '/qrcode/list', params);
+    return doGet(this.CONFIG.ctx + '/qrcode/list', params);
   },
 
    /**
     * 查询专属活动列表
     */
   generateQrcode(params) {
-    return doPost(this.CONFIG.cmsCtx + '/qrcode/group2', params);
+    return doPost(this.CONFIG.ctx + '/qrcode/group2', params);
   },
 
    /**
     * 二维码领取
     */
   receiveQrcode(params) {
-    return doGet(this.CONFIG.cmsCtx + '/coupon/receive', params);
-  },
-
-   /**
-    * 团购列表
-    */
-  getGroupbuys(params) {
-    return doGet(this.CONFIG.cmsCtx + '/groupBuy/list', params);
-  },
-
-   /**
-    * 团购单品详情
-    */
-  getGroupbuyDetail(id, params) {
-    return doGet(this.CONFIG.cmsCtx + '/groupBuy/' + id, params);
-  },
-
-   /**
-    * 查询商品评论列表
-    */
-  getProductComments(params) {
-    return doGet(this.CONFIG.cmsCtx + '/comment/list', params);
+    return doGet(this.CONFIG.ctx + '/coupon/receive', params);
   },
 
   /**
@@ -596,20 +591,49 @@ export default {
    * 奖金提现
    */
   withdraw(params) {
-    return doPost(this.CONFIG.cmsCtx + '/sendRedPack', params);
+    return doPost(this.CONFIG.ctx + '/sendRedPack', params);
   },
 
   /**
    * 奖金提现记录
    */
   withdrawLog(params) {
-    return doGet(this.CONFIG.cmsCtx + '/redPack/list', params);
+    return doGet(this.CONFIG.ctx + '/redPack/list', params);
   },
 
   /**
    * 发货日志
    */
   getDeliveryLog(params) {
-    return doGet(this.CONFIG.cmsCtx + '/deliverlog/list', params);
+    return doGet(this.CONFIG.ctx + '/deliverlog/list', params);
+  },
+
+  /** 查询物流信息 */
+  getExpressLog(params) {
+    return doGet(this.CONFIG.ctx + '/express/query', params);
+  },
+
+  /**
+   * 查询当前用户的所有的订单状态
+   */
+  getTodoOrderStats(params) {
+    return doGet(this.CONFIG.ctx + '/order/todo', params);
+  },
+
+  /**
+   * 卡片兑换
+   */
+  exchangeCard(params) {
+    return doPost(this.CONFIG.ctx + '/card/exchange', params);
+  },
+
+  /** 查询用户积分明细 */
+  getIntegrationLog(params) {
+    return doGet(this.CONFIG.ctx + '/sso/integration/log', params);
+  },
+
+  /** 我的卡券 */
+  getMyCards(params) {
+    return doGet(this.CONFIG.ctx + '/card/list', params);
   }
 };

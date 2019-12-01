@@ -26,9 +26,9 @@ export function countdown(time) {
   let seconds = Math.floor(time) - (days * 24 * 3600) - (hours * 3600) - (mins * 60);
   return {
     days: days,
-    hours: hours < 10 ? '0' + hours : hours,
-    mins: mins < 10 ? '0' + mins : mins,
-    seconds: seconds < 10 ? '0' + seconds : seconds,
+    hours: hours < 10 ? hours : hours,
+    mins: mins < 10 ? mins : mins,
+    seconds: seconds < 10 ? seconds : seconds,
     milliseconds: time
   };
 }

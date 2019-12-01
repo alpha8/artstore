@@ -12,7 +12,7 @@
         </div>
       </div>
       <div class="ext-tools">
-        <span v-show="showLogin"><a :href="getLoginUrl">登录</a></span>
+        <span v-show="showLogin"><span @click="getLoginUrl">登录</span></span>
         <span v-show="showDiscard" @click.stop.prevent="hideDialog"><span class="button" :class="{'active': !highlight}">取消</span></span>
         <span v-show="showSearchBtn"><span class="button" :class="{'active': !highlight}" @click.stop.prevent="search">搜索</span></span>
         <span v-show="hasLogin && !typing"><router-link to="/my" class="userIcon"><i class="icon-user2"></i></router-link></span>
@@ -35,7 +35,7 @@
         showDiscard: false,
         showSearch: false,
         keyword: '',
-        isLogin: this.$store.getters.checkLogined,
+        isLogin: this.$store.getters.userId,
         typing: false,
         highlight: false,
         trans: false,
@@ -48,7 +48,7 @@
         return this.$store.state.searchDialog;
       },
       showSearchBtn() {
-        this.showSearch = (this.keyword !== '');
+        this.showSearch = (this.keyword != '');
         if (this.showSearch) {
           this.showDiscard = this.showLogin = false;
         } else if (!this.isLogin && !this.showLogin) {
@@ -57,20 +57,17 @@
         return this.showSearch;
       },
       hasLogin() {
+        this.isLogin = this.$store.getters.userId;
         this.showLogin = !this.isLogin;
         return this.isLogin;
       },
       rollingSlogan() {
         return this.slogan;
-      },
-      getLoginUrl() {
-        let anon = this.$store.getters.getAnonymous;
-        return `${api.CONFIG.wxCtx}/baseInfo?uid=${anon}`;
       }
     },
     activated() {
-      let user = this.$store.getters.userInfo;
-      this.isLogin = (user.id > 0);
+      let userId = this.$store.getters.userId;
+      this.isLogin = (userId > 0);
     },
     deactivated() {
       this.hideDialog();
@@ -101,6 +98,9 @@
       },
       showLoginForm() {
         this.showLogin = !this.isLogin;
+      },
+      getLoginUrl() {
+        this.$router.push('/login');
       },
       changeText() {
         if (!this.keyword.length) {

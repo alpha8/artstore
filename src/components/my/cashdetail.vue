@@ -45,7 +45,7 @@
       };
     },
     activated() {
-      this.fetchData(true);
+      // this.fetchData(true);
       this.show();
     },
     deactivated() {
@@ -60,39 +60,6 @@
     },
     methods: {
       fetchData(force) {
-        if (this.totalPages && this.pageNumber > this.totalPages) {
-          return;
-        }
-        let now = +new Date();
-        if (!force && now - this.lastExec <= 50) {
-          return;
-        }
-        this.loading = true;
-        let user = this.$store.getters.getUserInfo;
-        api.getOrders({
-          currentPage: this.pageNumber,
-          pageSize: this.pageSize,
-          userId: user.userId || 0,
-          type: 6,
-          status: 3
-        }).then(response => {
-          if (response.code === 0) {
-            if (response.orders && response.orders.length) {
-              response.orders.forEach(item => {
-                this.cashs.push(item);
-              });
-            }
-            this.totalPages = response.totalPages;
-            this.pageNumber++;
-            this.lastExec = +new Date();
-            this.loading = false;
-            this.loadEnd = this.pageNumber > this.totalPages;
-          }
-        }).catch(response => {
-          this.loadEnd = false;
-          this.loading = false;
-          this.totalPages = 0;
-        });
       },
       _reset() {
         this.cashs = [];
@@ -194,6 +161,7 @@
           width: 100%
           padding: 10px
           box-sizing: border-box
+          background: #fff
           .cash-item
             position: relative
             display: flex
@@ -201,7 +169,6 @@
             border-1px(rgba(7, 17, 27, 0.1))
             .content
               flex: 1
-              background: #fff
               height: 60px
               box-sizing: border-box
               overflow: hidden

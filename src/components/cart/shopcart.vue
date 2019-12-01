@@ -3,11 +3,11 @@
     <fixedheader title="购物车" right-icon="icon-more" ref="header"></fixedheader>
     <div class="cart-wrapper" ref="cart">
       <div>
-        <div class="toolbars">
-          <div class="delivery"><span class="icon-address"></span><span v-show="defaultAddress" class="gpsaddress">{{defaultAddress.address}}</span></div>
+        <div class="toolbars" v-if="cartProducts.length">
+          <div class="delivery"><span class="icon-address"></span><span v-if="defaultAddress" class="gpsaddress">{{defaultAddress}}</span></div>
           <div class="edit" @click.stop.prevent="editProduct">{{editDesc}}</div>
         </div>
-        <ul class="good-list" v-show="cartProducts && cartProducts.length > 0">
+        <ul class="good-list" v-if="cartProducts.length">
           <li class="good-item" v-for="product in cartProducts">
             <div class="cart-item border-top-1px">
               <span class="icon-check_circle" :class="{'on': product.checked}" @click.stop.prevent="toggleCheckout(product)"></span>
@@ -22,16 +22,16 @@
                   <div class="sku">{{`${product.sp1 || ''} ${product.sp2 || ''}  ${product.sp3 || ''}`}}</div>
                 </div>
                 <div class="amountWrapper">
-                  <div class="price">{{product.price | currency}}</div>
+                  <div class="price">{{product.price | currency}}<span class="point"><i class="icon-database" />{{product.price * plusPointRate()}}</span></div>
                   <cartcontrol :good="product" @confirm="confirmRemove" @add="doAdd" @minus="doMinus"></cartcontrol>
                 </div>
               </div>
             </div>
           </li>
         </ul>
-        <div class="no-product" v-show="!cartProducts || !cartProducts.length">
+        <div class="no-product" v-else>
           <p class="empty-cart"><i class="icon-cart"></i></p>
-          <p class="empty-text">您的购物车内还没有商品！</p>
+          <p class="empty-text">购物车空空如也，去逛逛吧~</p>
         </div>
       </div>
     </div>
@@ -45,24 +45,26 @@
         <div class="content-center" v-show="editMode">
           <div class="button-wrapper">
             <div class="button remove" @click.stop.prevent="removeCartItem"><span>删除</span></div>
-            <!-- <div class="button favorite"><span>移入收藏</span></div> -->
+            <div class="button favorite" @click.stop.prevent="moveToCollection"><span>移入收藏</span></div>
             <!-- <div class="button share"><span>分享</span></div> -->
           </div>
         </div>
         <div class="content-center" v-show="!editMode">
-          <span class="totalPrice">总计：<span class="price">{{totalPrice | currency}}</span></span>
+          <span class="totalPrice">总计：<span class="price">{{totalPrice | currency}}</span><span class="total_point"><i class="icon-database" />{{totalPrice * plusPointRate()}}</span></span>
         </div>
         <div class="content-right" @click.stop.prevent="pay" v-show="!editMode">
           <div class="pay activated">结算<span>(<em class="count">{{totalCount}}</em>件)</span></div>
         </div>
       </div>
     </div>
+    <quietlogin/>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import cartcontrol from '@/components/cartcontrol/cartcontrol';
+  import quietlogin from '@/components/common/quietlogin';
   import api from '@/api/api';
 
   export default {
@@ -76,13 +78,17 @@
     },
     computed: {
       defaultAddress() {
-        return this.$store.getters.getDefaultAddress;
+        let addr = this.$store.getters.getDefaultAddress;
+        if (addr.city == '市辖区') {
+          return `${addr.province || ''}${addr.region || ''}`;
+        }
+        return `${addr.city || ''}${addr.region || ''}`;
       },
       editDesc() {
         if (this.editMode) {
           return '完成';
         } else {
-          return '修改商品';
+          return '编辑商品';
         }
       },
       totalPrice() {
@@ -106,21 +112,28 @@
       }
     },
     activated() {
+      this.$store.dispatch('cleanUsedDiscount');
       this.fetchData();
       this.$store.commit('HIDE_FOOTER');
     },
     deactivated() {
-      this.checkAll(false);
-      this.checkedAll = false;
+      this._reset();
       this.$store.commit('SHOW_FOOTER');
       this.$refs.header.hide();
     },
     methods: {
       fetchData() {
+        var userId = this.$store.getters.userId;
+        if (!userId) {
+          let redirect = window.location.href.replace('?from=singlemessage&isappinstalled=0', '').replace('&from=singlemessage&isappinstalled=0', '');
+          this.$router.push({name: 'login', query: {redirect: encodeURI(redirect)}});
+          // 未登录
+          return;
+        }
         this.$store.dispatch('openLoading');
         api.getCartList().then(response => {
           if (response.code == 200) {
-            this.cartProducts = response.data;
+            this.cartProducts = response.data || [];
             var sum = 0;
             this.cartProducts.forEach(product => {
               if (!product.checked) {
@@ -159,7 +172,7 @@
           api.deleteCartProducts(params).then(response => {
             if (response.code == 200) {
               this.fetchData();
-              this.editMode = false;
+              this._reset();
             }
           });
         });
@@ -174,8 +187,8 @@
       },
       editProduct() {
         this.editMode = !this.editMode;
-        this.checkAll(false);
-        this.checkedAll = false;
+        this.checkedAll = this.editMode;
+        this.checkAll(this.editMode);
       },
       checkAll(state) {
         this.cartProducts.forEach((item) => {
@@ -204,7 +217,23 @@
       },
       pay() {
         if (this.total) {
-          window.location.href = 'http://' + location.host + '#/pay';
+          var ids = [];
+          this.cartProducts.forEach((item) => {
+            if (item.checked) {
+              ids.push(item.id);
+            }
+          });
+          api.cartToOrder(ids).then(response => {
+            if (response.code == 200) {
+              if (api.CONFIG.profiles == 'dev') {
+                this.$router.push({name: 'pay'});
+              } else {
+                window.location.href = 'http://' + location.host + '/wx/pay';
+              }
+            } else {
+              this.$message('网络开了小差，请稍候再试!');
+            }
+          });
         }
       },
       confirmRemove(good) {
@@ -246,10 +275,57 @@
           count: product.quantity || 1
         });
         this.$router.push({name: 'good', params: { id: product.productId }});
+      },
+      moveToCollection() {
+        var collectItems = [];
+        var user = this.$store.getters.userInfo;
+        var ids = [];
+        this.cartProducts.forEach((item) => {
+          if (item.checked) {
+            collectItems.push({
+              memberIcon: user.icon,
+              memberId: user.id,
+              memberNickname: user.nickname,
+              productId: item.productId,
+              productName: item.productName,
+              productPic: item.productPic,
+              productPrice: item.price,
+              productSubTitle: item.productSubTitle
+            });
+            ids.push(item.id);
+          }
+        });
+        if (!ids.length) {
+          this.$store.dispatch('openToast', '请至少选择一个商品');
+          return;
+        }
+        this.$confirm(`是否确认将已选中的${ids.length}件商品移至收藏?`, '', {
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          api.batchCollect(collectItems).then(response => {
+            let params = new URLSearchParams();
+            params.append('ids', ids);
+            api.deleteCartProducts(params).then(response => {
+              this._reset();
+              this.fetchData();
+            });
+          });
+        });
+      },
+      _reset() {
+        this.editMode = false;
+        this.checkAll(false);
+        this.checkedAll = false;
+      },
+      plusPointRate() {
+        let profile = this.$store.getters.userProfile;
+        return profile.memberLevel && profile.memberLevel.pointRate || 100;
       }
     },
     components: {
-      fixedheader, cartcontrol
+      fixedheader, cartcontrol, quietlogin
     }
   };
 </script>
@@ -289,7 +365,6 @@
         display: flex
         align-items: center
         padding: 0 15px
-        font-weight: 700
         .icon-edit
           padding-right: 5px
     .good-list
@@ -297,8 +372,7 @@
       background: #fff
       padding-bottom: 100px
       -webkit-overflow-scrolling: touch
-      overflow-x: hidden
-      overflow-y: auto
+      overflow: auto
       .good-item
         position: relative
         .cart-item
@@ -336,8 +410,9 @@
               position: relative
               padding-top: 8px
               overflow: hidden
-              font-size: 14px
-              a
+              font-size: 13px
+              >div
+                color: #333
                 display: block
                 overflow: hidden
                 text-overflow: ellipsis
@@ -364,15 +439,22 @@
                 border-radius: 2px;
             .amountWrapper
               position: absolute
-              display: inline-block
+              display: block
               width: 100%
+              height: 30px
               bottom: 2px
               .price
                 display: inline-block
-                margin-top: 10px
-                color: #f2270c
+                color: #ff6325
                 font-size: 13px
                 font-weight: 700
+                vertical-align: top
+              .point
+                font-size: 10px
+                padding-left: 10px
+                color: #666
+                .icon-database
+                  padding-right: 2px
               .cartcontrol
                 display: inline-block
                 float: right
@@ -434,33 +516,41 @@
         line-height: 50px
         .totalPrice
           display: block
-          font-size: 16px
+          font-size: 15px
           .price
-            color: #f2270c
+            color: #ff6325
+          .total_point
+            font-size: 12px
+            padding-left: 10px
+            color: #666
+            .icon-database
+              padding-right: 2px
         .savePrice
           display: block
           line-height: 1
           font-size: 10px
         .button-wrapper
           width: 100%
-          height: 100%
+          height: 50px
           .button
             display: inline-block
             float: right
-            width: 28%
+            width: 76px
             height: 20px
             line-height: 20px
-            padding: 10px 0
+            padding: 5px 0
             font-size: 14px
             text-align: center
-            margin-top: 5px
+            margin-top: 10px
             margin-left: 10px
             color: #fff
-            letter-spacing: 2px
+            border-radius: 4px
             &.remove
-              background: rgba(250,180,90,0.93)
+              background: #f2270c
             &.favorite
-              background: #5e6a6e
+              background: #fff
+              color: #333
+              border: 1px solid #ccc
             &.share
               background: rgba(0,160,220,0.93)              
       .content-right

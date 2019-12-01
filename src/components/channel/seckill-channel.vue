@@ -33,7 +33,7 @@
         }
       },
       session: {
-        type: String,
+        type: Number,
         default() {
           return '';
         }
@@ -44,7 +44,7 @@
         if (!date) {
           return '';
         }
-        let time = new Date(Date.parse(date));
+        let time = new Date(date);
         let Y = time.getFullYear();
         let M = time.getMonth() + 1;
         let D = time.getDate();

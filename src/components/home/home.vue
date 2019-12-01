@@ -8,17 +8,21 @@
           <swipe :swiperSlides="homeData.advertiseList"></swipe>
         </div>
         <topchanel :channels="homeData.channelList"></topchanel>
-        <split v-if="homeData.homeFlashPromotion.productList && homeData.homeFlashPromotion.productList.length"></split>
-        <seckill :items="homeData.homeFlashPromotion.productList" :session="homeData.homeFlashPromotion.startTime" v-if="homeData.homeFlashPromotion.productList && homeData.homeFlashPromotion.productList.length"></seckill>
-        <split></split>
-        <modal-title title="热销商品" moreText="更多" catName="热销商品"></modal-title>
+        <!-- <split v-if="homeData.homeFlashPromotion.productList && homeData.homeFlashPromotion.productList.length"></split>
+        <seckill :items="homeData.homeFlashPromotion.productList" :session="homeData.homeFlashPromotion.startTimes" v-if="homeData.homeFlashPromotion.productList && homeData.homeFlashPromotion.productList.length"></seckill>
+        <split></split> -->
+        <!-- <modal-title title="热销商品" moreText="更多" catName="热销商品"></modal-title>
         <channel :items="homeData.hotProductList" :cols="2"></channel>
         <split></split>
         <modal-title title="新品上市" moreText="更多" catName="新品上市"></modal-title>
         <channel :items="homeData.newProductList" :cols="2"></channel>
         <split></split>
         <brand :items="homeData.brandList" section="brandList"></brand>
-        <split></split>
+        <split></split> -->
+        <div v-for="item in homeData.floorList">
+          <floor :category="item.category" :productList="item.products"></floor>
+          <split v-if="item.products.length"></split>
+        </div>
         <modal-title title="猜您喜欢" catName="猜您喜欢"></modal-title>
         <div class="product-wrapper">
           <div class="productlist" ref="productWrapper">
@@ -29,7 +33,7 @@
                 </div>
                 <div class="product-info">
                   <div class="product-title" @click.stop.prevent="goGoodDetail(product)">{{product.name}}</div>
-                  <div class="product-price"><div class="num">{{product.price | currency}}</div></div>
+                  <div class="product-price"><div class="num">{{product.memberPrice || product.price | currency}}</div></div>
                 </div>
               </mu-flexbox-item>
             </mu-flexbox>
@@ -41,6 +45,7 @@
         <div class="copyright">Copyright &copy; 2014-2019 深圳市未来科技文化有限公司 版权所有</div>
       </div>
     </div>
+    <quietlogin />
   </div>
 </template>
 
@@ -55,11 +60,12 @@
   import brand from '@/components/channel/brand';
   import search from '@/components/fixedtoolbar/search';
   import quietlogin from '@/components/common/quietlogin';
+  import floor from '@/components/channel/floor';
   import api from '@/api/api';
   import wx from 'weixin-js-sdk';
   const defaultListQuery = {
     pageNum: 1,
-    pageSize: 20
+    pageSize: 30
   };
   export default {
     data() {
@@ -93,28 +99,19 @@
       this.wxReady();
     },
     mounted() {
-      var dom = this.$refs.mainWrapper.getElementsByClassName('mainContent')[0];
-      if (dom) {
-        dom.addEventListener('scroll', this._handleScroll);
-      }
+      window.addEventListener('scroll', this._handleScroll);
       this.scroller = this.$refs.productWrapper;
     },
     deactivated() {
-      var dom = this.$refs.mainWrapper.getElementsByClassName('mainContent')[0];
-      if (dom) {
-        dom.removeEventListener('scroll', this._handleScroll);
-      }
+      window.removeEventListener('scroll', this._handleScroll);
     },
     updated() {
       this._initScroll();
     },
     activated() {
       this._initScroll();
-      var dom = this.$refs.mainWrapper.getElementsByClassName('mainContent')[0];
-      if (dom) {
-        dom.removeEventListener('scroll', this._handleScroll);
-        dom.addEventListener('scroll', this._handleScroll);
-      }
+      window.removeEventListener('scroll', this._handleScroll);
+      window.addEventListener('scroll', this._handleScroll);
     },
     computed: {
       showFixed() {
@@ -139,7 +136,7 @@
           this.loading = false;
           this.list = response.data.list;
           this.total = response.data.totalPage;
-          if (this.pageNum <= this.total) {
+          if (this.pageNum < this.total) {
             this.pageNum++;
           } else {
             this.loadEnd = true;
@@ -162,7 +159,8 @@
         this.swipeHeight = swipe.clientHeight;
       },
       wxReady() {
-        /* api.wxsignature(encodeURIComponent(location.href.split('#')[0])).then(response => {
+        api.apiSign(encodeURIComponent(location.href.split('#')[0])).then(res => {
+          let response = res.data;
           wx.config({
             // debug: true, // 开启调试模式
             appId: response.appId,      // 必填，公众号的唯一标识
@@ -175,29 +173,22 @@
         let redirect = 'http://' + location.host + location.pathname;
         let uid = this.$store.getters.userId;
         if (uid) {
-          redirect += '?userId=' + (uid || 0);
+          redirect += '?uid=' + uid;
         }
         let shareData = {
-          title: '',
-          desc: '',
+          title: '[未来科技电商平台]',
+          desc: '深耕于国内礼品采购和积分兑换业务，您贴心的礼品小助手，欢迎围观!',
           link: redirect,
-          imgUrl: ''
+          imgUrl: api.CONFIG.logo
         };
         wx.ready(function() {
           wx.onMenuShareTimeline(shareData);
           wx.onMenuShareAppMessage(shareData);
-        }); */
-      },
-      previewQrcode() {
-        wx.previewImage({
-          current: this.wxqrcode,
-          urls: [this.wxqrcode]
         });
       },
       _handleScroll(e) {
         if (e) {
-          var target = e.srcElement || e.target;
-          this.scrollY = Math.abs(target.scrollTop || 0);
+          this.scrollY = window.pageYOffset;
         }
       }
     },
@@ -210,28 +201,24 @@
       fixedsearch,
       search,
       seckill,
-      brand
+      brand,
+      quietlogin,
+      floor
     }
   };
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @require '../../common/stylus/variables'
-  .el-backtop
-    color: $color-main;
   .main
     position: relative
-    display: block
-    padding-bottom: 50px
-    width: 100%
     box-sizing: border-box
-    overflow-x: hidden
     .mainContent
       position: relative
-      height: 100vh
+      width: 100%
       box-sizing: border-box
       -webkit-overflow-scrolling: touch
-      padding-bottom: 10px
+      padding-bottom: 60px
       overflow-x: hidden
       overflow-y: auto
     .swipe-wrapper
@@ -244,79 +231,83 @@
     color: #848689
     font-size: 1.86667vw
     padding: 2vw 0
-  .productlist
+  .product-wrapper
     position: relative
-    display: flex
-    flex-wrap: wrap
-    margin: 0 8px 10px
-    overflow: auto
-    box-sizing: border-box
-    -webkit-overflow-scrolling: touch
-    border-top: 2px #f0f2f5 solid
-    .mu-flexbox
-      display: block
-    .no-more
-      width: 100%
-      padding: 10px 0
-      color: #999
-      text-align: center
-      font-size: 12px
-    .product-item
-      width: 50%
-      float: left
+    width: 100%
+    .productlist
+      position: relative
+      display: flex
+      flex-wrap: wrap
+      margin: 0 8px 10px
+      overflow: auto
       box-sizing: border-box
-      padding-bottom: 4px
-      overflow: hidden
-      &:nth-child(2n)
-        padding-left: 2px
-      &:nth-child(odd)
-        padding-right: 2px
-      .product-thumbnail
-        position: relative
+      -webkit-overflow-scrolling: touch
+      border-top: 2px #f0f2f5 solid
+      .mu-flexbox
+        display: block
+      .no-more
         width: 100%
-        min-height: 102px
-        overflow: hidden
-        background-color: #fff
-        a
-          display: inline-block
-          width: 100%
-          overflow: hidden
-          img
-            width: 48vw
-            vertical-align: top
-            overflow: hidden
-      .product-info
-        position: relative
-        width: 100%
-        padding-left: 3px
+        padding: 10px 0
+        color: #999
+        text-align: center
+        font-size: 12px
+      .product-item
+        width: 50%
+        float: left
         box-sizing: border-box
-        background-color: #fff
         padding-bottom: 4px
         overflow: hidden
-      .product-title
-        line-height: 16px
-        margin-bottom: 3px
-        padding: 0 4px
-        box-sizing: border-box
-        height: 31px
-        font-size: 13px
-        overflow: hidden
-        text-overflow: ellipsis
-        display: -webkit-box
-        -webkit-line-clamp: 2
-        /*! autoprefixer: off */
-        -webkit-box-orient:vertical
-        /*! autoprefixer: on */
-        word-break: break-word
-      .product-price
-        font-size: 16px
-        font-weight: 700
-        color: #ff463c
-        white-space: nowrap
-        overflow: hidden
-        text-overflow: ellipsis
-        vertical-align: bottom
-        padding: 0 4px
-        height: 25px
-        line-height: 25px
+        &:nth-child(2n)
+          padding-left: 2px
+        &:nth-child(odd)
+          padding-right: 2px
+        .product-thumbnail
+          position: relative
+          width: 100%
+          min-height: 102px
+          overflow: hidden
+          background-color: #fff
+          a
+            display: inline-block
+            width: 100%
+            overflow: hidden
+            img
+              width: 194px
+              height: 194px
+              vertical-align: top
+              overflow: hidden
+        .product-info
+          position: relative
+          width: 100%
+          padding-left: 3px
+          box-sizing: border-box
+          background-color: #fff
+          padding-bottom: 4px
+          overflow: hidden
+        .product-title
+          line-height: 16px
+          margin-bottom: 3px
+          padding: 0 4px
+          box-sizing: border-box
+          height: 31px
+          font-size: 13px
+          overflow: hidden
+          text-overflow: ellipsis
+          display: -webkit-box
+          -webkit-line-clamp: 2
+          /*! autoprefixer: off */
+          -webkit-box-orient:vertical
+          /*! autoprefixer: on */
+          word-break: break-word
+        .product-price
+          font-size: 16px
+          font-weight: 700
+          color: #ff463c
+          white-space: nowrap
+          overflow: hidden
+          text-overflow: ellipsis
+          vertical-align: bottom
+          padding: 0 4px
+          height: 25px
+          line-height: 25px
 </style>

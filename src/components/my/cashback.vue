@@ -4,39 +4,19 @@
       <div class="left">
         <div class="back" @click.stop.prevent="back"><i class="icon-arrow_lift"></i></div>
       </div>
-      <div class="title">奖金账户</div>
-      <div class="right" @click.stop.prevent="detail">奖金明细</div>
+      <div class="title">我的积分</div>
+      <div class="right" @click.stop.prevent="detail">积分明细</div>
     </div>
     <div class="cashback" ref="cashback">
       <div class="cashback-wrapper">
         <div class="cashback-heading">
-          <p class="balance-name">奖金余额(元)</p>
-          <p class="balance-num"><i class="symbol">¥</i><span>{{balance | currency('')}}</span></p>
+          <p class="balance-name">积分余额</p>
+          <p class="balance-num"><span>{{balance}}</span></p>
         </div>
-        <ul class="itemList">
-          <li class="item border-1px">
-            <div class="text">可提现(元)</div>
-            <div class="amount">{{PaidIn | currency}}</div>
-          </li>
-          <li class="item border-1px">
-            <div class="text">已提现(元)</div>
-            <div class="amount">{{PaidOut | currency}}</div>
-          </li>
-          <li class="item border-1px">
-            <div class="text">待解冻(元)</div>
-            <div class="amount">{{UnPaid | currency}}</div>
-          </li>
-        </ul>
         <div class="cashback-content">
-          <div class="btns">
-            <span class="btn-green" @click.stop.prevent="openWithdraw">奖金提现</span>
-            <!-- <span class="btn-orange" @click.stop.prevent="detail">奖金明细</span> -->
-          </div>
-          <div class="content-title">奖金余额是什么？</div>
+          <div class="content-title">积分有什么用？</div>
           <div class="content-text">
-            <p><em>[分享一次，受益三年]</em> 某朋友如果第一次进入审美品味出众的{{appName}}，是通过您分享的商城链接或二维码进入的（比如：首页、商品、文章），则之后的<em>3年内</em>，该朋友在商城里完成的所有商品交易，系统都将按照一定的额度（比如：<em>“皇冠一星” 10%</em>）赠送给您奖金。</p>
-            <p>您可前往「个人中心 — 奖金余额」中查看奖金信息及奖金对应的来源交易明细。</p>
-            <p><em>奖金余额可提取现金</em>，亦可在您购买商城商品时，自动被最大化使用。</p>
+            <p><em>[积分当钱花]</em> 您可以使用积分来抵扣商品货款，积分足够多，就可以0元换购商品了。</p>
           </div>
         </div>
       </div>
@@ -45,14 +25,13 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import BScroll from 'better-scroll';
   import fixedheader from '@/components/fixedtoolbar/fixedheader';
   import split from '@/components/split/split';
   import api from '@/api/api';
+  import {mapGetters} from 'vuex';
 
   export default {
     activated() {
-      this._initScroll();
       this.show();
     },
     deactivated() {
@@ -60,45 +39,15 @@
     },
     computed: {
       balance() {
-        let profile = this.$store.getters.getUserProfile;
-        return profile && profile.wallet && profile.wallet.rewardValue || 0;
-      },
-      PaidIn() {
-        let profile = this.$store.getters.getUserProfile;
-        return profile && profile.wallet && profile.wallet.alreadyReward || 0;
-      },
-      PaidOut() {
-        let profile = this.$store.getters.getUserProfile;
-        return profile && profile.wallet && profile.wallet.redpackValue || 0;
-      },
-      UnPaid() {
-        let profile = this.$store.getters.getUserProfile;
-        return profile && profile.wallet && profile.wallet.notReward || 0;
-      },
-      appName() {
-        return `${api.CONFIG.APPNAME || '一虎一席茶生活美学商城'}`;
+        return this.user().integration || 0;
       }
     },
     methods: {
-      _initScroll() {
-        this.$nextTick(() => {
-          if (!this.scroll) {
-            this.scroll = new BScroll(this.$refs.cashback, {
-              click: true
-            });
-          } else {
-            this.scroll.refresh();
-          }
-        });
-      },
-      info() {
-        this.$router.replace('/info');
-      },
+      ...mapGetters({
+        user: 'userInfo'
+      }),
       detail() {
         this.$router.push('/cashbackdetail');
-      },
-      openWithdraw() {
-        this.$router.push('/withdraw');
       },
       back() {
         this.$router.back();
@@ -153,13 +102,15 @@
     top: 44px
     bottom: 0
     width: 100%
-    overflow: hidden
     .cashback-wrapper
       position: relative
       width: 100%
       background-color: #fff
       box-sizing: border-box
-      overflow: hidden
+      overflow: auto
+      box-sizing: border-box
+      -webkit-overflow-scrolling: touch
+      padding-bottom: 100px
       .cashback-heading
         padding: 20px 13px
         color: #fff

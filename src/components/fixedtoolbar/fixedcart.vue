@@ -15,12 +15,12 @@
       <div class="foot-item" v-else>
         <span class="button-lg disable">已售磬</span>
       </div>
-      <div class="foot-item" v-if="good.stock">
+      <div class="foot-item" v-if="good.stock" @click.stop.prevent="fastPay">
         <span class="button-lg red">立即购买</span>
       </div>
-      <div class="foot-item" v-else @click.stop.prevent="bookNotify">
+      <!-- <div class="foot-item" v-else @click.stop.prevent="bookNotify">
         <span class="button-lg red">到货提醒</span>
-      </div>
+      </div> -->
     </div>
     <div class="ball-container">
       <div v-for="ball in balls">
@@ -55,11 +55,11 @@
         if (!newValue) {
           return;
         }
-        var user = this.$store.getters.userInfo;
-        if (!user.id) {
+        var userId = this.$store.getters.userId;
+        if (!userId) {
           return;
         }
-        api.existCollect(user.id, newValue.id).then(response => {
+        api.existCollect(userId, newValue.id).then(response => {
           if (response.code == 200) {
             this.marked = response.data;
           }
@@ -73,6 +73,10 @@
     },
     methods: {
       addGood() {
+        if (!this.$store.getters.userId) {
+          this.$router.push({name: 'login', query: {redirect: encodeURI(location.href)}});
+          return;
+        }
         this.$emit('add', event.target);
         var selected = this.$store.getters.getSelectedSku;
         var sku = selected.find(o => o.id == this.good.id);
@@ -81,12 +85,6 @@
           this.$store.dispatch('addSku', this.good);
         }
       },
-      pay() {
-        if (!this.good.count) {
-          this.$emit('add');
-        }
-        window.location.href = 'http://' + location.host + location.pathname + '#/pay';
-      },
       mark() {
         if (this.marked) {
           this.$store.dispatch('openToast', '商品已收藏！');
@@ -94,6 +92,7 @@
         var user = this.$store.getters.userInfo;
         if (!user.id) {
           this.$store.dispatch('openToast', '未登录！');
+          this.$router.push({name: 'login', query: {redirect: encodeURI(location.href)}});
           return;
         }
         api.addProductCollect({
@@ -110,6 +109,19 @@
             this.marked = true;
           }
         });
+      },
+      fastPay() {
+        if (!this.$store.getters.userId) {
+          this.$router.push({name: 'login', query: {redirect: encodeURI(location.href)}});
+          return;
+        }
+        this.$emit('fastAdd', event.target);
+        var selected = this.$store.getters.getSelectedSku;
+        var sku = selected.find(o => o.id == this.good.id);
+        if (!sku) {
+          this.$store.dispatch('showSkuWin', this.good);
+          this.$store.dispatch('addSku', this.good);
+        }
       },
       bookNotify() {
         let openid = this.$store.getters.userInfo.openId;

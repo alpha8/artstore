@@ -30,6 +30,13 @@ const user = {
     },
     SET_PROFILE: (state, profile) => {
       state.profile = profile;
+    },
+    CLEAR_PROFILE: (state) => {
+      state.profile = {};
+      state.userInfo = {};
+      state.id = '';
+      state.avatar = '';
+      state.name = '';
     }
   },
 
@@ -81,6 +88,7 @@ const user = {
       return new Promise((resolve, reject) => {
         api.logout(state.token).then(() => {
           commit('SET_TOKEN', '');
+          commit('CLEAR_PROFILE');
           removeToken(SSO_KEYNAME);
           resolve();
         }).catch(error => {
@@ -93,6 +101,7 @@ const user = {
     FedLogOut({ commit }) {
       return new Promise(resolve => {
         commit('SET_TOKEN', '');
+        commit('CLEAR_PROFILE');
         removeToken(SSO_KEYNAME);
         resolve();
       });

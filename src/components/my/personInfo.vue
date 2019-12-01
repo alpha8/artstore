@@ -31,8 +31,7 @@
           { key: 'icon', text: '头像', type: 'image', link: '' },
           { key: 'nickName', text: '微信名称', link: '' },
           { key: 'sex', text: '性别', link: '' },
-          { key: 'model', text: '用户类型', link: '' },
-          { key: 'phone', text: '绑定手机号码', link: '/bindphone' }
+          { key: 'model', text: '用户类型', link: '' }
         ],
         user: this.$store.getters.getUserInfo,
         userProfile: this.$store.getters.getUserProfile

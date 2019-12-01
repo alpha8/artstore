@@ -5,7 +5,7 @@ import * as types from './types';
 // import cart from './modules/cart';
 import loading from './modules/loading';
 import user from './modules/user';
-import { save, load, loadCookie, parseJson } from '@/common/js/store';
+import { save, load, loadCookie, parseJson, saveSession, loadSession } from '@/common/js/store';
 import api from '@/api/api';
 Vue.use(Vuex);
 
@@ -22,6 +22,8 @@ const APP_CACHE = 'APP_CACHE';
 const ANONYMOUS = 'anonymous';
 const SKU = 'sku';
 const SELECTED_SKU = 'selected_sku';
+const SNS_OPEN_ID = 'openid';
+const REFERER_UID = 'referer_uid';
 
 // states
 export const state = {
@@ -31,7 +33,6 @@ export const state = {
   searchDialog: false,
   showSidebar: false,
   showSidebarMask: false,
-  userInfo: parseJson({}),
   addressList: load(ADDRESS_LIST, []),
   toastList: [],
   couponAmount: load(COUPON_AMOUNT, 0),  // 优惠券账户余额
@@ -43,7 +44,9 @@ export const state = {
   appCache: load(APP_CACHE, {}),  // 应用缓存
   sku: {},
   selectedSku: load(SELECTED_SKU, []),  // 已选择的SKU
-  showSkuWindow: false
+  showSkuWindow: false,
+  openId: loadCookie(SNS_OPEN_ID, ''),
+  refererUid: loadSession(REFERER_UID, '')
 };
 
 // getters
@@ -51,7 +54,6 @@ export const getters = {
   isShowTop: state => state.showTop,
   addedProducts: state => state.products,
   showSearchBox: state => state.searchDialog,
-  getUserInfo: state => state.userInfo,
   getAddressList: state => state.addressList,
   getDefaultAddress: state => {
     let address = state.addressList.find(addr => addr.defaultStatus == 1);
@@ -72,7 +74,6 @@ export const getters = {
   getFooterState: state => state.showFooter,
   getUserAmount: state => state.userAmount,
   getCouponAmount: state => state.couponAmount,
-  getUserProfile: state => state.userProfile,
   getPayRemark: state => state.payRemark,
   getKilledProduct: state => state.killProducts,
   loadSearchHistory: state => state.searchHistory,
@@ -93,11 +94,22 @@ export const getters = {
   name: state => state.user.name,
   userId: state => state.user.id,
   userInfo: state => state.user.userInfo,
-  userProfile: state => state.user.profile
+  userProfile: state => state.user.profile,
+  getOpenId (state) {
+    if (state.openId) {
+      return state.openId;
+    } else {
+      return loadCookie(SNS_OPEN_ID, '');
+    }
+  },
+  getRefererUid: state => state.refererUid
 };
 
 // actions
 export const actions = {
+  setRefererUid({commit}, uid) {
+    commit(types.SET_REFERER_UID, uid);
+  },
   showSkuWin({commit}) {
     commit(types.SHOW_SKU_WINDOW);
   },
@@ -377,6 +389,10 @@ export const mutations = {
   [types.UPDATE_CART_AMOUNT] (state, amount) {
     state.cartAmount = amount;
     save(CART_AMOUNT, state.cartAmount);
+  },
+  [types.SET_REFERER_UID] (state, uid) {
+    state.refererUid = uid;
+    saveSession(REFERER_UID, state.refererUid);
   }
 };
 

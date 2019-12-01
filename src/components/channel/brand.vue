@@ -39,7 +39,10 @@
         }
       },
       goGoodDetail(item) {
-        this.$router.push({name: 'good', params: {id: item.id}});
+        this.$router.push({name: 'search', query: {brand: item.id || '', key: item.name || ''}});
+      },
+      fetchMore() {
+        this.$router.push({name: 'search'});
       }
     }
   };

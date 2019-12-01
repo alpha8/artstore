@@ -69,7 +69,6 @@
     font-size: 0
     .cart-decrease
       display: inline-block
-      padding: 6px
       transition: all 0.4s linear
       &.disable span
         color: #dedede
@@ -78,15 +77,15 @@
         transform: translate3d(0, 0, 0)
         .inner
           display: inline-block
-          line-height: 24px
-          font-size: 24px
+          line-height: 20px
+          font-size: 20px
           color: rgb(0, 160, 220)
           transition: all 0.4s linear
           transform: rotate(0)
       .inner
         display: inline-block
-        line-height: 24px
-        font-size: 24px
+        line-height: 20px
+        font-size: 20px
         color: rgb(0, 160, 220)
         transition: all 0.4s linear
         transform: rotate(0)
@@ -100,15 +99,13 @@
       vertical-align: top
       width: 12px
       font-size: 10px
-      padding-top: 6px
-      line-height: 24px
+      line-height: 20px
       text-align: center
       color: rgb(147, 153, 159)
     .cart-add
       display: inline-block
-      padding: 6px
-      line-height: 24px
-      font-size: 24px
+      line-height: 20px
+      font-size: 20px
       color: rgb(0, 160, 220)
       &.disable span
         color: #dedede

@@ -154,6 +154,7 @@
     background-color: #fff
     .footprint-wrap
       position: relative
+      padding-bottom: 60px
       width: 100%
       background-color: #fff
       .no-more

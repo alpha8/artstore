@@ -1,24 +1,17 @@
 <template>
   <div>
-    <fixedheader title="奖金明细"></fixedheader>
+    <fixedheader title="积分明细"></fixedheader>
     <div class="cashback">
       <div class="cashback-wrap">
         <div class="cashback-container" ref="cashbackRef" v-show="cashbacks.length">
-          <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="cashback-list">
-            <table>
-              <tr>
-                <th class="col-1">创建时间</th>
-                <th class="col-3">奖金</th>
-                <th class="col-3">状态</th>
-                <th class="col-4">备注</th>
-              </tr>
-              <tr v-for="(item, index) in cashbacks" :key="index">
-                <td class="col-1">{{item.createAt | formatDate}}</td>
-                <td class="col-3 price">{{item.value | currency}}</td>
-                <td class="col-3">{{statusDesc(item.status)}}</td>
-                <td class="col-4" @click.stop.prevent="goOrderDetail(item)"><strong v-if="item.orderNo">订单号：{{item.orderNo}}</strong></td>
-              </tr>
-            </table>
+          <mu-flexbox wrap="wrap" justify="space-around" :gutter="0" class="cash-list">
+            <mu-flexbox-item basis="100%" class="cash-item border-1px" v-for="(item, index) in cashbacks" :key="index">
+              <div class="content">
+                <p class="line text">{{item.operateNote}}</p>
+                <p class="time">{{item.createTimes | formatDate}}</p>
+              </div>
+              <div class="amount" :class="{'plus': item.changeType == 0}"><span v-if="item.changeType == 0">+</span><span v-else>-</span>{{item.changeCount}}</div>
+            </mu-flexbox-item>
           </mu-flexbox>
           <mu-infinite-scroll :scroller="scroller" :loading="loading" @load="loadMore" :isLoaded="loadEnd"/>
           <div class="no-more" v-show="loadEnd">———&nbsp;&nbsp;没有更多了&nbsp;&nbsp;———</div>
@@ -35,7 +28,6 @@
   import gotop from '@/components/fixedtoolbar/gotop';
   import {formatDate} from '@/common/js/date';
   import api from '@/api/api';
-  let Base64 = require('js-base64').Base64;
 
   export default {
     data() {
@@ -77,24 +69,17 @@
           return;
         }
         this.loading = true;
-        let user = this.$store.getters.getUserInfo;
-        api.getRewards({
+        api.getIntegrationLog({
           currentPage: this.pageNumber,
-          pageSize: this.pageSize,
-          rid: user.userId || 0
+          pageSize: this.pageSize
         }).then(response => {
-          if (response.code === 0) {
-            if (response.rewards && response.rewards.length) {
-              response.rewards.forEach(item => {
-                if (item.userName) {
-                  item.userName = Base64.decode(item.userName);
-                } else {
-                  item.userName = item.userId;
-                }
+          if (response.code == 200) {
+            if (response.data && response.data.list) {
+              response.data.list.forEach(item => {
                 this.cashbacks.push(item);
               });
             }
-            this.totalPages = response.totalPages;
+            this.totalPages = response.data.totalPage;
             this.pageNumber++;
             this.lastExec = +new Date();
             this.loading = false;
@@ -110,16 +95,6 @@
         this.cashbacks = [];
         this.pageNumber = 1;
         this.totalPages = 0;
-      },
-      statusDesc(status) {
-        if (status === 1) {
-          return '可提现';
-        } else {
-          return '待解冻';
-        }
-      },
-      goOrderDetail(order) {
-        this.$router.push({name: 'orderdetail', params: {id: order.orderNo}});
       },
       show() {
         this.$store.commit('HIDE_FOOTER');
@@ -183,19 +158,6 @@
         background: #fff
         color: #333
         border: 1px solid #ddd
-      .tab
-        position: relative
-        display: flex
-        border-1px(rgba(7, 17, 27, 0.1))
-        .tab-item
-          flex: 1
-          font-size: 14px
-          padding: 15px 0
-          text-align: center
-          border-bottom: 2px solid transparent
-          &.active
-            color: #f15353
-            border-bottom: 2px solid #f15353
       .no-more
         width: 100%
         padding: 10px 0
@@ -206,62 +168,61 @@
       .cashback-container
         position: relative
         width: 100%
-        padding-right: 5px
         display: flex
         flex-wrap: wrap
         overflow: auto
         box-sizing: border-box
         -webkit-overflow-scrolling: touch
-        .cashback-list
+        .cash-list
           position: relative
           width: 100%
-        table
-          position: relative
-          width: 100%
-          font-size: 12px
-          background-color: #fff
-          color: #666
-          text-align: left
-          tr
+          padding: 10px
+          box-sizing: border-box
+          .cash-item
+            background: #fff
+            position: relative
             display: flex
-            height: 40px
-            line-height: 40px
-          th
-            background-color: #fafafa
-            font-size: 13px
-          .col-1, .col-4
-            flex: 1
-            padding-left: 10px
-            overflow: hidden
-            text-overflow: ellipsis
-            display: -webkit-box
-            -webkit-line-clamp: 1
-            -webkit-box-orient: vertical
-            word-wrap: break-word
-            word-break: break-all
+            margin-bottom: 15px
+            padding: 10px
+            border-top: 6px solid #999
+            border-bottom: 10px solid #fff
+            border-radius: 6px
             box-sizing: border-box
-          .col-2
-            flex: 1
-            width: 135px
-            padding-left: 8px
-            overflow: hidden
-            text-overflow: ellipsis
-            display: -webkit-box
-            -webkit-line-clamp: 1
-            -webkit-box-orient: vertical
-            word-wrap: break-word
-            word-break: break-all
-            box-sizing: border-box
-          .col-3
-            width: 15%
-            padding-left: 8px
-            word-break: break-all
-            overflow: hidden
-            box-sizing: border-box
-          .col-4
-            padding-left: 8px
-          .price
-            color: #ff463c
+            .content
+              flex: 1
+              height: 60px
+              box-sizing: border-box
+              overflow: hidden
+              .line
+                position: relative
+                font-size: 14px
+                line-height: 1.8
+                text-overflow: ellipsis
+                white-space: nowrap
+                overflow: hidden
+                strong
+                  font-weight: 700
+                &.text
+                  padding-bottom: 10px
+                  -webkit-box-orient: vertical
+                  -webkit-line-clamp: 1
+                  font-weight: 400
+                  font-size: 14px
+                  line-height: 1.0625rem
+              .time
+                color: #666
+                font-size: 12px
+            .amount
+              width: 80px
+              height: 60px
+              color: #44b549
+              font-size: 14px
+              font-weight: 700
+              text-align: right
+              &.plus
+                color: #e45050
+            &:last-child
+              margin-bottom: 0
       .no-cashback
         width: 100%
         padding: 40px 0

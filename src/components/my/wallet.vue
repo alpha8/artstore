@@ -7,7 +7,7 @@
           <p class="balance-name">账户余额（元）</p>
           <p class="balance-num"><i class="symbol">¥</i><span>{{balance | currency('')}}</span></p>
         </div>
-        <div class="btns"><span class="btn-green" @click.stop.prevent="deposit">充值</span></div>
+        <!-- <div class="btns"><span class="btn-green" @click.stop.prevent="deposit">充值</span></div> -->
         <div class="btns"><span class="btn-orange" @click.stop.prevent="detail">交易明细</span></div>
         <div class="wallet-content">
           <p class="content-title">账户余额是什么？</p>
@@ -122,13 +122,14 @@
     top: 44px
     bottom: 0
     width: 100%
-    overflow: hidden
     .wallet-wrapper
       position: relative
       width: 100%
       background-color: #fff
+      overflow: auto
       box-sizing: border-box
-      overflow: hidden
+      -webkit-overflow-scrolling: touch
+      padding-bottom: 100px
       .wallet-heading
         padding: 20px 13px
         color: #fff

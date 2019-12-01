@@ -46,10 +46,15 @@
         countdown: 60,
         processing: false,
         codeTips: '获取验证码',
-        timer: null
+        timer: null,
+        redirect: ''
       };
     },
     activated() {
+      let redirect = this.$route.query.redirect;
+      if (redirect) {
+        this.redirect = redirect;
+      }
       this.show();
     },
     deactivated() {
@@ -58,13 +63,18 @@
       if (this.timer) {
         clearTimeout(this.timer);
       }
+      this.redirect = '';
     },
     methods: {
       onSubmit(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
             this.$store.dispatch('Login', this.loginForm).then(() => {
-              this.$router.push({name: 'my'});
+              if (this.redirect) {
+                location.href = decodeURI(this.redirect);
+              } else {
+                this.$router.push({name: 'my'});
+              }
             }).catch((error) => {
               this.$message({
                 message: error,
@@ -94,7 +104,11 @@
         this.processing = true;
         api.getVerifyCode(this.loginForm.username).then(response => {
           if (response.code == 200) {
-            this.$store.dispatch('openToast', '验证码已下发，请注意查收!');
+            if (response.data == 100) {
+              this.$store.dispatch('openToast', '每隔60s才能获取一次验证码!');
+            } else {
+              this.$store.dispatch('openToast', '验证码已下发，请注意查收!');
+            }
           } else {
             this.$store.dispatch('openToast', '网络太忙了, 请稍候再试!');
           }
@@ -162,11 +176,8 @@
         box-sizing: border-box
         text-align: center
         color: #fff
-        width: 100px
-        height: 100px
-        line-height: 100px
+        height: 75px
         vertical-align: middle
-        border-radius: 50%
         overflow: hidden
         >img
           display: block

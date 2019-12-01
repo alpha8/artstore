@@ -4,10 +4,13 @@
       <div class="detail-wrapper clearfix">
         <div class="detail-main">
           <div class="main-content">
-            <img class="icon" src="../../common/images/limitbuy2.png" alt="">
-            <div class="text" v-html="text"></div>
-            <div class="footer">
-              <div class="btn-group" @click.stop.prevent="hide"><span>我知道了</span></div>
+            <div class="qrcode_wrap">
+              <img class="icon" v-if="icon" :src="icon" alt="" @click.stop.prevent="previewImage(icon)">
+            </div>
+            <div class="text">
+              <p class="strong">关注公众号</p>
+              <p>将收到实时的积分变动，订单和发货等通知</p>
+              <p style="margin-top: 25px;color: #999;">长按二维码识别并关注公众号</p>
             </div>
           </div>
           <div class="btn-close" @click.stop.prevent="hide"><i class="icon-close"></i></div>
@@ -18,9 +21,16 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import {Device} from '@/common/js/util';
   export default {
     props: {
       text: {
+        type: String,
+        default() {
+          return '';
+        }
+      },
+      icon: {
         type: String,
         default() {
           return '';
@@ -34,10 +44,27 @@
     },
     methods: {
       show() {
-        this.isOpen = true;
+        /* let uid = this.$store.getters.userId;
+        if (!uid || (uid && this.$store.getters.userInfo.follow != 0)) {
+          return;
+        }
+        let dialog = window.sessionStorage.getItem('qrcode_dialog');
+        if (!dialog) {
+          this.isOpen = true;
+        } */
       },
       hide() {
         this.isOpen = false;
+        window.sessionStorage.setItem('qrcode_dialog', 'close');
+      },
+      previewImage(pic) {
+        let device = Device();
+        if (device.isWeixin && device.isAndroid) {
+          wx.previewImage({
+            current: pic,
+            urls: [pic]
+          });
+        }
       }
     }
   };
@@ -68,7 +95,7 @@
       overflow: auto
       -webkit-overflow-scrolling: touch
       .detail-main
-        position: absolute
+        position: fixed
         top: 50%
         left: 0
         width: 100%
@@ -77,23 +104,31 @@
         transform: translate(0, -50%)
         .main-content
           position: relative
+          display: flex;
           height: 100%
-          margin: 0 50px
+          margin: 0 20px;
           background: #fff
           border-radius: 15px
           box-sizing: border-box
-          .icon
-            position: absolute
-            top: -30.5px
-            left: 50%
-            width: 101px
-            height: 55px
-            margin-left: -50.5px
+          overflow: hidden
+          .qrcode_wrap
+            padding: 5px;
+            border: 1px solid #dfdfdf;
+            float: left;
+            .icon
+              width: 150px;
+              height: 150px;
+              border: 0;
+              vertical-align: middle;
           .text
-            padding: 32px 20px 11px
+            flex: 1;
+            padding: 15px 10px 0
             font-size: 14px
-            line-height: 1.4
             box-sizing: border-box
+            .strong
+              font-weight: 700
+              font-size: 16px
+              padding-bottom: 5px
           .footer
             padding: 2px 15px 18px
             text-align: center
@@ -116,16 +151,17 @@
                 box-sizing: border-box
         .btn-close
           position: absolute
-          width: 24px
-          height: 24px
+          width: 28px
+          height: 28px
           border-radius: 100%
           background: #fff
           border: 1px solid #e1e1e1
-          right: 38px
+          right: 10px
           top: -10px
           clear: both
           font-size: 24px
           padding: 2px
+          text-align: center
           color: #e4393c
           box-shadow: 0px 1px 20px 0px #dfdbdb
 </style>
