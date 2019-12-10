@@ -25,6 +25,11 @@
                     </div>
                   </div>
                 </div>
+                <div class="no-more">---- 到达底部了 -----</div>
+              </div>
+              <div class="no-coupon" v-else>
+                <img src="../../common/images/ticket.png" alt="">
+                <p>啊哦，还没有优惠券哦!</p>
               </div>
             </div>
           </el-tab-pane>
@@ -49,13 +54,18 @@
                     </div>
                   </div>
                 </div>
+                <div class="no-more">---- 到达底部了 -----</div>
+              </div>
+              <div class="no-coupon" v-else>
+                <img src="../../common/images/ticket.png" alt="">
+                <p>啊哦，还没有优惠券哦!</p>
               </div>
             </div>
           </el-tab-pane>
         </el-tabs>
         <div class="no-coupon" v-else>
           <img src="../../common/images/ticket.png" alt="">
-          <p>啊哦，还没有相关记录哦</p>
+          <p>啊哦，还没有优惠券哦!</p>
         </div>
       </div>
     </div>

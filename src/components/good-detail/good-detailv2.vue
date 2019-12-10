@@ -70,7 +70,7 @@
         </div>
         <el-backtop target=".good-content" :bottom="55" :right="10"></el-backtop>
       </div>
-      <fixedcart ref="shopcart" @add="addToCart" @fastAdd="fastConfirmOrder" :good="good"></fixedcart>
+      <fixedcart ref="shopcart" @add="addToCart" @fastAdd="fastConfirmOrder" :good="good" v-show="!readOnly"></fixedcart>
       <nicelayer ref="nicelayer" :icon="qrcode" />
     </div>
     <quietlogin />
@@ -103,6 +103,10 @@
       this.hide();
     },
     created() {
+      let readOnly = this.$route.query.readOnly;
+      if (readOnly) {
+        this.readOnly = true;
+      }
       document.body.scrollTop = document.documentElement.scrollTop = 0;
       this.fetchData();
     },
@@ -133,7 +137,8 @@
         activeName: 'intro',
         skuId: null,
         skuCount: 0,
-        qrcode: api.CONFIG.qrcode
+        qrcode: api.CONFIG.qrcode,
+        readOnly: false
       };
     },
     computed: {
@@ -479,6 +484,7 @@
         document.documentElement.scrollTop = 0;
       },
       _reset() {
+        this.readOnly = false;
       }
     },
     filters: {

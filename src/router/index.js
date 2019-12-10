@@ -52,6 +52,8 @@ export default new Router({
     {path: '/guidecard', component: () => import('@/components/virtual/guidecard'), name: 'guidecard', meta: {keepAlive: true}},
     {path: '/exchangecard', component: () => import('@/components/user/exchangecard'), name: 'exchangecard', meta: {keepAlive: true}},
     {path: '/mycard', component: () => import('@/components/user/mycard'), name: 'mycard', meta: {keepAlive: true}},
+    {path: '/carddetail/:id', component: () => import('@/components/user/carddetail'), name: 'carddetail', meta: {keepAlive: true}},
+    {path: '/exchangeOrder/:id', component: () => import('@/components/user/exchangeOrder'), name: 'exchangeOrder', meta: {keepAlive: true}},
     {path: '*', redirect: '/404'}
   ]
 });

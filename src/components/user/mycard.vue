@@ -21,7 +21,7 @@
                 <p class="line text" v-if="coupon.title">{{coupon.title}}</p>
                 <p class="line" v-if="coupon.cardNo">卡号：{{coupon.cardNo}}</p>
                 <p class="line">有效期：{{getCouponExpire(coupon.expireTimes)}}</p>
-                <div class="fastOps" v-if="coupon.type == 1 && (coupon.status == 2 || coupon.status == 4)" @click="exchangeScore(coupon)">立即兑换</div>
+                <div class="fastOps" v-if="coupon.type == 1 && (coupon.status == 2 || coupon.status == 4)" @click="exchangeScore(coupon)">立即充值</div>
                 <div class="fastOps" v-else-if="coupon.type == 2 && (coupon.status == 2 || coupon.status == 4)" @click="exchangeGoods(coupon)">立即兑换</div>
               </div>
             </mu-flexbox-item>
@@ -48,7 +48,7 @@
     data() {
       return {
         coupons: [],
-        couponTypes: ['', '积分卡券', '兑换卡券'],
+        couponTypes: ['', '积分卡', '兑换卡'],
         couponStates: ['', '未激活', '已激活', '已兑换', '已绑定', '已过期', '已删除'],
         loading: false,
         scrollY: 0
@@ -101,7 +101,7 @@
         });
       },
       exchangeGoods(item) {
-        this.$message.warning('商品兑换正在建设中...');
+        this.$router.push({name: 'carddetail', params: {id: item.id}});
       },
       _reset() {
         this.coupons = [];
@@ -219,6 +219,7 @@
                 top: 50%
                 left: 50%
                 transform: translate(-50%,-50%)
+                text-align: center
                 box-sizing: border-box
                 .money
                   font-size: 16px
@@ -229,6 +230,7 @@
                   text-align: center
                   font-size: 14px
                   margin-top: 3px
+                  min-width: 60px
                   box-sizing: border-box
               .tag
                 position: absolute
@@ -275,6 +277,7 @@
               content: ''
               border-radius: 50%
               top: 43%
+              z-index: 10
               &.circle-left
                 left: -8px
               &.circle-right
@@ -291,7 +294,7 @@
                 position: absolute
                 font-size: 12px
                 display: inline-block
-                right: 10px
+                right: 15px
                 top: 50%
                 margin-top: -14px
                 padding: 0 8px

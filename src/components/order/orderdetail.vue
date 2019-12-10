@@ -44,7 +44,7 @@
         <split></split>
         <div class="order-info">
           <div class="order-state">
-            <p v-if="order.type"><label>订单类型：</label><span>{{orderTypeDesc}}</span></p>
+            <p v-if="order.orderType"><label>订单类型：</label><span>{{orderTypeDesc}}</span></p>
             <p><label>下单时间：</label><span>{{order.createTimes | formatDate}}</span></p>
             <p v-if="order.paymentTime"><label>付款时间：</label><span>{{order.paymentTimes | formatDate}}</span></p>
             <p v-if="order.deliveryTime"><label>发货时间：</label><span>{{order.deliveryTimes | formatDate}}</span></p>
@@ -139,8 +139,14 @@
         return this.mapStatus[this.order.status];
       },
       orderTypeDesc() {
-        if (this.order.orderStatus == 1) {
+        if (this.order.orderType == 1) {
           return '秒杀订单';
+        } else if (this.order.orderType == 2) {
+          return '卡券兑换订单';
+        } else if (this.order.orderType == 3) {
+          return '活动赠送订单';
+        } else if (this.order.orderType == 4) {
+          return '虚拟商品订单';
         }
         return '普通订单';
       },

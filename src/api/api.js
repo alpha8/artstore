@@ -635,5 +635,20 @@ export default {
   /** 我的卡券 */
   getMyCards(params) {
     return doGet(this.CONFIG.ctx + '/card/list', params);
+  },
+
+  /** 卡券详情 */
+  getCardDetail(id) {
+    return doGet(this.CONFIG.ctx + '/card/detail/' + id);
+  },
+
+  /** 查询卡券关联的商品列表 */
+  getCardRelationGoods(id) {
+    return doGet(this.CONFIG.ctx + '/card/relation/' + id);
+  },
+
+  /** 兑换商品 */
+  exchangeGoods(data) {
+    return doPost(this.CONFIG.ctx + '/card/exchange/goods', data);
   }
 };

@@ -24,6 +24,7 @@ const SKU = 'sku';
 const SELECTED_SKU = 'selected_sku';
 const SNS_OPEN_ID = 'openid';
 const REFERER_UID = 'referer_uid';
+const EXCHANGED_GOODS = 'exchanged';
 
 // states
 export const state = {
@@ -46,7 +47,8 @@ export const state = {
   selectedSku: load(SELECTED_SKU, []),  // 已选择的SKU
   showSkuWindow: false,
   openId: loadCookie(SNS_OPEN_ID, ''),
-  refererUid: loadSession(REFERER_UID, '')
+  refererUid: loadSession(REFERER_UID, ''),
+  exchangedGoods: loadSession(EXCHANGED_GOODS, []) || []  // 卡券兑换的商品
 };
 
 // getters
@@ -102,11 +104,15 @@ export const getters = {
       return loadCookie(SNS_OPEN_ID, '');
     }
   },
-  getRefererUid: state => state.refererUid
+  getRefererUid: state => state.refererUid,
+  getExchangedGoods: state => state.exchangedGoods
 };
 
 // actions
 export const actions = {
+  setExchangedGoods({commit}, goods) {
+    commit(types.ADD_EXCHANGED_GOODS, goods);
+  },
   setRefererUid({commit}, uid) {
     commit(types.SET_REFERER_UID, uid);
   },
@@ -209,6 +215,10 @@ export const actions = {
 
 // mutations
 export const mutations = {
+  [types.ADD_EXCHANGED_GOODS](state, goods) {
+    state.exchangedGoods = goods;
+    saveSession(EXCHANGED_GOODS, goods);
+  },
   [types.HIDE_SKU_WINDOW](state) {
     state.showSkuWindow = false;
   },

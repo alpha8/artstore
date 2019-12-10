@@ -1,7 +1,7 @@
 <template>
   <swiper :options="swiperOption" class="swiperHook" :style="getStyle">
-    <swiper-slide v-for="(slide, index) in swiperSlides" :key="index">
-      <img :src="getSlideUrl(slide)" class="slide2" @click.stop.prevent="search" />
+    <swiper-slide v-for="(slide, index) in swiperSlides" :key="index" v-if="slide.thumbnail">
+      <img :src="slide.thumbnail" class="slide2" @click.stop.prevent="search" />
     </swiper-slide>
     <div class="swiper-pagination pager" slot="pagination"></div>
   </swiper>
@@ -65,10 +65,6 @@
       width: 100%
       height: 100%
       min-height: 80px
-      content: ""
-      background-repeat: no-repeat
-      background-position: center
-      background-size: cover
     .pager
       width: 100%      
       .swiper-pagination-bullet
